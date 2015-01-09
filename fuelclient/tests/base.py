@@ -62,13 +62,10 @@ class BaseTestCase(UnitTestCase):
             os.path.pardir
         )
     )
-    manage_path = os.path.join(
-        root_path,
-        "nailgun/manage.py"
-    )
+    manage_path = "/tmp/fuel_web/nailgun/manage.py"
     fuel_path = os.path.join(
         root_path,
-        "fuelclient/fuel"
+        "python-fuelclient/fuel"
     )
 
     def setUp(self):
@@ -104,10 +101,7 @@ class BaseTestCase(UnitTestCase):
     @classmethod
     def load_data_to_nailgun_server(cls):
         cls.run_command(cls.manage_path, "loaddata {0}".format(
-            os.path.join(
-                cls.root_path,
-                "nailgun/nailgun/fixtures/sample_environment.json"
-            )
+                "/tmp/fuel_web/nailgun/nailgun/fixtures/sample_environment.json"
         ))
 
     def run_cli_command(self, command_line, check_errors=False):
