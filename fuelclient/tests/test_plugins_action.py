@@ -60,3 +60,122 @@ class TestPluginsActions(base.UnitTestCase):
             ['fuel', 'plugins', '--install', '/tmp/sample.fp', '--force'])
         self.assertEqual(mrequests.post.call_count, 1)
         self.assertEqual(mrequests.put.call_count, 1)
+
+    @patch('fuelclient.objects.plugins.os')
+    @patch('fuelclient.objects.plugins.shutil')
+    def test_remove_plugin_single(self, mshutil, mos, mrequests):
+        mos.path.exists.return_value = True
+        mresponse = Mock(status_code=201)
+        mresponse.json.return_value = [
+            {
+                'id': 1,
+                'name': 'test',
+                'version': '1.0.0',
+            }
+        ]
+        mrequests.get.return_value = mresponse
+        mrequests.delete.return_value = Mock(status_code=200)
+
+        self.execute(
+            ['fuel', 'plugins', '--remove', 'test']
+        )
+
+        self.assertEqual(mrequests.delete.call_count, 1)
+        self.assertEqual(mshutil.rmtree.call_count, 1)
+
+
+    @patch('fuelclient.objects.plugins.os')
+    @patch('fuelclient.objects.plugins.shutil')
+    def test_remove_plugin_multi(self, mshutil, mos, mrequests):
+        mos.path.exists.return_value = True
+        mresponse = Mock(status_code=201)
+        mresponse.json.return_value = [
+            {
+                'id': 1,
+                'name': 'test',
+                'version': '1.0.0',
+            },
+            {
+                'id': 2,
+                'name': 'test',
+                'version': '1.1.0',
+            }
+        ]
+        mrequests.get.return_value = mresponse
+        mrequests.delete.return_value = Mock(status_code=200)
+
+        self.execute(
+            ['fuel', 'plugins', '--remove', 'test==1.0.0']
+        )
+
+        self.assertEqual(mrequests.delete.call_count, 1)
+        self.assertEqual(mshutil.rmtree.call_count, 1)
+
+    @patch('fuelclient.objects.plugins.os')
+    def test_remove_nonexisting_plugin(self, mos, mrequests):
+        mos.path.exists.return_value = True
+        mresponse = Mock(status_code=201)
+        mresponse.json.return_value = [
+            {
+                'id': 1,
+                'name': 'test',
+                'version': '1.0.0',
+            }
+        ]
+        mrequests.get.return_value = mresponse
+
+        self.assertRaises(
+            SystemExit,
+            self.execute,
+            ['fuel', 'plugins', '--remove', 'test-fail']
+        )
+
+        self.assertEqual(mrequests.delete.call_count, 0)
+
+    @patch('fuelclient.objects.plugins.os')
+    def test_remove_when_multiple_versions(self, mos, mrequests):
+        mos.path.exists.return_value = True
+        mresponse = Mock(status_code=201)
+        mresponse.json.return_value = [
+            {
+                'id': 1,
+                'name': 'test',
+                'version': '1.0.0',
+            },
+            {
+                'id': 2,
+                'name': 'test',
+                'version': '1.1.0',
+            }
+        ]
+        mrequests.get.return_value = mresponse
+
+        self.assertRaises(
+            SystemExit,
+            self.execute,
+            ['fuel', 'plugins', '--remove', 'test']
+        )
+
+        self.assertEqual(mrequests.delete.call_count, 0)
+
+
+    @patch('fuelclient.objects.plugins.os')
+    def test_remove_nonexisting_plugin_version(self, mos, mrequests):
+        mos.path.exists.return_value = True
+        mresponse = Mock(status_code=201)
+        mresponse.json.return_value = [
+            {
+                'id': 1,
+                'name': 'test',
+                'version': '1.0.0',
+            }
+        ]
+        mrequests.get.return_value = mresponse
+
+        self.assertRaises(
+            SystemExit,
+            self.execute,
+            ['fuel', 'plugins', '--remove', 'test==1.1.0']
+        )
+
+        self.assertEqual(mrequests.delete.call_count, 0)
