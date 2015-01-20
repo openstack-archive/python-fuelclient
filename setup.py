@@ -12,23 +12,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from setuptools import find_packages
-from setuptools import setup
+import setuptools
 
-setup(
-    name='fuelclient',
-    version='6.0.0',
-    description='Command line interface for Nailgun',
-    long_description="""Command line interface for Nailgun""",
-    author='Mirantis Inc.',
-    author_email='product@mirantis.com',
-    url='http://mirantis.com',
-    install_requires=['PyYAML==3.10', "argparse==1.2.1"],
-    packages=find_packages(),
-    package_data = {'': ['*.yaml']},
-    entry_points={
-        'console_scripts': [
-            'fuel = fuelclient.cli.parser:main',
-        ],
-    }
-)
+import pbr
+import pbr.packaging
+
+# In python < 2.7.4, a lazy loading of package `pbr` will break
+# setuptools if some other modules registered functions in `atexit`.
+# solution from: http://bugs.python.org/issue15881#msg170215
+try:
+    import multiprocessing  # noqa
+except ImportError:
+    pass
+
+# this monkey patch is to avoid appending git version to version
+pbr.packaging._get_version_from_git = lambda pre_version: pre_version
+
+setuptools.setup(
+    setup_requires=['pbr'],
+    pbr=True)
