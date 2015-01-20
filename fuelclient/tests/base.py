@@ -65,8 +65,6 @@ class UnitTestCase(TestCase):
 class BaseTestCase(UnitTestCase):
     nailgun_root = os.environ.get('NAILGUN_ROOT', '/tmp/fuel_web/nailgun')
 
-    manage_path = os.path.join(nailgun_root, 'manage.py')
-
     def setUp(self):
         self.reload_nailgun_server()
         self.temp_directory = tempfile.mkdtemp()
@@ -75,16 +73,18 @@ class BaseTestCase(UnitTestCase):
         shutil.rmtree(self.temp_directory)
 
     @staticmethod
-    def run_command(*args):
+    def run_command(*args, **kwargs):
         handle = subprocess.Popen(
             [" ".join(args)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True
+            stdout=kwargs.pop('stdout', subprocess.PIPE),
+            stderr=kwargs.pop('stderr', subprocess.PIPE),
+            shell=kwargs.pop('shell', True),
+            **kwargs
         )
         log.debug("Running " + " ".join(args))
         out, err = handle.communicate()
         log.debug("Finished command with {0} - {1}".format(out, err))
+
 
     def upload_command(self, cmd):
         return "{0} --upload --dir {1}".format(cmd, self.temp_directory)
@@ -95,14 +95,16 @@ class BaseTestCase(UnitTestCase):
     @classmethod
     def reload_nailgun_server(cls):
         for action in ("dropdb", "syncdb", "loaddefault"):
-            cls.run_command(cls.manage_path, action)
+            cmd = 'tox -evenv -- manage.py %s' % action
+            cls.run_command(cmd, cwd=cls.nailgun_root)
 
     @classmethod
     def load_data_to_nailgun_server(cls):
         file_path = os.path.join(cls.nailgun_root,
                                  'nailgun/fixtures/sample_environment.json')
 
-        cls.run_command(cls.manage_path, "loaddata {0}".format(file_path))
+        cmd = 'tox -evenv -- manage.py loaddata %s' % file_path
+        cls.run_command(cmd, cwd=cls.nailgun_root)
 
     def run_cli_command(self, command_line, check_errors=False):
         modified_env = os.environ.copy()
