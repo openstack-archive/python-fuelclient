@@ -14,7 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-set -eu
+set -eux
+
+env
 
 # settings
 ROOT=$(dirname $(readlink -f $0))
