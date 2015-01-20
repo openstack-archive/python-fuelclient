@@ -63,20 +63,15 @@ class UnitTestCase(TestCase):
 
 
 class BaseTestCase(UnitTestCase):
-    root_path = os.path.abspath(
-        os.path.join(
-            os.curdir,
-            os.path.pardir
-        )
-    )
-
     nailgun_root = os.environ.get('NAILGUN_ROOT', '/tmp/fuel_web/nailgun')
 
     manage_path = os.path.join(nailgun_root, 'manage.py')
 
-    fuel_path = os.path.join(
-        root_path,
-        "python-fuelclient/fuel"
+    # ../../
+    fuel_cli_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__)))),
+        'fuel'
     )
 
     def setUp(self):
@@ -118,7 +113,8 @@ class BaseTestCase(UnitTestCase):
 
     def run_cli_command(self, command_line, check_errors=False):
         modified_env = os.environ.copy()
-        command_args = [" ".join((self.fuel_path, command_line))]
+        command_args = [" ".join((self.fuel_cli_path, command_line))]
+        print command_args
         process_handle = subprocess.Popen(
             command_args,
             stdout=subprocess.PIPE,
