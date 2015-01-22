@@ -301,11 +301,15 @@ EOL
 obtain_nailgun() {
     echo "Obtaining Nailgun with the revision $fuel_commit"
 
-    if [[ -n $do_clone ]]; then
+    if [[ $do_clone -ne 0 ]]; then
         git clone $FUEL_WEB_REPO $FUEL_WEB_ROOT || \
             { echo "Failed to clone Nailgun"; return 1; }
     fi
 
+    if [[ ! -d "$NAILGUN_ROOT" ]]; then
+        echo "Error: Nailgun directory $NAILGUN_ROOT not found."
+        exit 1
+    fi
     pushd $NAILGUN_ROOT > /dev/null
 
     if [[ -n $fetch_repo ]]; then
