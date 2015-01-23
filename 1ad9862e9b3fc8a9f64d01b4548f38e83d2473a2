@@ -1,0 +1,9 @@
+Verified+2: Jenkins
+Code-Review+2: Roman Prykhodchenko <me@romcheg.me>
+Workflow+1: Roman Prykhodchenko <me@romcheg.me>
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Fri, 23 Jan 2015 23:13:38 +0000
+Reviewed-on: https://review.openstack.org/149691
+Project: stackforge/python-fuelclient
+Branch: refs/heads/master
