@@ -16,7 +16,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name='fuelclient',
+    name='python-fuelclient',
     version='6.0.0',
     description='Command line interface for Nailgun',
     long_description="""Command line interface for Nailgun""",
