@@ -117,7 +117,7 @@ run_cli_tests() {
     pushd $ROOT/fuelclient > /dev/null
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
-        NAILGUN_ROOT=$NAILGUN_ROOT tox -epy26 -- -vv $testropts \
+        NAILGUN_ROOT=$NAILGUN_ROOT tox -epy26,py27 -- -vv $testropts \
         $certain_tests --xunit-file $FUELCLIENT_XUNIT || return 1
     popd > /dev/null
 
