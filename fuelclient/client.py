@@ -14,14 +14,14 @@
 
 import json
 import logging
-import os
 import requests
 
+from keystoneclient.v2_0 import client as auth_client
+from six.moves.urllib import parse as urlparse
 import yaml
 
-from keystoneclient.v2_0 import client as auth_client
-
 from fuelclient.cli.error import exceptions_decorator
+from fuelclient import fuelclient_settings
 from fuelclient.logs import NullHandler
 
 
@@ -36,28 +36,17 @@ class Client(object):
     """
 
     def __init__(self):
+        conf = fuelclient_settings.get_settings()
+
         self.debug = False
-        path_to_config = "/etc/fuel/client/config.yaml"
-        defaults = {
-            "SERVER_ADDRESS": "127.0.0.1",
-            "LISTEN_PORT": "8000",
-            "KEYSTONE_USER": "admin",
-            "KEYSTONE_PASS": "admin",
-        }
-        if os.access(path_to_config, os.R_OK):
-            with open(path_to_config, "r") as fh:
-                config = yaml.load(fh.read())
-            defaults.update(config)
-        defaults.update(os.environ)
-        self.root = "http://{SERVER_ADDRESS}:{LISTEN_PORT}".format(**defaults)
-        self.keystone_base = (
-            "http://{SERVER_ADDRESS}:{LISTEN_PORT}/keystone/v2.0"
-            .format(**defaults)
-        )
-        self.api_root = self.root + "/api/v1/"
-        self.ostf_root = self.root + "/ostf/"
-        self.user = defaults["KEYSTONE_USER"]
-        self.password = defaults["KEYSTONE_PASS"]
+        self.root = "http://{server}:{port}".format(server=conf.SERVER_ADDRESS,
+                                                    port=conf.LISTEN_PORT)
+
+        self.keystone_base = urlparse.urljoin(self.root, "/keystone/v2.0")
+        self.api_root = urlparse.urljoin(self.root, "/api/v1/")
+        self.ostf_root = urlparse.urljoin(self.root, "/ostf/")
+        self.user = conf.KEYSTONE_USER
+        self.password = conf.KEYSTONE_PASS
         self._keystone_client = None
         self._auth_required = None
 
