@@ -1,4 +1,10 @@
-# performance tests settings
+# Connection settings
+SERVER_ADDRESS: "127.0.0.1"
+LISTEN_PORT: "8000"
+KEYSTONE_USER: "admin"
+KEYSTONE_PASS: "admin"
+
+# Performance tests settings
 PERFORMANCE_PROFILING_TESTS: 0
 PERF_TESTS_PATHS:
     perf_tests_base: "/tmp/fuelclient_performance_tests/tests/"
