@@ -45,6 +45,10 @@ usage() {
     echo "Usage: $0 [OPTIONS] [-- TESTR OPTIONS]"
     echo "Run python-fuelclient test suite"
     echo ""
+    echo "  -6  --py26             Run python-2.6 tests."
+    echo "  -7  --py27             Run python-2.7 tests."
+    echo "                              If neither -6 nor -7 is specified, tests for both"
+    echo "                              versions will be running."
     echo "  -c  --fuel-commit           Checkout fuel-web to a specified commit. If not specified,"
     echo "                              \$FUEL_COMMIT or master will be used."
     echo "                              By default checks out to master."
@@ -66,14 +70,16 @@ usage() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o hnc:f:r:t: \
-        --long tests,help,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67hnc:f:r:t: \
+        --long py26,py27,help,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
 
     while true ; do
         case "$1" in
+            -6|--py26) python_26=1;            shift 1;;
+            -7|--py27) python_27=1;            shift 1;;
             -h|--help) usage;                       shift 1;;
             -f|--fetch-repo) fetch_repo="$2";       shift 2;;
             -r|--fetch-refspec) fetch_refspec="$2"; shift 2;;
@@ -113,11 +119,25 @@ process_options() {
 # It is supposed that nailgun server is up and running.
 run_cli_tests() {
     local config=$1
+    local run_single_env=$((python_26^python_27))
+
+    local py26_env="py26"
+    local py27_env="py27"
+
+    if [[ $run_single_env -eq 1 ]]; then
+        if [[ $python_26 -eq 1 ]]; then
+            env_to_run=$py26_env
+        else
+            env_to_run=$py27_env
+        fi
+    else
+        env_to_run=$py26_env,$py27_env
+    fi
 
     pushd $ROOT/fuelclient > /dev/null
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
-        NAILGUN_ROOT=$NAILGUN_ROOT tox -epy26 -- -vv $testropts \
+        NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
         $certain_tests --xunit-file $FUELCLIENT_XUNIT || return 1
     popd > /dev/null
 
@@ -327,6 +347,8 @@ obtain_nailgun() {
 
 # Sets default values for parameters
 init_default_params() {
+    python_26=0
+    python_27=0
     do_clone=1
     fetch_repo=$FETCH_REPO
     fetch_refspec=$FETCH_REFSPEC
