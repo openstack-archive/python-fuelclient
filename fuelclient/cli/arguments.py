@@ -43,7 +43,7 @@ substitutions = {
 
 def group(*args, **kwargs):
     required = kwargs.get("required", False)
-    return (required, ) + args
+    return (required,) + args
 
 
 class TaskAction(argparse.Action):
@@ -146,8 +146,7 @@ def get_fuel_version_arg():
 
 
 def get_arg(name, flags=None, aliases=None, help_=None, **kwargs):
-    if "_" in name:
-        name = name.replace("_", "-")
+    name = name.replace("_", "-")
     args = ["--" + name, ]
     if flags is not None:
         args.extend(flags)
@@ -305,7 +304,7 @@ def get_skip_tasks():
     return get_arg(
         'skip',
         flags=('--skip',),
-        nargs = '+',
+        nargs='+',
         default=[],
         help="Get list of tasks to be skipped.")
 
@@ -314,7 +313,7 @@ def get_tasks():
     return get_arg(
         'tasks',
         flags=('--tasks',),
-        nargs = '+',
+        nargs='+',
         default=[],
         help="Get list of tasks to be executed.")
 
@@ -428,5 +427,54 @@ def get_plugin_remove_arg(help_msg):
     return get_str_arg(
         "remove",
         flags=("--remove",),
+        help=help_msg
+    )
+
+
+def get_notify_all_messages_arg(help_msg):
+    return get_boolean_arg(
+        'all',
+        flags=('-a',),
+        help=help_msg
+    )
+
+
+def get_notify_mark_as_read_arg(help_msg):
+    return get_str_arg(
+        "mark-as-read",
+        flags=('-r',),
+        nargs='+',
+        help=help_msg,
+    )
+
+
+def get_notify_message_arg(help_msg):
+    return get_str_arg(
+        "send",
+        nargs='+',
+        flags=('-m',),
+        help=help_msg,
+    )
+
+
+def get_notify_send_arg(help_msg):
+    return get_str_arg(
+        "send",
+        flags=("--send",),
+        help=help_msg
+    )
+
+
+def get_notify_topic_arg(help_msg):
+    return get_str_arg(
+        "topic",
+        flags=("--topic",),
+        choices=(
+            'discover',
+            'done',
+            'error',
+            'warning',
+            'release'
+        ),
         help=help_msg
     )
