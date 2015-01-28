@@ -163,7 +163,7 @@ class Parser:
         for flag in self.universal_flags:
             self.move_argument_before_action(flag, has_value=False)
 
-        self.move_argument_after_action("--env", )
+        self.move_argument_after_action("--env",)
 
     def move_argument_before_action(self, flag, has_value=True):
         """We need to move general argument before action, we use them
