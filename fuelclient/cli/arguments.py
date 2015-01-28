@@ -395,3 +395,26 @@ def get_plugin_install_arg(help_msg):
         flags=("--install",),
         help=help_msg
     )
+
+
+def get_notify_send_arg(help_msg):
+    return get_str_arg(
+        "send",
+        flags=("--send",),
+        help=help_msg
+    )
+
+
+def get_notify_topic_arg(help_msg):
+    return get_str_arg(
+        "topic",
+        flags=("--topic",),
+        choices=(
+            'discover',
+            'done',
+            'error',
+            'warning',
+            'release'
+        ),
+        help=help_msg
+    )

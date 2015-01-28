@@ -26,6 +26,7 @@ from fuelclient.cli.actions.interrupt import StopAction
 from fuelclient.cli.actions.network import NetworkAction
 from fuelclient.cli.actions.node import NodeAction
 from fuelclient.cli.actions.nodegroup import NodeGroupAction
+from fuelclient.cli.actions.notifications import NotificationsAction
 from fuelclient.cli.actions.release import ReleaseAction
 from fuelclient.cli.actions.role import RoleAction
 from fuelclient.cli.actions.settings import SettingsAction
@@ -51,7 +52,8 @@ actions_tuple = (
     HealthCheckAction,
     UserAction,
     PluginAction,
-    NodeGroupAction
+    NodeGroupAction,
+    NotificationsAction
 )
 
 actions = dict(
