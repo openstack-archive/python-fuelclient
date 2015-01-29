@@ -1,4 +1,6 @@
-#    Copyright 2014 Mirantis, Inc.
+# -*- coding: utf-8 -*-
+#
+#    Copyright 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,8 +14,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""fuelclient.cli sub-module contains functionality of
-fuelclient command line interface
+import mock
+
+from fuelclient.tests import base
+
+from nose.plugins.attrib import attr
 
 
-"""
+@attr('mocked_api')
+@mock.patch('fuelclient.client.requests')
+class TestPluginsActions(base.UnitTestCase):
+
+    @mock.patch('fuelclient.cli.actions.token.APIClient')
+    def test_token_action(self, mAPIClient, mrequests):
+        mauth_token = mock.PropertyMock(return_value='token123')
+        type(mAPIClient).auth_token = mauth_token
+
+        self.execute(['fuel', 'token'])
+
+        self.assertEqual(mauth_token.call_count, 1)
