@@ -66,7 +66,7 @@ usage() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o hnc:f:r:t: \
+        -o hmnc:f:r:t: \
         --long tests,help,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
@@ -78,6 +78,7 @@ process_options() {
             -f|--fetch-repo) fetch_repo="$2";       shift 2;;
             -r|--fetch-refspec) fetch_refspec="$2"; shift 2;;
             -c|--fuel-commit) fuel_commit="$2";     shift 2;;
+            -m|--mocked-api) mocked_api=1;          shift 1;;
             -n|--no-clone) do_clone=0;              shift 1;;
             -t|--tests) certain_tests="$2";         shift 2;;
             # All parameters and alien options will be passed to testr
@@ -113,11 +114,16 @@ process_options() {
 # It is supposed that nailgun server is up and running.
 run_cli_tests() {
     local config=$1
+    local noseattrs=''
+
+    if [[ $mocked_api -eq 1 ]]; then
+        noseattrs='-a mocked_api'
+    fi
 
     pushd $ROOT/fuelclient > /dev/null
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
-        NAILGUN_ROOT=$NAILGUN_ROOT tox -epy26 -- -vv $testropts \
+        NAILGUN_ROOT=$NAILGUN_ROOT tox -epy26 -- -vv $testropts $noseattrs \
         $certain_tests --xunit-file $FUELCLIENT_XUNIT || return 1
     popd > /dev/null
 
@@ -328,6 +334,7 @@ obtain_nailgun() {
 # Sets default values for parameters
 init_default_params() {
     do_clone=1
+    mocked_api=0
     fetch_repo=$FETCH_REPO
     fetch_refspec=$FETCH_REFSPEC
     fuel_commit=$FUEL_COMMIT
@@ -340,14 +347,18 @@ init_default_params() {
 run() {
     local config=$ARTIFACTS/test.yaml
 
-    run_cleanup $config
-    prepare_env $config
+    if [[ $mocked_api -eq 0 ]]; then
+        run_cleanup $config
+        prepare_env $config
+    fi
 
     echo "Starting python-fuelclient tests..."
     run_cli_tests $config || { echo "Failed tests: cli_tests"; exit 1; }
 
     # Do a final cleanup
-    run_cleanup $config
+    if [[ $mocked_api -eq 0 ]]; then
+        run_cleanup $config
+    fi
 
     echo "Testing python-fuelclient succeeded."
 

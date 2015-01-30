@@ -18,6 +18,7 @@ except ImportError:
     # Runing unit-tests in production environment
     from unittest2.case import TestCase
 
+from mock import Mock
 from mock import patch
 
 import logging
@@ -150,3 +151,14 @@ class BaseTestCase(UnitTestCase):
     def check_number_of_rows_in_table(self, command, number_of_rows):
         output = self.run_cli_command(command)
         self.assertEqual(len(output.stdout.split("\n")), number_of_rows + 3)
+
+
+class BaseMockedAPIUnitTestCase(UnitTestCase):
+    def setUp(self):
+        self.mauth_client_patcher = patch('fuelclient.client.auth_client')
+        self.mauth_client_patcher.start()
+        super(BaseMockedAPIUnitTestCase, self).setUp()
+
+    def tearDown(self):
+        super(BaseMockedAPIUnitTestCase, self).tearDown()
+        self.mauth_client_patcher.stop()
