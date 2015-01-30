@@ -18,14 +18,14 @@ except ImportError:
     # Runing unit-tests in production environment
     from unittest2.case import TestCase
 
-from mock import patch
-
 import logging
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+
+import mock
 
 from fuelclient.cli.parser import main
 
@@ -57,7 +57,8 @@ class UnitTestCase(TestCase):
         return main(command)
 
     def execute_wo_auth(self, command):
-        with patch('fuelclient.client.Client.auth_required') as auth:
+        with mock.patch('fuelclient.client.Client.auth_required',
+                        new_callable=mock.PropertyMock) as auth:
             auth.return_value = False
             return self.execute(command)
 
