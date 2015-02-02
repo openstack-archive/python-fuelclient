@@ -20,6 +20,7 @@ from fuelclient.cli.actions.deploy import DeployChangesAction
 from fuelclient.cli.actions.environment import EnvironmentAction
 from fuelclient.cli.actions.fact import DeploymentAction
 from fuelclient.cli.actions.fact import ProvisioningAction
+from fuelclient.cli.actions.token import TokenAction
 from fuelclient.cli.actions.health import HealthCheckAction
 from fuelclient.cli.actions.interrupt import ResetAction
 from fuelclient.cli.actions.interrupt import StopAction
@@ -55,7 +56,8 @@ actions_tuple = (
     PluginAction,
     NodeGroupAction,
     NotificationsAction,
-    NotifyAction
+    NotifyAction,
+    TokenAction
 )
 
 actions = dict(
