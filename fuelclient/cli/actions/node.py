@@ -69,7 +69,8 @@ class NodeAction(Action):
                 Args.get_skip_tasks(),
                 Args.get_tasks()
             ),
-            Args.get_graph_endpoint()
+            Args.get_graph_endpoint(),
+            Args.get_graph_startpoint(),
         ]
 
         self.flag_func_map = (
@@ -83,6 +84,7 @@ class NodeAction(Action):
             ("tasks", self.execute_tasks),
             ("skip", self.execute_tasks),
             ("end", self.execute_tasks),
+            ("start", self.execute_tasks),
             (None, self.list)
         )
 
@@ -246,6 +248,8 @@ class NodeAction(Action):
                 fuel node --node 2 --skip hiera netconfig
                 fuel node --node 2 --skip rsync --end pre_deployment
                 fuel node --node 2 --end netconfig
+                fuel node --node 2 --start hiera --end neutron
+                fuel node --node 2 --start post_deployment
         """
         node_collection = NodeCollection.init_with_ids(params.node)
         env_id_to_start = self.get_env_id(node_collection)
@@ -255,7 +259,8 @@ class NodeAction(Action):
         if params.tasks:
             tasks = params.tasks
         else:
-            tasks = env.get_tasks(skip=params.skip, end=params.end)
+            tasks = env.get_tasks(
+                skip=params.skip, end=params.end, start=params.start)
 
         task = env.execute_tasks(node_collection.collection, tasks=tasks)
 
