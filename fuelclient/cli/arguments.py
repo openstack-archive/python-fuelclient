@@ -237,6 +237,14 @@ def get_sync_deployment_tasks_arg():
         help="Update tasks for each release.")
 
 
+def get_file_pattern_arg():
+    return get_str_arg(
+        "filepattern",
+        flags=("--fp", "--file-pattern"),
+        default="*tasks.yaml",
+        help="Provide unix file pattern to filter tasks with files.")
+
+
 def get_network_arg(help_msg):
     return get_boolean_arg("network", flags=("--net",), help=help_msg)
 

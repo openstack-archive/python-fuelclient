@@ -27,9 +27,9 @@ class TestUtils(base.UnitTestCase):
     @mock.patch('fuelclient.cli.utils.os.walk')
     def test_iterfiles(self, mwalk):
         mwalk.return_value = [
-            ('/some_directory/', [], ['valid.yaml', 'invalid.yaml'])]
+            ('/some_directory/', [], ['valid.yaml', 'invalid.yml'])]
 
-        pattern = ('valid.yaml',)
+        pattern = '*.yaml'
         directory = '/some_directory'
 
         expected_result = [os.path.join(directory, 'valid.yaml')]
