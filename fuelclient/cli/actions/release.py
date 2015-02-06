@@ -38,6 +38,7 @@ class ReleaseAction(Action):
             Args.get_network_arg("Release network configuration."),
             Args.get_deployment_tasks_arg("Release tasks configuration."),
             Args.get_sync_deployment_tasks_arg(),
+            Args.get_file_pattern_arg(),
             Args.get_dir_arg(
                 "Select directory to which download release attributes"),
             group(
@@ -133,6 +134,7 @@ class ReleaseAction(Action):
             /etc/puppet/2014.2-6.0/
 
         fuel rel --sync-deployment-tasks --dir /etc/puppet/2014.2-6.0/
+        fuel rel --sync-deployment-tasks --fp *tasks.yaml
 
         In case no directory will be provided:
 
@@ -142,11 +144,10 @@ class ReleaseAction(Action):
         """
         all_rels = Release.get_all_data()
         real_path = os.path.realpath(params.dir)
-        files = list(utils.iterfiles(real_path, ('tasks.yaml',)))
         serialized_tasks = defaultdict(list)
         versions = set([r['version'] for r in all_rels])
 
-        for file_name in files:
+        for file_name in utils.iterfiles(real_path, params.filepattern):
             for version in versions:
                 if version in file_name:
                     serialized_tasks[version].extend(

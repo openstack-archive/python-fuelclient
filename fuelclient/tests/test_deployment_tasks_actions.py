@@ -86,12 +86,12 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
         mrequests.get().json.return_value = RELEASE_OUTPUT
         mfiles.return_value = ['/etc/puppet/2014.2-6.0/tasks.yaml']
         mopen().__enter__().read.return_value = API_OUTPUT
-
+        file_pattern = '*tests*'
         self.execute_wo_auth(
-            ['fuel', 'rel', '--sync-deployment-tasks'])
+            ['fuel', 'rel', '--sync-deployment-tasks', '--fp', file_pattern])
 
         mfiles.assert_called_once_with(
-            os.path.realpath(os.curdir), ('tasks.yaml',))
+            os.path.realpath(os.curdir), file_pattern)
 
         call_args = mrequests.put.call_args_list[0]
         url = call_args[0][0]
@@ -107,7 +107,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
         real_path = '/etc/puppet'
         self.execute_wo_auth(
             ['fuel', 'rel', '--sync-deployment-tasks', '--dir', real_path])
-        mfiles.assert_called_once_with(real_path, ('tasks.yaml',))
+        mfiles.assert_called_once_with(real_path, '*tasks.yaml')
 
     def test_multiple_tasks_but_one_release(self, mfiles, mopen, mrequests):
         mrequests.get().json.return_value = RELEASE_OUTPUT
