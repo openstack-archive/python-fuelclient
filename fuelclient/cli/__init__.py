@@ -15,5 +15,7 @@
 """fuelclient.cli sub-module contains functionality of
 fuelclient command line interface
 
+from fuelclient.cli import error
+
 
 """
