@@ -14,6 +14,8 @@
 
 import os
 
+from fuelclient.cli import error
+
 
 def iterfiles(dir_path, file_patterns):
     """Returns generator where each item is a path to file, that satisfies
@@ -26,3 +28,42 @@ def iterfiles(dir_path, file_patterns):
         for file_name in file_names:
             if file_name in file_patterns:
                 yield os.path.join(root, file_name)
+
+
+def render_graph(input_path, output_path):
+    """Renders DOT graph using pydot or pygraphviz depending on their presence.
+
+    If none of the libraries is available and are fully functional it is not
+    possible to render graphs.
+
+    :param input_path: path to the file with DOT graph
+    :param output_path: path to the rendered graph
+    """
+    render = None
+    try:
+        import pydot
+
+        def render(input_path, output_path):
+            graph = pydot.graph_from_dot_file(input_path)
+            if not graph:
+                raise error.BadDataException(
+                    "File {0} do not contains graph in DOT format".format(
+                        input_path))
+            try:
+                graph.write_png(output_path)
+            except pydot.InvocationException as e:
+                raise error.WrongEnvironmentError(
+                    "There was an error with rendering graph:\n{0}".format(e))
+    except ImportError:
+        try:
+            import pygraphviz as pgv
+
+            def render(input_path, output_path):
+                graph = pgv.AGraph(input_path)
+                graph.draw(output_path, prog='dot', format='png')
+        except ImportError:
+            raise error.WrongEnvironmentError(
+                "This action require Graphviz installed toghether with "
+                "'pydot' or 'pygraphviz' Python library")
+
+    return render(input_path, output_path)
