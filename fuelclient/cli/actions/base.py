@@ -17,7 +17,9 @@ from functools import wraps
 from itertools import imap
 import os
 
-from fuelclient.cli.error import ArgumentException
+import six
+
+from fuelclient.cli import error
 from fuelclient.cli.formatting import quote_and_join
 from fuelclient.cli.serializers import Serializer
 from fuelclient.client import APIClient
@@ -84,7 +86,10 @@ class Action(object):
     def full_path_directory(self, directory, base_name):
         full_path = os.path.join(directory, base_name)
         if not os.path.exists(full_path):
-            os.mkdir(full_path)
+            try:
+                os.mkdir(full_path)
+            except OSError as e:
+                raise error.ActionException(six.text_type(e))
         return full_path
 
     def default_directory(self, directory=None):
@@ -103,7 +108,7 @@ def wrap(method, args, f):
         if method(getattr(params, _arg) for _arg in args):
             return f(self, params)
         else:
-            raise ArgumentException(
+            raise error.ArgumentException(
                 "{0} required!".format(
                     quote_and_join(
                         "--" + arg for arg in args

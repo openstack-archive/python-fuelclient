@@ -21,7 +21,7 @@ from fuelclient.cli.error import ArgumentException
 from fuelclient.client import APIClient
 
 substitutions = {
-    #replace from: to
+    # replace from: to
     "env": "environment",
     "nodes": "node",
     "net": "network",
@@ -294,37 +294,49 @@ def get_net_arg(help_msg):
 def get_graph_endpoint():
     return get_arg(
         'end',
-        flags=('--end',),
         action="store",
         default=None,
-        help="Specify endpoint for the graph traversal.")
+        help="Specify endpoint for the graph traversal.",
+        metavar='TASK',
+    )
 
 
 def get_graph_startpoint():
     return get_arg(
         'start',
-        flags=('--start',),
         action="store",
         default=None,
-        help="Specify start point for the graph traversal.")
+        help="Specify start point for the graph traversal.",
+        metavar='TASK',
+    )
 
 
 def get_skip_tasks():
     return get_arg(
         'skip',
-        flags=('--skip',),
         nargs='+',
         default=[],
-        help="Get list of tasks to be skipped.")
+        help="Get list of tasks to be skipped.",
+        metavar='TASK',
+    )
 
 
 def get_tasks():
     return get_arg(
         'tasks',
-        flags=('--tasks',),
         nargs='+',
         default=[],
-        help="Get list of tasks to be executed.")
+        help="Get list of tasks to be executed.",
+        metavar='TASK',
+    )
+
+
+def get_parents_arg():
+    return get_arg(
+        'parents-for',
+        help="Get parent for given task",
+        metavar='TASK',
+    )
 
 
 def get_nst_arg(help_msg):
@@ -397,6 +409,13 @@ def get_release_arg(help_msg, required=False):
         "release",
         flags=("--rel",),
         required=required,
+        help=help_msg)
+
+
+def get_render_arg(help_msg):
+    return get_str_arg(
+        "render",
+        metavar='INPUT',
         help=help_msg)
 
 

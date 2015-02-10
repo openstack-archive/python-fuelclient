@@ -143,9 +143,12 @@ class Client(object):
 
         return resp.json()
 
-    @exceptions_decorator
-    def get_request(self, api, ostf=False, params=None):
-        """Make GET request to specific API
+    def get_request_raw(self, api, ostf=False, params=None):
+        """Make a GET request to specific API and return raw response.
+
+        :param api: API endpoint (path)
+        :param ostf: is this a call to OSTF API
+        :param params: params passed to GET request
         """
         url = (self.ostf_root if ostf else self.api_root) + api
         self.print_debug(
@@ -155,12 +158,24 @@ class Client(object):
 
         headers = {'x-auth-token': self.auth_token}
         params = params or {}
-        resp = requests.get(url, params=params, headers=headers)
+        return requests.get(url, params=params, headers=headers)
+
+    @exceptions_decorator
+    def get_request(self, api, ostf=False, params=None):
+        """Make GET request to specific API
+        """
+        resp = self.get_request_raw(api, ostf, params)
         resp.raise_for_status()
 
         return resp.json()
 
     def post_request_raw(self, api, data, ostf=False):
+        """Make a POST request to specific API and return raw response.
+
+        :param api: API endpoint (path)
+        :param data: data send in request, will be serialzied to JSON
+        :param ostf: is this a call to OSTF API
+        """
         url = (self.ostf_root if ostf else self.api_root) + api
         data_json = json.dumps(data)
         self.print_debug(
