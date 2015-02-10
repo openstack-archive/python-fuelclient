@@ -30,6 +30,7 @@ class Environment(BaseObject):
     class_api_path = "clusters/"
     instance_api_path = "clusters/{0}/"
     deployment_tasks_path = 'clusters/{0}/deployment_tasks'
+    deployment_tasks_graph_path = 'clusters/{0}/deploy_tasks/graph.gv'
 
     @classmethod
     def create(cls, name, release_id, net, net_segment_type=None):
@@ -400,3 +401,13 @@ class Environment(BaseObject):
     def update_deployment_tasks(self, data):
         url = self.deployment_tasks_path.format(self.id)
         return self.connection.put_request(url, data)
+
+    def get_deployment_tasks_graph(self, tasks, parents_for=None):
+        url = self.deployment_tasks_graph_path.format(self.id)
+        params = {
+            'tasks': ','.join(tasks),
+            'parents_for': parents_for,
+        }
+        resp = self.connection.get_request_raw(url, params=params)
+        resp.raise_for_status()
+        return resp.text
