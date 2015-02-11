@@ -12,17 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from fnmatch import fnmatch
 import os
 
 
-def iterfiles(dir_path, file_patterns):
+def iterfiles(dir_path, file_pattern):
     """Returns generator where each item is a path to file, that satisfies
     file_patterns condtion
 
     :param dir_path: path to directory, e.g /etc/puppet/
-    :param file_patterns: iterable with file name, e.g (tasks.yaml,)
+    :param file_pattern: unix filepattern to match files
     """
     for root, dirs, file_names in os.walk(dir_path):
         for file_name in file_names:
-            if file_name in file_patterns:
+            if fnmatch(file_name, file_pattern):
                 yield os.path.join(root, file_name)
