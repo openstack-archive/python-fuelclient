@@ -305,7 +305,16 @@ def get_graph_endpoint():
         flags=('--end',),
         action="store",
         default=None,
-        help="Specify endpoint for the graph of tasks.")
+        help="Specify endpoint for the graph traversal.")
+
+
+def get_graph_startpoint():
+    return get_arg(
+        'start',
+        flags=('--start',),
+        action="store",
+        default=None,
+        help="Specify start point for the graph traversal.")
 
 
 def get_skip_tasks():

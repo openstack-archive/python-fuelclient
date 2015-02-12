@@ -50,7 +50,7 @@ class TestNodeExecuteTasksAction(base.UnitTestCase):
             ['fuel', 'node', '--node', '1,2', '--end', self.tasks[-2]])
         kwargs = mrequests.put.call_args_list[0][1]
         self.assertEqual(json.loads(kwargs['data']), self.tasks[:2])
-        get_tasks.assert_called_once_with(end=self.tasks[-2])
+        get_tasks.assert_called_once_with(end=self.tasks[-2], start=None)
 
     @patch('fuelclient.objects.environment.Environment.get_deployment_tasks')
     def test_skip_with_end_param(self, get_tasks, mrequests):
@@ -61,4 +61,29 @@ class TestNodeExecuteTasksAction(base.UnitTestCase):
 
         kwargs = mrequests.put.call_args_list[0][1]
         self.assertEqual(json.loads(kwargs['data']), self.tasks[2:])
-        get_tasks.assert_called_once_with(end=self.tasks[-1])
+        get_tasks.assert_called_once_with(end=self.tasks[-1], start=None)
+
+    @patch('fuelclient.objects.environment.Environment.get_deployment_tasks')
+    def test_start_with_end_param(self, get_tasks, mrequests):
+        """end will be included."""
+        start = 1
+        end = 2
+        get_tasks.return_value = [{'id': t} for t in self.tasks[start:end + 1]]
+        self.execute(
+            ['fuel', 'node', '--node', '1,2', '--start', self.tasks[start],
+             '--end', self.tasks[end]])
+
+        kwargs = mrequests.put.call_args_list[0][1]
+        self.assertEqual(json.loads(kwargs['data']), self.tasks[start:end + 1])
+        get_tasks.assert_called_once_with(
+            end=self.tasks[2], start=self.tasks[1])
+
+    @patch('fuelclient.objects.environment.Environment.get_deployment_tasks')
+    def test_start_param(self, get_tasks, mrequests):
+        get_tasks.return_value = [{'id': t} for t in self.tasks[1:]]
+        self.execute(
+            ['fuel', 'node', '--node', '1,2', '--start', self.tasks[1]])
+
+        kwargs = mrequests.put.call_args_list[0][1]
+        self.assertEqual(json.loads(kwargs['data']), self.tasks[1:])
+        get_tasks.assert_called_once_with(start=self.tasks[1], end=None)
