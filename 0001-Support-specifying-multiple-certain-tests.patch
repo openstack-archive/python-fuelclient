@@ -1,0 +1,81 @@
+From 369c0aa0de2334ebed4a2c2e8551b41e606858a3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bart=C5=82omiej=20Piotrowski?= <bpiotrowski@mirantis.com>
+Date: Fri, 13 Feb 2015 14:53:49 +0100
+Subject: [PATCH] Support specifying multiple certain tests
+
+Disable checking for unbound variables, as there is possibility that no
+tests were specified.  Additionally align shifts in getopt loop and remove
+dead return from tox invocation.
+
+Change-Id: I83a52b5f5467c9ea92dfafba9b92b700f7e76a38
+Closes-Bug: 1420664
+---
+ run_tests.sh | 26 ++++++++++++++------------
+ 1 file changed, 14 insertions(+), 12 deletions(-)
+
+diff --git a/run_tests.sh b/run_tests.sh
+index e1bd7c1..e653a5b 100755
+--- a/run_tests.sh
++++ b/run_tests.sh
+@@ -14,7 +14,7 @@
+ #    License for the specific language governing permissions and limitations
+ #    under the License.
+ 
+-set -eu
++set -e
+ 
+ # settings
+ ROOT=$(dirname $(readlink -f $0))
+@@ -78,14 +78,14 @@ process_options() {
+ 
+     while true ; do
+         case "$1" in
+-            -6|--py26) python_26=1;            shift 1;;
+-            -7|--py27) python_27=1;            shift 1;;
++            -6|--py26) python_26=1;                 shift 1;;
++            -7|--py27) python_27=1;                 shift 1;;
+             -h|--help) usage;                       shift 1;;
+             -f|--fetch-repo) fetch_repo="$2";       shift 2;;
+             -r|--fetch-refspec) fetch_refspec="$2"; shift 2;;
+             -c|--fuel-commit) fuel_commit="$2";     shift 2;;
+             -n|--no-clone) do_clone=0;              shift 1;;
+-            -t|--tests) certain_tests="$2";         shift 2;;
++            -t|--tests) certain_tests+=("$2");      shift 2;;
+             # All parameters and alien options will be passed to testr
+             --) shift 1; testropts="$@";
+                 break;;
+@@ -100,13 +100,15 @@ process_options() {
+     fi
+ 
+     # Check that specified test file/dir exists. Fail otherwise.
+-    if [[ -n $certain_tests ]]; then
+-        local file_name=${certain_tests%:*}
+-
+-        if [[ ! -f $file_name ]] && [[ ! -d $file_name ]]; then
+-            >&2 echo "Error: Specified tests were not found."
+-            exit 1
+-        fi
++    if [[ ${#certain_tests[@]} -ne 0 ]]; then
++        for test in ${certain_tests[@]}; do
++            local file_name=${test%:*}
++
++            if [[ ! -f $file_name ]] && [[ ! -d $file_name ]]; then
++                >&2 echo "Error: Specified tests were not found."
++                exit 1
++            fi
++        done
+     fi
+ }
+ 
+@@ -138,7 +140,7 @@ run_cli_tests() {
+     # run tests
+     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
+         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
+-        $certain_tests --xunit-file $FUELCLIENT_XUNIT || return 1
++        ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT
+     popd > /dev/null
+ 
+     return 0
+-- 
+2.3.0
+
