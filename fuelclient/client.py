@@ -13,7 +13,7 @@
 #    under the License.
 
 import json
-import logging
+import os
 import requests
 
 from keystoneclient.v2_0 import client as auth_client
@@ -23,12 +23,6 @@ import yaml
 from fuelclient.cli.error import exceptions_decorator
 from fuelclient import fuelclient_settings
 from fuelclient.logs import NullHandler
-
-
-# configure logging to silent all logs
-# and prevent issues in keystoneclient logging
-logger = logging.getLogger()
-logger.addHandler(NullHandler())
 
 
 class Client(object):
