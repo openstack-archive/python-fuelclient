@@ -16,7 +16,6 @@ import argparse
 from itertools import chain
 import os
 
-from fuelclient import __version__
 from fuelclient.cli.error import ArgumentException
 from fuelclient.client import APIClient
 
@@ -92,15 +91,6 @@ class NodeAction(argparse.Action):
             setattr(namespace, self.dest, map(int, only_ids))
 
 
-class FuelVersionAction(argparse._VersionAction):
-    """Custom argparse._VersionAction subclass to compute fuel server version
-
-    :returns: prints fuel server version
-    """
-    def __call__(self, parser, namespace, values, option_string=None):
-        parser.exit(message=APIClient.get_fuel_version())
-
-
 class SetAction(argparse.Action):
     """Custom argparse.Action subclass to store distinct values
 
@@ -111,38 +101,6 @@ class SetAction(argparse.Action):
             getattr(namespace, self.dest).update(values)
         except AttributeError:
             setattr(namespace, self.dest, set(values))
-
-
-def get_debug_arg():
-    return {
-        "args": ["--debug"],
-        "params": {
-            "dest": "debug",
-            "action": "store_true",
-            "help": "prints details of all HTTP request",
-            "default": False
-        }
-    }
-
-
-def get_version_arg():
-    return {
-        "args": ["-v", "--version"],
-        "params": {
-            "action": "version",
-            "version": __version__
-        }
-    }
-
-
-def get_fuel_version_arg():
-    return {
-        "args": ["--fuel-version"],
-        "params": {
-            "action": FuelVersionAction,
-            "help": "show Fuel server's version number and exit"
-        }
-    }
 
 
 def get_arg(name, flags=None, aliases=None, help_=None, **kwargs):
