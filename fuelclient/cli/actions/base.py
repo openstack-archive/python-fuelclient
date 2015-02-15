@@ -46,7 +46,10 @@ class Action(object):
     def action_func(self, params):
         """Entry point for all actions subclasses
         """
-        APIClient.debug_mode(debug=params.debug)
+        # Temporary disable debug mode for http client due to
+        # difficulties in supporting of cliff and old code bases
+        # TODO(romcheg): Fix after the migration to Cliff is done
+        APIClient.debug_mode(debug=False)
         if getattr(params, 'user') and getattr(params, 'password'):
             APIClient.user = params.user
             APIClient.password = params.password

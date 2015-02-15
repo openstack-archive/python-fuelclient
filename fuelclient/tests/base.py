@@ -27,7 +27,7 @@ import tempfile
 
 import mock
 
-from fuelclient.cli.parser import main
+from fuelclient.main import main
 
 
 logging.basicConfig(stream=sys.stderr)
