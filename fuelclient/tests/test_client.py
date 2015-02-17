@@ -16,10 +16,12 @@
 
 
 import os
+import urllib2
 
 from mock import Mock
 from mock import patch
 
+from fuelclient import fuelclient_settings
 from fuelclient.tests import base
 
 
@@ -301,22 +303,73 @@ class TestDeployChanges(base.BaseTestCase):
 
 class TestAuthentication(base.UnitTestCase):
 
+    def validate_credentials_response(self,
+                                      args,
+                                      username=None,
+                                      password=None,
+                                      tenant_name=None):
+        conf = fuelclient_settings.get_settings()
+
+        self.assertEqual(args['username'], username)
+        self.assertEqual(args['password'], password)
+        self.assertEqual(args['tenant_name'], tenant_name)
+        pr = urllib2.urlparse.urlparse(args['auth_url'])
+        self.assertEqual(conf.SERVER_ADDRESS, pr.hostname)
+        self.assertEqual(int(conf.LISTEN_PORT), int(pr.port))
+        self.assertEqual('/keystone/v2.0', pr.path)
+
     @patch('fuelclient.client.requests')
     @patch('fuelclient.client.auth_client')
-    def test_wrong_credentials(self, mkeystone_cli, mrequests):
+    def test_credentials(self, mkeystone_cli, mrequests):
         mkeystone_cli.return_value = Mock(auth_token='')
         mrequests.get_request.return_value = Mock(status_code=200)
         self.execute(
-            ['fuel', '--user=a', '--password=a', 'node'])
-        mkeystone_cli.Client.assert_called_with(
+            ['fuel', '--user=a', '--password=b', 'node'])
+        self.validate_credentials_response(
+            mkeystone_cli.Client.call_args[1],
             username='a',
-            tenant_name='admin',
-            password='a',
-            auth_url='http://127.0.0.1:8003/keystone/v2.0')
+            password='b',
+            tenant_name='admin'
+        )
         self.execute(
-            ['fuel', '--user=a', '--password', 'a', 'node'])
-        mkeystone_cli.Client.assert_called_with(
+            ['fuel', '--user=a', '--password', 'b', 'node'])
+        self.validate_credentials_response(
+            mkeystone_cli.Client.call_args[1],
             username='a',
-            tenant_name='admin',
-            password='a',
-            auth_url='http://127.0.0.1:8003/keystone/v2.0')
+            password='b',
+            tenant_name='admin'
+        )
+        self.execute(
+            ['fuel', '--user=a', '--password=b', '--tenant=t', 'node'])
+        self.validate_credentials_response(
+            mkeystone_cli.Client.call_args[1],
+            username='a',
+            password='b',
+            tenant_name='t'
+        )
+        self.execute(
+            ['fuel', '--user', 'a', '--password', 'b', '--tenant', 't',
+             'node'])
+        self.validate_credentials_response(
+            mkeystone_cli.Client.call_args[1],
+            username='a',
+            password='b',
+            tenant_name='t'
+        )
+        self.execute(
+            ['fuel', 'node', '--user=a', '--password=b', '--tenant=t'])
+        self.validate_credentials_response(
+            mkeystone_cli.Client.call_args[1],
+            username='a',
+            password='b',
+            tenant_name='t'
+        )
+        self.execute(
+            ['fuel', 'node', '--user', 'a', '--password', 'b',
+             '--tenant', 't'])
+        self.validate_credentials_response(
+            mkeystone_cli.Client.call_args[1],
+            username='a',
+            password='b',
+            tenant_name='t'
+        )
