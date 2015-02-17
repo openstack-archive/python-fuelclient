@@ -307,16 +307,23 @@ class TestAuthentication(base.UnitTestCase):
         mkeystone_cli.return_value = Mock(auth_token='')
         mrequests.get_request.return_value = Mock(status_code=200)
         self.execute(
-            ['fuel', '--user=a', '--password=a', 'node'])
+            ['fuel', '--user=a', '--password=b', 'node'])
         mkeystone_cli.Client.assert_called_with(
             username='a',
             tenant_name='admin',
-            password='a',
+            password='b',
             auth_url='http://127.0.0.1:8003/keystone/v2.0')
         self.execute(
-            ['fuel', '--user=a', '--password', 'a', 'node'])
+            ['fuel', '--user=a', '--password', 'b', 'node'])
         mkeystone_cli.Client.assert_called_with(
             username='a',
             tenant_name='admin',
-            password='a',
+            password='b',
+            auth_url='http://127.0.0.1:8003/keystone/v2.0')
+        self.execute(
+            ['fuel', '--user=a', '--password=b', '--tenant=t', 'node'])
+        mkeystone_cli.Client.assert_called_with(
+            username='a',
+            tenant_name='t',
+            password='b',
             auth_url='http://127.0.0.1:8003/keystone/v2.0')

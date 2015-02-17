@@ -129,6 +129,7 @@ class Parser:
     def add_keystone_credentials_args(self):
         self.credential_flags.append('--user')
         self.credential_flags.append('--password')
+        self.credential_flags.append('--tenant')
         self.parser.add_argument(
             "--user",
             dest="user",
@@ -142,6 +143,13 @@ class Parser:
             type=str,
             help="credentials for keystone authentication password",
             default=None
+        )
+        self.parser.add_argument(
+            "--tenant",
+            dest="tenant",
+            type=str,
+            help="credentials for keystone authentication tenant",
+            default="admin"
         )
 
     def add_version_args(self):

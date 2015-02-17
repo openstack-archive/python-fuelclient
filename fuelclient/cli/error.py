@@ -107,7 +107,7 @@ def exceptions_decorator(func):
             Unauthorized: need authentication!
             Please provide user and password via client
              fuel --user=user --password=pass [action]
-            or modify "KEYSTONE_USER" and "KEYSTONE_PASS" in
+            or modify "KEYSTONE_USER" "KEYSTONE_PASS" in
             /etc/fuel/client/config.yaml""")
         except FuelClientException as exc:
             exit_with_error(exc.message)

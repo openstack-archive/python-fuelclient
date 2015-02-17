@@ -50,6 +50,8 @@ class Action(object):
         if getattr(params, 'user') and getattr(params, 'password'):
             APIClient.user = params.user
             APIClient.password = params.password
+            if getattr(params, 'tenant'):
+                APIClient.tenant = params.tenant
             APIClient.initialize_keystone_client()
 
         self.serializer = Serializer.from_params(params)

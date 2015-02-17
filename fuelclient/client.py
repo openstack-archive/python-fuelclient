@@ -47,6 +47,7 @@ class Client(object):
         self.ostf_root = urlparse.urljoin(self.root, "/ostf/")
         self.user = conf.KEYSTONE_USER
         self.password = conf.KEYSTONE_PASS
+        self.tenant = 'admin'
         self._keystone_client = None
         self._auth_required = None
 
@@ -86,7 +87,7 @@ class Client(object):
                 username=self.user,
                 password=self.password,
                 auth_url=self.keystone_base,
-                tenant_name="admin")
+                tenant_name=self.tenant)
             self._keystone_client.session.auth = self._keystone_client
             self._keystone_client.authenticate()
 
