@@ -207,7 +207,7 @@ class EnvironmentAction(Action):
         full_path = '{0}/deployment_tasks'.format(dir_path)
         if params.download:
             tasks = cluster.get_deployment_tasks()
-            self.serializer.write_to_file(full_path, tasks)
+            self.serializer.write_to_path(full_path, tasks)
             print("Deployment tasks for cluster {0} "
                   "downloaded into {1}.yaml.".format(cluster.id, full_path))
         elif params.upload:
