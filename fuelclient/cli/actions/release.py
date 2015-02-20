@@ -15,13 +15,13 @@
 from collections import defaultdict
 import os
 
+from fuelclient import utils
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
 from fuelclient.cli.actions.base import check_any
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli.formatting import format_table
-from fuelclient.cli import utils
 from fuelclient.objects.release import Release
 
 
