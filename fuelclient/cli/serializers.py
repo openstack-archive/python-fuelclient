@@ -72,10 +72,10 @@ class Serializer(object):
             path, self.format
         )
 
-    def write_to_file(self, path, data):
+    def write_to_path(self, path, data):
         full_path = self.prepare_path(path)
         with open(full_path, "w+") as file_to_write:
-            file_to_write.write(self.serializer["w"](data))
+            self.write_to_file(file_to_write, data)
         return full_path
 
     def read_from_file(self, path):
@@ -84,6 +84,13 @@ class Serializer(object):
     def read_from_full_path(self, full_path):
         with open(full_path, "r") as file_to_read:
             return self.serializer["r"](file_to_read.read())
+
+    def write_to_file(self, file_obj, data):
+        """Writes to opened file or file like object
+        :param file: opened file
+        """
+        serialized = self.serializer["w"](data)
+        file_obj.write(serialized)
 
 
 def listdir_without_extensions(dir_path):
