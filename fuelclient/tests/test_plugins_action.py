@@ -14,169 +14,164 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from mock import Mock
 from mock import patch
 
 from fuelclient.tests import base
 
-DATA = """
-name: sample
-version: 0.1.0
-"""
+from fuelclient.cli.actions import PluginAction
+from fuelclient.cli import error
+from fuelclient.cli.formatting import format_table
+from fuelclient.cli.serializers import Serializer
+from fuelclient.objects.plugins import Plugins
 
 
-@patch('fuelclient.client.requests')
+plugin_data = {
+    'id': 1,
+    'name': 'plugin_name',
+    'version': '1.0.0',
+    'package_version': '1.0.0'
+}
+
+
 class TestPluginsActions(base.UnitTestCase):
 
-    def test_001_plugins_action(self, mrequests):
-        self.execute(['fuel', 'plugins'])
-        plugins_call = mrequests.get.call_args_list[-1]
-        url = plugins_call[0][0]
-        self.assertIn('api/v1/plugins', url)
+    def setUp(self):
+        super(TestPluginsActions, self).setUp()
+        self.file_name = '/tmp/path/plugin.fp'
+        self.attr_name = 'plugin_name==version'
+        self.name = 'plugin_name'
+        self.version = 'version'
 
-    @patch('fuelclient.objects.plugins.tarfile')
-    @patch('fuelclient.objects.plugins.os')
-    def test_install_plugin(self, mos, mtar, mrequests):
-        mos.path.exists.return_value = True
-        mtar.open().getnames.return_value = ['metadata.yaml']
-        mtar.open().extractfile().read.return_value = DATA
-        response_mock = Mock(status_code=201)
-        mrequests.post.return_value = response_mock
-        self.execute(
-            ['fuel', 'plugins', '--install', '/tmp/sample.fp'])
-        self.assertEqual(mrequests.post.call_count, 1)
-        self.assertEqual(mrequests.put.call_count, 0)
+    def exec_plugins(self, actions):
+        plugins_cmd = ['fuel', 'plugins']
+        plugins_cmd.extend(actions)
+        self.execute(plugins_cmd)
 
-    @patch('fuelclient.objects.plugins.tarfile')
-    @patch('fuelclient.objects.plugins.os')
-    def test_install_plugin_with_force(self, mos, mtar, mrequests):
-        mos.path.exists.return_value = True
-        mtar.open().getnames.return_value = ['metadata.yaml']
-        mtar.open().extractfile().read.return_value = DATA
-        response_mock = Mock(status_code=409)
-        response_mock.json.return_value = {'id': '12'}
-        mrequests.post.return_value = response_mock
-        self.execute(
-            ['fuel', 'plugins', '--install', '/tmp/sample.fp', '--force'])
-        self.assertEqual(mrequests.post.call_count, 1)
-        self.assertEqual(mrequests.put.call_count, 1)
+    def assert_print_table(self, print_mock, plugins):
+        print_mock.assert_called_once_with(
+            plugins, format_table(
+                plugins,
+                acceptable_keys=PluginAction.acceptable_keys))
 
-    @patch('fuelclient.objects.plugins.os')
-    @patch('fuelclient.objects.plugins.shutil')
-    def test_remove_plugin_single(self, mshutil, mos, mrequests):
-        mos.path.exists.return_value = True
-        mresponse = Mock(status_code=201)
-        mresponse.json.return_value = [
-            {
-                'id': 1,
-                'name': 'test',
-                'version': '1.0.0',
-            }
-        ]
-        mrequests.get.return_value = mresponse
-        mrequests.delete.return_value = Mock(status_code=200)
+    def assert_print(self, print_mock, result, msg):
+        print_mock.assert_called_once_with(result, msg)
 
-        self.execute(
-            ['fuel', 'plugins', '--remove', 'test']
-        )
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(Plugins, 'get_all_data')
+    def test_list_default(self, get_mock, print_mock):
+        plugins = [plugin_data, plugin_data]
+        get_mock.return_value = plugins
 
-        self.assertEqual(mrequests.delete.call_count, 1)
-        self.assertEqual(mshutil.rmtree.call_count, 1)
+        self.exec_plugins([])
+
+        get_mock.assert_called_once_with()
+        self.assert_print_table(print_mock, plugins)
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(Plugins, 'get_all_data')
+    def test_list(self, get_mock, print_mock):
+        plugins = [plugin_data, plugin_data]
+        get_mock.return_value = plugins
+
+        self.exec_plugins(['--list'])
+
+        get_mock.assert_called_once_with()
+        self.assert_print_table(print_mock, plugins)
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(PluginAction, 'check_file')
+    @patch.object(Plugins, 'install', return_value='some_result')
+    def test_install(self, install_mock, check_mock, print_mock):
+        self.exec_plugins(['--install', self.file_name])
+        self.assert_print(
+            print_mock,
+            'some_result',
+            'Plugin /tmp/path/plugin.fp was successfully installed.')
+        install_mock.assert_called_once_with(self.file_name, force=False)
+        check_mock.assert_called_once_with(self.file_name)
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(Plugins, 'remove', return_value='some_result')
+    def test_remove(self, remove_mock, print_mock):
+        self.exec_plugins(['--remove', self.attr_name])
+        self.assert_print(
+            print_mock,
+            'some_result',
+            'Plugin plugin_name==version was successfully removed.')
+        remove_mock.assert_called_once_with(self.name, self.version)
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(PluginAction, 'check_file')
+    @patch.object(Plugins, 'update', return_value='some_result')
+    def test_update(self, update_mock, check_mock, print_mock):
+        self.exec_plugins(['--update', self.file_name])
+        self.assert_print(
+            print_mock,
+            'some_result',
+            'Plugin /tmp/path/plugin.fp was successfully updated.')
+        update_mock.assert_called_once_with(self.file_name)
+        check_mock.assert_called_once_with(self.file_name)
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(PluginAction, 'check_file')
+    @patch.object(Plugins, 'downgrade', return_value='some_result')
+    def test_downgrade(self, downgrade_mock, check_mock, print_mock):
+        self.exec_plugins(['--downgrade', self.file_name])
+        self.assert_print(
+            print_mock,
+            'some_result',
+            'Plugin /tmp/path/plugin.fp was successfully downgraded.')
+        downgrade_mock.assert_called_once_with(self.file_name)
+        check_mock.assert_called_once_with(self.file_name)
+
+    @patch.object(Plugins, 'sync')
+    def test_sync(self, sync_mock):
+        self.exec_plugins(['--sync'])
+        sync_mock.assert_called_once_with()
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(Plugins, 'register', return_value='some_result')
+    def test_register(self, register_mock, print_mock):
+        self.exec_plugins(['--register', 'plugin_name==version'])
+        self.assert_print(
+            print_mock,
+            'some_result',
+            'Plugin plugin_name==version was successfully registered.')
+        register_mock.assert_called_once_with(
+            self.name, self.version, force=False)
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(Plugins, 'unregister', return_value='some_result')
+    def test_unregister(self, unregister_mock, print_mock):
+        self.exec_plugins(['--unregister', 'plugin_name==version'])
+        self.assert_print(
+            print_mock,
+            'some_result',
+            'Plugin plugin_name==version was successfully unregistered.')
+        unregister_mock.assert_called_once_with(self.name, self.version)
+
+    def test_parse_name_version(self):
+        plugin = PluginAction()
         self.assertEqual(
-            'test-1.0.0',
-            mos.path.join.call_args[0][1])
+            plugin.parse_name_version('name==version'),
+            ['name', 'version'])
 
-    @patch('fuelclient.objects.plugins.os')
-    @patch('fuelclient.objects.plugins.shutil')
-    def test_remove_plugin_multi(self, mshutil, mos, mrequests):
-        mos.path.exists.return_value = True
-        mresponse = Mock(status_code=201)
-        mresponse.json.return_value = [
-            {
-                'id': 1,
-                'name': 'test',
-                'version': '1.0.0',
-            },
-            {
-                'id': 2,
-                'name': 'test',
-                'version': '1.1.0',
-            }
-        ]
-        mrequests.get.return_value = mresponse
-        mrequests.delete.return_value = Mock(status_code=200)
+    def test_parse_name_version_raises_error(self):
+        plugin = PluginAction()
+        self.assertRaisesRegexp(
+            error.ArgumentException,
+            'Syntax: fuel plugins <action> fuel_plugin==1.0.0',
+            plugin.parse_name_version, 'some_string')
 
-        self.execute(
-            ['fuel', 'plugins', '--remove', 'test==1.0.0']
-        )
+    @patch('fuelclient.utils.exists', return_value=True)
+    def test_check_file(self, _):
+        plugin = PluginAction()
+        plugin.check_file(self.file_name)
 
-        self.assertEqual(mrequests.delete.call_count, 1)
-        self.assertEqual(mshutil.rmtree.call_count, 1)
-
-    @patch('fuelclient.objects.plugins.os')
-    def test_remove_nonexisting_plugin(self, mos, mrequests):
-        mos.path.exists.return_value = True
-        mresponse = Mock(status_code=201)
-        mresponse.json.return_value = [
-            {
-                'id': 1,
-                'name': 'test',
-                'version': '1.0.0',
-            }
-        ]
-        mrequests.get.return_value = mresponse
-
-        self.assertRaises(
-            SystemExit,
-            self.execute,
-            ['fuel', 'plugins', '--remove', 'test-fail']
-        )
-
-        self.assertEqual(mrequests.delete.call_count, 0)
-
-    @patch('fuelclient.objects.plugins.os')
-    def test_remove_when_multiple_versions(self, mos, mrequests):
-        mos.path.exists.return_value = True
-        mresponse = Mock(status_code=201)
-        mresponse.json.return_value = [
-            {
-                'id': 1,
-                'name': 'test',
-                'version': '1.0.0',
-            },
-            {
-                'id': 2,
-                'name': 'test',
-                'version': '1.1.0',
-            }
-        ]
-        mrequests.get.return_value = mresponse
-
-        self.assertRaises(
-            SystemExit,
-            self.execute,
-            ['fuel', 'plugins', '--remove', 'test']
-        )
-
-        self.assertEqual(mrequests.delete.call_count, 0)
-
-    @patch('fuelclient.objects.plugins.os')
-    def test_remove_nonexisting_plugin_version(self, mos, mrequests):
-        mos.path.exists.return_value = True
-        mresponse = Mock(status_code=201)
-        mresponse.json.return_value = [
-            {
-                'id': 1,
-                'name': 'test',
-                'version': '1.0.0',
-            }
-        ]
-        mrequests.get.return_value = mresponse
-
-        self.assertRaises(
-            SystemExit,
-            self.execute,
-            ['fuel', 'plugins', '--remove', 'test==1.1.0']
-        )
-
-        self.assertEqual(mrequests.delete.call_count, 0)
+    @patch('fuelclient.utils.exists', return_value=False)
+    def test_check_file_raises_error(self, _):
+        plugin = PluginAction()
+        self.assertRaisesRegexp(
+            error.ArgumentException,
+            'File "/tmp/path/plugin.fp" does not exists',
+            plugin.check_file, self.file_name)
