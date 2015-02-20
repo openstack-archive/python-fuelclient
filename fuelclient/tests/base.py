@@ -25,6 +25,8 @@ import subprocess
 import sys
 import tempfile
 
+from StringIO import StringIO
+
 import mock
 
 from fuelclient.cli.parser import main
@@ -33,6 +35,20 @@ from fuelclient.cli.parser import main
 logging.basicConfig(stream=sys.stderr)
 log = logging.getLogger("CliTest.ExecutionLog")
 log.setLevel(logging.DEBUG)
+
+
+class FakeFile(StringIO):
+    """It's a fake file which returns StringIO
+    when file opens with 'with' statement.
+    NOTE(eli): We cannot use mock_open from mock library
+    here, because it hangs when we use 'with' statement,
+    and when we want to read file by chunks.
+    """
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
 
 
 class CliExectutionResult:
@@ -61,6 +77,17 @@ class UnitTestCase(TestCase):
                         new_callable=mock.PropertyMock) as auth:
             auth.return_value = False
             return self.execute(command)
+
+    def mock_open(self, text, filename='some.file'):
+        """Mocks builtin open function.
+        Usage example:
+
+          with mock.patch('__builtin__.open', self.mock_open('file content')):
+              # call mocked code
+        """
+        fileobj = FakeFile(text)
+        setattr(fileobj, 'name', filename)
+        return mock.MagicMock(return_value=fileobj)
 
 
 class BaseTestCase(UnitTestCase):
