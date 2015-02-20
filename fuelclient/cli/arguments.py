@@ -435,7 +435,6 @@ def get_task_arg(help_msg):
 def get_plugin_install_arg(help_msg):
     return get_str_arg(
         "install",
-        flags=("--install",),
         help=help_msg
     )
 
@@ -443,7 +442,41 @@ def get_plugin_install_arg(help_msg):
 def get_plugin_remove_arg(help_msg):
     return get_str_arg(
         "remove",
-        flags=("--remove",),
+        help=help_msg
+    )
+
+
+def get_plugin_register_arg(help_msg):
+    return get_str_arg(
+        "register",
+        help=help_msg
+    )
+
+
+def get_plugin_unregister_arg(help_msg):
+    return get_str_arg(
+        "unregister",
+        help=help_msg
+    )
+
+
+def get_plugin_update_arg(help_msg):
+    return get_str_arg(
+        "update",
+        help=help_msg
+    )
+
+
+def get_plugin_downgrade_arg(help_msg):
+    return get_str_arg(
+        "downgrade",
+        help=help_msg
+    )
+
+
+def get_plugin_sync_arg(help_msg):
+    return get_boolean_arg(
+        "sync",
         help=help_msg
     )
 

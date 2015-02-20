@@ -83,6 +83,10 @@ class SettingsException(FuelClientException):
     """Indicates errors or unexpected behaviour in processing settings."""
 
 
+class ExecutedErrorNonZeroExitCode(FuelClientException):
+    """Subshell command returned non-zero exit code."""
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class
