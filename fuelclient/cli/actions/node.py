@@ -298,11 +298,12 @@ class NodeAction(Action):
     def delete_from_db(self, params):
         """To delete nodes from fuel db:
                 fuel node --node-id 1 --delete-from-db
+                fuel node --node-id 1 2 --delete-from-db
         """
-        nodes = Node.get_by_ids(params.node)
-        for node in nodes:
-            node.delete()
+        NodeCollection.delete_by_ids(params.node)
+
         self.serializer.print_to_output(
             {},
-            "Nodes with id {0} has been deleted from fuel db.\n"
-            "You should still delete node from cobbler".format(params.node))
+            "Nodes with id {0} have been deleted from fuel db.\n"
+            .format(', '.join(map(str, params.node)))
+        )

@@ -151,6 +151,15 @@ class NodeCollection(object):
     def get_all(cls):
         return cls(Node.get_all())
 
+    @classmethod
+    def delete_by_ids(cls, ids):
+        url = '{0}?ids={1}'.format(
+            Node.class_api_path,
+            ','.join(map(str, ids))
+        )
+
+        return BaseObject.connection.delete_request(url)
+
     def filter_by_env_id(self, env_id):
         predicate = lambda node: node.data['cluster'] == env_id
         self.collection = filter(predicate, self.collection)
