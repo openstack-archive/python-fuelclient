@@ -18,8 +18,8 @@ import os
 
 import mock
 
-from fuelclient.cli import utils
 from fuelclient.tests import base
+from fuelclient import utils
 
 
 class TestUtils(base.UnitTestCase):
