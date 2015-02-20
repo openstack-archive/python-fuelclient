@@ -18,7 +18,7 @@ import os
 
 import mock
 
-from fuelclient.cli import utils
+from fuelclient import utils
 from fuelclient.tests import base
 
 
