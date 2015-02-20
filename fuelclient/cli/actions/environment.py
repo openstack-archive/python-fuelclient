@@ -198,8 +198,8 @@ class EnvironmentAction(Action):
     @check_any("download", "upload")
     def deployment_tasks(self, params):
         """Modify deployment_tasks for environment.
-        fuel env --env 1 --deployment-tasks --download
-        fuel env --env 1 --deployment-tasks --upload
+               fuel env --env 1 --deployment-tasks --download
+               fuel env --env 1 --deployment-tasks --upload
         """
         cluster = Environment(params.env)
         dir_path = self.full_path_directory(
