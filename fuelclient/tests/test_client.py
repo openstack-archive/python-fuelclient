@@ -110,10 +110,21 @@ class TestHandlers(base.BaseTestCase):
             "env create --name=NewEnv --release=1",
             "--env-id=1 node set --node 1 --role=controller"
         ))
-        msg = ("Nodes with id [1] has been deleted from fuel db.\n"
-               "You should still delete node from cobbler\n")
+        msg = ("Nodes with id [1] have been deleted from Fuel db.\n")
         self.check_for_stdout(
             "node --node 1 --delete-from-db",
+            msg
+        )
+
+    def test_destroy_multiple_nodes(self):
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1",
+            "--env-id=1 node set --node 1 2 --role=controller"
+        ))
+        msg = ("Nodes with id [1, 2] have been deleted from Fuel db.\n")
+        self.check_for_stdout(
+            "node --node 1 2 --delete-from-db",
             msg
         )
 
