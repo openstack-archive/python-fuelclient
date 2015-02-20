@@ -448,6 +448,46 @@ def get_plugin_remove_arg(help_msg):
     )
 
 
+def get_plugin_register_arg(help_msg):
+    return get_str_arg(
+        "register",
+        flags=("--register",),
+        help=help_msg
+    )
+
+
+def get_plugin_unregister_arg(help_msg):
+    return get_str_arg(
+        "unregister",
+        flags=("--unregister",),
+        help=help_msg
+    )
+
+
+def get_plugin_update_arg(help_msg):
+    return get_str_arg(
+        "update",
+        flags=("--update",),
+        help=help_msg
+    )
+
+
+def get_plugin_downgrade_arg(help_msg):
+    return get_str_arg(
+        "downgrade",
+        flags=("--downgrade",),
+        help=help_msg
+    )
+
+
+def get_plugin_sync_arg(help_msg):
+    return get_boolean_arg(
+        "sync",
+        flags=("--sync",),
+        help=help_msg
+    )
+
+
 def get_notify_all_messages_arg(help_msg):
     return get_boolean_arg(
         'all',
