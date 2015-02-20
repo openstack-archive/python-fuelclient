@@ -79,7 +79,7 @@ class TestClusterDeploymentTasksActions(base.UnitTestCase):
 
 @patch('fuelclient.client.requests')
 @patch('fuelclient.cli.serializers.open', create=True)
-@patch('fuelclient.cli.utils.iterfiles')
+@patch('fuelclient.utils.iterfiles')
 class TestSyncDeploymentTasks(base.UnitTestCase):
 
     def test_sync_deployment_scripts(self, mfiles, mopen, mrequests):
