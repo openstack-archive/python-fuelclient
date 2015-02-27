@@ -20,6 +20,8 @@ import os
 
 import yaml
 
+from fuelclient.cli import error
+
 
 class Serializer(object):
     """Serializer class - contains all logic responsible for
@@ -84,6 +86,28 @@ class Serializer(object):
     def read_from_full_path(self, full_path):
         with open(full_path, "r") as file_to_read:
             return self.serializer["r"](file_to_read.read())
+
+
+class FileFormatBasedSerializer(Serializer):
+    """Serializer that compute serializer format based on file extension."""
+
+    def get_serializer(self, path):
+        extension = os.path.splitext(path)[1][1:]
+        if extension not in self.serializers:
+            raise error.BadDataException(
+                'No serializer for provided file {0}'.format(path))
+        return self.serializers[extension]
+
+    def write_to_file(self, full_path, data):
+        serializer = self.get_serializer(full_path)
+        with open(full_path, "w+") as f:
+            f.write(serializer["w"](data))
+        return full_path
+
+    def read_from_file(self, full_path):
+        serializer = self.get_serializer(full_path)
+        with open(full_path, "r") as f:
+            return serializer["r"](f.read())
 
 
 def listdir_without_extensions(dir_path):
