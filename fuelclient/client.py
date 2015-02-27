@@ -145,6 +145,7 @@ class Client(object):
 
         headers = {'x-auth-token': self.auth_token}
         params = params or {}
+
         resp = requests.get(url, params=params, headers=headers)
         resp.raise_for_status()
 
