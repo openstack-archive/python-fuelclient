@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 from fuelclient.cli.actions.base import Action
+from fuelclient.cli.actions.base import check_all
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.formatting import format_table
-from fuelclient.objects.release import Release
+from fuelclient.objects.role import Role
 
 
 class RoleAction(Action):
@@ -27,28 +27,36 @@ class RoleAction(Action):
     def __init__(self):
         super(RoleAction, self).__init__()
         self.args = [
-            Args.get_list_arg("List all roles for specific release"),
-            Args.get_release_arg("Release id", required=True)
+            Args.get_list_arg("List all roles"),
+            Args.get_release_arg("Release id"),
+            Args.get_int_arg("role"),
+            Args.get_file_arg("File where to download role info"),
+            Args.get_create_arg("Create role from file"),
+            Args.get_boolean_arg("update", help="Update role form file"),
+            Args.get_delete_arg("Delete role from fuel")
         ]
         self.flag_func_map = (
+            ("delete", self.delete),
+            ("create", self.create),
+            ("update", self.update),
+            ("role", self.item),
             (None, self.list),
         )
 
     def list(self, params):
-        """Print all available roles and their
-           conflicts for some release with id=1:
+        """Print all available roles
+
                 fuel role --rel 1
+                fuel role
         """
-        release = Release(params.release, params=params)
-        data = release.get_fresh_data()
-        acceptable_keys = ("name", "conflicts")
-        roles = [
-            {
-                "name": role_name,
-                "conflicts": ", ".join(
-                    metadata.get("conflicts", ["-"])
-                )
-            } for role_name, metadata in data["roles_metadata"].iteritems()]
+        roles = Role.get_all()
+
+        # such cases should be covered with filtering
+        if params.release:
+            roles = [r for r in roles if r['release_id'] == params.release]
+
+        acceptable_keys = ("name", "id", "release_id")
+
         self.serializer.print_to_output(
             roles,
             format_table(
@@ -56,3 +64,47 @@ class RoleAction(Action):
                 acceptable_keys=acceptable_keys
             )
         )
+
+    @check_all('role')
+    def item(self, params):
+        """Save full role description to file
+            fuel role --role 1 --file some
+        """
+        role = Role.get_one(params.role)
+        self.serializer.write_to_file(params.file, role)
+        self.serializer.print_to_output(
+            role,
+            "Role successfully saved to {0}.".format(params.file))
+
+    @check_all('file')
+    def create(self, params):
+        """Create a role from file description
+            fuel role --create --file some
+        """
+        role = self.serializer.read_from_file(params.file)
+        role = Role.create(role)
+        self.serializer.print_to_output(
+            role,
+            "Role with {0} successfully created from {1}.".format(
+                role['id'], params.file))
+
+    @check_all('file')
+    def update(self, params):
+        """Update a role from file description
+            fuel role --update --file some
+        """
+        role = self.serializer.read_from_file(params.file)
+        role = Role.update(role['id'], role)
+        self.serializer.print_to_output(
+            role,
+            "Role successfully updated from {0}.".format(params.file))
+
+    @check_all('role')
+    def delete(self, params):
+        """Delete role from fuel
+            fuel role --delete --role 2
+        """
+        Role.delete(params.role)
+        self.serializer.print_to_output(
+            {},
+            "Role with id successfully delete.".format(params.role))
