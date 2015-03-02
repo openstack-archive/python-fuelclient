@@ -13,6 +13,7 @@
 #    under the License.
 
 from functools import wraps
+import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
@@ -95,8 +96,7 @@ def exceptions_decorator(func):
         # when server returns to us bad request check that
         # and print meaningful reason
         except requests.HTTPError as exc:
-            error_body = exc.response.text
-            exit_with_error("{0} ({1})".format(exc, error_body))
+            exit_with_error("{0} ({1})".format(exc, get_error_body(exc)))
         except requests.ConnectionError:
             exit_with_error("""
             Can't connect to Nailgun server!
@@ -116,3 +116,12 @@ def exceptions_decorator(func):
             return {}
 
     return wrapper
+
+
+def get_error_body(error):
+    try:
+        error_body = json.loads(error.response.text)['message']
+    except Exception:
+        error_body = error.response.text
+
+    return error_body
