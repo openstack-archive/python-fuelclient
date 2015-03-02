@@ -13,6 +13,7 @@
 #    under the License.
 
 from functools import wraps
+import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
@@ -95,7 +96,7 @@ def exceptions_decorator(func):
         # when server returns to us bad request check that
         # and print meaningful reason
         except requests.HTTPError as exc:
-            error_body = exc.response.text
+            error_body = json.loads(exc.response.text)['message']
             exit_with_error("{0} ({1})".format(exc, error_body))
         except requests.ConnectionError:
             exit_with_error("""
