@@ -347,11 +347,13 @@ class TestPluginsObject(base.UnitTestCase):
                   return_value=MagicMock(
                       status_code=409,
                       **{'json.return_value': {'id': 99}}))
-    @patch.object(Plugins.connection, 'put_request')
+    @patch.object(Plugins.connection, 'put_request', return_value='put_return')
     def test_update_or_create_updates_with_force(
             self, put_mock, post_mock, get_for_update_mock):
         meta = {'id': 99, 'version': '1.0.0', 'package_version': '2.0.0'}
-        self.plugin.update_or_create(meta, force=True)
+        self.assertEqual(
+            self.plugin.update_or_create(meta, force=True),
+            'put_return')
         post_mock.assert_called_once_with('plugins/', meta)
         get_for_update_mock.assert_called_once_with(meta)
         put_mock.assert_called_once_with('plugins/99', meta)
