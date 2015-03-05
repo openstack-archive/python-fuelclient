@@ -12,7 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from fuelclient. v1 import environment
 
 
 __all__ = (
+    'environment',
 )
