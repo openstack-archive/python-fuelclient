@@ -12,11 +12,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient. v1 import environment
-from fuelclient. v1 import node
+from fuelclient import objects
+from fuelclient.v1 import base_v1
 
 
-__all__ = (
-    'environment',
-    'node',
-)
+class NodeClient(base_v1.BaseV1Client):
+
+    _entity_wrapper = objects.Node
+
+    def get_all(self, environment_id=None):
+        result = self._entity_wrapper.get_all_data()
+
+        if environment_id is not None:
+            result = filter(lambda n: n['cluster'] == environment_id, result)
+
+        return result
+
+
+def get_client():
+    return NodeClient()
