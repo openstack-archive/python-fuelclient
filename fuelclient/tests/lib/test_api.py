@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 #    Copyright 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -12,7 +14,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
+
+from fuelclient.tests import base
 
 
-__all__ = (
-)
+class BaseLibTest(base.UnitTestCase):
+    def setUp(self):
+        self.m_requests = mock.patch('requests.request')
+        self.m_requests.start()
+
+    def tearDown(self):
+        self.m_requests.stop()

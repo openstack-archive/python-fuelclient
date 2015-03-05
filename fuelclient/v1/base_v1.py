@@ -12,7 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
+
+import six
 
 
-__all__ = (
-)
+@six.add_metaclass(abc.ABCMeta)
+class BaseV1Client(object):
+
+    @abc.abstractproperty
+    def _entity_wrapper(self):
+        pass
+
+    def get_all(self):
+        result = self._entity_wrapper.get_all_data()
+
+        return result
+
+    def get_by_id(self, entity_id):
+        obj = self._entity_wrapper(obj_id=entity_id)
+
+        return obj.data

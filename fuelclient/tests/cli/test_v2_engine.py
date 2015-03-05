@@ -23,6 +23,14 @@ from fuelclient.tests import base
 
 
 class BaseCLITest(base.UnitTestCase):
+
+    def setUp(self):
+        self.m_client = mock.patch('fuelclient.get_client')
+        self.m_client.start()
+
+    def tearDown(self):
+        self.m_client.stop()
+
     def exec_v2_command(self, *args, **kwargs):
         """Executes fuelclient with the specified arguments."""
 
