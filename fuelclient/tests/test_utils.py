@@ -174,8 +174,8 @@ class TestUtils(base.UnitTestCase):
         self.assertEqual([1, '-', '-'], result)
 
     def test_get_display_data_multi(self):
-        test_data = [{'a': 1, 'b': 2, 'c': 3}, {'b': 8, 'd': 9}]
+        test_data = [{'a': 1, 'b': 2, 'c': 3}, {'b': 8, 'c': 9}]
         fields = ('b', 'c')
 
         result = data_utils.get_display_data_multi(fields, test_data)
-        self.assertEqual([[2, 3], [8]], result)
+        self.assertEqual([[2, 3], [8, 9]], result)

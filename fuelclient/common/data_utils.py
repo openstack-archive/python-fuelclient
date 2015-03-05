@@ -28,13 +28,15 @@ def get_display_data_single(fields, data):
     result = []
 
     for field in fields:
+        if field not in data:
+            raise KeyError
+
         val = data.get(field)
 
         if not val and val not in (0, None, False, ''):
             val = '-'
 
-        if val is not None:
-            result.append(val)
+        result.append(val)
 
     return result
 
