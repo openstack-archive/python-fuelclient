@@ -19,6 +19,7 @@ import sys
 import mock
 
 import fuelclient
+from fuelclient.cli import error
 from fuelclient import main as main_mod
 from fuelclient.tests import base
 
@@ -43,10 +44,10 @@ class BaseCLITest(base.UnitTestCase):
     def tearDown(self):
         self._get_client_patcher.stop()
 
-    def exec_v2_command(self, *args, **kwargs):
+    def exec_v2_command(self, command=''):
         """Executes fuelclient with the specified arguments."""
 
-        return main_mod.main(argv=args)
+        return main_mod.main(argv=command.split())
 
     def exec_v2_command_interactive(self, commands):
         """Executes specified commands in one sesstion of interactive mode
@@ -68,6 +69,19 @@ class BaseCLITest(base.UnitTestCase):
         args = ['help']
         self.exec_v2_command(*args)
         m_find_command.assert_called_once_with(args)
+
+    @mock.patch.object(sys, 'stderr')
+    @mock.patch('cliff.app.App.run_subcommand')
+    def test_exec_command_error_handle(self, m_run, m_stderr):
+        error_msg = 'Test error'
+        expected_output = error_msg + '\n'
+
+        m_run.side_effect = error.FuelClientException(error_msg)
+
+        self.assertRaises(SystemExit,
+                          self.exec_v2_command,
+                          'some command --fail True')
+        m_stderr.write.assert_called_once_with(expected_output)
 
     @mock.patch('cliff.commandmanager.CommandManager.find_command')
     def test_command_interactive(self, m_find_command):
