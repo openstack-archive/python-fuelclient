@@ -14,10 +14,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import os
 import subprocess
 
 import mock
+import requests
 
 from fuelclient.cli import error
 from fuelclient.tests import base
@@ -157,3 +159,27 @@ class TestUtils(base.UnitTestCase):
         self.assertEqual(
             lexists_mock.call_args_list,
             [mock.call('file1'), mock.call('file2')])
+
+    def test_get_error_body_get_from_json(self):
+        error_body = 'This is error body'
+
+        resp = requests.Response()
+        resp._content = json.dumps({
+            'message': error_body
+        })
+
+        exception = requests.HTTPError()
+        exception.response = resp
+
+        self.assertEqual(error.get_error_body(exception), error_body)
+
+    def test_get_error_body_get_from_plaintext(self):
+        error_body = 'This is error body'
+
+        resp = requests.Response()
+        resp._content = error_body
+
+        exception = requests.HTTPError()
+        exception.response = resp
+
+        self.assertEqual(error.get_error_body(exception), error_body)
