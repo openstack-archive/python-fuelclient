@@ -18,11 +18,31 @@ import sys
 
 import mock
 
+import fuelclient
 from fuelclient import main as main_mod
 from fuelclient.tests import base
 
 
 class BaseCLITest(base.UnitTestCase):
+    """Base class for testing the new CLI
+
+    It mocks the whole API layer in order to be sure the
+    tests test only the stuff which is responsible for
+    the command line application. That allows to find bugs
+    more precisely and not confuse them with the bugs in the
+    API wrapper.
+
+    """
+    def setUp(self):
+        self._get_client_patcher = mock.patch.object(fuelclient, 'get_client')
+        self.m_get_client = self._get_client_patcher.start()
+
+        self.m_client = mock.MagicMock()
+        self.m_get_client.return_value = self.m_client
+
+    def tearDown(self):
+        self._get_client_patcher.stop()
+
     def exec_v2_command(self, *args, **kwargs):
         """Executes fuelclient with the specified arguments."""
 
