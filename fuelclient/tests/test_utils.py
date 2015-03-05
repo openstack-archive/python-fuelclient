@@ -20,6 +20,7 @@ import subprocess
 import mock
 
 from fuelclient.cli import error
+from fuelclient.common import data_utils
 from fuelclient.tests import base
 from fuelclient import utils
 
@@ -157,3 +158,24 @@ class TestUtils(base.UnitTestCase):
         self.assertEqual(
             lexists_mock.call_args_list,
             [mock.call('file1'), mock.call('file2')])
+
+    def test_get_display_data_single(self):
+        test_data = {'a': 1, 'b': 2, 'c': 3}
+        fields = ('b', 'c')
+
+        result = data_utils.get_display_data_single(fields, test_data)
+        self.assertEqual([2, 3], result)
+
+    def test_get_display_data_single_empty_val(self):
+        test_data = {'a': 1, 'b': {}, 'c': []}
+        fields = ('a', 'b', 'c')
+
+        result = data_utils.get_display_data_single(fields, test_data)
+        self.assertEqual([1, 'Empty', 'Empty'], result)
+
+    def test_get_display_data_multi(self):
+        test_data = [{'a': 1, 'b': 2, 'c': 3}, {'b': 8, 'd': 9}]
+        fields = ('b', 'c')
+
+        result = data_utils.get_display_data_multi(fields, test_data)
+        self.assertEqual([[2, 3], [8]], result)
