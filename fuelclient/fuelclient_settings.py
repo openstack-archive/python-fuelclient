@@ -49,10 +49,12 @@ class FuelClientSettings(object):
         project_settings_file = os.path.join(project_path,
                                              'fuelclient_settings.yaml')
         external_default_settings = '/etc/fuel/client/config.yaml'
+        external_user_settings = os.environ.get('FUELCLIENT_CUSTOM_SETTINGS')
 
         # NOTE(romcheg): when external default settings file is removed
         # this deprecation warning should be removed as well.
-        if os.path.exists(external_default_settings):
+        if os.path.exists(external_default_settings) and \
+                external_default_settings != external_user_settings:
             six.print_('DEPRECATION WARNING: file {0} is found and will be '
                        'used as a source for settings. However, it deprecated '
                        'and will not be used by default in the ongoing '
@@ -64,8 +66,7 @@ class FuelClientSettings(object):
         self._add_file_if_exists(external_default_settings, settings_files)
 
         # Add a custom settings file specified by user
-        self._add_file_if_exists(os.environ.get('FUELCLIENT_CUSTOM_SETTINGS'),
-                                 settings_files)
+        self._add_file_if_exists(external_user_settings, settings_files)
 
         self.config = {}
         for sf in settings_files:
