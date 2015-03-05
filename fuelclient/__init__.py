@@ -48,6 +48,7 @@ def get_client(resource, version='v1'):
 
     version_map = {
         'v1': {
+            'environment': v1.environment,
         }
     }
 
