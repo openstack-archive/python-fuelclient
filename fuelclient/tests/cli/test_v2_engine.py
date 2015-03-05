@@ -18,11 +18,23 @@ import sys
 
 import mock
 
+import fuelclient
 from fuelclient import main as main_mod
 from fuelclient.tests import base
 
 
 class BaseCLITest(base.UnitTestCase):
+
+    def setUp(self):
+        self._get_client_patcher = mock.patch.object(fuelclient, 'get_client')
+        self.m_get_client = self._get_client_patcher.start()
+
+        self.m_client = mock.MagicMock()
+        self.m_get_client.return_value = self.m_client
+
+    def tearDown(self):
+        self._get_client_patcher.stop()
+
     def exec_v2_command(self, *args, **kwargs):
         """Executes fuelclient with the specified arguments."""
 
