@@ -33,7 +33,8 @@ class Environment(BaseObject):
     deployment_tasks_graph_path = 'clusters/{0}/deploy_tasks/graph.gv'
 
     @classmethod
-    def create(cls, name, release_id, net, net_segment_type=None):
+    def create(cls, name, release_id, net,
+               net_segment_type=None, mode='ha_compact'):
         data = {
             "nodes": [],
             "tasks": [],
