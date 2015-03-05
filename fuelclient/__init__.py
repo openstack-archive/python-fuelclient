@@ -27,6 +27,7 @@ except ImportError:
 version_map = {
     'v1': {
         'environment': v1.environment,
+        'node': v1.node,
     }
 }
 
