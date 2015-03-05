@@ -24,6 +24,7 @@ from fuelclient.tests import base
 
 
 class BaseCLITest(base.UnitTestCase):
+    """Base class for CLI-v2 tests."""
 
     def setUp(self):
         self._get_client_patcher = mock.patch.object(fuelclient, 'get_client')
