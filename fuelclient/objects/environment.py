@@ -32,7 +32,8 @@ class Environment(BaseObject):
     deployment_tasks_path = 'clusters/{0}/deployment_tasks'
 
     @classmethod
-    def create(cls, name, release_id, net, net_segment_type=None):
+    def create(cls, name, release_id, net,
+               net_segment_type=None, mode='ha_compact'):
         data = {
             "nodes": [],
             "tasks": [],
