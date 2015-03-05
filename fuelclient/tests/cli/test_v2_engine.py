@@ -43,10 +43,10 @@ class BaseCLITest(base.UnitTestCase):
     def tearDown(self):
         self._get_client_patcher.stop()
 
-    def exec_v2_command(self, *args, **kwargs):
+    def exec_v2_command(self, command=''):
         """Executes fuelclient with the specified arguments."""
 
-        return main_mod.main(argv=args)
+        return main_mod.main(argv=command.split())
 
     def exec_v2_command_interactive(self, commands):
         """Executes specified commands in one sesstion of interactive mode

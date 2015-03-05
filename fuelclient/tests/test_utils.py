@@ -22,6 +22,7 @@ import mock
 import requests
 
 from fuelclient.cli import error
+from fuelclient.common import data_utils
 from fuelclient.tests import base
 from fuelclient import utils
 
@@ -183,3 +184,24 @@ class TestUtils(base.UnitTestCase):
         exception.response = resp
 
         self.assertEqual(error.get_error_body(exception), error_body)
+
+    def test_get_display_data_single(self):
+        test_data = {'a': 1, 'b': 2, 'c': 3}
+        fields = ('b', 'c')
+
+        result = data_utils.get_display_data_single(fields, test_data)
+        self.assertEqual([2, 3], result)
+
+    def test_get_display_data_single_empty_val(self):
+        test_data = {'a': 1, 'b': {}, 'c': []}
+        fields = ('a', 'b', 'c')
+
+        result = data_utils.get_display_data_single(fields, test_data)
+        self.assertEqual([1, '-', '-'], result)
+
+    def test_get_display_data_multi(self):
+        test_data = [{'a': 1, 'b': 2, 'c': 3}, {'b': 8, 'c': 9}]
+        fields = ('b', 'c')
+
+        result = data_utils.get_display_data_multi(fields, test_data)
+        self.assertEqual([[2, 3], [8, 9]], result)
