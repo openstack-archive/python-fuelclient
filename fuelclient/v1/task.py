@@ -12,13 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient. v1 import environment
-from fuelclient. v1 import node
-from fuelclient. v1 import task
+from fuelclient import objects
+from fuelclient.v1 import base_v1
 
 
-__all__ = (
-    'environment',
-    'node',
-    'task'
-)
+class TaskClient(base_v1.BaseV1Client):
+
+    _entity_wrapper = objects.Task
+
+
+def get_client():
+    return TaskClient()
