@@ -34,15 +34,57 @@ class Parser:
         self.args = argv
         self.parser = argparse.ArgumentParser(
             usage="""
-            Configuration for client you can find in
-            /etc/fuel/client/config.yaml. If you don't have this file please
-            create it i.e.:
-            "SERVER_ADDRESS": "127.0.0.1",
-            "LISTEN_PORT": "8000",
-            "KEYSTONE_USER": "admin",
-            "KEYSTONE_PASS": "admin"
+            Default configuration for Fuel Client is the following:
 
-            fuel [optional args] <namespace> [action] [flags]"""
+            SERVER_ADDRESS: "127.0.0.1"
+            LISTEN_PORT: "8000"
+            KEYSTONE_USER: "admin"
+            KEYSTONE_PASS: "admin"
+
+            These options can be changed by putting some or all of them
+            into a yaml-formatted textfile and specifying its full path
+            in the FUELCLIENT_CUSTOM_SETTINGS enviroment variable.
+
+            fuel [optional args] <namespace> [action] [flags]
+
+            DEPRECATION WARNING:
+
+                In the following release the schema of commands
+                will be changed to the following one
+
+                    fuel [general flags] <entity> <action> [action flags]
+
+                where both [general flags] and [action flags] are derivatives
+                from [optional args] and [flags]; <entity> is a derivative from
+                <namespace>. Keep in mind, that ispecifying <action> will be
+                mandatory.
+
+                Some of the [optional args] are going to be context-specific
+                in the following release of Fuel Client so specifying them
+                before either <namespace> or [action] will not be possible.
+
+                Example:
+                    Correct: fuel node list --env 1
+                    Wrong:   fuel --env 1 node list
+
+                The table bellowof the commands which are going to be removed
+                or changed significantly.
+
+                +--------------------------------------------------------+
+                |     Old command        |         New command           |
+                +------------------------+-------------------------------+
+                | fuel deploy-changes    |        fuel env deploy        |
+                +------------------------+-------------------------------+
+                | fuel node --set --env  |       fuel env add nodes      |
+                +------------------------+-------------------------------+
+
+                To check out the demo run
+
+                    fuel2 --help
+
+            END OF THE DEPRECATION WARNING.
+
+            """
         )
         self.universal_flags = []
         self.credential_flags = []
