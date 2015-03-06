@@ -34,15 +34,67 @@ class Parser:
         self.args = argv
         self.parser = argparse.ArgumentParser(
             usage="""
-            Configuration for client you can find in
-            /etc/fuel/client/config.yaml. If you don't have this file please
-            create it i.e.:
-            "SERVER_ADDRESS": "127.0.0.1",
-            "LISTEN_PORT": "8000",
-            "KEYSTONE_USER": "admin",
-            "KEYSTONE_PASS": "admin"
+            Default configuration for Fuel Client uses the
+            following parameters:
 
-            fuel [optional args] <namespace> [action] [flags]"""
+            SERVER_ADDRESS: "127.0.0.1"
+            LISTEN_PORT: "8000"
+            KEYSTONE_USER: "admin"
+            KEYSTONE_PASS: "admin"
+
+            These options can be changed by putting some or all of them
+            into a yaml-formatted text file and specifying its full path
+            in the FUELCLIENT_CUSTOM_SETTINGS environment variable.
+
+            fuel [optional args] <namespace> [action] [flags]
+
+            DEPRECATION WARNING:
+
+                In an upcoming release of Fuel Client, the syntax will
+                be changed to the following:
+
+                    fuel [general flags] <entity> <action> [action flags]
+
+                where both [general flags] and [action flags] are derivatives
+                from [optional args] and [flags]; <entity> is a derivative from
+                <namespace>. Keep in mind that specifying <action> will be
+                mandatory.
+
+                Some of the [optional args] are going to specific to a
+                particular <entity> and <action> context in the upcoming
+                release of Fuel Client, so specifying them
+                before either <namespace> or <action> will not be possible.
+
+                Example:
+                    Correct: fuel node list --env 1
+                    Wrong:   fuel --env 1 node list
+
+                The table below describes the upcoming changes to commands
+                which will be removed or changed significantly.
+
+                +--------------------------------------------------------+
+                |     Old command        |         New command           |
+                +------------------------+-------------------------------+
+                | fuel deploy-changes    |        fuel env deploy        |
+                +------------------------+-------------------------------+
+                | fuel node --set --env  |       fuel env add nodes      |
+                +------------------------+-------------------------------+
+                | fuel network <> --env  |      fuel env network <>      |
+                +------------------------+-------------------------------+
+                | fuel settings <> --env |      fuel env settings <>     |
+                +------------------------+-------------------------------+
+                |        fuel stop       |      fuel env stop-deploy     |
+                +------------------------+-------------------------------+
+
+                Further information will be located in Fuel Documentation and
+                on our Wiki page: https://wiki.openstack.org/wiki/Fuel_CLI
+
+                You can check out an experimental version of the new
+                Fuel Client by using the following command:
+
+                    fuel2 --help
+
+            """
         )
         self.universal_flags = []
         self.credential_flags = []
