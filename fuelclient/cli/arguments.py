@@ -372,6 +372,10 @@ def get_dir_arg(help_msg):
     return get_str_arg("dir", default=os.curdir, help=help_msg)
 
 
+def get_file_arg(help_msg):
+    return get_str_arg("file", help=help_msg)
+
+
 def get_verify_arg(help_msg):
     return get_boolean_arg("verify", flags=("-v",), help=help_msg)
 
