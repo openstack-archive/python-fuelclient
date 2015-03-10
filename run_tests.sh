@@ -14,7 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-set -eu
+set -e
 
 # settings
 ROOT=$(dirname $(readlink -f $0))
@@ -61,7 +61,8 @@ usage() {
     echo "  -r  --fetch-refspec         Refspec to fetch from the remore repo. This option"
     echo "                              requires -r or --fetch-refspec to be specified."
     echo "                              If not specified, \$FETCH_REFSPEC or nothing will be used."
-    echo "  -t  --tests                 Tests to run. Runs all tests, if not specified."
+    echo "  -t  --test                  Test to run. To run many tests, pass this flag multiple times."
+    echo "                              Runs all tests, if not specified. "
     exit
 }
 
@@ -78,14 +79,14 @@ process_options() {
 
     while true ; do
         case "$1" in
-            -6|--py26) python_26=1;            shift 1;;
-            -7|--py27) python_27=1;            shift 1;;
+            -6|--py26) python_26=1;                 shift 1;;
+            -7|--py27) python_27=1;                 shift 1;;
             -h|--help) usage;                       shift 1;;
             -f|--fetch-repo) fetch_repo="$2";       shift 2;;
             -r|--fetch-refspec) fetch_refspec="$2"; shift 2;;
             -c|--fuel-commit) fuel_commit="$2";     shift 2;;
             -n|--no-clone) do_clone=0;              shift 1;;
-            -t|--tests) certain_tests="$2";         shift 2;;
+            -t|--test) certain_tests+=("$2");       shift 2;;
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
                 break;;
@@ -100,13 +101,15 @@ process_options() {
     fi
 
     # Check that specified test file/dir exists. Fail otherwise.
-    if [[ -n $certain_tests ]]; then
-        local file_name=${certain_tests%:*}
+    if [[ ${#certain_tests[@]} -ne 0 ]]; then
+        for test in ${certain_tests[@]}; do
+            local file_name=${test%:*}
 
-        if [[ ! -f $file_name ]] && [[ ! -d $file_name ]]; then
-            >&2 echo "Error: Specified tests were not found."
-            exit 1
-        fi
+            if [[ ! -f $file_name ]] && [[ ! -d $file_name ]]; then
+                >&2 echo "Error: Specified tests were not found."
+                exit 1
+            fi
+        done
     fi
 }
 
@@ -138,7 +141,7 @@ run_cli_tests() {
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
-        $certain_tests --xunit-file $FUELCLIENT_XUNIT || return 1
+        ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT
     popd > /dev/null
 
     return 0
