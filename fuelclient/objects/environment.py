@@ -133,6 +133,12 @@ class Environment(BaseObject):
             "settings_{0}".format(self.id)
         )
 
+    def get_vmware_settings_data_path(self, directory=os.curdir):
+        return os.path.join(
+            os.path.abspath(directory),
+            "vmware_settings_{0}".format(self.id)
+        )
+
     def write_network_data(self, network_data, directory=os.curdir,
                            serializer=None):
         return (serializer or self.serializer).write_to_path(
@@ -147,6 +153,13 @@ class Environment(BaseObject):
             settings_data
         )
 
+    def write_vmware_settings_data(self, settings_data, directory=os.curdir,
+                                   serializer=None):
+        return (serializer or self.serializer).write_to_file(
+            self.get_vmware_settings_data_path(directory),
+            settings_data
+        )
+
     def read_network_data(self, directory=os.curdir,
                           serializer=None):
         network_file_path = self.get_network_data_path(directory)
@@ -157,6 +170,10 @@ class Environment(BaseObject):
         settings_file_path = self.get_settings_data_path(directory)
         return (serializer or self.serializer).read_from_file(
             settings_file_path)
+
+    def read_vmware_settings_data(self, directory=os.curdir, serializer=None):
+        return (serializer or self.serializer).read_from_file(
+            self.get_vmware_settings_data_path(directory))
 
     @property
     def status(self):
@@ -169,6 +186,14 @@ class Environment(BaseObject):
     @property
     def default_settings_url(self):
         return self.settings_url + "/defaults"
+
+    @property
+    def vmware_settings_url(self):
+        return "clusters/{0}/vmware_attributes".format(self.id)
+
+    @property
+    def default_vmware_settings_url(self):
+        return self.vmware_settings_url + "/defaults"
 
     @property
     def network_url(self):
@@ -189,6 +214,12 @@ class Environment(BaseObject):
     def get_default_settings_data(self):
         return self.connection.get_request(self.default_settings_url)
 
+    def get_vmware_settings_data(self):
+        return self.connection.get_request(self.vmware_settings_url)
+
+    def get_default_vmware_settings_data(self):
+        return self.connection.get_request(self.default_vmware_settings_url)
+
     def set_network_data(self, data):
         return self.connection.put_request(
             self.network_url, data)
@@ -196,6 +227,10 @@ class Environment(BaseObject):
     def set_settings_data(self, data):
         return self.connection.put_request(
             self.settings_url, data)
+
+    def set_vmware_settings_data(self, data):
+        return self.connection.put_request(
+            self.vmware_settings_url, data)
 
     def verify_network(self):
         return self.connection.put_request(
