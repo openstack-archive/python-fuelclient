@@ -155,7 +155,7 @@ class Environment(BaseObject):
 
     def write_vmware_settings_data(self, settings_data, directory=os.curdir,
                                    serializer=None):
-        return (serializer or self.serializer).write_to_file(
+        return (serializer or self.serializer).write_to_path(
             self.get_vmware_settings_data_path(directory),
             settings_data
         )
