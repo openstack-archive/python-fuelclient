@@ -123,6 +123,7 @@ process_options() {
 run_cli_tests() {
     local config=$1
     local run_single_env=$((python_26^python_27))
+    local result=0
 
     local py26_env="py26"
     local py27_env="py27"
@@ -141,10 +142,10 @@ run_cli_tests() {
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
-        ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT
+        ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT || result=1
     popd > /dev/null
 
-    return 0
+    return $result
 }
 
 
