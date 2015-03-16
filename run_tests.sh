@@ -58,6 +58,8 @@ usage() {
     echo "  -n  --no-clone              Do not clone fuel-web repo and use existing"
     echo "                              one specified in \$FUEL_WEB_ROOT. Make sure it"
     echo "                              does not have pending changes."
+    echo "  -p  --pep8                  Runs only PEP8 tests."
+    echo "  -P  --no-pep8               Do not run PEP8 tests automatically."
     echo "  -r  --fetch-refspec         Refspec to fetch from the remore repo. This option"
     echo "                              requires -r or --fetch-refspec to be specified."
     echo "                              If not specified, \$FETCH_REFSPEC or nothing will be used."
@@ -71,22 +73,25 @@ usage() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o 67hnc:f:r:t: \
-        --long py26,py27,help,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67hnpPc:f:r:t: \
+        --long py26,py27,help,no-clone,no-pep8,pep8,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
 
     while true ; do
         case "$1" in
-            -6|--py26) python_26=1;                 shift 1;;
-            -7|--py27) python_27=1;                 shift 1;;
-            -h|--help) usage;                       shift 1;;
-            -f|--fetch-repo) fetch_repo="$2";       shift 2;;
-            -r|--fetch-refspec) fetch_refspec="$2"; shift 2;;
-            -c|--fuel-commit) fuel_commit="$2";     shift 2;;
-            -n|--no-clone) do_clone=0;              shift 1;;
-            -t|--test) certain_tests+=("$2");       shift 2;;
+            -6|--py26)          python_26=1;           shift 1;;
+            -7|--py27)          python_27=1;           shift 1;;
+            -c|--fuel-commit)   fuel_commit="$2";      shift 2;;
+            -f|--fetch-repo)    fetch_repo="$2";       shift 2;;
+            -h|--help)          usage;                 shift 1;;
+            -n|--no-clone)      do_clone=0;            shift 1;;
+            -p|--pep8)          pep8_only=1;           shift 1;;
+            -P|--no-pep8)       do_pep8=0;             shift 1;;
+            -r|--fetch-refspec) fetch_refspec="$2";    shift 2;;
+            -t|--test)          certain_tests+=("$2"); shift 2;;
+
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
                 break;;
@@ -147,6 +152,15 @@ run_cli_tests() {
     return 0
 }
 
+run_pep8() {
+    local ret=0
+
+    pushd $ROOT/fuelclient > /dev/null
+    tox -e pep8 || ret=$?
+    popd > /dev/null
+
+    return $ret
+}
 
 # Arguments:
 #
@@ -353,6 +367,8 @@ init_default_params() {
     python_26=0
     python_27=0
     do_clone=1
+    do_pep8=1
+    pep8_only=0
     fetch_repo=$FETCH_REPO
     fetch_refspec=$FETCH_REFSPEC
     fuel_commit=$FUEL_COMMIT
@@ -364,19 +380,33 @@ init_default_params() {
 # Main function
 run() {
     local config=$ARTIFACTS/test.yaml
+    local pep8_ret=0
+    local cli_ret=0
 
     run_cleanup $config
+
+    if [[ $do_pep8 -eq 1 ]]; then
+        echo "Starting PEP8 tests..." >&2
+        run_pep8 || pep8_ret=$?
+
+        [[ $pep8_ret -ne 0 ]] && echo "Failed tests: pep8" >&2
+        [[ $pep8_only -eq 1 ]] && exit $pep8_ret
+    fi
+
     prepare_env $config
+    echo "Starting python-fuelclient tests..."  >&2
+    run_cli_tests $config || cli_ret=$?
+    [[ $cli_ret -ne 0 ]] && echo "Failed tests: cli_tests" >&2
 
-    echo "Starting python-fuelclient tests..."
-    run_cli_tests $config || { echo "Failed tests: cli_tests"; exit 1; }
-
-    # Do a final cleanup
     run_cleanup $config
 
-    echo "Testing python-fuelclient succeeded."
-
-    exit 0
+    if [[ $pep8_ret -ne 0 || $cli_ret -ne 0 ]]; then
+        echo "Testing python-fuelclient failed."
+        exit 1
+    else
+        echo "Testing python-fuelclient succeeded."
+        exit 0
+    fi
 }
 
 
