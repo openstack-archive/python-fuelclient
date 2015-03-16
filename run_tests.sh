@@ -63,6 +63,7 @@ usage() {
     echo "                              If not specified, \$FETCH_REFSPEC or nothing will be used."
     echo "  -t  --test                  Test to run. To run many tests, pass this flag multiple times."
     echo "                              Runs all tests, if not specified. "
+    echo "  -p  --pep8                  Runs only PEP8 tests."
     exit
 }
 
@@ -71,8 +72,8 @@ usage() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o 67hnc:f:r:t: \
-        --long py26,py27,help,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67hnpc:f:r:t: \
+        --long py26,py27,help,no-clone,pep8,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
@@ -87,6 +88,7 @@ process_options() {
             -c|--fuel-commit) fuel_commit="$2";     shift 2;;
             -n|--no-clone) do_clone=0;              shift 1;;
             -t|--test) certain_tests+=("$2");       shift 2;;
+            -p|--pep8) pep8_only=1;                 shift 1;;
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
                 break;;
@@ -127,6 +129,8 @@ run_cli_tests() {
     local py26_env="py26"
     local py27_env="py27"
 
+    local pep8_ret=0
+
     if [[ $run_single_env -eq 1 ]]; then
         if [[ $python_26 -eq 1 ]]; then
             env_to_run=$py26_env
@@ -138,10 +142,14 @@ run_cli_tests() {
     fi
 
     pushd $ROOT/fuelclient > /dev/null
-    # run tests
+
+    tox -e pep8 || pep8_ret=$?
+    [[ $pep8_only ]] && return $pep8_ret
+
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
         ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT || return 1
+
     popd > /dev/null
 
     return 0
