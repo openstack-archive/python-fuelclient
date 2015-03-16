@@ -58,6 +58,8 @@ usage() {
     echo "  -n  --no-clone              Do not clone fuel-web repo and use existing"
     echo "                              one specified in \$FUEL_WEB_ROOT. Make sure it"
     echo "                              does not have pending changes."
+    echo "  -o  --no-pep8               Do not run PEP8 tests automatically."
+    echo "  -p  --pep8                  Runs only PEP8 tests."
     echo "  -r  --fetch-refspec         Refspec to fetch from the remore repo. This option"
     echo "                              requires -r or --fetch-refspec to be specified."
     echo "                              If not specified, \$FETCH_REFSPEC or nothing will be used."
@@ -71,22 +73,25 @@ usage() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o 67hnc:f:r:t: \
-        --long py26,py27,help,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67hnopc:f:r:t: \
+        --long py26,py27,help,no-clone,no-pep8,pep8,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
 
     while true ; do
         case "$1" in
-            -6|--py26) python_26=1;                 shift 1;;
-            -7|--py27) python_27=1;                 shift 1;;
-            -h|--help) usage;                       shift 1;;
-            -f|--fetch-repo) fetch_repo="$2";       shift 2;;
-            -r|--fetch-refspec) fetch_refspec="$2"; shift 2;;
-            -c|--fuel-commit) fuel_commit="$2";     shift 2;;
-            -n|--no-clone) do_clone=0;              shift 1;;
-            -t|--test) certain_tests+=("$2");       shift 2;;
+            -6|--py26)          python_26=1;           shift 1;;
+            -7|--py27)          python_27=1;           shift 1;;
+            -c|--fuel-commit)   fuel_commit="$2";      shift 2;;
+            -f|--fetch-repo)    fetch_repo="$2";       shift 2;;
+            -h|--help)          usage;                 shift 1;;
+            -n|--no-clone)      do_clone=0;            shift 1;;
+            -o|--no-pep8)       do_pep8=0;             shift 1;;
+            -p|--pep8)          pep8_only=1;           shift 1;;
+            -r|--fetch-refspec) fetch_refspec="$2";    shift 2;;
+            -t|--test)          certain_tests+=("$2"); shift 2;;
+
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
                 break;;
@@ -127,6 +132,8 @@ run_cli_tests() {
     local py26_env="py26"
     local py27_env="py27"
 
+    local pep8_ret=0
+
     if [[ $run_single_env -eq 1 ]]; then
         if [[ $python_26 -eq 1 ]]; then
             env_to_run=$py26_env
@@ -138,10 +145,19 @@ run_cli_tests() {
     fi
 
     pushd $ROOT/fuelclient > /dev/null
-    # run tests
+
+    if [[ $do_pep8 -eq 1 ]]; then
+        echo "Starting PEP8 tests..." >&2
+        tox -e pep8 || pep8_ret=$?
+        [[ $pep8_only -eq 1 ]] && return $pep8_ret
+    fi
+
+
+    echo "Starting unit tests..." >&2
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
         ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT || return 1
+
     popd > /dev/null
 
     return 0
@@ -353,6 +369,7 @@ init_default_params() {
     python_26=0
     python_27=0
     do_clone=1
+    do_pep8=1
     fetch_repo=$FETCH_REPO
     fetch_refspec=$FETCH_REFSPEC
     fuel_commit=$FUEL_COMMIT
