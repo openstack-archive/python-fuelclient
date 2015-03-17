@@ -53,10 +53,10 @@ class FuelClientSettings(object):
         # NOTE(romcheg): when external default settings file is removed
         # this deprecation warning should be removed as well.
         if os.path.exists(external_default_settings):
-            six.print_('DEPRECATION WARNING: file {0} is found and will be '
-                       'used as a source for settings. However, it deprecated '
-                       'and will not be used by default in the ongoing '
-                       'version of '
+            six.print_('DEPRECATION WARNING: {0} exists and will be '
+                       'used as the source for settings. This is '
+                       'deprecated and will not be used by default in future '
+                       'versions of '
                        'python-fuelclient.'.format(external_default_settings),
                        file=sys.stderr)
 
