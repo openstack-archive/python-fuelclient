@@ -39,7 +39,6 @@ TEST_WORKERS=${TEST_WORKERS:-0}
 # A POSIX variable
 OPTIND=1
 
-
 # Prints usage and exist
 usage() {
     echo "Usage: $0 [OPTIONS] [-- TESTR OPTIONS]"
@@ -55,6 +54,8 @@ usage() {
     echo "  -f  --fetch-repo            URI of a remote repo for fetching changes to fuel-web."
     echo "                              If not specified, \$FETCH_REPO or nothing will be used."
     echo "  -h, --help                  Print this usage message and exit."
+    echo "  -i  --integrate-tests       Runs integration tests."
+    echo "  -m  --mock-auth             Mocks keystone authentication. Can be used only with unit tests."
     echo "  -n  --no-clone              Do not clone fuel-web repo and use existing"
     echo "                              one specified in \$FUEL_WEB_ROOT. Make sure it"
     echo "                              does not have pending changes."
@@ -63,6 +64,8 @@ usage() {
     echo "                              If not specified, \$FETCH_REFSPEC or nothing will be used."
     echo "  -t  --test                  Test to run. To run many tests, pass this flag multiple times."
     echo "                              Runs all tests, if not specified. "
+    echo "  -u  --unit-tests            Runs unit tests."
+    echo "  -V  --client-version        python-fuelclient version."
     exit
 }
 
@@ -71,22 +74,26 @@ usage() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o 67hnc:f:r:t: \
-        --long py26,py27,help,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67huimnc:f:r:t:v: \
+        --long py26,py27,help,integrate-tests,unit-tests,mock-auth,no-clone,client-version:,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
 
     while true ; do
         case "$1" in
-            -6|--py26) python_26=1;                 shift 1;;
-            -7|--py27) python_27=1;                 shift 1;;
-            -h|--help) usage;                       shift 1;;
-            -f|--fetch-repo) fetch_repo="$2";       shift 2;;
-            -r|--fetch-refspec) fetch_refspec="$2"; shift 2;;
-            -c|--fuel-commit) fuel_commit="$2";     shift 2;;
-            -n|--no-clone) do_clone=0;              shift 1;;
-            -t|--test) certain_tests+=("$2");       shift 2;;
+            -6|--py26) python_26=1;                   shift 1;;
+            -7|--py27) python_27=1;                   shift 1;;
+            -h|--help) usage;                         shift 1;;
+            -f|--fetch-repo) fetch_repo="$2";         shift 2;;
+            -r|--fetch-refspec) fetch_refspec="$2";   shift 2;;
+            -c|--fuel-commit) fuel_commit="$2";       shift 2;;
+            -n|--no-clone) do_clone=0;                shift 1;;
+            -m|--mock-auth) mock_auth=1;              shift 1;;
+            -t|--test) certain_tests+=("$2");         shift 2;;
+            -i|--integrate-tests) integrate_tests=1;  shift 1;;
+            -u|--unit-tests) unit_tests=1;            shift 1;;
+            -V|--client-version) client_version="$2"; shift 2;;
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
                 break;;
@@ -95,8 +102,21 @@ process_options() {
         esac
     done
 
+    export FUELCLIENT_TESTS_MOCK_AUTH=$mock_auth
+
     if [[ -z $fetch_repo ]] && [[ -n $fetch_refspec ]]; then
         >&2 echo "Error: --fetch-refspec option requires --fetch-repo to be specified."
+        exit 1
+    fi
+
+    if [[ $unit_tests -eq 0 ]] && [[ $integrate_tests -eq 0 ]] && [[ ${#certain_tests[@]} -eq 0 ]]; then
+        echo "None of test cases specified. Running all unit and integration tests as a default."
+        unit_tests=1;
+        integrate_tests=1;
+    fi
+
+    if [[ $mock_auth -eq 1 ]] && [[ $integrate_tests -eq 1 ]]; then
+        >&2 echo "Error: Cannot run integration tests with '-m' '--mock-auth' option."
         exit 1
     fi
 
@@ -104,7 +124,6 @@ process_options() {
     if [[ ${#certain_tests[@]} -ne 0 ]]; then
         for test in ${certain_tests[@]}; do
             local file_name=${test%:*}
-
             if [[ ! -f $file_name ]] && [[ ! -d $file_name ]]; then
                 >&2 echo "Error: Specified tests were not found."
                 exit 1
@@ -135,6 +154,15 @@ run_cli_tests() {
         fi
     else
         env_to_run=$py26_env,$py27_env
+    fi
+
+    if [[ ${#certain_tests[@]} -eq 0 ]]; then
+        if [[ $unit_tests -eq 1 ]]; then
+            certain_tests+="tests/$client_version/unit_tests"
+        fi
+        if [[ $integrate-tests -eq 1 ]]; then
+            certain_tests+="tests/$client_version/integrate_tests"
+        fi
     fi
 
     pushd $ROOT/fuelclient > /dev/null
@@ -350,14 +378,18 @@ obtain_nailgun() {
 
 # Sets default values for parameters
 init_default_params() {
+    certain_tests=()
+    client_version="v1"
+    do_clone=1
+    fetch_refspec=$FETCH_REFSPEC
+    fetch_repo=$FETCH_REPO
+    fuel_commit=$FUEL_COMMIT
+    integrate_tests=0
+    mock_auth=0
     python_26=0
     python_27=0
-    do_clone=1
-    fetch_repo=$FETCH_REPO
-    fetch_refspec=$FETCH_REFSPEC
-    fuel_commit=$FUEL_COMMIT
-    certain_tests=""
     testropts="--with-timer --timer-warning=10 --timer-ok=2 --timer-top-n=10"
+    unit_tests=0
 }
 
 
@@ -365,14 +397,18 @@ init_default_params() {
 run() {
     local config=$ARTIFACTS/test.yaml
 
-    run_cleanup $config
-    prepare_env $config
+    if [[ $integrate_tests -eq 1 ]] || [[ $mock_auth -eq 0 ]]; then
+        run_cleanup $config
+        prepare_env $config
+    fi
 
     echo "Starting python-fuelclient tests..."
     run_cli_tests $config || { echo "Failed tests: cli_tests"; exit 1; }
 
     # Do a final cleanup
-    run_cleanup $config
+    if [[ $integrate_tests -eq 1 ]] || [[ $mock_auth -eq 0 ]]; then
+        run_cleanup $config
+    fi
 
     echo "Testing python-fuelclient succeeded."
 
