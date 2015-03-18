@@ -21,6 +21,8 @@ import subprocess
 import mock
 import requests
 
+from oslo_concurrency.processutils import ProcessExecutionError
+
 from fuelclient.cli import error
 from fuelclient.tests import base
 from fuelclient import utils
@@ -42,76 +44,32 @@ class TestUtils(base.UnitTestCase):
         mwalk.assert_called_once_with(directory)
         self.assertEqual(expected_result, files)
 
-    def make_process_mock(self, return_code=0):
-        process_mock = mock.Mock()
-        process_mock.stdout = ['Stdout line 1', 'Stdout line 2']
-        process_mock.returncode = return_code
-
-        return process_mock
-
-    def test_exec_cmd(self):
+    @mock.patch('fuelclient.utils.execute')
+    def test_exec_cmd(self, exec_mock):
         cmd = 'some command'
 
-        process_mock = self.make_process_mock()
-        with mock.patch.object(
-                subprocess, 'Popen', return_value=process_mock) as popen_mock:
-            utils.exec_cmd(cmd)
+        utils.exec_cmd(cmd, shell=True)
 
-        popen_mock.assert_called_once_with(
+        exec_mock.assert_called_once_with(
             cmd,
-            stdout=None,
-            stderr=subprocess.STDOUT,
-            shell=True,
-            cwd=None)
-
-    def test_exec_cmd_raises_error(self):
-        cmd = 'some command'
-        return_code = 1
-
-        process_mock = self.make_process_mock(return_code=return_code)
-
-        with mock.patch.object(
-                subprocess, 'Popen', return_value=process_mock) as popen_mock:
-            self.assertRaisesRegexp(
-                error.ExecutedErrorNonZeroExitCode,
-                'Shell command executed with "{0}" '
-                'exit code: {1} '.format(return_code, cmd),
-                utils.exec_cmd, cmd)
-
-        popen_mock.assert_called_once_with(
-            cmd,
-            stdout=None,
-            stderr=subprocess.STDOUT,
-            shell=True,
-            cwd=None)
-
-    def test_exec_cmd_iterator(self):
-        cmd = 'some command'
-
-        process_mock = self.make_process_mock()
-        with mock.patch.object(
-                subprocess, 'Popen', return_value=process_mock) as popen_mock:
-            for line in utils.exec_cmd_iterator(cmd):
-                self.assertTrue(line.startswith('Stdout line '))
-
-        popen_mock.assert_called_once_with(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             shell=True)
 
-    def test_exec_cmd_iterator_raises_error(self):
-        cmd = 'some command'
-        return_code = 1
+    @mock.patch('fuelclient.utils.execute',
+                side_effect=ProcessExecutionError(
+                    cmd='cmd',
+                    exit_code=1,
+                    stdout='stdout',
+                    stderr='stderr'))
+    def test_exec_cmd_raises_error(self, exec_mock):
+        self.assertRaisesRegexp(
+            error.ExecutedErrorNonZeroExitCode,
+            'Shell command "cmd" executed with '
+            'exit code: 1\n'
+            'stdout: stdout\n'
+            'stderr: stderr\n',
+            utils.exec_cmd, 'cmd')
 
-        process_mock = self.make_process_mock(return_code=return_code)
-        with mock.patch.object(subprocess, 'Popen', return_value=process_mock):
-            with self.assertRaisesRegexp(
-                    error.ExecutedErrorNonZeroExitCode,
-                    'Shell command executed with "{0}" '
-                    'exit code: {1} '.format(return_code, cmd)):
-                for line in utils.exec_cmd_iterator(cmd):
-                    self.assertTrue(line.startswith('Stdout line '))
+        exec_mock.assert_called_once_with('cmd')
 
     def test_parse_yaml_file(self):
         mock_open = self.mock_open("key: value")
