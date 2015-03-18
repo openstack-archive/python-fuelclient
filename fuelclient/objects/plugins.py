@@ -184,23 +184,23 @@ class PluginV2(BasePlugin):
         if force:
             action = 'reinstall'
 
-        utils.exec_cmd('yum -y {0} {1}'.format(action, plugin_path))
+        utils.exec_cmd('yum', '-y', action, plugin_path)
 
     @classmethod
     @master_only
     def remove(cls, name, version):
         rpm_name = '{0}-{1}'.format(name, utils.major_plugin_version(version))
-        utils.exec_cmd('yum -y remove {0}'.format(rpm_name))
+        utils.exec_cmd('yum', '-y', 'remove', rpm_name)
 
     @classmethod
     @master_only
     def update(cls, plugin_path):
-        utils.exec_cmd('yum -y update {0}'.format(plugin_path))
+        utils.exec_cmd('yum', '-y', 'update', plugin_path)
 
     @classmethod
     @master_only
     def downgrade(cls, plugin_path):
-        utils.exec_cmd('yum -y downgrade {0}'.format(plugin_path))
+        utils.exec_cmd('yum', '-y', 'downgrade', plugin_path)
 
     @classmethod
     def name_from_file(cls, file_path):
@@ -210,12 +210,10 @@ class PluginV2(BasePlugin):
         :param str file_path: path to rpm file
         :returns: name of the plugin
         """
-        for line in utils.exec_cmd_iterator(
-                "rpm -qp --queryformat '%{{name}}' {0}".format(file_path)):
-            name = line
-            break
+        stdout, _ = utils.exec_cmd(
+            'rpm', '-qp', '--queryformat', "%{name}", file_path)
 
-        return cls._remove_major_plugin_version(name)
+        return cls._remove_major_plugin_version(stdout)
 
     @classmethod
     def version_from_file(cls, file_path):
@@ -224,12 +222,10 @@ class PluginV2(BasePlugin):
         :param str file_path: path to rpm file
         :returns: version of the plugin
         """
-        for line in utils.exec_cmd_iterator(
-                "rpm -qp --queryformat '%{{version}}' {0}".format(file_path)):
-            version = line
-            break
+        stdout, _ = utils.exec_cmd(
+            'rpm', '-qp', '--queryformat', "%{version}", file_path)
 
-        return version
+        return stdout
 
     @classmethod
     def _remove_major_plugin_version(cls, name):

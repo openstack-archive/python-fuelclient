@@ -17,61 +17,36 @@
 import glob
 import io
 import os
-import subprocess
 import yaml
 
 from distutils.version import StrictVersion
 from fnmatch import fnmatch
 
+from oslo_concurrency.processutils import execute
+from oslo_concurrency.processutils import ProcessExecutionError
+
 from fuelclient.cli import error
 
 
-def _wait_and_check_exit_code(cmd, child):
-    """Wait for child and check it's exit code
+def exec_cmd(*cmd, **kwargs):
+    """Wrapper around oslo_concurrency.processutils.execute, accepts
+    the same set of parameters.
 
-    :param cmd: command
-    :param child: object which returned by subprocess.Popen
-    :raises: ExecutedErrorNonZeroExitCode
+    :returns: list, where first element is stdout, and the second is stderr
+    :raises: error.ExecutedErrorNonZeroExitCode
     """
-    child.wait()
-    exit_code = child.returncode
-
-    if exit_code != 0:
+    try:
+        return execute(*cmd, **kwargs)
+    except ProcessExecutionError as exc:
         raise error.ExecutedErrorNonZeroExitCode(
-            u'Shell command executed with "{0}" '
-            'exit code: {1} '.format(exit_code, cmd))
-
-
-def exec_cmd(cmd, cwd=None):
-    """Execute shell command logging.
-
-    :param str cmd: shell command
-    :param str cwd: None is default
-    """
-    child = subprocess.Popen(
-        cmd, stdout=None,
-        stderr=subprocess.STDOUT,
-        shell=True,
-        cwd=cwd)
-
-    _wait_and_check_exit_code(cmd, child)
-
-
-def exec_cmd_iterator(cmd):
-    """Execute command with logging.
-    :param cmd: shell command
-    :returns: generator where yeach item
-              is line from stdout
-    """
-    child = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True)
-
-    for line in child.stdout:
-        yield line
-
-    _wait_and_check_exit_code(cmd, child)
+            u'Shell command "{0}" executed with '
+            'exit code: {1}\n'
+            'stdout: {2}\n'
+            'stderr: {3}\n'.format(
+                exc.cmd,
+                exc.exit_code,
+                exc.stdout,
+                exc.stderr))
 
 
 def parse_yaml_file(path):
@@ -113,7 +88,7 @@ def iterfiles(dir_path, file_pattern):
     """Returns generator where each item is a path to file, that satisfies
     file_patterns condtion
 
-    :param dir_path: path to directory, e.g /etc/puppet/
+    :param dir_path: path to directory
     :param file_pattern: unix filepattern to match files
     """
     for root, dirs, file_names in os.walk(dir_path):

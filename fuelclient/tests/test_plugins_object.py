@@ -115,56 +115,61 @@ class TestPluginV2(base.UnitTestCase):
     def test_install(self, exec_mock, master_only_mock):
         self.plugin.install(self.path)
 
-        exec_mock.assert_called_once_with('yum -y install /tmp/plugin/path')
+        exec_mock.assert_called_once_with(
+            'yum', '-y', 'install', '/tmp/plugin/path')
         master_only_mock.assert_called_once_with()
 
     @patch('fuelclient.objects.plugins.utils.exec_cmd')
     def test_install_w_force(self, exec_mock, master_only_mock):
         self.plugin.install(self.path, force=True)
 
-        exec_mock.assert_called_once_with('yum -y reinstall /tmp/plugin/path')
+        exec_mock.assert_called_once_with(
+            'yum', '-y', 'reinstall', '/tmp/plugin/path')
         master_only_mock.assert_called_once_with()
 
     @patch('fuelclient.objects.plugins.utils.exec_cmd')
     def test_remove(self, exec_mock, master_only_mock):
         self.plugin.remove(self.name, self.version)
 
-        exec_mock.assert_called_once_with('yum -y remove plugin_name-1.2')
+        exec_mock.assert_called_once_with(
+            'yum', '-y', 'remove', 'plugin_name-1.2')
         master_only_mock.assert_called_once_with()
 
     @patch('fuelclient.objects.plugins.utils.exec_cmd')
     def test_update(self, exec_mock, master_only_mock):
         self.plugin.update(self.path)
 
-        exec_mock.assert_called_once_with('yum -y update /tmp/plugin/path')
+        exec_mock.assert_called_once_with(
+            'yum', '-y', 'update', '/tmp/plugin/path')
         master_only_mock.assert_called_once_with()
 
     @patch('fuelclient.objects.plugins.utils.exec_cmd')
     def test_downgrade(self, exec_mock, master_only_mock):
         self.plugin.downgrade(self.path)
 
-        exec_mock.assert_called_once_with('yum -y downgrade /tmp/plugin/path')
+        exec_mock.assert_called_once_with(
+            'yum', '-y', 'downgrade', '/tmp/plugin/path')
         master_only_mock.assert_called_once_with()
 
-    @patch('fuelclient.objects.plugins.utils.exec_cmd_iterator',
-           return_value=['plugin_name-1.2'])
+    @patch('fuelclient.objects.plugins.utils.exec_cmd',
+           return_value=['plugin_name-1.2', ''])
     def test_name_from_file(self, exec_mock, _):
         self.assertEqual(
             self.plugin.name_from_file(self.path),
             self.name)
 
         exec_mock.assert_called_once_with(
-            "rpm -qp --queryformat '%{name}' /tmp/plugin/path")
+            'rpm', '-qp', '--queryformat', '%{name}', '/tmp/plugin/path')
 
-    @patch('fuelclient.objects.plugins.utils.exec_cmd_iterator',
-           return_value=['1.2.3'])
+    @patch('fuelclient.objects.plugins.utils.exec_cmd',
+           return_value=['1.2.3', ''])
     def test_version_from_file(self, exec_mock, _):
         self.assertEqual(
             self.plugin.version_from_file(self.path),
             self.version)
 
         exec_mock.assert_called_once_with(
-            "rpm -qp --queryformat '%{version}' /tmp/plugin/path")
+            'rpm', '-qp', '--queryformat', '%{version}', '/tmp/plugin/path')
 
 
 class TestPluginsObject(base.UnitTestCase):
