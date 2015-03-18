@@ -123,7 +123,7 @@ class GraphAction(base.Action):
             '{0}.png'.format(out_filename),
         )
 
-        if not os.access(target_file, os.W_OK):
+        if not os.access(os.path.dirname(target_file), os.W_OK):
             raise error.ActionException(
                 'Path {0} is not writable'.format(target_file))
 
