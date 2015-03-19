@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# DO NOT PUT ANY IMPORTS HERE BECAUSE THIS FILE IS USED
-# DURING THE INSTALLATION.
+from fuelclient import v1
 
 try:
     import pkg_resources
@@ -25,6 +24,10 @@ try:
 except ImportError:
     __version__ = ""
 
+version_map = {
+    'v1': {
+    }
+}
 
 def get_client(resource, version='v1'):
     """Gets an API client for a resource
@@ -44,13 +47,6 @@ def get_client(resource, version='v1'):
                      calls to the specified version of the API.
 
     """
-    from fuelclient import v1
-
-    version_map = {
-        'v1': {
-        }
-    }
-
     try:
         return version_map[version][resource].get_client()
     except KeyError:
