@@ -199,5 +199,4 @@ class TestGraphAction(base.UnitTestCase):
             self.execute_wo_auth(
                 ['fuel', 'graph', '--render', 'graph.gv', '--dir', output_dir]
             )
-        m_access.assert_called_once_with(
-            os.path.join(output_dir, 'graph.gv.png'), os.W_OK)
+        m_access.assert_called_once_with(output_dir, os.W_OK)
