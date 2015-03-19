@@ -148,12 +148,12 @@ def render_graph(input_data, output_path):
         except ImportError:
             raise error.WrongEnvironmentError(
                 "This action require Graphviz installed toghether with "
-                "'pydot' or 'pygraphviz' Python library")
+                "'pydot_ng' or 'pygraphviz' Python library")
 
 
 def _render_with_pydot(input_data, output_path):
-    """Renders graph using pydot library."""
-    import pydot
+    """Renders graph using pydot_ng library."""
+    import pydot_ng as pydot
 
     graph = pydot.graph_from_dot_data(input_data)
     if not graph:
