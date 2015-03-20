@@ -69,6 +69,25 @@ class CliExectutionResult:
 class UnitTestCase(TestCase):
     """Base test class which does not require nailgun server to run."""
 
+    def setUp(self):
+        """Mocks keystone authentication if environment variable
+        FUELCLIENT_TESTS_MOCK_AUTH is set and not equals 0
+        """
+        if int(os.getenv('FUELCLIENT_TESTS_MOCK_AUTH', 0)):
+            self.mocked_api = True
+            self.mauth_client_patcher = mock.patch(
+                'fuelclient.client.auth_client')
+            self.mauth_client_patcher.start()
+        else:
+            self.mocked_api = False
+
+        super(UnitTestCase, self).setUp()
+
+    def tearDown(self):
+        super(UnitTestCase, self).tearDown()
+        if self.mocked_api:
+            self.mauth_client_patcher.stop()
+
     def execute(self, command):
         return main(command)
 
