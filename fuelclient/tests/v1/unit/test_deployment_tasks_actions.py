@@ -36,13 +36,13 @@ class TestReleaseDeploymentTasksActions(base.UnitTestCase):
 
     def test_release_tasks_download(self, mos, mopen, mrequests):
         mrequests.get().json.return_value = API_INPUT
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'rel', '--rel', '1', '--deployment-tasks', '--download'])
         mopen().__enter__().write.assert_called_once_with(API_OUTPUT)
 
     def test_release_tasks_upload(self, mos, mopen, mrequests):
         mopen().__enter__().read.return_value = API_OUTPUT
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'rel', '--rel', '1', '--deployment-tasks', '--upload'])
         self.assertEqual(mrequests.put.call_count, 1)
         call_args = mrequests.put.call_args_list[0]
@@ -60,13 +60,13 @@ class TestClusterDeploymentTasksActions(base.UnitTestCase):
 
     def test_cluster_tasks_download(self, mos, mopen, mrequests):
         mrequests.get().json.return_value = API_INPUT
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'env', '--env', '1', '--deployment-tasks', '--download'])
         mopen().__enter__().write.assert_called_once_with(API_OUTPUT)
 
     def test_cluster_tasks_upload(self, mos, mopen, mrequests):
         mopen().__enter__().read.return_value = API_OUTPUT
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'env', '--env', '1', '--deployment-tasks', '--upload'])
         self.assertEqual(mrequests.put.call_count, 1)
         call_args = mrequests.put.call_args_list[0]
@@ -87,7 +87,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
         mfiles.return_value = ['/etc/puppet/2014.2-6.0/tasks.yaml']
         mopen().__enter__().read.return_value = API_OUTPUT
         file_pattern = '*tests*'
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks', '--fp', file_pattern])
 
         mfiles.assert_called_once_with(
@@ -105,7 +105,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
         mfiles.return_value = ['/etc/puppet/2014.2-6.0/tasks.yaml']
         mopen().__enter__().read.return_value = API_OUTPUT
         real_path = '/etc/puppet'
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks', '--dir', real_path])
         mfiles.assert_called_once_with(real_path, '*tasks.yaml')
 
@@ -115,7 +115,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
                                '/etc/puppet/2014.3-6.1/tasks.yaml']
         mopen().__enter__().read.return_value = API_OUTPUT
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks'])
 
         self.assertEqual(mrequests.put.call_count, 1)
@@ -126,7 +126,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
                                '/etc/puppet/2014.3-6.1/tasks.yaml']
         mopen().__enter__().read.return_value = API_OUTPUT
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks'])
 
         self.assertEqual(mrequests.put.call_count, 2)

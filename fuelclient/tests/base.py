@@ -69,14 +69,22 @@ class CliExectutionResult:
 class UnitTestCase(TestCase):
     """Base test class which does not require nailgun server to run."""
 
-    def execute(self, command):
-        return main(command)
+    def setUp(self):
+        """Mocks keystone authentication."""
+        self.mauth_client_patcher = mock.patch(
+            'fuelclient.client.auth_client')
+        self.mauth_client_patcher.start()
+        super(UnitTestCase, self).setUp()
 
-    def execute_wo_auth(self, command):
+    def tearDown(self):
+        super(UnitTestCase, self).tearDown()
+        self.mauth_client_patcher.stop()
+
+    def execute(self, command):
         with mock.patch('fuelclient.client.Client.auth_required',
                         new_callable=mock.PropertyMock) as auth:
             auth.return_value = False
-            return self.execute(command)
+            return main(command)
 
     def mock_open(self, text, filename='some.file'):
         """Mocks builtin open function.
