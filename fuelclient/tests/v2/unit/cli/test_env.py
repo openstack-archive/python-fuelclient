@@ -16,7 +16,7 @@
 
 import mock
 
-from fuelclient.tests.cli import test_v2_engine
+from fuelclient.tests.v2.unit.cli import test_v2_engine
 from fuelclient.v1 import environment
 
 
