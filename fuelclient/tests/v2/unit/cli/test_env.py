@@ -16,30 +16,30 @@
 
 import mock
 
-from fuelclient.tests.cli import test_v2_engine
+from fuelclient.tests.v2.unit.cli import test_engine
 from fuelclient.v1 import environment
 
 
-class TestEnvCommand(test_v2_engine.BaseCLITest):
+class TestEnvCommand(test_engine.BaseCLITest):
     """Tests for fuel2 env * commands."""
 
     def test_env_list(self):
         args = 'env list'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.get_all.assert_called_once_with()
 
     def test_env_show(self):
         args = 'env show 42'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.get_by_id.assert_called_once_with(42)
 
     def test_env_create(self):
         args = 'env create -r 1 -n neutron -nst gre env42'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
 
@@ -51,21 +51,21 @@ class TestEnvCommand(test_v2_engine.BaseCLITest):
 
     def test_env_delete(self):
         args = 'env delete 42'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.delete_by_id.assert_called_once_with(42)
 
     def test_env_deploy(self):
         args = 'env deploy 42'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.deploy_changes.assert_called_once_with(42)
 
     def test_env_add_nodes(self):
         args = 'env add nodes -e 42 -n 24,25 -r compute,cinder'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.add_nodes.assert_called_once_with(environment_id=42,
@@ -78,7 +78,7 @@ class TestEnvCommand(test_v2_engine.BaseCLITest):
             environment.EnvironmentClient._updatable_attributes
 
         args = 'env update -n test_name 42'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.update.assert_called_once_with(environment_id=42,
@@ -86,7 +86,7 @@ class TestEnvCommand(test_v2_engine.BaseCLITest):
 
     def test_env_upgrade(self):
         args = 'env upgrade 10 15'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.upgrade.assert_called_once_with(10, 15)

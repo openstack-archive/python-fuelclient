@@ -16,14 +16,14 @@
 
 import mock
 
-from fuelclient.tests.cli import test_v2_engine
+from fuelclient.tests.v2.unit.cli import test_engine
 
 
-class TestTaskCommand(test_v2_engine.BaseCLITest):
+class TestTaskCommand(test_engine.BaseCLITest):
 
     def test_task_list(self):
         args = 'task list'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('task', mock.ANY)
         self.m_client.get_all.assert_called_once_with()
@@ -32,7 +32,7 @@ class TestTaskCommand(test_v2_engine.BaseCLITest):
         task_id = 42
         args = 'task show {task_id}'.format(task_id=task_id)
 
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('task', mock.ANY)
         self.m_client.get_by_id.assert_called_once_with(task_id)

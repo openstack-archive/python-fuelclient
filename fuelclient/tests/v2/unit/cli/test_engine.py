@@ -44,12 +44,12 @@ class BaseCLITest(base.UnitTestCase):
     def tearDown(self):
         self._get_client_patcher.stop()
 
-    def exec_v2_command(self, command=''):
+    def exec_command(self, command=''):
         """Executes fuelclient with the specified arguments."""
 
         return main_mod.main(argv=command.split())
 
-    def exec_v2_command_interactive(self, commands):
+    def exec_command_interactive(self, commands):
         """Executes specified commands in one sesstion of interactive mode
 
         Starts Fuel Client's interactive console and passes
@@ -62,12 +62,12 @@ class BaseCLITest(base.UnitTestCase):
         """
         with mock.patch.object(sys, 'stdin') as m_stdin:
             m_stdin.readline.side_effect = commands
-            self.exec_v2_command()
+            self.exec_command()
 
     @mock.patch('cliff.commandmanager.CommandManager.find_command')
     def test_command_non_interactive(self, m_find_command):
         args = ['help']
-        self.exec_v2_command(*args)
+        self.exec_command(*args)
         m_find_command.assert_called_once_with(args)
 
     @mock.patch.object(sys, 'stderr')
@@ -79,7 +79,7 @@ class BaseCLITest(base.UnitTestCase):
         m_run.side_effect = error.FuelClientException(error_msg)
 
         self.assertRaises(SystemExit,
-                          self.exec_v2_command,
+                          self.exec_command,
                           'some command --fail True')
         m_stderr.write.assert_called_once_with(expected_output)
 
@@ -87,5 +87,5 @@ class BaseCLITest(base.UnitTestCase):
     def test_command_interactive(self, m_find_command):
         commands = ['quit']
 
-        self.exec_v2_command_interactive(commands)
+        self.exec_command_interactive(commands)
         m_find_command.assert_called_once_with(commands)

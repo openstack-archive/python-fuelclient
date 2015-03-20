@@ -16,15 +16,15 @@
 
 import mock
 
-from fuelclient.tests.cli import test_v2_engine
+from fuelclient.tests.v2.unit.cli import test_engine
 
 
-class TestNodeCommand(test_v2_engine.BaseCLITest):
+class TestNodeCommand(test_engine.BaseCLITest):
     """Tests for fuel2 node * commands."""
 
     def test_node_list(self):
         args = 'node list'
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(environment_id=None)
@@ -33,7 +33,7 @@ class TestNodeCommand(test_v2_engine.BaseCLITest):
         env_id = 42
         args = 'node list --env {env}'.format(env=env_id)
 
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(environment_id=env_id)
@@ -42,7 +42,7 @@ class TestNodeCommand(test_v2_engine.BaseCLITest):
         node_id = 42
         args = 'node show {node_id}'.format(node_id=node_id)
 
-        self.exec_v2_command(args)
+        self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_by_id.assert_called_once_with(node_id)
