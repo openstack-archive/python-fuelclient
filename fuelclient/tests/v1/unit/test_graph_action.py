@@ -56,7 +56,7 @@ class TestGraphAction(base.UnitTestCase):
 
     def test_download_all_tasks(self):
         with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--download', '--env', '1', '--download']
             )
 
@@ -67,7 +67,7 @@ class TestGraphAction(base.UnitTestCase):
 
     def test_download_selected_tasks(self):
         with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--download', '--env', '1',
                  '--tasks', 'task-a', 'task-b']
             )
@@ -79,7 +79,7 @@ class TestGraphAction(base.UnitTestCase):
 
     def test_download_with_skip(self):
         with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--download', '--env', '1',
                  '--skip', 'sync-time', 'task-b']
             )
@@ -91,7 +91,7 @@ class TestGraphAction(base.UnitTestCase):
 
     def test_download_with_end_and_start(self):
         with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--download', '--env', '1',
                  '--start', 'task-a', '--end', 'task-b']
             )
@@ -107,7 +107,7 @@ class TestGraphAction(base.UnitTestCase):
 
     def test_download_only_parents(self):
         with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--download', '--env', '1',
                  '--parents-for', 'task-z']
             )
@@ -117,7 +117,7 @@ class TestGraphAction(base.UnitTestCase):
 
     def test_params_saved_in_dotfile(self):
         with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--download', '--env', '1',
                  '--parents-for', 'task-z',
                  '--skip', 'task-a']
@@ -139,7 +139,7 @@ class TestGraphAction(base.UnitTestCase):
         m_exists.return_value = True
         m_open().__enter__().read.return_value = graph_data
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'graph', '--render', 'graph.gv']
         )
 
@@ -150,7 +150,7 @@ class TestGraphAction(base.UnitTestCase):
     def test_render_no_file(self, m_exists):
         m_exists.return_value = False
         with self.assertRaises(SystemExit):
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--render', 'graph.gv']
             )
 
@@ -166,7 +166,7 @@ class TestGraphAction(base.UnitTestCase):
         m_open().__enter__().read.return_value = graph_data
         self.m_full_path.return_value = output_dir
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'graph', '--render', 'graph.gv', '--dir', output_dir]
         )
 
@@ -180,7 +180,7 @@ class TestGraphAction(base.UnitTestCase):
         graph_data = u'graph data'
 
         with mock.patch('sys.stdin', new=io.StringIO(graph_data)):
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--render', '-', ]
             )
 
@@ -196,7 +196,7 @@ class TestGraphAction(base.UnitTestCase):
         self.m_full_path.return_value = output_dir
 
         with self.assertRaises(SystemExit):
-            self.execute_wo_auth(
+            self.execute(
                 ['fuel', 'graph', '--render', 'graph.gv', '--dir', output_dir]
             )
         m_access.assert_called_once_with(output_dir, os.W_OK)
