@@ -133,7 +133,7 @@ class BaseTestCase(UnitTestCase):
         cmd = 'tox -evenv -- manage.py loaddata %s' % file_path
         cls.run_command(cmd, cwd=cls.nailgun_root)
 
-    def run_cli_command(self, command_line, check_errors=False):
+    def run_cli_command(self, command_line, check_errors=True):
         modified_env = os.environ.copy()
         command_args = [" ".join(('fuel', command_line))]
         process_handle = subprocess.Popen(
@@ -147,7 +147,7 @@ class BaseTestCase(UnitTestCase):
         result = CliExectutionResult(process_handle, out, err)
         log.debug("command_args: '%s',stdout: '%s', stderr: '%s'",
                   command_args[0], out, err)
-        if not check_errors:
+        if check_errors:
             if not result.is_return_code_zero or result.has_errors:
                 self.fail(err)
         return result
@@ -157,12 +157,12 @@ class BaseTestCase(UnitTestCase):
             self.run_cli_command(command, **kwargs)
 
     def check_if_required(self, command):
-        call = self.run_cli_command(command, check_errors=True)
+        call = self.run_cli_command(command, check_errors=False)
         #should not work without env id
         self.assertIn("required", call.stderr)
 
-    def check_for_stdout(self, command, msg):
-        call = self.run_cli_command(command)
+    def check_for_stdout(self, command, msg, check_errors=True):
+        call = self.run_cli_command(command, check_errors=check_errors)
         self.assertEqual(call.stdout, msg)
 
     def check_all_in_msg(self, command, substrings, **kwargs):

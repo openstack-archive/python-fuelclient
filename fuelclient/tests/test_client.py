@@ -100,19 +100,48 @@ class TestHandlers(base.BaseTestCase):
 
     def test_check_wrong_server(self):
         os.environ["SERVER_ADDRESS"] = "0"
-        result = self.run_cli_command("-h", check_errors=True)
+        result = self.run_cli_command("-h")
         self.assertEqual(result.stderr, '')
         del os.environ["SERVER_ADDRESS"]
 
-    def test_destroy_node(self):
+    def test_error_when_destroying_online_node(self):
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1",
+            "--env-id=1 node set --node 1 --role=controller"
+        ), check_errors=False)
+        msg = ("Nodes with ids [1] cannot be deleted from cluster because "
+               "they are online. You might want to use the --force option.\n")
+        self.check_for_stdout(
+            "node --node 1 --delete-from-db",
+            msg,
+            check_errors=False
+        )
+
+    def test_force_destroy_online_node(self):
         self.load_data_to_nailgun_server()
         self.run_cli_commands((
             "env create --name=NewEnv --release=1",
             "--env-id=1 node set --node 1 --role=controller"
         ))
-        msg = ("Nodes with id [1] have been deleted from Fuel db.\n")
+        msg = ("Nodes with ids [1] have been deleted from Fuel db.\n")
         self.check_for_stdout(
-            "node --node 1 --delete-from-db",
+            "node --node 1 --delete-from-db --force",
+            msg
+        )
+
+    def test_destroy_offline_node(self):
+
+        self.load_data_to_nailgun_server()
+        node_id = 4
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1",
+            "--env-id=1 node set --node {0} --role=controller".format(node_id)
+        ))
+        msg = ("Nodes with ids [{0}] have been deleted from Fuel db.\n".format(
+            node_id))
+        self.check_for_stdout(
+            "node --node {0} --delete-from-db".format(node_id),
             msg
         )
 
@@ -122,9 +151,9 @@ class TestHandlers(base.BaseTestCase):
             "env create --name=NewEnv --release=1",
             "--env-id=1 node set --node 1 2 --role=controller"
         ))
-        msg = ("Nodes with id [1, 2] have been deleted from Fuel db.\n")
+        msg = ("Nodes with ids [1, 2] have been deleted from Fuel db.\n")
         self.check_for_stdout(
-            "node --node 1 2 --delete-from-db",
+            "node --node 1 2 --delete-from-db --force",
             msg
         )
 
@@ -144,7 +173,7 @@ class TestHandlers(base.BaseTestCase):
                 "GET http://127.0.0.1",
                 "/api/v1/tasks/1/"
             ],
-            check_errors=True
+            check_errors=False
         )
         self.check_all_in_msg(
             "task --task-id 1 --delete --debug",
@@ -152,7 +181,7 @@ class TestHandlers(base.BaseTestCase):
                 "DELETE http://127.0.0.1",
                 "/api/v1/tasks/1/?force=0"
             ],
-            check_errors=True
+            check_errors=False
         )
         self.check_all_in_msg(
             "task --task-id 1 --delete --force --debug",
@@ -160,7 +189,7 @@ class TestHandlers(base.BaseTestCase):
                 "DELETE http://127.0.0.1",
                 "/api/v1/tasks/1/?force=1"
             ],
-            check_errors=True
+            check_errors=False
         )
         self.check_all_in_msg(
             "task --tid 1 --delete --debug",
@@ -168,7 +197,7 @@ class TestHandlers(base.BaseTestCase):
                 "DELETE http://127.0.0.1",
                 "/api/v1/tasks/1/?force=0"
             ],
-            check_errors=True
+            check_errors=False
         )
 
     def test_get_release_list_without_errors(self):
@@ -181,7 +210,7 @@ class TestUserActions(base.BaseTestCase):
     def test_change_password_params(self):
         cmd = "user change-password"
         msg = "Expect password [--newpass NEWPASS]"
-        result = self.run_cli_command(cmd, check_errors=True)
+        result = self.run_cli_command(cmd, check_errors=False)
         self.assertTrue(msg, result)
 
 

@@ -14,6 +14,7 @@
 
 from itertools import groupby
 from operator import attrgetter
+import sys
 
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
@@ -299,11 +300,30 @@ class NodeAction(Action):
         """To delete nodes from fuel db:
                 fuel node --node-id 1 --delete-from-db
                 fuel node --node-id 1 2 --delete-from-db
+            (this works only for offline nodes)
+                fuel node --node-id 1 --delete-from-db --force
+            (this forces deletion of nodes with status other than offline)
         """
+        if not params.force:
+            node_collection = NodeCollection.init_with_ids(params.node)
+
+            not_offline = [node for node in node_collection.data
+                           if node['online']]
+
+            if not_offline:
+                self.serializer.print_to_output(
+                    {},
+                    "Nodes with ids {0} cannot be deleted from cluster "
+                    "because they are online. You might want to use the "
+                    "--force option.".format(
+                        [node['id'] for node in not_offline])
+                )
+                sys.exit(1)
+
         NodeCollection.delete_by_ids(params.node)
 
         self.serializer.print_to_output(
             {},
-            "Nodes with id {0} have been deleted from Fuel db.".format(
+            "Nodes with ids {0} have been deleted from Fuel db.".format(
                 params.node)
         )
