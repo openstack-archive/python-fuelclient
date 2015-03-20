@@ -39,79 +39,128 @@ TEST_WORKERS=${TEST_WORKERS:-0}
 # A POSIX variable
 OPTIND=1
 
-
 # Prints usage and exist
 usage() {
-    echo "Usage: $0 [OPTIONS] [-- TESTR OPTIONS]"
-    echo "Run python-fuelclient test suite"
-    echo ""
-    echo "  -6  --py26                  Run python-2.6 tests."
-    echo "  -7  --py27                  Run python-2.7 tests."
-    echo "                              If neither -6 nor -7 is specified, tests for both"
-    echo "                              versions will be running."
-    echo "  -c  --fuel-commit           Checkout fuel-web to a specified commit. If not specified,"
-    echo "                              \$FUEL_COMMIT or master will be used."
-    echo "                              By default checks out to master."
-    echo "  -f  --fetch-repo            URI of a remote repo for fetching changes to fuel-web."
-    echo "                              If not specified, \$FETCH_REPO or nothing will be used."
-    echo "  -h, --help                  Print this usage message and exit."
-    echo "  -n  --no-clone              Do not clone fuel-web repo and use existing"
-    echo "                              one specified in \$FUEL_WEB_ROOT. Make sure it"
-    echo "                              does not have pending changes."
-    echo "  -p  --pep8                  Runs only flake8 tests."
-    echo "  -P  --no-pep8               Do not run flake8 tests automatically."
-    echo "  -r  --fetch-refspec         Refspec to fetch from the remore repo. This option"
-    echo "                              requires -r or --fetch-refspec to be specified."
-    echo "                              If not specified, \$FETCH_REFSPEC or nothing will be used."
-    echo "  -t  --test                  Test to run. To run many tests, pass this flag multiple times."
-    echo "                              Runs all tests, if not specified. "
+    msg "Usage: $0 [OPTIONS] [-- TESTR OPTIONS]"
+    msg "Run python-fuelclient test suite"
+    msg ""
+    msg "  -6  --py26                  Run python-2.6 tests."
+    msg "  -7  --py27                  Run python-2.7 tests."
+    msg "                              If neither -6 nor -7 is specified, tests for both"
+    msg "                              versions will be running."
+    msg "  -c  --fuel-commit           Checkout fuel-web to a specified commit. If not specified,"
+    msg "                              \$FUEL_COMMIT or master will be used."
+    msg "                              By default checks out to master."
+    msg "  -f  --fetch-repo            URI of a remote repo for fetching changes to fuel-web."
+    msg "                              If not specified, \$FETCH_REPO or nothing will be used."
+    msg "  -h, --help                  Print this usage message and exit."
+    msg "  -i  --integration-tests     Run only integration tests."
+    msg "  -I  --no-integration-tests  Don't run integration tests."
+    msg "  -n  --no-clone              Do not clone fuel-web repo and use existing"
+    msg "                              one specified in \$FUEL_WEB_ROOT. Make sure it"
+    msg "                              does not have pending changes."
+    msg "  -p  --pep8                  Runs only flake8 tests."
+    msg "  -P  --no-pep8               Do not run flake8 tests automatically."
+    msg "  -r  --fetch-refspec         Refspec to fetch from the remore repo. This option"
+    msg "                              requires -r or --fetch-refspec to be specified."
+    msg "                              If not specified, \$FETCH_REFSPEC or nothing will be used."
+    msg "  -t  --test                  Test to run. To run many tests, pass this flag multiple times."
+    msg "                              Runs all tests, if not specified. "
+    msg "  -u  --unit-tests            Run only unit tests."
+    msg "  -U  --no-unit-tests         Don't run unit tests."
+    msg "  -V  --client-version        Which version of python-fuelclient should be tested, for example:"
+    msg "                              ./run_tests.sh -V v1"
+    msg "                              To test multiple versions, pass this flag multiple times."
     exit
 }
 
+err() {
+    printf "%s\n" "$1" >&2
+}
+
+msg() {
+    printf "%s\n" "$1"
+}
 
 # Reads input options and sets appropriate parameters
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o 67hnpPc:f:r:t: \
-        --long py26,py27,help,no-clone,no-pep8,pep8,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67huUiInpPc:f:r:t:V: \
+        --long py26,py27,help,integration-tests,no-integration-tests,no-pep8,pep8,unit-tests,no-unit-tests,no-clone,client-version:,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
 
     while true ; do
         case "$1" in
-            -6|--py26)          python_26=1;           shift 1;;
-            -7|--py27)          python_27=1;           shift 1;;
-            -c|--fuel-commit)   fuel_commit="$2";      shift 2;;
-            -f|--fetch-repo)    fetch_repo="$2";       shift 2;;
-            -h|--help)          usage;                 shift 1;;
-            -n|--no-clone)      do_clone=0;            shift 1;;
-            -p|--pep8)          pep8_only=1;           shift 1;;
-            -P|--no-pep8)       do_pep8=0;             shift 1;;
-            -r|--fetch-refspec) fetch_refspec="$2";    shift 2;;
-            -t|--test)          certain_tests+=("$2"); shift 2;;
-
+            -6|--py26) python_26=1;                             shift 1;;
+            -7|--py27) python_27=1;                             shift 1;;
+            -h|--help) usage;                                   shift 1;;
+            -f|--fetch-repo) fetch_repo="$2";                   shift 2;;
+            -r|--fetch-refspec) fetch_refspec="$2";             shift 2;;
+            -c|--fuel-commit) fuel_commit="$2";                 shift 2;;
+            -n|--no-clone) do_clone=0;                          shift 1;;
+            -t|--test) certain_tests+=("$2");                   shift 2;;
+            -p|--pep8) pep8_only=1;                             shift 1;;
+            -P|--no-pep8) do_pep8=0;                            shift 1;;
+            -i|--integration-tests) integration_tests=1;        shift 1;;
+            -I|--no-integration-tests) no_integration_tests=1;  shift 1;;
+            -u|--unit-tests) unit_tests=1;                      shift 1;;
+            -U|--no-unit-tests) no_unit_tests=1;                shift 1;;
+            -V|--client-version) client_version+=("$2");        shift 2;;
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
                 break;;
-            *) >&2 echo "Internal error: got \"$1\" argument.";
+            *) err "Internal error: got \"$1\" argument.";
                 usage; exit 1
         esac
     done
 
-    if [[ -z $fetch_repo ]] && [[ -n $fetch_refspec ]]; then
-        >&2 echo "Error: --fetch-refspec option requires --fetch-repo to be specified."
+    if [[ -z $fetch_repo && -n $fetch_refspec ]]; then
+        err "--fetch-refspec option requires --fetch-repo to be specified."
         exit 1
     fi
+
+    if [[ $unit_tests -eq 0 && \
+        $integration_tests -eq 0 && \
+        ${#certain_tests[@]} -eq 0 ]]; then
+
+        if [[ $no_unit_tests -ne 1 ]]; then
+            unit_tests=1
+        fi
+
+        if [[ $no_integration_tests -ne 1 ]]; then
+            integration_tests=1
+        fi
+
+    else
+        do_pep8=0
+    fi
+
+    # when no version specified, choose all of the versions available
+    if [[ ${#client_version[@]} -eq 0 ]]; then
+        client_version+=("common")
+        for version in ${ROOT}/fuelclient/tests/v[0-9]; do
+            client_version+=(`basename $version`)
+        done
+    fi
+
+    for version in ${client_version[@]}; do
+        if [[ $unit_tests -eq 1 ]]; then
+            certain_tests+=("${ROOT}/fuelclient/tests/${version}/unit/")
+        fi
+        if [[ $integration_tests -eq 1 ]]; then
+            certain_tests+=("${ROOT}/fuelclient/tests/${version}/integration/")
+        fi
+    done
 
     # Check that specified test file/dir exists. Fail otherwise.
     if [[ ${#certain_tests[@]} -ne 0 ]]; then
         for test in ${certain_tests[@]}; do
             local file_name=${test%:*}
-
             if [[ ! -f $file_name ]] && [[ ! -d $file_name ]]; then
-                >&2 echo "Error: Specified tests were not found."
+                err "Specified tests were not found."
                 exit 1
             fi
         done
@@ -171,7 +220,7 @@ run_pep8() {
 run_cleanup() {
     local config=$1
 
-    echo "Doing a clean up."
+    msg "Doing a clean up."
 
     kill_server
 
@@ -208,7 +257,7 @@ setup_db() {
     local config=$1
     local defaults=$2
 
-    echo "Setting up database."
+    msg "Setting up database."
 
     pushd $NAILGUN_ROOT > /dev/null
     NAILGUN_CONFIG=$config tox -evenv -- python manage.py syncdb > /dev/null
@@ -293,7 +342,7 @@ run_server() {
 prepare_env() {
     local config=$1
 
-    echo "Preparing test environment."
+    msg "Preparing test environment."
     obtain_nailgun || return 1
 
     mkdir -p $ARTIFACTS
@@ -303,7 +352,7 @@ prepare_env() {
 
     server_log=$(mktemp /tmp/test_nailgun_cli_server.XXXX)
     run_server $server_log $config || \
-        { echo "Failed to start Nailgun"; return 1; }
+        { err "Failed to start Nailgun"; return 1; }
 }
 
 
@@ -336,27 +385,27 @@ EOL
 # Clones Nailgun from git, pulls specified patch and
 # switches to the specified commit
 obtain_nailgun() {
-    echo "Obtaining Nailgun with the revision $fuel_commit"
+    err "Obtaining Nailgun with the revision $fuel_commit"
 
     if [[ $do_clone -ne 0 ]]; then
         git clone $FUEL_WEB_REPO $FUEL_WEB_ROOT || \
-            { echo "Failed to clone Nailgun"; return 1; }
+            { err "Failed to clone Nailgun"; return 1; }
     fi
 
     if [[ ! -d "$NAILGUN_ROOT" ]]; then
-        echo "Error: Nailgun directory $NAILGUN_ROOT not found."
+        err "Nailgun directory $NAILGUN_ROOT not found."
         exit 1
     fi
     pushd $NAILGUN_ROOT > /dev/null
 
     if [[ -n $fetch_repo ]]; then
-        echo "Fetching changes from $fetch_repo $fetch_refspec"
+        err "Fetching changes from $fetch_repo $fetch_refspec"
         git fetch $fetch_repo $fetch_refspec || \
-            { echo "Failed to pull changes"; return 1; }
+            { err "Failed to pull changes"; return 1; }
     fi
 
     git checkout $fuel_commit || \
-        { echo "Failed to checkout to $fuel_commit"; return 1; }
+        { err "Failed to checkout to $fuel_commit"; return 1; }
 
     popd > /dev/null
 }
@@ -364,16 +413,21 @@ obtain_nailgun() {
 
 # Sets default values for parameters
 init_default_params() {
-    python_26=0
-    python_27=0
+    certain_tests=()
+    client_version=()
     do_clone=1
     do_pep8=1
-    pep8_only=0
-    fetch_repo=$FETCH_REPO
     fetch_refspec=$FETCH_REFSPEC
+    fetch_repo=$FETCH_REPO
     fuel_commit=$FUEL_COMMIT
-    certain_tests=""
+    integration_tests=0
+    no_integration_tests=0
+    no_unit_tests=0
+    pep8_only=0
+    python_26=0
+    python_27=0
     testropts="--with-timer --timer-warning=10 --timer-ok=2 --timer-top-n=10"
+    unit_tests=0
 }
 
 
@@ -386,25 +440,28 @@ run() {
     run_cleanup $config
 
     if [[ $do_pep8 -eq 1 ]]; then
-        echo "Starting PEP8 tests..." >&2
+        err "Starting PEP8 tests..."
         run_pep8 || pep8_ret=$?
 
-        [[ $pep8_ret -ne 0 ]] && echo "Failed tests: pep8" >&2
+        [[ $pep8_ret -ne 0 ]] && err "Failed tests: pep8"
         [[ $pep8_only -eq 1 ]] && exit $pep8_ret
     fi
 
-    prepare_env $config
-    echo "Starting python-fuelclient tests..."  >&2
+    if [[ "${certain_tests[@]}" == *"integration"* ]]; then
+        prepare_env $config
+    fi
+
+    err "Starting python-fuelclient tests..."
     run_cli_tests $config || cli_ret=$?
-    [[ $cli_ret -ne 0 ]] && echo "Failed tests: cli_tests" >&2
+    [[ $cli_ret -ne 0 ]] && err "Failed tests: cli_tests"
 
     run_cleanup $config
 
     if [[ $pep8_ret -ne 0 || $cli_ret -ne 0 ]]; then
-        echo "Testing python-fuelclient failed."
+        err "Testing python-fuelclient failed."
         exit 1
     else
-        echo "Testing python-fuelclient succeeded."
+        err "Testing python-fuelclient succeeded."
         exit 0
     fi
 }

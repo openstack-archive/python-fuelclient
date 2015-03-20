@@ -17,7 +17,7 @@
 import requests_mock as rm
 
 import fuelclient
-from fuelclient.tests.lib import test_api
+from fuelclient.tests.v2.unit.lib import test_api
 
 
 class TestTaskFacade(test_api.BaseLibTest):

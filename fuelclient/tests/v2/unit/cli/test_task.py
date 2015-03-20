@@ -16,7 +16,7 @@
 
 import mock
 
-from fuelclient.tests.cli import test_v2_engine
+from fuelclient.tests.v2.unit.cli import test_v2_engine
 
 
 class TestTaskCommand(test_v2_engine.BaseCLITest):
