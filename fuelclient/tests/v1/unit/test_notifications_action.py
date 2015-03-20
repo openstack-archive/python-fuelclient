@@ -28,14 +28,14 @@ class TestNotificationsActions(base.UnitTestCase):
         response_mock = Mock(status_code=201)
         mrequests.post.return_value = response_mock
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'notifications', '--send', 'test message'])
         self.assertEqual(mrequests.post.call_count, 1)
         request = json.loads(mrequests.post.call_args[1]['data'])
         self.assertEqual('test message', request['message'])
         self.assertEqual('done', request['topic'])
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'notify', '-m', 'test message 2'])
         self.assertEqual(mrequests.post.call_count, 2)
         request = json.loads(mrequests.post.call_args[1]['data'])
@@ -46,7 +46,7 @@ class TestNotificationsActions(base.UnitTestCase):
         response_mock = Mock(status_code=201)
         mrequests.post.return_value = response_mock
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'notifications', '--send', 'test error',
              '--topic', 'error'])
         self.assertEqual(mrequests.post.call_count, 1)
@@ -54,7 +54,7 @@ class TestNotificationsActions(base.UnitTestCase):
         self.assertEqual('test error', request['message'])
         self.assertEqual('error', request['topic'])
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'notify', '-m', 'test error 2', '--topic', 'error'])
         self.assertEqual(mrequests.post.call_count, 2)
         request = json.loads(mrequests.post.call_args[1]['data'])
@@ -67,14 +67,14 @@ class TestNotificationsActions(base.UnitTestCase):
 
         self.assertRaises(
             SystemExit,
-            self.execute_wo_auth,
+            self.execute,
             ['fuel', 'notifications', '--send']
         )
         self.assertEqual(mrequests.post.call_count, 0)
 
         self.assertRaises(
             SystemExit,
-            self.execute_wo_auth,
+            self.execute,
             ['fuel', 'notify', '-m']
         )
         self.assertEqual(mrequests.post.call_count, 0)
@@ -85,7 +85,7 @@ class TestNotificationsActions(base.UnitTestCase):
 
         self.assertRaises(
             SystemExit,
-            self.execute_wo_auth,
+            self.execute,
             ['fuel', 'notifications', '--send', 'test message',
              '--topic', 'x']
         )
@@ -93,7 +93,7 @@ class TestNotificationsActions(base.UnitTestCase):
 
         self.assertRaises(
             SystemExit,
-            self.execute_wo_auth,
+            self.execute,
             ['fuel', 'notify', '-m', 'test message', '--topic', 'x']
         )
         self.assertEqual(mrequests.post.call_count, 0)
@@ -116,7 +116,7 @@ class TestNotificationsActions(base.UnitTestCase):
         mrequests.get.side_effect = [m1, m2]
 
         mrequests.put.return_value = Mock(status_code=200)
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'notifications', '-r', '1'])
 
         self.assertEqual(mrequests.get.call_count, 1)
@@ -130,7 +130,7 @@ class TestNotificationsActions(base.UnitTestCase):
 
         mrequests.get.side_effect = [m1, m2]
 
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'notifications', '-r', '1', '2'])
 
         self.assertEqual(mrequests.get.call_count, 3)
@@ -161,7 +161,7 @@ class TestNotificationsActions(base.UnitTestCase):
         mrequests.get.return_value = m
 
         mrequests.put.return_value = Mock(status_code=200)
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'notifications', '-r', '*'])
 
         self.assertEqual(mrequests.get.call_count, 1)
@@ -192,7 +192,7 @@ class TestNotificationsActions(base.UnitTestCase):
         mrequests.get.return_value = m
 
         mrequests.put.return_value = Mock(status_code=200)
-        self.execute_wo_auth(['fuel', 'notifications'])
+        self.execute(['fuel', 'notifications'])
 
         self.assertEqual(mrequests.get.call_count, 1)
         notifications = mformat_table.call_args[0][0]
@@ -219,7 +219,7 @@ class TestNotificationsActions(base.UnitTestCase):
         mrequests.get.return_value = m
 
         mrequests.put.return_value = Mock(status_code=200)
-        self.execute_wo_auth(['fuel', 'notifications', '-a'])
+        self.execute(['fuel', 'notifications', '-a'])
 
         self.assertEqual(mrequests.get.call_count, 1)
         notifications = mformat_table.call_args[0][0]
