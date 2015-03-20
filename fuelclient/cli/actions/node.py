@@ -20,8 +20,7 @@ from fuelclient.cli.actions.base import check_all
 from fuelclient.cli.actions.base import check_any
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
-from fuelclient.cli.error import ActionException
-from fuelclient.cli.error import ArgumentException
+from fuelclient.cli import error
 from fuelclient.cli.formatting import format_table
 from fuelclient.objects.environment import Environment
 from fuelclient.objects.node import Node
@@ -129,7 +128,7 @@ class NodeAction(Action):
                 if params.all:
                     env.unassign_all()
                 else:
-                    raise ArgumentException(
+                    raise error.ArgumentException(
                         "You have to select which nodes to remove "
                         "with --node-id. Try --all for removing all nodes."
                     )
@@ -218,7 +217,7 @@ class NodeAction(Action):
     def get_env_id(self, node_collection):
         env_ids = set(n.env_id for n in node_collection)
         if len(env_ids) != 1:
-            raise ActionException(
+            raise error.ActionException(
                 "Inputed nodes assigned to multiple environments!")
         else:
             return env_ids.pop()
@@ -299,11 +298,27 @@ class NodeAction(Action):
         """To delete nodes from fuel db:
                 fuel node --node-id 1 --delete-from-db
                 fuel node --node-id 1 2 --delete-from-db
+            (this works only for offline nodes)
+                fuel node --node-id 1 --delete-from-db --force
+            (this forces deletion of nodes with status other than offline)
         """
+        if not params.force:
+            node_collection = NodeCollection.init_with_ids(params.node)
+
+            online_nodes = [node for node in node_collection.data
+                            if node['online']]
+
+            if online_nodes:
+                raise error.ActionException(
+                    "Nodes with ids {0} cannot be deleted from cluster "
+                    "because they are online. You might want to use the "
+                    "--force option.".format(
+                        [node['id'] for node in online_nodes]))
+
         NodeCollection.delete_by_ids(params.node)
 
         self.serializer.print_to_output(
             {},
-            "Nodes with id {0} have been deleted from Fuel db.".format(
+            "Nodes with ids {0} have been deleted from Fuel db.".format(
                 params.node)
         )
