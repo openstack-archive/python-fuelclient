@@ -55,11 +55,11 @@ class FuelClientSettings(object):
         # this deprecation warning should be removed as well.
         if os.path.exists(external_default_settings) and \
                 external_default_settings != external_user_settings:
-            six.print_('DEPRECATION WARNING: file {0} is found and will be '
-                       'used as a source for settings. However, it deprecated '
-                       'and will not be used by default in the ongoing '
-                       'version of '
-                       'python-fuelclient.'.format(external_default_settings),
+            six.print_('DEPRECATION WARNING: file {0} was found and will be '
+                       'used as a source for settings. However, this file has '
+                       'been deprecated and will not be used by default in '
+                       'future versions of python-fuelclient.'
+                       ''.format(external_default_settings),
                        file=sys.stderr)
 
         self._add_file_if_exists(project_settings_file, settings_files)
