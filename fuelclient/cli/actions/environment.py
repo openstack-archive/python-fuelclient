@@ -64,6 +64,7 @@ class EnvironmentAction(Action):
                 "Set network segment type"
             ),
             Args.get_deployment_tasks_arg("Environment tasks configuration."),
+            Args.get_attributes_arg("Environment attributes."),
             group(
                 Args.get_download_arg(
                     "Download configuration of specific cluster"),
@@ -75,6 +76,7 @@ class EnvironmentAction(Action):
         ]
         self.flag_func_map = (
             ("deployment-tasks", self.deployment_tasks),
+            ("attributes", self.attributes),
             ("create", self.create),
             ("set", self.set),
             ("delete", self.delete),
@@ -213,5 +215,28 @@ class EnvironmentAction(Action):
         elif params.upload:
             tasks = self.serializer.read_from_file(full_path)
             cluster.update_deployment_tasks(tasks)
-            print("Deployment tasks for release {0} "
-                  " uploaded from {1}.yaml".format(cluster.id, full_path))
+            print("Deployment tasks for cluster {0} "
+                  "uploaded from {1}.yaml".format(cluster.id, full_path))
+
+    @check_all("env")
+    @check_any("download", "upload")
+    def attributes(self, params):
+        """Modify attributes of the environment.
+               fuel env --env 1 --attributes --download
+               fuel env --env 1 --attributes --upload
+        """
+        cluster = Environment(params.env)
+        dir_path = self.full_path_directory(
+            params.dir, 'cluster_{0}'.format(params.env))
+        full_path = '{0}/attributes'.format(dir_path)
+
+        if params.download:
+            attributes = cluster.get_attributes()
+            self.serializer.write_to_path(full_path, attributes)
+            print("Attributes of cluster {0} "
+                  "downloaded into {1}.yaml.".format(cluster.id, full_path))
+        elif params.upload:
+            attributes = self.serializer.read_from_file(full_path)
+            cluster.update_attributes(attributes)
+            print("Attributes of cluster {0} "
+                  "uploaded from {1}.yaml".format(cluster.id, full_path))
