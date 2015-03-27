@@ -14,7 +14,6 @@
 
 from cliff import show
 
-from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 
@@ -182,13 +181,15 @@ class EnvAddNodes(EnvMixIn, base.BaseCommand):
 
         parser.add_argument('-n',
                             '--nodes',
-                            type=str,
+                            type=int,
+                            nargs='+',
                             required=True,
                             help='Ids of the nodes to add.')
 
         parser.add_argument('-r',
                             '--roles',
                             type=str,
+                            nargs='+',
                             required=True,
                             help='Target roles of the nodes.')
 
@@ -196,15 +197,10 @@ class EnvAddNodes(EnvMixIn, base.BaseCommand):
 
     def take_action(self, parsed_args):
         env_id = parsed_args.env
-        try:
-            nodes = [int(n) for n in parsed_args.nodes.split(',')]
-        except ValueError:
-            raise error.ArgumentException('All node ids should be '
-                                          'integer numbers.')
 
-        roles = parsed_args.roles.split(',')
-
-        self.client.add_nodes(environment_id=env_id, nodes=nodes, roles=roles)
+        self.client.add_nodes(environment_id=env_id,
+                              nodes=parsed_args.nodes,
+                              roles=parsed_args.roles)
 
         msg = 'Nodes {n} were added to the environment {e} with roles {r}\n'
         self.app.stdout.write(msg.format(n=parsed_args.nodes,
