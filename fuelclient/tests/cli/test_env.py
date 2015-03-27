@@ -40,6 +40,8 @@ class TestEnvCommand(test_v2_engine.BaseCLITest):
     def test_env_create(self):
         args = 'env create -r 1 -n neutron -nst gre env42'
         self.exec_v2_command(args)
+        a = 'test {}'.format('foo')
+        print a
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
 
