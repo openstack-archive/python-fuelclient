@@ -63,8 +63,11 @@ class BaseListCommand(lister.Lister, BaseCommand):
         group.add_argument('-s',
                            '--sort-columns',
                            type=str,
-                           default='id',
-                           help='Comma separated list of keys for sorting '
+                           nargs='+',
+                           choices=self.columns,
+                           metavar='SORT_COLUMN',
+                           default=['id'],
+                           help='Space separated list of keys for sorting '
                                 'the data. Defaults to id. Wrong values '
                                 'are ignored.')
 
@@ -74,11 +77,8 @@ class BaseListCommand(lister.Lister, BaseCommand):
         data = self.client.get_all()
         data = data_utils.get_display_data_multi(self.columns, data)
 
-        sort_columns = parsed_args.sort_columns.split(',')
-
         scolumn_ids = [self.columns.index(col)
-                       for col in sort_columns
-                       if col in self.columns]
+                       for col in parsed_args.sort_columns]
 
         data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
 
