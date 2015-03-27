@@ -64,7 +64,7 @@ class TestEnvCommand(test_v2_engine.BaseCLITest):
         self.m_client.deploy_changes.assert_called_once_with(42)
 
     def test_env_add_nodes(self):
-        args = 'env add nodes -e 42 -n 24,25 -r compute,cinder'
+        args = 'env add nodes -e 42 -n 24 25 -r compute cinder'
         self.exec_v2_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
