@@ -230,6 +230,10 @@ def get_deployment_tasks_arg(help_msg):
         "deployment-tasks", flags=("--deployment-tasks",), help=help_msg)
 
 
+def get_attributes_arg(help_msg):
+    return get_boolean_arg("attributes", help=help_msg)
+
+
 def get_sync_deployment_tasks_arg():
     return get_boolean_arg(
         "sync-deployment-tasks",

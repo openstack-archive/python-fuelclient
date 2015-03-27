@@ -31,6 +31,7 @@ class Environment(BaseObject):
     instance_api_path = "clusters/{0}/"
     deployment_tasks_path = 'clusters/{0}/deployment_tasks'
     deployment_tasks_graph_path = 'clusters/{0}/deploy_tasks/graph.gv'
+    attributes_path = 'clusters/{0}/attributes'
 
     @classmethod
     def create(cls, name, release_id, net,
@@ -436,6 +437,14 @@ class Environment(BaseObject):
 
     def update_deployment_tasks(self, data):
         url = self.deployment_tasks_path.format(self.id)
+        return self.connection.put_request(url, data)
+
+    def get_attributes(self):
+        url = self.attributes_path.format(self.id)
+        return self.connection.get_request(url)
+
+    def update_attributes(self, data):
+        url = self.attributes_path.format(self.id)
         return self.connection.put_request(url, data)
 
     def get_deployment_tasks_graph(self, tasks, parents_for=None):
