@@ -321,8 +321,8 @@ class Plugins(base.BaseObject):
         :param str version: plugin version
         """
         plugin = cls.make_obj_by_name(plugin_name, plugin_version)
-        plugin.remove(plugin_name, plugin_version)
-        return cls.unregister(plugin_name, plugin_version)
+        cls.unregister(plugin_name, plugin_version)
+        return plugin.remove(plugin_name, plugin_version)
 
     @classmethod
     def update(cls, plugin_path):
