@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 #    Copyright 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -12,18 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import argparse
-
-from fuelclient.cli import serializers
-from fuelclient import client
+from fuelclient.tests import base
 
 
-class FuelVersionAction(argparse._VersionAction):
-    """Custom argparse._VersionAction subclass to compute fuel server version
+class TestParser(base.UnitTestCase):
 
-    :returns: prints fuel server version
-    """
-    def __call__(self, parser, namespace, values, option_string=None):
-        serializer = serializers.Serializer.from_params(namespace)
-        version = client.APIClient.get_fuel_version()
-        parser.exit(message=serializer.serialize(version))
+    def test_choose_only_one_format(self):
+        with self.assertRaises(SystemExit):
+            self.execute_wo_auth(['fuel', '--json', '--yaml'])
