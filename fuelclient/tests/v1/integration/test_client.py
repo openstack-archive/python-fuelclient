@@ -22,7 +22,7 @@ from fuelclient.tests import base
 class TestHandlers(base.BaseTestCase):
 
     def test_env_action(self):
-        #check env help
+        # check env help
         help_msgs = ["usage: fuel environment [-h]",
                      "[--list | --set | --delete | --create | --update]",
                      "optional arguments:", "--help", "--list", "--set",
@@ -31,13 +31,13 @@ class TestHandlers(base.BaseTestCase):
                      "--network-mode", "--nst", "--net-segment-type",
                      "--deployment-mode", "--update", "--env-update"]
         self.check_all_in_msg("env --help", help_msgs)
-        #no clusters
+        # no clusters
         self.check_for_rows_in_table("env")
 
         for action in ("set", "create", "delete"):
             self.check_if_required("env {0}".format(action))
 
-        #list of tuples (<fuel CLI command>, <expected output of a command>)
+        # list of tuples (<fuel CLI command>, <expected output of a command>)
         expected_stdout = \
             [(
                 "env --create --name=TestEnv --release=1",

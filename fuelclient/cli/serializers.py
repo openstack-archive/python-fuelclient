@@ -42,21 +42,24 @@ class Serializer(object):
     default_format = "yaml"
     format = default_format
 
-    def __init__(self, **kwargs):
-        for f in self.serializers:
-            if kwargs.get(f, False):
-                self.format = f
-                self.format_flags = True
-                break
+    def __init__(self, format=None):
+        if format and format in self.serializers:
+            self.format = format
+            self.format_flags = True
 
     @property
     def serializer(self):
         return self.serializers[self.format]
 
+    def serialize(self, data):
+        return self.serializer['w'](data)
+
+    def deserialize(self, data):
+        return self.serializer['r'](data)
+
     @classmethod
     def from_params(cls, params):
-        kwargs = dict((key, getattr(params, key)) for key in cls.serializers)
-        return cls(**kwargs)
+        return cls(format=getattr(params, 'serialization_format', None))
 
     def print_formatted(self, data):
             print(self.serializer["w"](data))

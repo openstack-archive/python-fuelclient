@@ -30,7 +30,7 @@ class BaseObject(object):
 
     def __init__(self, obj_id, **kwargs):
         self.connection = APIClient
-        self.serializer = Serializer(**kwargs)
+        self.serializer = Serializer.from_params(kwargs.get('params'))
         self.id = obj_id
         self._data = None
 
