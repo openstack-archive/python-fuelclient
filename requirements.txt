@@ -1,7 +1,7 @@
-argparse==1.2.1
-cliff>=1.9.0
+argparse
+cliff>=1.7.0,<=1.9.0
 pbr>=0.6,!=0.7,<1.0
-python-keystoneclient>=0.7.1,<=0.7.2
-PyYAML==3.10
-requests>=1.2.3
-six>=1.5.2
+python-keystoneclient>=0.10.0,<=1.1.0
+PyYAML>=3.1.0,<=3.10
+requests>=2.1.0,!=2.4.0,<=2.2.1
+six>=1.7.0,<=1.9.0
