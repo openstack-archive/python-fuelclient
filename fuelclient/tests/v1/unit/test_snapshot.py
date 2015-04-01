@@ -22,13 +22,13 @@ from fuelclient.tests import base
 class TestSnapshot(base.UnitTestCase):
 
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.get_default_config')
-    @patch('sys.stdout.write')
-    def test_get_default_config(self, mwrite, mconf):
+    @patch('sys.stdout')
+    def test_get_default_config(self, mstdout, mconf):
 
         mconf.return_value = {'key': 'value'}
 
         self.execute(['fuel', 'snapshot', '--conf'])
-        self.assertEqual(mwrite.call_args_list, [call('key: value\n')])
+        self.assertEqual(mstdout.write.call_args_list, [call('key: value\n')])
 
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
     @patch('fuelclient.cli.actions.snapshot.'

@@ -18,7 +18,6 @@ import requests
 
 from keystoneclient.v2_0 import client as auth_client
 from six.moves.urllib import parse as urlparse
-import yaml
 
 from fuelclient.cli.error import exceptions_decorator
 from fuelclient import fuelclient_settings
@@ -188,10 +187,7 @@ class Client(object):
 
     @exceptions_decorator
     def get_fuel_version(self):
-        return yaml.safe_dump(
-            self.get_request("version"),
-            default_flow_style=False
-        )
+        return self.get_request("version")
 
 # This line is single point of instantiation for 'Client' class,
 # which intended to implement Singleton design pattern.

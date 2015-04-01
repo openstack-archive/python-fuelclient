@@ -21,6 +21,7 @@ import os
 import yaml
 
 from fuelclient.cli import error
+from fuelclient import consts
 
 
 class Serializer(object):
@@ -42,21 +43,33 @@ class Serializer(object):
     default_format = "yaml"
     format = default_format
 
-    def __init__(self, **kwargs):
-        for f in self.serializers:
-            if kwargs.get(f, False):
-                self.format = f
-                self.format_flags = True
-                break
+    def __init__(self, format=None):
+        if format and format in self.serializers:
+            self.format = format
+            self.format_flags = True
 
     @property
     def serializer(self):
+        """Returns dicts with methods for loadin/dumping current fromat.
+
+        Returned dict's keys:
+            * 'w' - from 'writing', method for serializing/dumping data
+            * 'r' - from 'reading', method for deserializing/loading data
+        """
         return self.serializers[self.format]
+
+    def serialize(self, data):
+        """Shortcut for serializing data with current format."""
+        return self.serializer['w'](data)
+
+    def deserialize(self, data):
+        """Shortcut for deserializing data with current format."""
+        return self.serializer['r'](data)
 
     @classmethod
     def from_params(cls, params):
-        kwargs = dict((key, getattr(params, key)) for key in cls.serializers)
-        return cls(**kwargs)
+        return cls(format=getattr(params,
+                                  consts.SERIALIZATION_FORMAT_FLAG, None))
 
     def print_formatted(self, data):
             print(self.serializer["w"](data))

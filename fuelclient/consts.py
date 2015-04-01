@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 #    Copyright 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -12,18 +14,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import argparse
-
-from fuelclient.cli import serializers
-from fuelclient import client
+from collections import namedtuple
 
 
-class FuelVersionAction(argparse._VersionAction):
-    """Custom argparse._VersionAction subclass to compute fuel server version
+def Enum(*values, **kwargs):
+    names = kwargs.get('names')
+    if names:
+        return namedtuple('Enum', names)(*values)
+    return namedtuple('Enum', values)(*values)
 
-    :returns: prints fuel server version
-    """
-    def __call__(self, parser, namespace, values, option_string=None):
-        serializer = serializers.Serializer.from_params(namespace)
-        version = client.APIClient.get_fuel_version()
-        parser.exit(message=serializer.serialize(version))
+
+SERIALIZATION_FORMAT_FLAG = 'serialization_format'
