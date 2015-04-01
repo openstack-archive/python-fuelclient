@@ -4,4 +4,4 @@ pbr>=0.6,!=0.7,<1.0
 python-keystoneclient>=0.7.1,<=0.7.2
 PyYAML==3.10
 requests>=1.2.3
-six>=1.5.2
+six>=1.7.0,<=1.9.0
