@@ -122,7 +122,9 @@ class TestPluginV2(base.UnitTestCase):
     def test_install_w_force(self, exec_mock, master_only_mock):
         self.plugin.install(self.path, force=True)
 
-        exec_mock.assert_called_once_with('yum -y reinstall /tmp/plugin/path')
+        exec_mock.assert_called_once_with(
+            'yum -y install /tmp/plugin/path'
+            ' || yum -y reinstall /tmp/plugin/path')
         master_only_mock.assert_called_once_with()
 
     @patch('fuelclient.objects.plugins.utils.exec_cmd')

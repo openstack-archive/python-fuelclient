@@ -180,11 +180,12 @@ class PluginV2(BasePlugin):
     @classmethod
     @master_only
     def install(cls, plugin_path, force=False):
-        action = 'install'
         if force:
-            action = 'reinstall'
-
-        utils.exec_cmd('yum -y {0} {1}'.format(action, plugin_path))
+            utils.exec_cmd(
+                'yum -y install {0} || yum -y reinstall {0}'
+                .format(plugin_path))
+        else:
+            utils.exec_cmd('yum -y install {0}'.format(plugin_path))
 
     @classmethod
     @master_only
