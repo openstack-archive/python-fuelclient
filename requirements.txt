@@ -1,4 +1,4 @@
-argparse==1.2.1
+argparse==1.2.2
 cliff>=1.9.0
 pbr>=0.6,!=0.7,<1.0
 python-keystoneclient>=0.7.1,<=0.7.2
