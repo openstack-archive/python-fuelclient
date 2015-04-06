@@ -89,7 +89,7 @@ class EnvironmentAction(Action):
         """To create an environment with name MyEnv and release id=1 run:
                 fuel env create --name MyEnv --rel 1
 
-           By default it creates environment in multinode mode, and nova
+           By default it creates environment in ha_compact mode, and nova
            network mode, to specify other modes add optional arguments:
                 fuel env create --name MyEnv --rel 1 \\
                 --mode ha --network-mode neutron
