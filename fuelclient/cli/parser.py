@@ -22,6 +22,7 @@ from fuelclient.cli.arguments import substitutions
 from fuelclient.cli.error import exceptions_decorator
 from fuelclient.cli.error import ParserException
 from fuelclient.cli.serializers import Serializer
+from fuelclient import consts
 from fuelclient import profiler
 
 
@@ -157,13 +158,15 @@ class Parser:
             prof.save_data()
 
     def add_serializers_args(self):
+        serializers = self.parser.add_mutually_exclusive_group()
         for format_name in Serializer.serializers.keys():
             serialization_flag = "--{0}".format(format_name)
             self.universal_flags.append(serialization_flag)
-            self.parser.add_argument(
+            serializers.add_argument(
                 serialization_flag,
-                dest=format_name,
-                action="store_true",
+                dest=consts.SERIALIZATION_FORMAT_FLAG,
+                action="store_const",
+                const=format_name,
                 help="prints only {0} to stdout".format(format_name),
                 default=False
             )
