@@ -59,7 +59,7 @@ class CliExectutionResult:
 
     @property
     def has_errors(self):
-        return bool(len(self.stderr))
+        return self.return_code != 0
 
     @property
     def is_return_code_zero(self):
@@ -178,7 +178,7 @@ class BaseTestCase(UnitTestCase):
 
     def check_for_stderr(self, command, msg, check_errors=True):
         call = self.run_cli_command(command, check_errors=check_errors)
-        self.assertEqual(call.stderr, msg)
+        self.assertIn(msg, call.stderr)
 
     def check_all_in_msg(self, command, substrings, **kwargs):
         output = self.run_cli_command(command, **kwargs)

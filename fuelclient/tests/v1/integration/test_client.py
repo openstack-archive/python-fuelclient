@@ -92,10 +92,10 @@ class TestHandlers(base.BaseTestCase):
                 msg
             )
 
-    def test_check_wrong_server(self):
+    def test_help_works_without_connection(self):
         os.environ["SERVER_ADDRESS"] = "0"
-        result = self.run_cli_command("-h")
-        self.assertEqual(result.stderr, '')
+        result = self.run_cli_command("node --list")
+        self.assertEqual(result.return_code, 0)
         del os.environ["SERVER_ADDRESS"]
 
     def test_error_when_destroying_online_node(self):
