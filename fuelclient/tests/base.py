@@ -59,7 +59,7 @@ class CliExectutionResult:
 
     @property
     def has_errors(self):
-        return bool(len(self.stderr))
+        return self.return_code != 0
 
     @property
     def is_return_code_zero(self):
@@ -144,15 +144,16 @@ class BaseTestCase(UnitTestCase):
         cmd = 'tox -evenv -- manage.py loaddata %s' % file_path
         cls.run_command(cmd, cwd=cls.nailgun_root)
 
-    def run_cli_command(self, command_line, check_errors=True):
-        modified_env = os.environ.copy()
+    def run_cli_command(self, command_line,
+                        check_errors=True, env=os.environ.copy()):
+
         command_args = [" ".join(('fuel', command_line))]
         process_handle = subprocess.Popen(
             command_args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,
-            env=modified_env
+            env=env
         )
         out, err = process_handle.communicate()
         result = CliExectutionResult(process_handle, out, err)
@@ -178,7 +179,7 @@ class BaseTestCase(UnitTestCase):
 
     def check_for_stderr(self, command, msg, check_errors=True):
         call = self.run_cli_command(command, check_errors=check_errors)
-        self.assertEqual(call.stderr, msg)
+        self.assertIn(msg, call.stderr)
 
     def check_all_in_msg(self, command, substrings, **kwargs):
         output = self.run_cli_command(command, **kwargs)
