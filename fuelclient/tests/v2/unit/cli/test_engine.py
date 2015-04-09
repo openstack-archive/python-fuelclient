@@ -20,6 +20,7 @@ import mock
 
 import fuelclient
 from fuelclient.cli import error
+from fuelclient.commands import environment as env
 from fuelclient import main as main_mod
 from fuelclient.tests import base
 
@@ -89,3 +90,40 @@ class BaseCLITest(base.UnitTestCase):
 
         self.exec_command_interactive(commands)
         m_find_command.assert_called_once_with(commands)
+
+    @mock.patch('cliff.formatters.table.TableFormatter.emit_list')
+    def test_lister_sorting(self, m_emit_list):
+        cmd = 'env list -s status net_provider'
+
+        raw_data = [{'id': 43,
+                     'status': 'STATUS 2',
+                     'name': 'Test env 2',
+                     'mode': 'ha_compact',
+                     'release_id': 2,
+                     'net_provider': 'nova'},
+
+                    {'id': 42,
+                     'status': 'STATUS 1',
+                     'name': 'Test env 1',
+                     'mode': 'ha_compact',
+                     'release_id': 2,
+                     'net_provider': 'nova'},
+
+                    {'id': 44,
+                     'status': 'STATUS 2',
+                     'name': 'Test env 3',
+                     'mode': 'ha_compact',
+                     'release_id': 2,
+                     'net_provider': 'neutron'}]
+
+        expected_order = [1, 2, 0]
+        expected_data = [[raw_data[i][prop] for prop in env.EnvList.columns]
+                         for i in expected_order]
+
+        self.m_client.get_all.return_value = raw_data
+
+        self.exec_command(cmd)
+        m_emit_list.assert_called_once_with(mock.ANY,
+                                            expected_data,
+                                            mock.ANY,
+                                            mock.ANY)
