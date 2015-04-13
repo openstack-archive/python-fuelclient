@@ -16,7 +16,7 @@
 
 import mock
 
-from fuelclient.tests.v2.unit.cli import test_engine
+from fuelclient.tests.unit.v2.cli import test_engine
 
 
 class TestNodeCommand(test_engine.BaseCLITest):
