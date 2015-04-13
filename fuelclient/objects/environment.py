@@ -447,11 +447,12 @@ class Environment(BaseObject):
         url = self.attributes_path.format(self.id)
         return self.connection.put_request(url, data)
 
-    def get_deployment_tasks_graph(self, tasks, parents_for=None):
+    def get_deployment_tasks_graph(self, tasks, parents_for=None, remove=None):
         url = self.deployment_tasks_graph_path.format(self.id)
         params = {
             'tasks': ','.join(tasks),
             'parents_for': parents_for,
+            'remove': ','.join(remove) if remove else None,
         }
         resp = self.connection.get_request_raw(url, params=params)
         resp.raise_for_status()

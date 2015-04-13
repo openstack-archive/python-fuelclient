@@ -30,6 +30,8 @@ class GraphAction(base.Action):
 
     action_name = 'graph'
 
+    task_types = ('skipped', 'group', 'stage')
+
     def __init__(self):
         super(GraphAction, self).__init__()
         self.args = (
@@ -49,6 +51,7 @@ class GraphAction(base.Action):
             ),
             Args.get_graph_endpoint(),
             Args.get_graph_startpoint(),
+            Args.get_remove_type_arg(self.task_types),
             Args.get_parents_arg(),
         )
         self.flag_func_map = (
@@ -77,7 +80,8 @@ class GraphAction(base.Action):
         parents_for = getattr(params, 'parents-for')
 
         used_params = "# params:\n"
-        for param in ('start', 'end', 'skip', 'tasks', 'parents-for'):
+        for param in ('start', 'end', 'skip', 'tasks', 'parents-for',
+                      'remove'):
             used_params += "# - {0}: {1}\n".format(param,
                                                    getattr(params, param))
 
@@ -88,7 +92,8 @@ class GraphAction(base.Action):
                 skip=params.skip, end=params.end, start=params.start)
 
         dotraph = env.get_deployment_tasks_graph(tasks,
-                                                 parents_for=parents_for)
+                                                 parents_for=parents_for,
+                                                 remove=params.remove)
         sys.stdout.write(six.text_type(used_params))
         sys.stdout.write(six.text_type(dotraph))
 

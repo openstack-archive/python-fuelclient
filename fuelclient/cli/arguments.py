@@ -219,7 +219,7 @@ def get_delete_from_db_arg(help_msg):
 
 def get_deployment_tasks_arg(help_msg):
     return get_boolean_arg(
-        "deployment-tasks", flags=("--deployment-tasks",), help=help_msg)
+        "deployment-tasks", help=help_msg)
 
 
 def get_attributes_arg(help_msg):
@@ -229,7 +229,6 @@ def get_attributes_arg(help_msg):
 def get_sync_deployment_tasks_arg():
     return get_boolean_arg(
         "sync-deployment-tasks",
-        flags=("--sync-deployment-tasks",),
         help="Update tasks for each release.")
 
 
@@ -340,6 +339,16 @@ def get_parents_arg():
         'parents-for',
         help="Get parent for given task",
         metavar='TASK',
+    )
+
+
+def get_remove_type_arg(types):
+    return get_arg(
+        'remove',
+        nargs='+',
+        default=[],
+        choices=types,
+        help="Select task types to remove from graph.",
     )
 
 
