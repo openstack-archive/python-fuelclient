@@ -53,8 +53,8 @@ usage() {
     msg "  -f  --fetch-repo            URI of a remote repo for fetching changes to fuel-web."
     msg "                              If not specified, \$FETCH_REPO or nothing will be used."
     msg "  -h, --help                  Print this usage message and exit."
-    msg "  -i  --integration-tests     Run only integration tests."
-    msg "  -I  --no-integration-tests  Don't run integration tests."
+    msg "  -i  --functional-tests      Run only functional tests."
+    msg "  -I  --no-functional-tests   Don't run functional tests."
     msg "  -n  --no-clone              Do not clone fuel-web repo and use existing"
     msg "                              one specified in \$FUEL_WEB_ROOT. Make sure it"
     msg "                              does not have pending changes."
@@ -86,7 +86,7 @@ process_options() {
     # Read the options
     TEMP=$(getopt \
         -o 67huUiInpPc:f:r:t:V: \
-        --long py26,py27,help,integration-tests,no-integration-tests,no-pep8,pep8,unit-tests,no-unit-tests,no-clone,client-version:,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        --long py26,py27,help,functional-tests,no-functional-tests,no-pep8,pep8,unit-tests,no-unit-tests,no-clone,client-version:,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
@@ -103,8 +103,8 @@ process_options() {
             -t|--test) certain_tests+=("$2");                   shift 2;;
             -p|--pep8) pep8_only=1;                             shift 1;;
             -P|--no-pep8) do_pep8=0;                            shift 1;;
-            -i|--integration-tests) integration_tests=1;        shift 1;;
-            -I|--no-integration-tests) no_integration_tests=1;  shift 1;;
+            -i|--functional-tests) functional_tests=1;        shift 1;;
+            -I|--no-functional-tests) no_functional_tests=1;  shift 1;;
             -u|--unit-tests) unit_tests=1;                      shift 1;;
             -U|--no-unit-tests) no_unit_tests=1;                shift 1;;
             -V|--client-version) client_version+=("$2");        shift 2;;
@@ -122,15 +122,15 @@ process_options() {
     fi
 
     if [[ $unit_tests -eq 0 && \
-        $integration_tests -eq 0 && \
+        $functional_tests -eq 0 && \
         ${#certain_tests[@]} -eq 0 ]]; then
 
         if [[ $no_unit_tests -ne 1 ]]; then
             unit_tests=1
         fi
 
-        if [[ $no_integration_tests -ne 1 ]]; then
-            integration_tests=1
+        if [[ $no_functional_tests -ne 1 ]]; then
+            functional_tests=1
         fi
 
     else
@@ -147,10 +147,10 @@ process_options() {
 
     for version in ${client_version[@]}; do
         if [[ $unit_tests -eq 1 ]]; then
-            certain_tests+=("${ROOT}/fuelclient/tests/${version}/unit/")
+            certain_tests+=("${ROOT}/fuelclient/tests/unit/${version}/")
         fi
-        if [[ $integration_tests -eq 1 ]]; then
-            certain_tests+=("${ROOT}/fuelclient/tests/${version}/integration/")
+        if [[ $functional_tests -eq 1 ]]; then
+            certain_tests+=("${ROOT}/fuelclient/tests/functional/${version}/")
         fi
     done
 
@@ -419,8 +419,8 @@ init_default_params() {
     fetch_refspec=$FETCH_REFSPEC
     fetch_repo=$FETCH_REPO
     fuel_commit=$FUEL_COMMIT
-    integration_tests=0
-    no_integration_tests=0
+    functional_tests=0
+    no_functional_tests=0
     no_unit_tests=0
     pep8_only=0
     python_26=0
@@ -446,7 +446,7 @@ run() {
         [[ $pep8_only -eq 1 ]] && exit $pep8_ret
     fi
 
-    if [[ "${certain_tests[@]}" == *"integration"* ]]; then
+    if [[ "${certain_tests[@]}" == *"functional"* ]]; then
         prepare_env $config
     fi
 
