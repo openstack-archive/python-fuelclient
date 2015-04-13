@@ -17,7 +17,7 @@
 import mock
 
 from fuelclient.tests.utils import fake_node
-from fuelclient.tests.v2.unit.cli import test_engine
+from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.v1 import node
 
 

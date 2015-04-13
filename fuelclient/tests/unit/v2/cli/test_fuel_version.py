@@ -19,7 +19,7 @@ import mock
 import yaml
 
 from fuelclient.tests.utils import fake_fuel_version
-from fuelclient.tests.v2.unit.cli import test_engine
+from fuelclient.tests.unit.v2.cli import test_engine
 
 
 class TestFuelVersionCommand(test_engine.BaseCLITest):
