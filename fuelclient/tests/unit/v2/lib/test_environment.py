@@ -21,8 +21,8 @@ from fuelclient.cli import error
 from fuelclient.objects import base as base_object
 from fuelclient.objects import environment as env_object
 from fuelclient.objects import task as task_object
+from fuelclient.tests.unit.v2.lib import test_api
 from fuelclient.tests import utils
-from fuelclient.tests.v2.unit.lib import test_api
 
 
 class TestEnvFacade(test_api.BaseLibTest):
