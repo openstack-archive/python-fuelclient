@@ -15,37 +15,25 @@
 #    under the License.
 
 import fuelclient
+from fuelclient.tests.unit.v2.lib import test_api
 from fuelclient.tests import utils
-from fuelclient.tests.v2.unit.lib import test_api
 
 
-class TestTaskFacade(test_api.BaseLibTest):
+class TestFuelVersionFacade(test_api.BaseLibTest):
 
     def setUp(self):
-        super(TestTaskFacade, self).setUp()
+        super(TestFuelVersionFacade, self).setUp()
 
         self.version = 'v1'
-        self.res_uri = '/api/{version}/tasks/'.format(version=self.version)
+        self.res_uri = '/api/{version}/version/'.format(version=self.version)
 
-        self.fake_task = utils.get_fake_task()
-        self.fake_tasks = [utils.get_fake_task() for _ in range(10)]
+        self.fake_version = utils.get_fake_fuel_version()
 
-        self.client = fuelclient.get_client('task', self.version)
+        self.client = fuelclient.get_client('fuel-version', self.version)
 
-    def test_task_list(self):
-
-        matcher = self.m_request.get(self.res_uri, json=self.fake_task)
+    def test_fuel_version(self):
+        matcher = self.m_request.get(self.res_uri, json=self.fake_version)
 
         self.client.get_all()
-
-        self.assertTrue(self.res_uri, matcher.called)
-
-    def test_task_show(self):
-        task_id = 42
-        expected_uri = self.get_object_uri(self.res_uri, task_id)
-
-        matcher = self.m_request.get(expected_uri, json=self.fake_tasks)
-
-        self.client.get_by_id(task_id)
 
         self.assertTrue(matcher.called)
