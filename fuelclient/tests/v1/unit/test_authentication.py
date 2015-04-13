@@ -24,6 +24,10 @@ from fuelclient.tests import base
 
 class TestAuthentication(base.UnitTestCase):
 
+    def setUp(self):
+        super(TestAuthentication, self).setUp()
+        self.auth_required_mock.return_value = True
+
     def validate_credentials_response(self,
                                       args,
                                       username=None,

@@ -71,23 +71,20 @@ class UnitTestCase(TestCase):
 
     def setUp(self):
         """Mocks keystone authentication."""
-        self.mauth_client_patcher = mock.patch(
-            'fuelclient.client.auth_client')
-        self.mauth_client_patcher.start()
+        self.auth_required_patcher = mock.patch(
+            'fuelclient.client.Client.auth_required',
+            new_callable=mock.PropertyMock
+        )
+        self.auth_required_mock = self.auth_required_patcher.start()
+        self.auth_required_mock.return_value = False
         super(UnitTestCase, self).setUp()
 
     def tearDown(self):
         super(UnitTestCase, self).tearDown()
-        self.mauth_client_patcher.stop()
+        self.auth_required_patcher.stop()
 
     def execute(self, command):
         return main(command)
-
-    def execute_wo_auth(self, command):
-        with mock.patch('fuelclient.client.Client.auth_required',
-                        new_callable=mock.PropertyMock) as auth:
-            auth.return_value = False
-            return self.execute(command)
 
     def mock_open(self, text, filename='some.file'):
         """Mocks builtin open function.

@@ -35,7 +35,7 @@ class TestClusterAttributesActions(base.UnitTestCase):
 
     def test_attributes_download(self, mos, mopen, mrequests):
         mrequests.get().json.return_value = self._input
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'env', '--env', '1', '--attributes', '--download'])
 
         url = mrequests.get.call_args[0][0]
@@ -45,7 +45,7 @@ class TestClusterAttributesActions(base.UnitTestCase):
 
     def test_attributes_upload(self, mos, mopen, mrequests):
         mopen().__enter__().read.return_value = self._output
-        self.execute_wo_auth(
+        self.execute(
             ['fuel', 'env', '--env', '1', '--attributes', '--upload'])
         self.assertEqual(mrequests.put.call_count, 1)
 

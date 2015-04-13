@@ -111,7 +111,7 @@ class TestFuelVersion(base_tests.UnitTestCase):
 
         with mock.patch('sys.stderr') as mstderr:
             with self.assertRaises(SystemExit):
-                self.execute_wo_auth(['fuel', '--fuel-version', '--yaml'])
+                self.execute(['fuel', '--fuel-version', '--yaml'])
         args, _ = mstderr.write.call_args
         with self.assertRaisesRegexp(
                 ValueError, 'No JSON object could be decoded'):
@@ -123,6 +123,6 @@ class TestFuelVersion(base_tests.UnitTestCase):
 
         with mock.patch('sys.stderr') as mstderr:
             with self.assertRaises(SystemExit):
-                self.execute_wo_auth(['fuel', '--fuel-version', '--json'])
+                self.execute(['fuel', '--fuel-version', '--json'])
         args, _ = mstderr.write.call_args
         json.loads(args[0])
