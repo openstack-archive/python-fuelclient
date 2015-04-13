@@ -19,9 +19,9 @@ import yaml
 from oslo_serialization import jsonutils as json
 
 import fuelclient
-from fuelclient.tests.common.unit import \
+from fuelclient.tests.unit.common import \
     test_network_template as common_net_template
-from fuelclient.tests.v2.unit.lib import test_api
+from fuelclient.tests.unit.v2.lib import test_api
 
 
 class TestNetworkTemplateFacade(test_api.BaseLibTest):

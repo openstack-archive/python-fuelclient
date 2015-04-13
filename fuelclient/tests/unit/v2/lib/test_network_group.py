@@ -14,8 +14,8 @@
 
 import fuelclient
 from fuelclient.cli import error
+from fuelclient.tests.unit.v2.lib import test_api
 from fuelclient.tests import utils
-from fuelclient.tests.v2.unit.lib import test_api
 
 
 class TestNetworkGroupFacade(test_api.BaseLibTest):

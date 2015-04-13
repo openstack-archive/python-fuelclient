@@ -16,8 +16,8 @@
 
 import mock
 
+from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_task
-from fuelclient.tests.v2.unit.cli import test_engine
 
 
 class TestTaskCommand(test_engine.BaseCLITest):

@@ -15,7 +15,7 @@
 
 import mock
 
-from fuelclient.tests.v2.unit.cli import test_engine
+from fuelclient.tests.unit.v2.cli import test_engine
 
 
 class TestNetworkTemplateCommand(test_engine.BaseCLITest):
