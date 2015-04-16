@@ -22,10 +22,6 @@ class Release(BaseObject):
     networks_path = 'releases/{0}/networks'
     deployment_tasks_path = 'releases/{0}/deployment_tasks'
 
-    @classmethod
-    def get_all(cls):
-        map(cls.init_with_data, cls.get_all_data())
-
     def get_networks(self):
         url = self.networks_path.format(self.id)
         return self.connection.get_request(url)
