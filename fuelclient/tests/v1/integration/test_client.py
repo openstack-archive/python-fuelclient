@@ -15,6 +15,7 @@
 #    under the License.
 
 import os
+import tempfile
 
 from fuelclient.tests import base
 
@@ -92,11 +93,21 @@ class TestHandlers(base.BaseTestCase):
                 msg
             )
 
-    def test_check_wrong_server(self):
-        os.environ["SERVER_ADDRESS"] = "0"
-        result = self.run_cli_command("-h")
-        self.assertEqual(result.stderr, '')
-        del os.environ["SERVER_ADDRESS"]
+    def test_help_works_without_connection(self):
+        fake_config = 'SERVER_ADDRESS: "333.333.333.333"'
+
+        c_handle, c_path = tempfile.mkstemp(suffix='.json', text=True)
+        with open(c_path, 'w') as f:
+            f.write(fake_config)
+
+        env = os.environ.copy()
+        env['FUELCLIENT_CUSTOM_SETTINGS'] = c_path
+
+        try:
+            result = self.run_cli_command("--help", env=env)
+            self.assertEqual(result.return_code, 0)
+        finally:
+            os.remove(c_path)
 
     def test_error_when_destroying_online_node(self):
         self.load_data_to_nailgun_server()
