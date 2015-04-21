@@ -115,6 +115,16 @@ class TestGraphAction(base.UnitTestCase):
         self.assertEqual('task-z', querystring['parents_for'][0])
         self.assertIn(GRAPH_API_OUTPUT, m_stdout.getvalue())
 
+    def test_download_with_removed(self):
+        with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
+            self.execute(
+                ['fuel', 'graph', '--download', '--env', '1',
+                 '--remove', 'skipped']
+            )
+        querystring = self.m_graph_api.last_request.qs
+        self.assertEqual('skipped', querystring['remove'][0])
+        self.assertIn(GRAPH_API_OUTPUT, m_stdout.getvalue())
+
     def test_params_saved_in_dotfile(self):
         with mock.patch('sys.stdout', new=io.StringIO()) as m_stdout:
             self.execute(
@@ -127,7 +137,8 @@ class TestGraphAction(base.UnitTestCase):
                         "# - end: None\n"
                         "# - skip: ['task-a']\n"
                         "# - tasks: []\n"
-                        "# - parents-for: task-z\n")
+                        "# - parents-for: task-z\n"
+                        "# - remove: []\n")
         self.assertIn(saved_params + GRAPH_API_OUTPUT, m_stdout.getvalue())
 
     @mock.patch('fuelclient.cli.actions.graph.open', create=True)
