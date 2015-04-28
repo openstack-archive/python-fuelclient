@@ -277,7 +277,7 @@ kill_server() {
     local pid=$(lsof -ti tcp:$NAILGUN_PORT)
     if [[ -n "$pid" ]]; then
         kill $pid
-        sleep $NAILGUN_START_MAX_WAIT_TIME
+        wait $pid
     fi
 }
 
