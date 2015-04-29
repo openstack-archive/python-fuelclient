@@ -222,7 +222,7 @@ class NodeAction(Action):
         else:
             return env_ids.pop()
 
-    @check_all("env", "node")
+    @check_all("node")
     def start(self, params):
         """Deploy/Provision some node:
                 fuel node --node-id 2 --provision
@@ -231,6 +231,10 @@ class NodeAction(Action):
         node_collection = NodeCollection.init_with_ids(params.node)
         method_type = "deploy" if params.deploy else "provision"
         env_id_to_start = self.get_env_id(node_collection)
+
+        if not env_id_to_start:
+            raise error.ActionException(
+                "Input nodes are not assigned to any environment!")
 
         task = Environment(env_id_to_start).install_selected_nodes(
             method_type, node_collection.collection)
