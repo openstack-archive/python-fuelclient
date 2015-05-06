@@ -300,7 +300,7 @@ class NodeAction(Action):
                 fuel node --node-id 1 2 --delete-from-db
             (this works only for offline nodes)
                 fuel node --node-id 1 --delete-from-db --force
-            (this forces deletion of nodes with status other than offline)
+            (this forces deletion of nodes regardless of their state)
         """
         if not params.force:
             node_collection = NodeCollection.init_with_ids(params.node)
