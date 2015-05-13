@@ -135,7 +135,7 @@ class ClientPerfTest(base.UnitTestCase):
         # NOTE(romcheg): After 100 nodes were added to an environment
         # they are listed as pending changes so that may potentially
         # affect the performance.
-        env = [utils.get_fake_env(changes_number=self.NUMBER_OF_NODES)]
+        env = [utils.get_fake_env()]
         resp_text = json.dumps(env)
 
         self.mock_nailgun_response(resp_text)

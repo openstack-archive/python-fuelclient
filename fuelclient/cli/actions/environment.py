@@ -163,7 +163,7 @@ class EnvironmentAction(Action):
                 fuel env
         """
         acceptable_keys = ("id", "status", "name", "mode",
-                           "release_id", "changes", "pending_release_id")
+                           "release_id", "pending_release_id")
         data = Environment.get_all_data()
         if params.env:
             data = filter(
