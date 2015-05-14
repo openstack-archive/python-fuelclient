@@ -50,11 +50,17 @@ class TestEnvCommand(test_engine.BaseCLITest):
                                                 net_segment_type='gre')
 
     def test_env_delete(self):
-        args = 'env delete 42'
+        args = 'env delete --force 42'
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.delete_by_id.assert_called_once_with(42)
+
+    def test_env_delete_wo_force(self):
+        args = 'env delete 42'
+        self.m_client.get_one_by_id.return_value = {'id': 1,
+                                                    'status': 'operational'}
+        self.assertRaises(SystemExit, self.exec_command, args)
 
     def test_env_deploy(self):
         args = 'env deploy 42'

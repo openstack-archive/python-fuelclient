@@ -51,6 +51,9 @@ class EnvironmentAction(Action):
             Args.get_release_arg(
                 "Release id"
             ),
+            Args.get_force_arg(
+                "Do it anyway."
+            ),
             Args.get_name_arg(
                 "environment name"
             ),
@@ -148,9 +151,18 @@ class EnvironmentAction(Action):
     @check_all("env")
     def delete(self, params):
         """To delete the environment:
-                fuel --env 1 env delete
+                fuel --env 1 env --force delete
         """
         env = Environment(params.env, params=params)
+
+        if env.status == "operational" and not params.force:
+            self.serializer.print_to_output(env.data,
+                                            "Deleting a provisioned "
+                                            "environment is a dangerous "
+                                            "operation. Please use --force to "
+                                            "bypass this message.")
+            return
+
         data = env.delete()
         self.serializer.print_to_output(
             data,

@@ -103,6 +103,28 @@ class EnvCreate(EnvMixIn, base.BaseShowCommand):
 class EnvDelete(EnvMixIn, base.BaseDeleteCommand):
     """Delete environment with given id."""
 
+    def get_parser(self, prog_name):
+        parser = super(EnvDelete, self).get_parser(prog_name)
+
+        parser.add_argument('-f',
+                            '--force',
+                            action='store_true',
+                            required=True,
+                            help='Force-delete the environment.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        env = self.client.get_by_id(parsed_args.id)
+
+        if env.status == 'operational' and not parsed_args.force:
+            self.app.stdout.write("Deleting a provisioned environment is a "
+                                  "dangerous operation. Please use --force to "
+                                  "bypass this message.")
+            return
+
+        return super(EnvDelete, self).take_action(parsed_args)
+
 
 class EnvUpdate(EnvMixIn, base.BaseShowCommand):
     """Change given attributes for an environment."""
