@@ -51,6 +51,9 @@ class EnvironmentAction(Action):
             Args.get_release_arg(
                 "Release id"
             ),
+            Args.get_force_arg(
+                "Do it anyway."
+            ),
             Args.get_name_arg(
                 "environment name"
             ),
@@ -145,10 +148,10 @@ class EnvironmentAction(Action):
             msg_template.format(env_attributes=env_attributes)
         )
 
-    @check_all("env")
+    @check_all("env", "force")
     def delete(self, params):
         """To delete the environment:
-                fuel --env 1 env delete
+                fuel --env 1 env --force delete
         """
         env = Environment(params.env, params=params)
         data = env.delete()
