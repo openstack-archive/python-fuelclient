@@ -59,6 +59,9 @@ class TestHandlers(base.BaseTestCase):
         for cmd, msg in expected_stdout:
             self.check_for_stdout(cmd, msg)
 
+    def test_env_delete_force_required(self):
+        self.check_if_required('--env 1 env delete')
+
     def test_node_action(self):
         help_msg = ["fuel node [-h] [--env ENV]",
                     "[--list | --set | --delete | --network | --disk |"

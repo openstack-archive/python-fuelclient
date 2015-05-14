@@ -103,6 +103,17 @@ class EnvCreate(EnvMixIn, base.BaseShowCommand):
 class EnvDelete(EnvMixIn, base.BaseDeleteCommand):
     """Delete environment with given id."""
 
+    def get_parser(self, prog_name):
+        parser = super(EnvDelete, self).get_parser(prog_name)
+
+        parser.add_argument('-f',
+                            '--force',
+                            action='store_true',
+                            required=True,
+                            help='Force-delete the environment.')
+
+        return parser
+
 
 class EnvUpdate(EnvMixIn, base.BaseShowCommand):
     """Change given attributes for an environment."""
