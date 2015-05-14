@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import cStringIO
+
 import mock
 
 from fuelclient.tests.v2.unit.cli import test_engine
@@ -50,11 +52,22 @@ class TestEnvCommand(test_engine.BaseCLITest):
                                                 net_segment_type='gre')
 
     def test_env_delete(self):
-        args = 'env delete 42'
+        args = 'env delete --force 42'
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.delete_by_id.assert_called_once_with(42)
+
+    def test_env_delete_wo_force(self):
+        args = 'env delete 42'
+        fake_env = mock.Mock()
+        fake_env.status = 'operational'
+
+        self.m_client.get_by_id.return_value = fake_env
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.exec_command(args)
+            self.assertIn('--force', m_stdout.getvalue())
 
     def test_env_deploy(self):
         args = 'env deploy 42'

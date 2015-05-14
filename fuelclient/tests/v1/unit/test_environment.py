@@ -14,10 +14,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import cStringIO
+
 import mock
 
 from fuelclient.objects.environment import Environment
 from fuelclient.tests import base
+
+
+class TestEnvironment(base.UnitTestCase):
+
+    @mock.patch('requests.Response', new_callable=mock.MagicMock)
+    @mock.patch('requests.delete')
+    @mock.patch('requests.get')
+    def test_delete_operational_wo_force(self, m_get, m_del, m_resp):
+        m_resp.json.return_value = {'id': 1, 'status': 'operational'}
+        m_get.return_value = m_resp
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.execute('fuel --env 1 env delete'.split())
+            self.assertIn('--force', m_stdout.getvalue())
+
+        self.assertEqual(0, m_del.call_count)
 
 
 class TestEnvironmentOstf(base.UnitTestCase):
