@@ -51,6 +51,16 @@ class TestEnvCommand(test_engine.BaseCLITest):
                                                 network_provider='neutron',
                                                 net_segment_type='gre')
 
+    def test_nova_net_deprecation_warning(self):
+        args = 'env create -r 1 -n nova env42'
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.exec_command(args)
+            self.assertIn(
+                'Warning: nova-network is deprecated since 6.1 release',
+                m_stdout.getvalue()
+            )
+
     def test_env_delete(self):
         args = 'env delete --force 42'
         self.exec_command(args)

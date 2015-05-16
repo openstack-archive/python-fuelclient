@@ -92,16 +92,24 @@ class EnvironmentAction(Action):
         """To create an environment with name MyEnv and release id=1 run:
                 fuel env create --name MyEnv --rel 1
 
-           By default it creates environment in ha_compact mode, and nova
-           network mode, to specify other modes add optional arguments:
+           By default it creates environment with ha_compact mode and
+           neutron with VLAN network segmentation as network provider
+           (WARNING: nova-network is deprecated since 6.1 release).
+           To specify other modes add optional arguments:
                 fuel env create --name MyEnv --rel 1 \\
                 --mode ha --network-mode neutron
         """
+        if params.net == "nova":
+            self.serializer.print_to_output(
+                {},
+                "Warning: nova-network is deprecated since 6.1 release."
+            )
+
         env = Environment.create(
             params.name,
             params.release,
             params.net,
-            net_segment_type=params.nst
+            params.nst
         )
 
         if params.mode:

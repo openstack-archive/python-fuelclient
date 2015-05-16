@@ -291,7 +291,7 @@ def get_net_arg(help_msg):
                    action="store",
                    choices=("nova", "neutron"),
                    help_=help_msg,
-                   default="nova")
+                   default="neutron")
 
 
 def get_graph_endpoint():
@@ -358,7 +358,7 @@ def get_nst_arg(help_msg):
                    action="store",
                    choices=("gre", "vlan"),
                    help_=help_msg,
-                   default=None)
+                   default="vlan")
 
 
 def get_all_arg(help_msg):

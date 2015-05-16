@@ -76,20 +76,26 @@ class EnvCreate(EnvMixIn, base.BaseShowCommand):
                             choices=['nova', 'neutron'],
                             dest='net_provider',
                             default='neutron',
-                            help='Network provider for the new environment')
+                            help=('Network provider for the new environment. '
+                                  'WARNING: nova-network is deprecated since '
+                                  '6.1 release'))
 
         parser.add_argument('-nst',
                             '--net-segmentation-type',
                             type=str,
                             choices=['vlan', 'gre'],
                             dest='nst',
-                            default=None,
+                            default='vlan',
                             help='Network segmentation type. Is only '
                                  'used if network provider is  Neutron')
 
         return parser
 
     def take_action(self, parsed_args):
+        if parsed_args.net_provider == 'nova':
+            self.app.stdout.write('Warning: nova-network is deprecated '
+                                  'since 6.1 release')
+
         new_env = self.client.create(name=parsed_args.name,
                                      release_id=parsed_args.release,
                                      network_provider=parsed_args.net_provider,

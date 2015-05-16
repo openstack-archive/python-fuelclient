@@ -45,7 +45,7 @@ class TestHandlers(base.BaseTestCase):
             [(
                 "env --create --name=TestEnv --release=1",
                 "Environment 'TestEnv' with id=1, mode=ha_compact and "
-                "network-mode=nova_network was created!\n"
+                "network-mode=neutron was created!\n"
             ), (
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
