@@ -37,6 +37,24 @@ class TestEnvironment(base.UnitTestCase):
 
         self.assertEqual(0, m_del.call_count)
 
+    @mock.patch('requests.Response', new_callable=mock.MagicMock)
+    @mock.patch('requests.post')
+    @mock.patch('requests.get')
+    def test_nova_network_using_warning(self, m_get, m_post, m_resp):
+        m_resp.json.return_value = {'id': 1, 'name': 'test',
+                                    'mode': 'ha_compact',
+                                    'net_provider': 'neutron'}
+        m_get.return_value = m_resp
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.execute(
+                'fuel env create --name test --rel 1 --network-mode nova'
+                .split()
+            )
+            self.assertIn('Warning: nova-network is '
+                          'deprecated since 6.1 release.',
+                          m_stdout.getvalue())
+
 
 class TestEnvironmentOstf(base.UnitTestCase):
 
