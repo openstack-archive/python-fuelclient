@@ -97,11 +97,17 @@ class EnvironmentAction(Action):
                 fuel env create --name MyEnv --rel 1 \\
                 --mode ha --network-mode neutron
         """
+        if params.net == "nova":
+            self.serializer.print_to_output(
+                {},
+                "Warning: nova-network is deprecated since 6.1 release."
+            )
+
         env = Environment.create(
             params.name,
             params.release,
             params.net,
-            net_segment_type=params.nst
+            params.nst
         )
 
         if params.mode:

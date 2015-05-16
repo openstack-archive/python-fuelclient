@@ -17,7 +17,6 @@ import os
 import shutil
 
 from fuelclient.cli.error import ActionException
-from fuelclient.cli.error import ArgumentException
 from fuelclient.cli.error import ServerDataException
 from fuelclient.cli.serializers import listdir_without_extensions
 from fuelclient.objects.base import BaseObject
@@ -34,24 +33,19 @@ class Environment(BaseObject):
     attributes_path = 'clusters/{0}/attributes'
 
     @classmethod
-    def create(cls, name, release_id, net,
-               net_segment_type=None, mode='ha_compact'):
+    def create(cls, name, release_id, net, net_segment_type,
+               mode='ha_compact'):
         data = {
             "nodes": [],
             "tasks": [],
             "name": name,
-            "release_id": release_id
+            "release_id": release_id,
+            "net_segment_type": net_segment_type,
         }
         if net.lower() == "nova":
             data["net_provider"] = "nova_network"
         else:
             data["net_provider"] = "neutron"
-
-            if net_segment_type is None:
-                raise ArgumentException(
-                    '"--net-segment-type" must be specified!')
-
-            data["net_segment_type"] = net_segment_type
 
         data = cls.connection.post_request("clusters/", data)
         return cls.init_with_data(data)
