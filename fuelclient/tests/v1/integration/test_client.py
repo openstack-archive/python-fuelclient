@@ -50,10 +50,6 @@ class TestHandlers(base.BaseTestCase):
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
                  "the environment: name=NewEnv\n")
-            ), (
-                "--env-id=1 env set --mode=multinode",
-                ("Following attributes are changed for "
-                 "the environment: mode=multinode\n")
             )]
 
         for cmd, msg in expected_stdout:

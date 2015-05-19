@@ -57,9 +57,6 @@ class EnvironmentAction(Action):
             Args.get_name_arg(
                 "environment name"
             ),
-            Args.get_mode_arg(
-                "Set deployment mode for specific environment."
-            ),
             Args.get_net_arg(
                 "Set network mode for specific environment."
             ),
