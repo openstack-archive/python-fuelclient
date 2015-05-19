@@ -55,9 +55,7 @@ class Environment(BaseObject):
         self._testruns_ids = []
 
     def set(self, data):
-        if data.get('mode'):
-            data["mode"] = "ha_compact" \
-                if data['mode'].lower() == "ha" else "multinode"
+        data["mode"] = "ha_compact"
 
         return self.connection.put_request(
             "clusters/{0}/".format(self.id),
