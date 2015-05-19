@@ -33,8 +33,7 @@ class Environment(BaseObject):
     attributes_path = 'clusters/{0}/attributes'
 
     @classmethod
-    def create(cls, name, release_id, net, net_segment_type,
-               mode='ha_compact'):
+    def create(cls, name, release_id, net, net_segment_type):
         data = {
             "nodes": [],
             "tasks": [],
@@ -55,9 +54,7 @@ class Environment(BaseObject):
         self._testruns_ids = []
 
     def set(self, data):
-        if data.get('mode'):
-            data["mode"] = "ha_compact" \
-                if data['mode'].lower() == "ha" else "multinode"
+        data["mode"] = "ha_compact"
 
         return self.connection.put_request(
             "clusters/{0}/".format(self.id),

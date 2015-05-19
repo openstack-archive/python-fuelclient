@@ -23,10 +23,10 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.Environment
 
-    _updatable_attributes = ('name', 'mode')
+    _updatable_attributes = ('name')
 
     def create(self, name, release_id, network_provider,
-               deployment_mode='ha_compact', net_segment_type=None):
+               net_segment_type=None):
 
         if network_provider == 'neutron':
             if net_segment_type not in ('gre', 'vlan'):
@@ -40,8 +40,7 @@ class EnvironmentClient(base_v1.BaseV1Client):
                 raise error.ArgumentException(msg)
 
         env = self._entity_wrapper.create(name, release_id, network_provider,
-                                          net_segment_type,
-                                          mode=deployment_mode)
+                                          net_segment_type)
 
         return env.data
 

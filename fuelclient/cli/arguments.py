@@ -276,15 +276,6 @@ def get_name_arg(help_msg):
     return get_str_arg("name", flags=("--env-name",), help=help_msg)
 
 
-def get_mode_arg(help_msg):
-    return get_arg("mode",
-                   action="store",
-                   choices=("multinode", "ha"),
-                   default=False,
-                   flags=("-m", "--deployment-mode"),
-                   help_=help_msg)
-
-
 def get_net_arg(help_msg):
     return get_arg("net",
                    flags=("-n", "--network-mode"),
