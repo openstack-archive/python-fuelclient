@@ -30,9 +30,9 @@ class TestHandlers(base.BaseTestCase):
                      "[--list | --set | --delete | --create | --update]",
                      "optional arguments:", "--help", "--list", "--set",
                      "--delete", "--rel", "--env-create",
-                     "--create", "--name", "--env-name", "--mode", "--net",
+                     "--create", "--name", "--env-name", "--net",
                      "--network-mode", "--nst", "--net-segment-type",
-                     "--deployment-mode", "--update", "--env-update"]
+                     "--update", "--env-update"]
         self.check_all_in_msg("env --help", help_msgs)
         # no clusters
         self.check_for_rows_in_table("env")
@@ -50,10 +50,6 @@ class TestHandlers(base.BaseTestCase):
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
                  "the environment: name=NewEnv\n")
-            ), (
-                "--env-id=1 env set --mode=multinode",
-                ("Following attributes are changed for "
-                 "the environment: mode=multinode\n")
             )]
 
         for cmd, msg in expected_stdout:
