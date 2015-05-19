@@ -57,9 +57,6 @@ class EnvironmentAction(Action):
             Args.get_name_arg(
                 "environment name"
             ),
-            Args.get_mode_arg(
-                "Set deployment mode for specific environment."
-            ),
             Args.get_net_arg(
                 "Set network mode for specific environment."
             ),
@@ -95,9 +92,6 @@ class EnvironmentAction(Action):
            By default it creates environment with ha_compact mode and
            neutron with VLAN network segmentation as network provider
            (WARNING: nova-network is deprecated since 6.1 release).
-           To specify other modes add optional arguments:
-                fuel env create --name MyEnv --rel 1 \\
-                --mode ha --network-mode neutron
         """
         if params.net == "nova":
             self.serializer.print_to_output(
@@ -112,10 +106,7 @@ class EnvironmentAction(Action):
             params.nst
         )
 
-        if params.mode:
-            data = env.set({'mode': params.mode})
-        else:
-            data = env.get_fresh_data()
+	data = env.get_fresh_data()
 
         self.serializer.print_to_output(
             data,
