@@ -105,6 +105,13 @@ class EnvironmentAction(Action):
                 "Warning: nova-network is deprecated since 6.1 release."
             )
 
+        if params.mode and params.mode != "ha":
+            self.serializer.print_to_output(
+                {},
+                ("Warning: deployment modes other than ha "
+                 "are deprecated since 6.1 release.")
+            )
+
         env = Environment.create(
             params.name,
             params.release,
