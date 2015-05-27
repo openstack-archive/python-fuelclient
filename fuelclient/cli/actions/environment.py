@@ -32,7 +32,7 @@ class EnvironmentAction(Action):
             Args.get_env_arg(),
             group(
                 Args.get_list_arg(
-                    "List all available environments."
+                    "List all available environments"
                 ),
                 Args.get_set_arg(
                     "Set environment parameters (e.g name, deployment mode)"
@@ -42,32 +42,32 @@ class EnvironmentAction(Action):
                 ),
                 Args.get_create_arg(
                     "Create a new environment with "
-                    "specific release id and name."
+                    "specific release id and name"
                 ),
                 Args.get_update_arg(
-                    "Update OS to specified release id for given env."
+                    "Update OS to specified release id for given env"
                 )
             ),
             Args.get_release_arg(
                 "Release id"
             ),
             Args.get_force_arg(
-                "Do it anyway."
+                "Do it anyway"
             ),
             Args.get_name_arg(
-                "environment name"
+                "Environment name"
             ),
             Args.get_mode_arg(
-                "Set deployment mode for specific environment."
+                "Set deployment mode for specific environment"
             ),
             Args.get_net_arg(
-                "Set network mode for specific environment."
+                "Set network mode for specific environment"
             ),
             Args.get_nst_arg(
                 "Set network segment type"
             ),
-            Args.get_deployment_tasks_arg("Environment tasks configuration."),
-            Args.get_attributes_arg("Environment attributes."),
+            Args.get_deployment_tasks_arg("Environment tasks configuration"),
+            Args.get_attributes_arg("Environment attributes"),
             group(
                 Args.get_download_arg(
                     "Download configuration of specific cluster"),
@@ -92,10 +92,10 @@ class EnvironmentAction(Action):
         """To create an environment with name MyEnv and release id=1 run:
                 fuel env create --name MyEnv --rel 1
 
-           By default it creates environment with ha_compact mode and
-           neutron with VLAN network segmentation as network provider
-           (WARNING: nova-network is deprecated since 6.1 release).
-           To specify other modes add optional arguments:
+            By default, it creates environment with ha_compact mode and
+            neutron with VLAN network segmentation as network provider.
+            (WARNING: nova-network is deprecated since 6.1 release)
+            To specify other modes add optional arguments:
                 fuel env create --name MyEnv --rel 1 \\
                 --mode ha --network-mode neutron
         """
@@ -126,9 +126,9 @@ class EnvironmentAction(Action):
 
     @check_all("env")
     def set(self, params):
-        """For changing environments name, mode
-           or network mode exists set action:
-                fuel --env 1 env set --name NewEmvName --mode ha_compact
+        """For changing environments name, mode or network mode
+            exists set action:
+                fuel --env 1 env set --name NewEnvName --mode ha_compact
         """
         acceptable_params = ('mode', 'name', 'pending_release_id')
 
@@ -174,7 +174,7 @@ class EnvironmentAction(Action):
         data = env.delete()
         self.serializer.print_to_output(
             data,
-            "Environment with id={0} was deleted."
+            "Environment with id={0} was deleted"
             .format(env.id)
         )
 
@@ -199,7 +199,7 @@ class EnvironmentAction(Action):
         )
 
     def update(self, params):
-        """Update environment to given OS release
+        """Update environment to given OS release:
                 fuel env --env 1 --update --release 1
         """
         params.pending_release_id = params.release
@@ -219,9 +219,9 @@ class EnvironmentAction(Action):
     @check_all("env")
     @check_any("download", "upload")
     def deployment_tasks(self, params):
-        """Modify deployment_tasks for environment.
-               fuel env --env 1 --deployment-tasks --download
-               fuel env --env 1 --deployment-tasks --upload
+        """Modify deployment_tasks for environment:
+                fuel env --env 1 --deployment-tasks --download
+                fuel env --env 1 --deployment-tasks --upload
         """
         cluster = Environment(params.env)
         dir_path = self.full_path_directory(
@@ -241,9 +241,9 @@ class EnvironmentAction(Action):
     @check_all("env")
     @check_any("download", "upload")
     def attributes(self, params):
-        """Modify attributes of the environment.
-               fuel env --env 1 --attributes --download
-               fuel env --env 1 --attributes --upload
+        """Modify attributes of the environment:
+                fuel env --env 1 --attributes --download
+                fuel env --env 1 --attributes --upload
         """
         cluster = Environment(params.env)
         dir_path = self.full_path_directory(
