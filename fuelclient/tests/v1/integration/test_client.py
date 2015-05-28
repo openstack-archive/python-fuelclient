@@ -51,13 +51,22 @@ class TestHandlers(base.BaseTestCase):
                 ("Following attributes are changed for "
                  "the environment: name=NewEnv\n")
             ), (
-                "--env-id=1 env set --mode=multinode",
+                "--env-id=1 env set --mode=ha",
                 ("Following attributes are changed for "
-                 "the environment: mode=multinode\n")
+                 "the environment: mode=ha\n")
             )]
 
         for cmd, msg in expected_stdout:
             self.check_for_stdout(cmd, msg)
+
+    def test_env_action_errors(self):
+        cases = [
+            ("env --create --name=TestEnv --release=1 --mode=multinode",
+             "400 Client Error: Bad Request (Cannot deploy in multinode "
+             "mode in current release. Need to be one of [u'ha_compact']")
+        ]
+        for cmd, err in cases:
+            self.check_for_stderr(cmd, err, check_errors=False)
 
     def test_node_action(self):
         help_msg = ["fuel node [-h] [--env ENV]",
