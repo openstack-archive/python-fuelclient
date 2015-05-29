@@ -12,16 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import functools
 import json
 import logging
-import requests
+import functools
 
 from keystoneclient.v2_0 import client as auth_client
+import requests
 from six.moves.urllib import parse as urlparse
 
-from fuelclient.cli.error import exceptions_decorator
 from fuelclient import fuelclient_settings
 from fuelclient.logs import NullHandler
+from fuelclient.common import os_utils
 
 
 # configure logging to silent all logs
@@ -30,65 +32,102 @@ logger = logging.getLogger()
 logger.addHandler(NullHandler())
 
 
-class Client(object):
-    """This class handles API requests
-    """
+def _cover_bad_interface(f):
+    """Construct parameters for request-functions
 
+    Allows to remove ugly ostf=False from HTTP Client's interface
+    without touching the rest of the python-fuelclient's code so
+    the refactoring can be done in smaller patches.
+
+    This will be removed in one of the following patches.
+
+    """
+    @functools.wraps(f)
+    def wrapper(self, resource, *args, **kwargs):
+        ostf = kwargs.pop('ostf', False)
+
+        api = APIClient.ostf_root if ostf else APIClient.api_root
+        url = urlparse.urljoin(api, resource)
+
+        return f(self, url, *args, **kwargs)
+    return wrapper
+
+
+def optional_content(f):
+    """Applies to request methods which may not return content
+
+    If a request does not return any content the decorator will return
+    an empty json object: {}
+
+    WILL BE REMOVED AFTER REFACTORING IS DONE
+
+    """
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except ValueError:
+            return {}
+
+    return wrapper
+
+
+class KeystoneAuth(requests.auth.AuthBase):
+    """A hook for requests module for performing authentication."""
+
+    def __call__(self, req):
+        """Performs authentication and adds X-Auth-Token header to requests."""
+
+        auth_headers = {'X-Auth-Token': os_utils.get_auth_token()}
+        req.headers.update(auth_headers)
+
+        return req
+
+
+class HTTPClient(object):
+    """Fuel HTTP Client
+
+    Configures HTTP subsystem and serves as an entry
+    point for sending HTTP requests to Fuel.
+
+    """
     def __init__(self):
+        self.debug = False
+        self.session = self._make_session()
+
+        self.api_root = os_utils.get_service_url('fuel', 'public')
+        self.ostf_root = os_utils.get_service_url('ostf', 'public')
+
+    def _make_common_headers(self):
+        return {'Content-Type': 'application/json',
+                'Accept': 'application/json'}
+
+    def _make_proxies(self):
         conf = fuelclient_settings.get_settings()
 
-        self.debug = False
-        self.root = "http://{server}:{port}".format(server=conf.SERVER_ADDRESS,
-                                                    port=conf.LISTEN_PORT)
+        if conf.HTTP_PROXY is None:
+            return None
 
-        self.keystone_base = urlparse.urljoin(self.root, "/keystone/v2.0")
-        self.api_root = urlparse.urljoin(self.root, "/api/v1/")
-        self.ostf_root = urlparse.urljoin(self.root, "/ostf/")
-        self.user = conf.KEYSTONE_USER
-        self.password = conf.KEYSTONE_PASS
-        self.tenant = 'admin'
-        self._keystone_client = None
-        self._auth_required = None
+        return {'http': conf.HTTP_PROXY,
+                'https': conf.HTTP_PROXY}
 
-    @property
-    def auth_token(self):
-        if self.auth_required:
-            if not self.keystone_client.auth_token:
-                self.keystone_client.authenticate()
-            return self.keystone_client.auth_token
-        return ''
+    def _make_session(self):
+        """Initializes a HTTP session."""
 
-    @property
-    @exceptions_decorator
-    def auth_required(self):
-        if self._auth_required is None:
-            url = self.api_root + 'version'
-            resp = requests.get(url)
-            resp.raise_for_status()
+        conf = fuelclient_settings.get_settings()
 
-            self._auth_required = resp.json().get('auth_required', False)
-        return self._auth_required
+        session = requests.Session()
+        session.headers.update(self._make_common_headers())
+        session.timeout=conf.HTTP_TIMEOUT
+        session.proxies=self._make_proxies()
+        session.auth = KeystoneAuth()
 
-    @property
-    def keystone_client(self):
-        if not self._keystone_client:
-            self.initialize_keystone_client()
-        return self._keystone_client
+        return session
 
     def update_own_password(self, new_pass):
         if self.auth_token:
             self.keystone_client.users.update_own_password(
                 self.password, new_pass)
-
-    def initialize_keystone_client(self):
-        if self.auth_required:
-            self._keystone_client = auth_client.Client(
-                username=self.user,
-                password=self.password,
-                auth_url=self.keystone_base,
-                tenant_name=self.tenant)
-            self._keystone_client.session.auth = self._keystone_client
-            self._keystone_client.authenticate()
 
     def debug_mode(self, debug=False):
         self.debug = debug
@@ -98,97 +137,83 @@ class Client(object):
         if self.debug:
             print(message)
 
-    @exceptions_decorator
-    def delete_request(self, api):
-        """Make DELETE request to specific API with some data
-        """
-        url = self.api_root + api
-        self.print_debug(
-            "DELETE {0}".format(self.api_root + api)
-        )
+    @optional_content
+    @_cover_bad_interface
+    def delete_request(self, url):
+        """Make DELETE request to specific API with some data."""
 
-        headers = {'content-type': 'application/json',
-                   'x-auth-token': self.auth_token}
-        resp = requests.delete(url, headers=headers)
+        self.print_debug("DELETE {0}".format(url))
+        resp = self.session.delete(url)
         resp.raise_for_status()
 
         return resp.json()
 
-    @exceptions_decorator
-    def put_request(self, api, data):
-        """Make PUT request to specific API with some data
-        """
-        url = self.api_root + api
+    @optional_content
+    @_cover_bad_interface
+    def put_request(self, url, data):
+        """Make PUT request to specific API with some data."""
+
         data_json = json.dumps(data)
-        self.print_debug(
-            "PUT {0} data={1}"
-            .format(self.api_root + api, data_json)
-        )
+        self.print_debug("PUT {0} data={1}".format(url, data_json))
 
-        headers = {'content-type': 'application/json',
-                   'x-auth-token': self.auth_token}
-        resp = requests.put(url, data=data_json, headers=headers)
+        resp = self.session.put(url, data=data_json)
         resp.raise_for_status()
 
         return resp.json()
 
-    def get_request_raw(self, api, ostf=False, params=None):
+    @_cover_bad_interface
+    def get_request_raw(self, url, **params):
         """Make a GET request to specific API and return raw response.
+
+        DEPRECATED
 
         :param api: API endpoint (path)
         :param ostf: is this a call to OSTF API
         :param params: params passed to GET request
-        """
-        url = (self.ostf_root if ostf else self.api_root) + api
-        self.print_debug(
-            "GET {0}"
-            .format(url)
-        )
 
-        headers = {'x-auth-token': self.auth_token}
-        params = params or {}
-        return requests.get(url, params=params, headers=headers)
-
-    @exceptions_decorator
-    def get_request(self, api, ostf=False, params=None):
-        """Make GET request to specific API
         """
-        resp = self.get_request_raw(api, ostf, params)
+        self.print_debug("GET {0}".format(url))
+
+        return self.session.get(url, params=params)
+
+    @_cover_bad_interface
+    def get_request(self, url, **params):
+        """Make GET request to specific URL."""
+
+        resp = self.get_request_raw(url, **params)
         resp.raise_for_status()
 
         return resp.json()
 
-    def post_request_raw(self, api, data, ostf=False):
+    @_cover_bad_interface
+    def post_request_raw(self, url, data):
         """Make a POST request to specific API and return raw response.
+
+        DEPRECATED
 
         :param api: API endpoint (path)
         :param data: data send in request, will be serialzied to JSON
         :param ostf: is this a call to OSTF API
+
         """
-        url = (self.ostf_root if ostf else self.api_root) + api
         data_json = json.dumps(data)
-        self.print_debug(
-            "POST {0} data={1}"
-            .format(url, data_json)
-        )
+        self.print_debug("POST {0} data={1}".format(url, data_json))
 
-        headers = {'content-type': 'application/json',
-                   'x-auth-token': self.auth_token}
-        return requests.post(url, data=data_json, headers=headers)
+        return self.session.post(url, data=data_json)
 
-    @exceptions_decorator
-    def post_request(self, api, data, ostf=False):
-        """Make POST request to specific API with some data
-        """
-        resp = self.post_request_raw(api, data, ostf=ostf)
+    @optional_content
+    @_cover_bad_interface
+    def post_request(self, url, data):
+        """Make POST request to specific API with some data."""
+
+        resp = self.post_request_raw(url, data)
         resp.raise_for_status()
 
         return resp.json()
 
-    @exceptions_decorator
     def get_fuel_version(self):
         return self.get_request("version")
 
 # This line is single point of instantiation for 'Client' class,
 # which intended to implement Singleton design pattern.
-APIClient = Client()
+APIClient = HTTPClient()

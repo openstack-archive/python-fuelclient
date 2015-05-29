@@ -36,6 +36,18 @@ class FuelClientException(Exception):
         self.message = args[0]
 
 
+class Unauthorized(FuelClientException):
+    """Required authentication information was not provided."""
+
+
+class AuthenticationError(FuelClientException):
+    """Could not authenticate a user."""
+
+
+class KeystoneFailure(FuelClientException):
+    """Error during interacting with Keystone."""
+
+
 class BadDataException(FuelClientException):
     """Should be raised when user provides corrupted data."""
 
