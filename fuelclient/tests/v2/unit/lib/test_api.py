@@ -15,11 +15,9 @@
 #    under the License.
 
 import mock
-from mock import patch
 import requests_mock as rm
 from six.moves.urllib import parse as urlparse
 
-from fuelclient import client
 from fuelclient.tests import base
 
 
@@ -31,15 +29,21 @@ class BaseLibTest(base.UnitTestCase):
         self.session_adapter = self.m_request._adapter.register_uri(rm.ANY,
                                                                     rm.ANY)
 
-        self.api_client_patcher = patch.object(client.Client,
-                                               'auth_required',
-                                               new_callable=mock.PropertyMock)
-        self.m_api_client = self.api_client_patcher.start()
-        self.m_api_client.return_value = False
+        self.token_patcher = mock.patch('fuelclient.common.os_utils'
+                                        '.get_auth_token')
+        self.service_url_patcher = mock.patch('fuelclient.common.os_utils'
+                                              '.get_service_url')
+
+        self.m_get_token = self.token_patcher.start()
+        self.m_get_token.return_value = 'DEADBEEF'
+
+        self.m_get_service_url = self.service_url_patcher.start()
+        self.m_get_service_url.return_value = 'http://127.0.0.1:8000/api/v1/'
 
     def tearDown(self):
         self.m_request.stop()
-        self.api_client_patcher.stop()
+        self.token_patcher.stop()
+        self.service_url_patcher.stop()
 
     def get_object_uri(self, collection_path, object_id, attribute='/'):
         return urlparse.urljoin(collection_path, str(object_id) + attribute)

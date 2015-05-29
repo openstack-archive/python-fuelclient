@@ -1,8 +1,14 @@
 # Connection settings
-SERVER_ADDRESS: "127.0.0.1"
-LISTEN_PORT: "8000"
-KEYSTONE_USER: "admin"
-KEYSTONE_PASS: "admin"
+# TODO(romcheg): change to 127.0.0.1 after debug is done
+OS_AUTH_URL: "http://172.18.163.4:8000/keystone/v2.0"
+HTTP_PROXY: null
+HTTP_TIMEOUT: 5
+
+# Authentication settings
+OS_USERNAME: "admin"
+OS_PASSWORD: "admin"
+OS_TENANT_NAME: "admin"
+OS_REGION_NAME: "RegionOne"
 
 # Performance tests settings
 PERFORMANCE_PROFILING_TESTS: 0
