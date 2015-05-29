@@ -14,7 +14,7 @@
 
 from functools import wraps
 import json
-from keystoneclient.exceptions import Unauthorized
+from keystoneclient import exceptions as ks_exc
 import requests
 import sys
 
@@ -34,6 +34,18 @@ class FuelClientException(Exception):
     def __init__(self, *args, **kwargs):
         super(FuelClientException, self).__init__(*args, **kwargs)
         self.message = args[0]
+
+
+class Unauthorized(FuelClientException):
+    """Required authentication information was not provided."""
+
+
+class AuthenticationError(FuelClientException):
+    """Could not authenticate a user."""
+
+
+class KeystoneFailure(FuelClientException):
+    """Error during interacting with Keystone."""
 
 
 class BadDataException(FuelClientException):
@@ -106,7 +118,7 @@ def exceptions_decorator(func):
             Can't connect to Nailgun server!
             Please modify "SERVER_ADDRESS" and "LISTEN_PORT"
             in the file /etc/fuel/client/config.yaml""")
-        except Unauthorized:
+        except ks_exc.Unauthorized:
             exit_with_error("""
             Unauthorized: need authentication!
             Please provide user and password via client
