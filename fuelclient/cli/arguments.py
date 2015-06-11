@@ -240,6 +240,10 @@ def get_file_pattern_arg():
         help="Provide unix file pattern to filter tasks with files.")
 
 
+def get_set_name_arg(help_msg):
+    return get_str_arg("set-name", help=help_msg)
+
+
 def get_network_arg(help_msg):
     return get_boolean_arg("network", flags=("--net",), help=help_msg)
 

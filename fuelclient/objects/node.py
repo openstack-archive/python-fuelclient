@@ -121,6 +121,10 @@ class Node(BaseObject):
     def delete(self):
         self.connection.delete_request(self.instance_api_path.format(self.id))
 
+    def set_name(self, node_name):
+        self.connection.put_request(
+            self.instance_api_path.format(self.id), {"name": node_name})
+
 
 class NodeCollection(object):
 
