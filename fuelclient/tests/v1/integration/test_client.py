@@ -225,6 +225,22 @@ class TestHandlers(base.BaseTestCase):
         cmd = 'release --list'
         self.run_cli_command(cmd)
 
+    def test_reassign_node_group(self):
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1 --nst=gre",
+            "--env-id=1 node set --node 1 2 --role=controller",
+            "nodegroup --create --env 1 --name 'new group'"
+        ))
+        msg = ['PUT http://127.0.0.1',
+               '/api/v1/nodes/ data=',
+               '"id": 1',
+               '"group_id": 2']
+        self.check_all_in_msg(
+            "nodegroup --env 1 --assign --group 2 --node 1 --debug",
+            msg
+        )
+
 
 class TestUserActions(base.BaseTestCase):
 
