@@ -152,6 +152,10 @@ class NodeCollection(object):
         return cls(Node.get_all())
 
     @classmethod
+    def update(cls, data):
+        return BaseObject.connection.put_request(Node.class_api_path, data)
+
+    @classmethod
     def delete_by_ids(cls, ids):
         url = '{0}?ids={1}'.format(
             Node.class_api_path,

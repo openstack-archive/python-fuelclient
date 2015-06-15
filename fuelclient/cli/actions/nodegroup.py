@@ -19,6 +19,7 @@ from fuelclient.cli.arguments import group
 from fuelclient.cli.error import ActionException
 from fuelclient.cli.formatting import format_table
 from fuelclient.objects.node import Node
+from fuelclient.objects.node import NodeCollection
 from fuelclient.objects.nodegroup import NodeGroup
 from fuelclient.objects.nodegroup import NodeGroupCollection
 
@@ -42,9 +43,9 @@ class NodeGroupAction(Action):
                     "Create a new node group in the specified environment."
                 ),
                 Args.get_assign_arg(
-                    "Download current network configuration."),
+                    "Assign nodes to the specified node group."),
                 Args.get_delete_arg(
-                    "Verify current network configuration."),
+                    "Delete specified node groups."),
             )
         )
         self.flag_func_map = (
@@ -85,7 +86,8 @@ class NodeGroupAction(Action):
             raise ActionException(
                 "Nodes can only be assigned to one node group."
             )
-        NodeGroup.assign(ngs[0].id, nodes)
+        data = [{"id": n, "group_id": int(ngs[0].id)} for n in nodes]
+        NodeCollection.update(data)
 
     def list(self, params):
         """To list all available node groups:
