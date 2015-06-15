@@ -15,6 +15,7 @@
 from operator import attrgetter
 
 from fuelclient.objects.base import BaseObject
+from fuelclient.objects import NodeCollection
 
 
 class NodeGroup(BaseObject):
@@ -43,12 +44,9 @@ class NodeGroup(BaseObject):
             cls.instance_api_path.format(group_id)
         )
 
-    @classmethod
-    def assign(cls, group_id, nodes):
-        return cls.connection.post_request(
-            cls.instance_api_path.format(group_id),
-            nodes
-        )
+    def assign(self, nodes):
+        data = [{"id": n, "group_id": self.id} for n in nodes]
+        NodeCollection.update(data)
 
 
 class NodeGroupCollection(object):
