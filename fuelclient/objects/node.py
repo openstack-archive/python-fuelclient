@@ -124,6 +124,8 @@ class Node(BaseObject):
 
 class NodeCollection(object):
 
+    class_api_path = "nodes/"
+
     def __init__(self, nodes):
         self.collection = nodes
 
@@ -152,9 +154,13 @@ class NodeCollection(object):
         return cls(Node.get_all())
 
     @classmethod
+    def update(cls, data):
+        return BaseObject.connection.put_request(cls.class_api_path, data)
+
+    @classmethod
     def delete_by_ids(cls, ids):
         url = '{0}?ids={1}'.format(
-            Node.class_api_path,
+            cls.class_api_path,
             ','.join(map(str, ids))
         )
 
