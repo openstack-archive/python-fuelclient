@@ -43,12 +43,6 @@ class NodeGroup(BaseObject):
             cls.instance_api_path.format(group_id)
         )
 
-    @classmethod
-    def assign(cls, group_id, nodes):
-        return cls.connection.post_request(
-            cls.instance_api_path.format(group_id),
-            nodes
-        )
 
 
 class NodeGroupCollection(object):
