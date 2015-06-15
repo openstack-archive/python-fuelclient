@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import requests_mock as rm
 
 import fuelclient
@@ -44,3 +45,26 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         self.assertEqual(rm.GET, self.session_adapter.last_request.method)
         self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+
+    def test_node_vms_list(self):
+        node_id = 42
+        expected_uri = "/api/v1/nodes/vm/{0}".format(node_id)
+
+        self.client.get_node_vms_list(node_id)
+
+        self.assertEqual(rm.GET, self.session_adapter.last_request.method)
+        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+
+    def test_node_vms_create(self):
+        config = [{'opt1': 'val1', 'opt2': 'val2'},
+                  {'opt3': 'val3', 'opt4': 'val4'}]
+        node_id = 42
+
+        expected_uri = "/api/v1/nodes/vm/{0}".format(node_id)
+        expected_body = json.dumps({'params': config})
+
+        self.client.node_vms_create(node_id, config)
+
+        self.assertEqual(rm.POST, self.session_adapter.last_request.method)
+        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual(expected_body, self.session_adapter.last_request.body)

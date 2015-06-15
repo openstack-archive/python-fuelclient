@@ -158,3 +158,12 @@ class TestEnvFacade(test_api.BaseLibTest):
         for assignment in self.session_adapter.last_request.json():
             # Check whether all assignments are expected
             self.assertIn(assignment, expected_body)
+
+    def test_env_provision(self):
+        env_id = 10
+        expected_uri = '/api/v1/clusters/{0}/prepare_deployment'.format(env_id)
+
+        self.client.env_provision(env_id)
+
+        self.assertEqual(rm.PUT, self.session_adapter.last_request.method)
+        self.assertEqual(expected_uri, self.session_adapter.last_request.path)

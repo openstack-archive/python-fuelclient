@@ -88,6 +88,12 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
         return deploy_task.id
 
+    def env_provision(self, environment_id):
+        env = self._entity_wrapper(obj_id=environment_id)
+        provision_task = env.env_provision()
+
+        return provision_task
+
 
 def get_client():
     return EnvironmentClient()

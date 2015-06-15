@@ -28,6 +28,14 @@ class NodeClient(base_v1.BaseV1Client):
 
         return result
 
+    def get_node_vms_list(self, node_id):
+        node = self._entity_wrapper(node_id)
+        return node.get_node_vms_list()
+
+    def node_vms_create(self, node_id, config):
+        node = self._entity_wrapper(node_id)
+        return node.node_vms_create(config)
+
 
 def get_client():
     return NodeClient()

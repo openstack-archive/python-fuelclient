@@ -113,3 +113,13 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.upgrade.assert_called_once_with(10, 15)
+
+    def test_env_provision(self):
+        env_id = 10
+
+        args = 'env provision {0}'.format(env_id)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.env_provision.assert_called_once_with(env_id)

@@ -16,6 +16,7 @@
 
 import glob
 import io
+import json
 import os
 import subprocess
 import yaml
@@ -82,6 +83,19 @@ def parse_yaml_file(path):
     """
     with io.open(path, encoding='utf-8') as f:
         data = yaml.load(f)
+
+    return data
+
+
+def parse_json_file(path):
+    """Parses json
+
+    :param str path: path to json file
+    :return deserialized file
+    """
+
+    with io.open(path, encoding='utf-8') as f:
+        data = json.load(f)
 
     return data
 
