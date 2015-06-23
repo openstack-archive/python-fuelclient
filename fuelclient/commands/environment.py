@@ -122,7 +122,7 @@ class EnvDelete(EnvMixIn, base.BaseDeleteCommand):
     def take_action(self, parsed_args):
         env = self.client.get_by_id(parsed_args.id)
 
-        if env.status == 'operational' and not parsed_args.force:
+        if env['status'] == 'operational' and not parsed_args.force:
             self.app.stdout.write("Deleting an operational environment is a "
                                   "dangerous operation. Please use --force to "
                                   "bypass this message.")
