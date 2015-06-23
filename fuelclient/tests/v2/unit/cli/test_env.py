@@ -18,12 +18,22 @@ import cStringIO
 
 import mock
 
+from fuelclient.tests.utils import fake_env
 from fuelclient.tests.v2.unit.cli import test_engine
 from fuelclient.v1 import environment
 
 
 class TestEnvCommand(test_engine.BaseCLITest):
     """Tests for fuel2 env * commands."""
+
+    def setUp(self):
+        super(TestEnvCommand, self).setUp()
+
+        self.m_client.get_all.return_value = [fake_env.get_fake_env()
+                                              for i in range(10)]
+        self.m_client.get_by_id.return_value = fake_env.get_fake_env()
+        self.m_client.create.return_value = fake_env.get_fake_env()
+        self.m_client.update.return_value = fake_env.get_fake_env()
 
     def test_env_list(self):
         args = 'env list'
@@ -70,10 +80,9 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
     def test_env_delete_wo_force(self):
         args = 'env delete 42'
-        fake_env = mock.Mock()
-        fake_env.status = 'operational'
 
-        self.m_client.get_by_id.return_value = fake_env
+        env = fake_env.get_fake_env(status='operational')
+        self.m_client.get_by_id.return_value = env
 
         with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
             self.exec_command(args)

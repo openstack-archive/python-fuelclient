@@ -16,11 +16,19 @@
 
 import mock
 
+from fuelclient.tests.utils import fake_node
 from fuelclient.tests.v2.unit.cli import test_engine
 
 
 class TestNodeCommand(test_engine.BaseCLITest):
     """Tests for fuel2 node * commands."""
+
+    def setUp(self):
+        super(TestNodeCommand, self).setUp()
+
+        self.m_client.get_all.return_value = [fake_node.get_fake_node()
+                                              for i in range(10)]
+        self.m_client.get_by_id.return_value = fake_node.get_fake_node()
 
     def test_node_list(self):
         args = 'node list'
