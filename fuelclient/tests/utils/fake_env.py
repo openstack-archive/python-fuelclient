@@ -23,13 +23,14 @@ def get_fake_env(name=None, status=None, release_id=None,
     environment. Represents the average amount of data.
 
     """
-    return {"status": status or "new",
-            "is_customized": False,
-            "release_id": release_id or 1,
-            "name": name or "fake_env",
-            "grouping": "roles",
-            "net_provider": "nova_network",
-            "fuel_version": fuel_version or "5.1",
-            "pending_release_id": pending_release,
-            "id": env_id or 1,
-            "mode": "multinode"}
+    return {'status': status or 'new',
+            'is_customized': False,
+            'release_id': release_id or 1,
+            'name': name or 'fake_env',
+            'grouping': 'roles',
+            'net_provider': 'nova_network',
+            'fuel_version': fuel_version or '5.1',
+            'pending_release_id': pending_release,
+            'id': env_id or 1,
+            'changes': [],
+            'mode': 'multinode'}

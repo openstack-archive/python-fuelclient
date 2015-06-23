@@ -16,10 +16,18 @@
 
 import mock
 
+from fuelclient.tests.utils import fake_task
 from fuelclient.tests.v2.unit.cli import test_engine
 
 
 class TestTaskCommand(test_engine.BaseCLITest):
+
+    def setUp(self):
+        super(TestTaskCommand, self).setUp()
+
+        self.m_client.get_all.return_value = [fake_task.get_fake_task()
+                                              for i in range(10)]
+        self.m_client.get_by_id.return_value = fake_task.get_fake_task()
 
     def test_task_list(self):
         args = 'task list'
