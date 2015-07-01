@@ -13,7 +13,7 @@ Project status, bugs, and blueprints are tracked on Launchpad:
   https://launchpad.net/fuel
 
 Development documentation is hosted here:
-  http://docs.mirantis.com/fuel-dev
+  https://docs.fuel-infra.org/fuel-dev
 
 User guide can be found here:
   http://docs.mirantis.com
