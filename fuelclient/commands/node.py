@@ -21,7 +21,7 @@ class NodeMixIn(object):
 
 
 class NodeList(NodeMixIn, base.BaseListCommand):
-    """Show list of all avaliable nodes."""
+    """Show list of all available nodes."""
 
     columns = ('id',
                'name',
