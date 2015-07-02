@@ -53,7 +53,7 @@ class PluginAction(Action):
                     "Downgrade installed plugin"),
                 Args.get_plugin_sync_arg(
                     "Synchronise plugins with API service")),
-
+            Args.get_plugin_arg("Plugin id."),
             Args.get_force_arg("Force action")
         ]
         self.flag_func_map = (
@@ -143,8 +143,9 @@ class PluginAction(Action):
            updates existent plugins
 
                fuel plugins --sync
+               fuel plugins --sync --plugin-id=1,2
         """
-        Plugins.sync()
+        Plugins.sync(plugin_ids=params.plugin)
         self.serializer.print_to_output(
             None, "Plugins were successfully synchronized.")
 
