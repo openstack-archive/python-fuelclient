@@ -280,13 +280,13 @@ class Plugins(base.BaseObject):
         return cls.update_or_create(metadata, force=force)
 
     @classmethod
-    def sync(cls):
+    def sync(cls, plugin_ids=[]):
         """Checks all of the plugins on file systems,
         and makes sure that they have consistent information
         in API service.
         """
-        for metadata in utils.glob_and_parse_yaml(METADATA_MASK):
-            cls.update_or_create(metadata, force=True)
+        cls.connection.post_request(
+            api='plugins/sync/', data={'ids': plugin_ids})
 
     @classmethod
     def unregister(cls, name, version):

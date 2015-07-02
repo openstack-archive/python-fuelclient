@@ -124,10 +124,15 @@ class TestPluginsActions(base.UnitTestCase):
         downgrade_mock.assert_called_once_with(self.file_name)
         check_mock.assert_called_once_with(self.file_name)
 
+    @patch.object(Serializer, 'print_to_output')
     @patch.object(Plugins, 'sync')
-    def test_sync(self, sync_mock):
+    def test_sync(self, sync_mock, print_mock):
         self.exec_plugins(['--sync'])
-        sync_mock.assert_called_once_with()
+        self.assert_print(
+            print_mock,
+            None,
+            'Plugins were successfully synchronized.')
+        sync_mock.assert_called_once_with(plugin_ids=[])
 
     @patch.object(Serializer, 'print_to_output')
     @patch.object(Plugins, 'register', return_value='some_result')
