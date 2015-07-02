@@ -13,7 +13,7 @@
 #    under the License.
 
 from fuelclient.cli.serializers import Serializer
-from fuelclient.client import APIClient
+from fuelclient import client
 
 
 class BaseObject(object):
@@ -26,10 +26,10 @@ class BaseObject(object):
     """
     class_api_path = None
     instance_api_path = None
-    connection = APIClient
+    connection = client.get_http_client()
 
     def __init__(self, obj_id, **kwargs):
-        self.connection = APIClient
+        self.connection = client.get_http_client()
         self.serializer = Serializer.from_params(kwargs.get('params'))
         self.id = obj_id
         self._data = None

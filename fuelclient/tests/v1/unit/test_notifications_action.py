@@ -22,9 +22,10 @@ from mock import patch
 from fuelclient.tests import base
 
 
-@patch('fuelclient.client.requests')
+@patch('requests.Session')
 class TestNotificationsActions(base.UnitTestCase):
     def test_notification_send(self, mrequests):
+        import pdb; pdb.set_trace()
         response_mock = Mock(status_code=201)
         mrequests.post.return_value = response_mock
 

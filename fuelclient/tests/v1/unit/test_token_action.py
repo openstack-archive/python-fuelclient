@@ -24,12 +24,12 @@ from fuelclient.tests import base
 @mock.patch('fuelclient.client.requests')
 class TestPluginsActions(base.UnitTestCase):
 
-    @mock.patch('fuelclient.cli.actions.token.APIClient')
-    def test_token_action(self, mAPIClient, mrequests):
+    @mock.patch('fuelclient.client._HTTP_CLIENT')
+    def test_token_action(self, mHTTPClient, mrequests):
         with mock.patch('sys.stdout', new=io.StringIO()) as mstdout:
             token = u'token123'
             mauth_token = mock.PropertyMock(return_value=token)
-            type(mAPIClient).auth_token = mauth_token
+            type(mHTTPClient).auth_token = mauth_token
 
             self.execute(['fuel', 'token'])
 

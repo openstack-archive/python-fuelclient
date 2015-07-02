@@ -22,12 +22,13 @@ from fuelclient.objects.environment import Environment
 from fuelclient.tests import base
 
 
+@mock.patch('requests.Response', new_callable=mock.MagicMock)
+@mock.patch('requests.Session.delete')
+@mock.patch('requests.Session.get')
+@mock.patch('requests.Session.post')
 class TestEnvironment(base.UnitTestCase):
 
-    @mock.patch('requests.Response', new_callable=mock.MagicMock)
-    @mock.patch('requests.delete')
-    @mock.patch('requests.get')
-    def test_delete_operational_wo_force(self, m_get, m_del, m_resp):
+    def test_delete_operational_wo_force(self, m_get, m_del, m_post, m_resp):
         m_resp.json.return_value = {'id': 1, 'status': 'operational'}
         m_get.return_value = m_resp
 
@@ -37,10 +38,7 @@ class TestEnvironment(base.UnitTestCase):
 
         self.assertEqual(0, m_del.call_count)
 
-    @mock.patch('requests.Response', new_callable=mock.MagicMock)
-    @mock.patch('requests.post')
-    @mock.patch('requests.get')
-    def test_nova_network_using_warning(self, m_get, m_post, m_resp):
+    def test_nova_network_using_warning(self, m_get, m_del, m_post, m_resp):
         m_resp.json.return_value = {'id': 1, 'name': 'test',
                                     'mode': 'ha_compact',
                                     'net_provider': 'neutron'}
@@ -91,7 +89,7 @@ class TestEnvironmentOstf(base.UnitTestCase):
             {'id': 1, 'status': 'running'},
             {'id': 2, 'status': 'finished'}])
 
-    @mock.patch('fuelclient.client.requests')
+    @mock.patch('requests.Session')
     def test_get_deployment_tasks_with_end(self, mrequests):
         end = 'task1'
         self.env.get_deployment_tasks(end=end)

@@ -43,7 +43,7 @@ class TestAuthentication(base.UnitTestCase):
         self.assertEqual(int(conf.LISTEN_PORT), int(pr.port))
         self.assertEqual('/keystone/v2.0', pr.path)
 
-    @patch('fuelclient.client.requests')
+    @patch('requests.Session')
     @patch('fuelclient.client.auth_client')
     def test_credentials(self, mkeystone_cli, mrequests):
         mkeystone_cli.return_value = Mock(auth_token='')

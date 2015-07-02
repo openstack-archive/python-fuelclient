@@ -19,7 +19,7 @@ import os
 from fuelclient import __version__
 from fuelclient.actions import fuel_version
 from fuelclient.cli.error import ArgumentException
-from fuelclient.client import APIClient
+from fuelclient import client
 
 substitutions = {
     # replace from: to
@@ -73,10 +73,11 @@ class NodeAction(argparse.Action):
                     raise ArgumentException(
                         "'{0}' is not valid node id.".format(_id))
             if input_macs:
-                nodes_mac_to_id_map = dict(
-                    (n["mac"], n["id"])
-                    for n in APIClient.get_request("nodes/")
-                )
+                http_client = client.get_http_client()
+                nodes = http_client.get_request("nodes/")
+
+                nodes_mac_to_id_map = dict((n["mac"], n["id"]) for n in nodes)
+
                 for short_mac in input_macs:
                     target_node = None
                     for mac in nodes_mac_to_id_map:

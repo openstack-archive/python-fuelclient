@@ -17,7 +17,7 @@ import mock
 from fuelclient.tests import base
 
 
-@mock.patch('fuelclient.client.requests')
+@mock.patch('requests.Session')
 class TestNodeGroupActions(base.UnitTestCase):
 
     def test_list_nodegroups(self, mreq):

@@ -22,7 +22,7 @@ import six
 from fuelclient.cli import error
 from fuelclient.cli.formatting import quote_and_join
 from fuelclient.cli.serializers import Serializer
-from fuelclient.client import APIClient
+from fuelclient import client
 
 
 class Action(object):
@@ -48,13 +48,15 @@ class Action(object):
     def action_func(self, params):
         """Entry point for all actions subclasses
         """
-        APIClient.debug_mode(debug=params.debug)
+        http_client = client.get_http_client()
+
+        http_client.debug_mode(debug=params.debug)
         if getattr(params, 'user') and getattr(params, 'password'):
-            APIClient.user = params.user
-            APIClient.password = params.password
+            http_client.user = params.user
+            http_client.password = params.password
             # tenant is set by default to 'admin' in parser.add_argument
-            APIClient.tenant = params.tenant
-            APIClient.initialize_keystone_client()
+            http_client.tenant = params.tenant
+            http_client.initialize_keystone_client()
 
         self.serializer = Serializer.from_params(params)
         if self.flag_func_map is not None:

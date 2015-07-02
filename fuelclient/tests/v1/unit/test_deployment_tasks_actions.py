@@ -29,7 +29,7 @@ MULTIPLE_RELEASES = [{'id': 1, 'version': '2014.2-6.0', 'name': 'Something'},
                      {'id': 2, 'version': '2014.3-6.1', 'name': 'Something'}]
 
 
-@patch('fuelclient.client.requests')
+@patch('requests.Session')
 @patch('fuelclient.cli.serializers.open', create=True)
 @patch('fuelclient.cli.actions.base.os')
 class TestReleaseDeploymentTasksActions(base.UnitTestCase):
@@ -53,7 +53,7 @@ class TestReleaseDeploymentTasksActions(base.UnitTestCase):
             json.loads(kwargs['data']), API_INPUT)
 
 
-@patch('fuelclient.client.requests')
+@patch('requests.Session')
 @patch('fuelclient.cli.serializers.open', create=True)
 @patch('fuelclient.cli.actions.base.os')
 class TestClusterDeploymentTasksActions(base.UnitTestCase):
@@ -77,7 +77,7 @@ class TestClusterDeploymentTasksActions(base.UnitTestCase):
             json.loads(kwargs['data']), API_INPUT)
 
 
-@patch('fuelclient.client.requests')
+@patch('requests.Session')
 @patch('fuelclient.cli.serializers.open', create=True)
 @patch('fuelclient.utils.iterfiles')
 class TestSyncDeploymentTasks(base.UnitTestCase):
