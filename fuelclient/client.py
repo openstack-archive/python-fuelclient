@@ -49,6 +49,37 @@ class Client(object):
         self.tenant = 'admin'
         self._keystone_client = None
         self._auth_required = None
+        self.session = self._make_session()
+
+    def _make_common_headers(self):
+        """Returns a dict of HTTP headers common for all requests."""
+
+        return {'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Auth-Token': self.auth_token}
+
+    def _make_proxies(self):
+        """Provides HTTP proxy configuration for requests module."""
+
+        conf = fuelclient_settings.get_settings()
+
+        if conf.HTTP_PROXY is None:
+            return None
+
+        return {'http': conf.HTTP_PROXY,
+                'https': conf.HTTP_PROXY}
+
+    def _make_session(self):
+        """Initializes a HTTP session."""
+
+        conf = fuelclient_settings.get_settings()
+
+        session = requests.Session()
+        session.headers.update(self._make_common_headers())
+        session.timeout = conf.HTTP_TIMEOUT
+        session.proxies = self._make_proxies()
+
+        return session
 
     @property
     def auth_token(self):
@@ -100,86 +131,71 @@ class Client(object):
 
     @exceptions_decorator
     def delete_request(self, api):
-        """Make DELETE request to specific API with some data
-        """
-        url = self.api_root + api
-        self.print_debug(
-            "DELETE {0}".format(self.api_root + api)
-        )
+        """Make DELETE request to specific API with some data."""
 
-        headers = {'content-type': 'application/json',
-                   'x-auth-token': self.auth_token}
-        resp = requests.delete(url, headers=headers)
+        url = self.api_root + api
+        self.print_debug('DELETE {0}'.format(url))
+
+        resp = self.session.delete(url)
         resp.raise_for_status()
 
         return resp.json()
 
     @exceptions_decorator
     def put_request(self, api, data):
-        """Make PUT request to specific API with some data
-        """
-        url = self.api_root + api
-        data_json = json.dumps(data)
-        self.print_debug(
-            "PUT {0} data={1}"
-            .format(self.api_root + api, data_json)
-        )
+        """Make PUT request to specific API with some data."""
 
-        headers = {'content-type': 'application/json',
-                   'x-auth-token': self.auth_token}
-        resp = requests.put(url, data=data_json, headers=headers)
+        url = self.api_root + api
+
+        data_json = json.dumps(data)
+        self.print_debug('PUT {0} data={1}'.format(url, data_json))
+
+        resp = self.session.put(url, data=data_json)
         resp.raise_for_status()
 
         return resp.json()
 
-    def get_request_raw(self, api, ostf=False, params=None):
-        """Make a GET request to specific API and return raw response.
+    def get_request_raw(self, api, ostf=False, params={}):
+        """Make a GET request to specific API and return raw response
 
         :param api: API endpoint (path)
         :param ostf: is this a call to OSTF API
         :param params: params passed to GET request
+
         """
         url = (self.ostf_root if ostf else self.api_root) + api
-        self.print_debug(
-            "GET {0}"
-            .format(url)
-        )
+        self.print_debug('GET {0}'.format(url))
 
-        headers = {'x-auth-token': self.auth_token}
-        params = params or {}
-        return requests.get(url, params=params, headers=headers)
+        return self.session.get(url, params=params)
 
     @exceptions_decorator
-    def get_request(self, api, ostf=False, params=None):
-        """Make GET request to specific API
-        """
+    def get_request(self, api, ostf=False, params={}):
+        """Make GET request to specific API."""
+
         resp = self.get_request_raw(api, ostf, params)
         resp.raise_for_status()
 
         return resp.json()
 
     def post_request_raw(self, api, data, ostf=False):
-        """Make a POST request to specific API and return raw response.
+        """Make a POST request to specific API and return raw response
 
         :param api: API endpoint (path)
         :param data: data send in request, will be serialzied to JSON
         :param ostf: is this a call to OSTF API
+
         """
         url = (self.ostf_root if ostf else self.api_root) + api
-        data_json = json.dumps(data)
-        self.print_debug(
-            "POST {0} data={1}"
-            .format(url, data_json)
-        )
 
-        headers = {'content-type': 'application/json',
-                   'x-auth-token': self.auth_token}
-        return requests.post(url, data=data_json, headers=headers)
+        data_json = json.dumps(data)
+        self.print_debug('POST {0} data={1}'.format(url, data_json))
+
+        return self.session.post(url, data=data_json)
 
     @exceptions_decorator
     def post_request(self, api, data, ostf=False):
-        """Make POST request to specific API with some data
-        """
+        """Make POST request to specific API with some data."""
+
         resp = self.post_request_raw(api, data, ostf=ostf)
         resp.raise_for_status()
 
