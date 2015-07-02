@@ -47,8 +47,8 @@ def group(*args, **kwargs):
     return (required,) + args
 
 
-class TaskAction(argparse.Action):
-    """Custom argparse.Action subclass to store task ids
+class ArrayAction(argparse.Action):
+    """Custom argparse.Action subclass to store ids
 
     :returns: list of ids
     """
@@ -197,6 +197,17 @@ def get_int_arg(name, **kwargs):
     default_kwargs = {
         "action": "store",
         "type": int,
+        "default": None
+    }
+    default_kwargs.update(kwargs)
+    return get_arg(name, **default_kwargs)
+
+
+def get_array_arg(name, **kwargs):
+    default_kwargs = {
+        "action": ArrayAction,
+        "nargs": '+',
+        "type": lambda v: v.split(","),
         "default": None
     }
     default_kwargs.update(kwargs)
@@ -449,15 +460,11 @@ def get_node_arg(help_msg):
 
 
 def get_task_arg(help_msg):
-    default_kwargs = {
-        "action": TaskAction,
-        "flags": ("--task-id", "--tid"),
-        "nargs": '+',
-        "type": lambda v: v.split(","),
-        "default": None,
-        "help": help_msg
-    }
-    return get_arg("task", **default_kwargs)
+    return get_array_arg(
+        'task',
+        flags=("--task-id", "--tid"),
+        help=help_msg
+    )
 
 
 def get_plugin_install_arg(help_msg):
@@ -511,6 +518,14 @@ def get_plugin_downgrade_arg(help_msg):
 def get_plugin_sync_arg(help_msg):
     return get_boolean_arg(
         "sync",
+        help=help_msg
+    )
+
+
+def get_plugin_arg(help_msg):
+    return get_array_arg(
+        'plugin',
+        flags=('--plugin-ids',),
         help=help_msg
     )
 

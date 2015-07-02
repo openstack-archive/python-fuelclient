@@ -158,7 +158,7 @@ class Client(object):
 
         return resp.json()
 
-    def post_request_raw(self, api, data, ostf=False):
+    def post_request_raw(self, api, data=None, ostf=False):
         """Make a POST request to specific API and return raw response.
 
         :param api: API endpoint (path)
@@ -166,18 +166,24 @@ class Client(object):
         :param ostf: is this a call to OSTF API
         """
         url = (self.ostf_root if ostf else self.api_root) + api
-        data_json = json.dumps(data)
-        self.print_debug(
-            "POST {0} data={1}"
-            .format(url, data_json)
-        )
+        headers = {'x-auth-token': self.auth_token}
 
-        headers = {'content-type': 'application/json',
-                   'x-auth-token': self.auth_token}
-        return requests.post(url, data=data_json, headers=headers)
+        if data:
+            data_json = json.dumps(data)
+            self.print_debug(
+                'POST {0} data={1}'.format(url, data_json)
+            )
+            headers.update({'content-type': 'application/json'})
+
+            return requests.post(
+                url, data=data_json, headers=headers)
+        else:
+            self.print_debug('POST with empty data')
+
+            return requests.post(url, headers=headers)
 
     @exceptions_decorator
-    def post_request(self, api, data, ostf=False):
+    def post_request(self, api, data=None, ostf=False):
         """Make POST request to specific API with some data
         """
         resp = self.post_request_raw(api, data, ostf=ostf)
