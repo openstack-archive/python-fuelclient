@@ -14,8 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
-
 from mock import MagicMock
 from mock import patch
 
@@ -240,18 +238,18 @@ class TestPluginsObject(base.UnitTestCase):
         plugin_obj.remove.assert_called_once_with(self.name, self.version)
         unregister_mock.assert_called_once_with(self.name, self.version)
 
-    @patch('fuelclient.utils.glob_and_parse_yaml',
-           return_value=['meta1', 'meta2'])
-    @patch.object(Plugins, 'update_or_create')
-    def test_sync(self, up_or_create_mock, glob_and_parse_mock):
+    @patch.object(Plugins.connection, 'post_request')
+    def test_sync(self, post_mock):
         self.plugin.sync()
+        post_mock.assert_called_once_with(
+            api='plugins/sync/', data=None)
 
-        glob_and_parse_mock.assert_called_once_with(
-            '/var/www/nailgun/plugins/*/metadata.yaml')
-        self.assertEqual(
-            up_or_create_mock.call_args_list,
-            [mock.call('meta1', force=True),
-             mock.call('meta2', force=True)])
+    @patch.object(Plugins.connection, 'post_request')
+    def test_sync_with_specific_plugins(self, post_mock):
+        self.plugin.sync(plugin_ids=[1, 2])
+        data = {'ids': [1, 2]}
+        post_mock.assert_called_once_with(
+            api='plugins/sync/', data=data)
 
     @patch.object(Plugins, 'register')
     @patch.object(Plugins, 'make_obj_by_file')
