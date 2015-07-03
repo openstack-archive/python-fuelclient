@@ -17,7 +17,7 @@
 import os
 import tempfile
 
-import nose
+import pytest
 
 from fuelclient.tests import base
 
@@ -96,9 +96,9 @@ class TestHandlers(base.BaseTestCase):
 
         self.check_for_stdout(cmd, msg)
 
+    @pytest.skip("Skipping the test to unlock the CI while "
+                 "#1448977 is been resolved.")
     def test_selected_node_deploy(self):
-        raise nose.SkipTest("Skipping the test to unlock the CI while "
-                            "#1448977 is been resolved.")
         self.load_data_to_nailgun_server()
         self.run_cli_commands((
             "env create --name=NewEnv --release=1",
