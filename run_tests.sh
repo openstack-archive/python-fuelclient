@@ -195,7 +195,7 @@ run_cli_tests() {
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
-        ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT || return 1
+        ${certain_tests[@]} --junit-xml $FUELCLIENT_XUNIT || return 1
     popd > /dev/null
 
     return 0
