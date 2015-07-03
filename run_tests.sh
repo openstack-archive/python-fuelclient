@@ -31,10 +31,9 @@ NAILGUN_CHECK_URL=${NAILGUN_CHECK_URL:-"http://0.0.0.0:$NAILGUN_PORT/api/version
 NAILGUN_START_MAX_WAIT_TIME=${NAILGUN_START_MAX_WAIT_TIME:-10}
 TEST_NAILGUN_DB=${TEST_NAILGUN_DB:-nailgun}
 
-# nosetest xunit options
+# pytest options
 ARTIFACTS=${ARTIFACTS:-$(pwd)/test_run}
-FUELCLIENT_XUNIT=${FUELCLIENT_XUNIT:-"$ROOT/fuelclient.xml"}
-TEST_WORKERS=${TEST_WORKERS:-0}
+FUELCLIENT_JUNIT=${FUELCLIENT_JUNIT:-"$ROOT/fuelclient.xml"}
 
 # A POSIX variable
 OPTIND=1
@@ -195,7 +194,7 @@ run_cli_tests() {
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
-        ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT || return 1
+        ${certain_tests[@]} --junit-xml $FUELCLIENT_JUNIT || return 1
     popd > /dev/null
 
     return 0
