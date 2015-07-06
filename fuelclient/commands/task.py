@@ -20,7 +20,7 @@ class TaskMixIn(object):
 
 
 class TaskList(TaskMixIn, base.BaseListCommand):
-    """Show list of all avaliable nodes."""
+    """Show list of all avaliable tasks."""
     columns = ('id',
                'status',
                'name',
@@ -30,7 +30,7 @@ class TaskList(TaskMixIn, base.BaseListCommand):
 
 
 class TaskShow(TaskMixIn, base.BaseShowCommand):
-    """Show info about node with given id."""
+    """Show info about task with given id."""
     columns = ('id',
                'uuid',
                'status',
