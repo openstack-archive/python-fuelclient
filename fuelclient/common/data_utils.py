@@ -34,6 +34,9 @@ def get_display_data_single(fields, data):
 
         val = data.get(field)
 
+        if isinstance(val, list):
+            val = ', '.join(val)
+
         if not val and val not in (0, None, False, ''):
             val = '-'
 
