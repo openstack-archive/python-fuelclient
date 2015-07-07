@@ -199,6 +199,13 @@ class TestUtils(base.UnitTestCase):
         result = data_utils.get_display_data_single(fields, test_data)
         self.assertEqual([1, '-', '-'], result)
 
+    def test_get_display_data_single_list_val(self):
+        test_data = {'a': 1, 'b': [['2']], 'c': [['3'], ['4']]}
+        fields = ('a', 'b', 'c')
+
+        result = data_utils.get_display_data_single(fields, test_data)
+        self.assertEqual([1, '2', '3, 4'], result)
+
     def test_get_display_data_bad_key(self):
         test_data = {'a': 1, 'b': 2, 'c': 3}
         fields = ('b', 'bad_key')
