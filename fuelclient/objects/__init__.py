@@ -20,6 +20,7 @@ from fuelclient.objects.base import BaseObject
 from fuelclient.objects.environment import Environment
 from fuelclient.objects.node import Node
 from fuelclient.objects.node import NodeCollection
+from fuelclient.objects.plugins import Plugins
 from fuelclient.objects.release import Release
 from fuelclient.objects.task import DeployTask
 from fuelclient.objects.task import SnapshotTask

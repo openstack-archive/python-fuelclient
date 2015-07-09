@@ -185,7 +185,8 @@ class PluginV2(BasePlugin):
                 'yum -y install {0} || yum -y reinstall {0}'
                 .format(plugin_path))
         else:
-            utils.exec_cmd('yum -y install {0}'.format(plugin_path))
+            pass
+            #utils.exec_cmd('yum -y install {0}'.format(plugin_path))
 
     @classmethod
     @master_only

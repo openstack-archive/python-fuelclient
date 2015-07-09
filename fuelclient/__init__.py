@@ -50,6 +50,7 @@ def get_client(resource, version='v1'):
         'v1': {
             'environment': v1.environment,
             'node': v1.node,
+            'plugins': v1.plugins,
             'task': v1.task
         }
     }

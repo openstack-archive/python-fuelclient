@@ -12,15 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient.v1 import environment
-from fuelclient.v1 import node
-from fuelclient.v1 import plugins
-from fuelclient.v1 import task
+from fuelclient import objects
+from fuelclient.v1 import base_v1
 
 
-__all__ = (
-    'environment',
-    'node',
-    'plugins',
-    'task'
-)
+class PluginsClient(base_v1.BaseV1Client):
+
+    _entity_wrapper = objects.Plugins
+
+    def sync(self, ids):
+        """Synchronise plugins on file system with plugins in
+           API service, creates plugin if it is not exists,
+           updates existent plugins
+
+               plugins --sync
+               plugins --sync --plugin-id=1,2
+        """
+        self._entity_wrapper.sync(plugin_ids=ids)
+
+
+def get_client():
+    return PluginsClient()
