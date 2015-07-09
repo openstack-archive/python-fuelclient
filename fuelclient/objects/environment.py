@@ -451,3 +451,9 @@ class Environment(BaseObject):
         resp = self.connection.get_request_raw(url, params=params)
         resp.raise_for_status()
         return resp.text
+
+    def spawn_vms(self):
+        return self.connection.put_request(
+            'clusters/{0}/spawn_vms/'.format(self.id),
+            {}
+        ) 
