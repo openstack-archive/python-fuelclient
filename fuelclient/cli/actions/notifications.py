@@ -91,7 +91,7 @@ class NotificationsAction(Action):
         """
         message = params.send
         if isinstance(message, list):
-            message = ' '.join(message)
+            message = ' '.join(message).replace('\\n', '\n')
         result = Notifications.send(message, topic=params.topic)
         self.serializer.print_to_output(
             result,
