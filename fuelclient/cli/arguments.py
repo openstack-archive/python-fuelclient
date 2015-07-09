@@ -40,6 +40,7 @@ substitutions = {
     "help": "--help",
     "change-password": "--change-password",
     "hostname": "--hostname",
+    "plugin": "plugins",
 }
 
 
