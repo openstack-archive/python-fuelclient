@@ -12,16 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient.v1 import environment
-from fuelclient.v1 import fuelversion
-from fuelclient.v1 import node
-from fuelclient.v1 import plugins
-from fuelclient.v1 import task
 
-
-# Please keeps the list in alphabetical order
-__all__ = ('environment',
-           'fuelversion',
-           'node',
-           'plugins',
-           'task')
+class NodeMixIn(object):
+    entity_name = 'plugins'

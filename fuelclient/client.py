@@ -161,7 +161,8 @@ class Client(object):
         :param ostf: is this a call to OSTF API
         """
         url = (self.ostf_root if ostf else self.api_root) + api
-        headers = {'x-auth-token': self.auth_token}
+        headers = {'x-auth-token': self.auth_token,
+                   'content-type': 'application/json'}
         data_json = None
 
         if data:
@@ -169,7 +170,6 @@ class Client(object):
             self.print_debug(
                 'POST {0} data={1}'.format(url, data_json)
             )
-            headers.update({'content-type': 'application/json'})
         else:
             self.print_debug('POST {0} with empty data'.format(url))
 
