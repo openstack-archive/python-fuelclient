@@ -16,6 +16,7 @@
 
 import glob
 import io
+import json
 import os
 import subprocess
 import yaml
@@ -129,3 +130,17 @@ def file_exists(path):
     :returns: True if file is exist, Flase if is not
     """
     return os.path.lexists(path)
+
+
+def parse_to_list_od_dicts(str_list):
+    """Parse list of json strings to dictionaries
+
+    :param list: list of dicts and json string
+    :returns" list of dictionaries
+    """
+    dict_list = []
+    for json_str in str_list:
+        if not isinstance(json_str, dict):
+            json_str = json.loads(json_str)
+        dict_list.append(json_str)
+    return dict_list
