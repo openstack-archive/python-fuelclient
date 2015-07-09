@@ -254,3 +254,19 @@ class EnvDeploy(EnvMixIn, base.BaseCommand):
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
 
         self.app.stdout.write(msg)
+
+
+class EnvSpawnVms(EnvMixIn, base.BaseCommand):
+    """Provision specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvSpawnVms, self).get_parser(prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the environment to be provision.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        return self.client.spawn_vms(parsed_args.id)

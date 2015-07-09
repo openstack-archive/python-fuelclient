@@ -121,6 +121,14 @@ class Node(BaseObject):
     def delete(self):
         self.connection.delete_request(self.instance_api_path.format(self.id))
 
+    def node_vms_create(self, config):
+        url = "nodes/{0}/vms_conf/".format(self.id)
+        return self.connection.put_request(url, config)
+
+    def get_node_vms_conf(self):
+        url = "nodes/{0}/vms_conf/".format(self.id)
+        return self.connection.get_request(url)
+
 
 class NodeCollection(object):
 
