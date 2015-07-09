@@ -88,6 +88,11 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
         return deploy_task.id
 
+    def spawn_vms(self, environment_id):
+        env = self._entity_wrapper(obj_id=environment_id)
+        spawn_task = env.spawn_vms()
+        return spawn_task
+
 
 def get_client():
     return EnvironmentClient()

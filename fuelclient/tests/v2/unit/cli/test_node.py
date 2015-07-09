@@ -54,3 +54,27 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_by_id.assert_called_once_with(node_id)
+
+    def test_node_vms_conf_list(self):
+        node_id = 42
+        args = 'node vms-conf {node_id}'.format(node_id=node_id)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_node_vms_conf.assert_called_once_with(node_id)
+
+    def test_node_vms_conf_create(self):
+        vms_conf = """{"id":2} {"id":3}"""
+        config = [{'id': 2},
+                  {'id': 3}]
+
+        node_id = 42
+
+        args = "node create-vms-conf {0} --conf {1}".format(
+            node_id,
+            vms_conf)
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.node_vms_create.assert_called_once_with(node_id, config)
