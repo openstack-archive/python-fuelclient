@@ -44,3 +44,15 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         self.assertEqual(rm.GET, self.session_adapter.last_request.method)
         self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+
+    def test_node_set_hostname(self):
+        node_id = 42
+        hostname = 'test-name'
+        expected_uri = self.get_object_uri(self.res_uri, node_id)
+
+        self.client.set_hostname(node_id, hostname)
+
+        self.assertEqual(rm.PUT, self.session_adapter.last_request.method)
+        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual('{"hostname": "%s"}' % hostname,
+                         self.session_adapter.last_request.body)

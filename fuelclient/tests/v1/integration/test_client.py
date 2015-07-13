@@ -71,10 +71,11 @@ class TestHandlers(base.BaseTestCase):
     def test_node_action(self):
         help_msg = ["fuel node [-h] [--env ENV]",
                     "[--list | --set | --delete | --network | --disk |"
-                    " --deploy | --delete-from-db | --provision]", "-h",
-                    "--help", " -s", "--default", " -d", "--download", " -u",
+                    " --deploy | --hostname HOSTNAME | --delete-from-db |"
+                    " --provision]", "-h", "--help", " -s",
+                    "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",
-                    "--role", "--net"]
+                    "--role", "--net", "--hostname"]
         self.check_all_in_msg("node --help", help_msg)
 
         self.check_for_rows_in_table("node")
@@ -163,6 +164,18 @@ class TestHandlers(base.BaseTestCase):
             node_id))
         self.check_for_stdout(
             "node --node {0} --delete-from-db".format(node_id),
+            msg
+        )
+
+    def test_node_change_hostname(self):
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1",
+            "--env-id=1 node set --node 2 --role=controller"
+        ))
+        msg = "Hostname for node with id 2 has been changed to test-name.\n"
+        self.check_for_stdout(
+            "node --node 2 --hostname test-name",
             msg
         )
 
