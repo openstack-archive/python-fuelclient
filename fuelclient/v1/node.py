@@ -28,6 +28,10 @@ class NodeClient(base_v1.BaseV1Client):
 
         return result
 
+    def set_hostname(self, node_id, hostname):
+        node = self._entity_wrapper(node_id)
+        return node.set_hostname(hostname)
+
 
 def get_client():
     return NodeClient()
