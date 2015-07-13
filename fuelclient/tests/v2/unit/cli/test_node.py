@@ -78,3 +78,19 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.node_vms_create.assert_called_once_with(node_id, config)
+
+    def test_node_set_hostname(self):
+        node_id = 42
+        hostname = 'test-name'
+
+        self.m_client.set_hostname.return_value = \
+            fake_node.get_fake_node(node_id=node_id,
+                                    hostname=hostname)
+
+        args = 'node set-hostname {node_id} {hostname}'\
+            .format(node_id=node_id, hostname=hostname)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.set_hostname.assert_called_once_with(node_id, hostname)

@@ -68,6 +68,7 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                'mac',
                'error_type',
                'pending_addition',
+               'hostname',
                'fqdn',
                'platform_name',
                'cluster',
@@ -114,3 +115,37 @@ class NodeCreateVMsConf(NodeMixIn, base.BaseCommand):
         data = self.client.node_vms_create(parsed_args.id, confs)
         msg = "{0}".format(data)
         self.app.stdout.write(msg)
+
+
+class NodeSetHostname(NodeMixIn, base.BaseCommand):
+
+    columns = ('id',
+               'name',
+               'hostname',
+               'ip',
+               'mac',
+               'cluster',
+               'online')
+
+    def get_parser(self, prog_name):
+        parser = super(NodeSetHostname, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'id',
+            type=int,
+            help='Change hostname for node <node-id>',
+        )
+        parser.add_argument(
+            'hostname',
+            type=str,
+            help='New hostname',
+        )
+
+        return parser
+
+    def take_action(self, parsed_args):
+
+        data = self.client.set_hostname(parsed_args.id, parsed_args.hostname)
+        data = data_utils.get_display_data_single(self.columns, data)
+
+        return (self.columns, data)

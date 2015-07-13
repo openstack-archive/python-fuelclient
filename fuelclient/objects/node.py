@@ -129,6 +129,10 @@ class Node(BaseObject):
         url = "nodes/{0}/vms_conf/".format(self.id)
         return self.connection.get_request(url)
 
+    def set_hostname(self, hostname):
+        return self.connection.put_request(
+            self.instance_api_path.format(self.id), {"hostname": hostname})
+
 
 class NodeCollection(object):
 
