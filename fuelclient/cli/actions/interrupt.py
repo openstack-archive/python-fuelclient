@@ -38,7 +38,7 @@ class InterruptAction(Action):
         self.serializer.print_to_output(
             intercept_task.data,
             "{0} task of environment with id={1} started. "
-            "To check task status run 'fuel task -t {2}'.".format(
+            "To check task status run 'fuel task --tid {2}'.".format(
                 self.action_name.title(),
                 params.env,
                 intercept_task.data["id"]

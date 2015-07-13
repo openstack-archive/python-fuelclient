@@ -30,10 +30,10 @@ class TaskAction(Action):
         self.args = [
             group(
                 Args.get_list_arg("List all tasks"),
-                Args.get_delete_arg("Delete task with some task-id.")
+                Args.get_delete_arg("Delete task with some task-id")
             ),
             Args.get_force_arg("Force deletion"),
-            Args.get_task_arg("Task id.")
+            Args.get_task_arg("Task id")
         ]
         self.flag_func_map = (
             ("delete", self.delete),
@@ -43,10 +43,10 @@ class TaskAction(Action):
     @check_all("task")
     def delete(self, params):
         """To delete some tasks:
-                fuel task delete --task-id 1,2,3
+                fuel task --delete --task-id 1,2,3
 
-           To delete some tasks forcefully (without considering their state):
-                fuel task delete -f --tid 1,6
+            To delete some tasks forcefully (without considering their state):
+                fuel task --delete -f --tid 1,6
         """
         tasks = Task.get_by_ids(params.task)
         delete_response = map(
@@ -63,7 +63,7 @@ class TaskAction(Action):
         """To display all tasks:
                 fuel task
 
-           To  display tasks with some ids:
+            To display tasks with some ids:
                 fuel task --tid 1,2,3
         """
         acceptable_keys = ("id", "status", "name",
