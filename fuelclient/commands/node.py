@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from cliff import show
+
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 from fuelclient import utils
@@ -68,6 +70,7 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                'mac',
                'error_type',
                'pending_addition',
+               'hostname',
                'fqdn',
                'platform_name',
                'cluster',
@@ -114,3 +117,37 @@ class NodeCreateVMsConf(NodeMixIn, base.BaseCommand):
         data = self.client.node_vms_create(parsed_args.id, confs)
         msg = "{0}".format(data)
         self.app.stdout.write(msg)
+
+
+class NodeUpdate(NodeMixIn, base.BaseShowCommand):
+    """Change given attributes for a node."""
+
+    columns = NodeShow.columns
+
+    def get_parser(self, prog_name):
+        # Avoid adding id argument by BaseShowCommand
+        parser = show.ShowOne.get_parser(self, prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the node instance to be updated.')
+
+        parser.add_argument('--hostname',
+                            type=str,
+                            default=None,
+                            help='New hostname for node')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        updates = {}
+        for attr in self.client._updatable_attributes:
+            if getattr(parsed_args, attr, None):
+                updates[attr] = getattr(parsed_args, attr)
+
+        updated_node = self.client.update(parsed_args.id,
+                                          dict(updates))
+        updated_node = data_utils.get_display_data_single(self.columns,
+                                                          updated_node)
+
+        return (self.columns, updated_node)
