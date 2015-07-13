@@ -44,6 +44,7 @@ def get_fake_node(cluster=None, hostname=None, node_id=None, cpu_model=None,
             'progress': 100,
             'roles': roles or ['compute'],
             'status': status or 'ready',
+            'hostname': host_name,
             'fqdn': '{hostname}.example.com'.format(hostname=host_name),
 
             'meta': {'cpu': {'real': 0,
