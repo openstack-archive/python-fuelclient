@@ -39,6 +39,7 @@ substitutions = {
     "--roles": "--role",
     "help": "--help",
     "change-password": "--change-password",
+    "hostname": "--hostname",
 }
 
 
@@ -249,6 +250,10 @@ def get_file_pattern_arg():
         flags=("--fp", "--file-pattern"),
         default="*tasks.yaml",
         help="Provide unix file pattern to filter tasks with files.")
+
+
+def get_hostname_arg(help_msg):
+    return get_str_arg("hostname", help=help_msg)
 
 
 def get_network_arg(help_msg):
