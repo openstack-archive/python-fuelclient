@@ -67,6 +67,7 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                'mac',
                'error_type',
                'pending_addition',
+               'hostname',
                'fqdn',
                'platform_name',
                'cluster',

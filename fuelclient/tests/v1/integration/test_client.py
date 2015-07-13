@@ -19,6 +19,7 @@ import tempfile
 
 import nose
 
+from fuelclient.objects.node import Node
 from fuelclient.tests import base
 
 
@@ -74,7 +75,7 @@ class TestHandlers(base.BaseTestCase):
                     " --deploy | --delete-from-db | --provision]", "-h",
                     "--help", " -s", "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",
-                    "--role", "--net"]
+                    "--role", "--net", "--hostname"]
         self.check_all_in_msg("node --help", help_msg)
 
         self.check_for_rows_in_table("node")
@@ -165,6 +166,21 @@ class TestHandlers(base.BaseTestCase):
             "node --node {0} --delete-from-db".format(node_id),
             msg
         )
+
+    def test_node_change_hostname(self):
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1",
+            "--env-id=1 node set --node 2 --role=controller"
+        ))
+        msg = "Hostname for node with id 2 has been changed to test-name.\n"
+        self.check_for_stdout(
+            "node --node 2 --hostname test-name",
+            msg
+        )
+        nodes = Node.get_by_ids([2])
+        self.assertEqual(1, len(nodes))
+        self.assertEqual('test-name', nodes[0].data['hostname'])
 
     def test_destroy_multiple_nodes(self):
         self.load_data_to_nailgun_server()
