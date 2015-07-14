@@ -13,6 +13,7 @@
 #    under the License.
 
 import argparse
+import sys
 
 from fuelclient.cli import serializers
 from fuelclient import client
@@ -26,4 +27,5 @@ class FuelVersionAction(argparse._VersionAction):
     def __call__(self, parser, namespace, values, option_string=None):
         serializer = serializers.Serializer.from_params(namespace)
         version = client.APIClient.get_fuel_version()
-        parser.exit(message=serializer.serialize(version))
+        print(serializer.serialize(version))
+        sys.exit(0)
