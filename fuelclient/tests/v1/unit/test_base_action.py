@@ -109,20 +109,20 @@ class TestFuelVersion(base_tests.UnitTestCase):
     def test_return_yaml(self, mrequests):
         mrequests.get('/api/v1/version', json=self.VERSION)
 
-        with mock.patch('sys.stderr') as mstderr:
+        with mock.patch('sys.stdout') as mstdout:
             with self.assertRaises(SystemExit):
                 self.execute(['fuel', '--fuel-version', '--yaml'])
-        args, _ = mstderr.write.call_args
+        args, _ = mstdout.write.call_args_list[0]
         with self.assertRaisesRegexp(
                 ValueError, 'No JSON object could be decoded'):
             json.loads(args[0])
-        yaml.load(args[0])
+        self.assertEqual(self.VERSION, yaml.load(args[0]))
 
     def test_return_json(self, mrequests):
         mrequests.get('/api/v1/version', json=self.VERSION)
 
-        with mock.patch('sys.stderr') as mstderr:
+        with mock.patch('sys.stdout') as mstdout:
             with self.assertRaises(SystemExit):
                 self.execute(['fuel', '--fuel-version', '--json'])
-        args, _ = mstderr.write.call_args
-        json.loads(args[0])
+        args, _ = mstdout.write.call_args_list[0]
+        self.assertEqual(self.VERSION, json.loads(args[0]))
