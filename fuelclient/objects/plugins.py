@@ -280,10 +280,14 @@ class Plugins(base.BaseObject):
         return cls.update_or_create(metadata, force=force)
 
     @classmethod
-    def sync(cls, plugin_ids=None):
+    def sync(cls, plugin_ids=[]):
         """Checks all of the plugins on file systems,
         and makes sure that they have consistent information
         in API service.
+
+        :params plugin_ids: list of ids for plugins which should be synced
+        :type plugin_ids: list
+        :returns: None
         """
         post_data = None
         if plugin_ids:
@@ -316,7 +320,10 @@ class Plugins(base.BaseObject):
         version = plugin.version_from_file(plugin_path)
 
         plugin.install(plugin_path, force=force)
-        return cls.register(name, version, force=force)
+        response = cls.register(name, version, force=force)
+        cls.sync(plugin_ids=[response['id']])
+
+        return response
 
     @classmethod
     def remove(cls, plugin_name, plugin_version):
