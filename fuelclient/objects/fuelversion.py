@@ -12,16 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""fuelclient.objects sub-module contains classes that mirror
-functionality from nailgun objects.
-"""
-
 from fuelclient.objects.base import BaseObject
-from fuelclient.objects.environment import Environment
-from fuelclient.objects.node import Node
-from fuelclient.objects.node import NodeCollection
-from fuelclient.objects.release import Release
-from fuelclient.objects.task import DeployTask
-from fuelclient.objects.task import SnapshotTask
-from fuelclient.objects.task import Task
-from fuelclient.objects.fuelversion import FuelVersion
+
+
+class FuelVersion(BaseObject):
+
+    class_api_path = "version/"
