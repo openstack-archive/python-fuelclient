@@ -43,8 +43,8 @@ class FuelClient(app.App):
         parser.add_argument(
             '--fuel-version',
             action=fuel_version.FuelVersionAction,
-            help="show Fuel server's version number and exit"
-        )
+            help=("show Fuel server's version number and exit. "
+                  "WARNING: deprecated since 7.0 release"))
 
         return parser
 
