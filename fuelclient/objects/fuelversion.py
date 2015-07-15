@@ -12,14 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient. v1 import environment
-from fuelclient. v1 import node
-from fuelclient. v1 import task
-from fuelclient. v1 import fuelversion
+from fuelclient.objects.base import BaseObject
 
-__all__ = (
-    'environment',
-    'node',
-    'task',
-    'fuelversion'
-)
+
+class FuelVersion(BaseObject):
+
+    class_api_path = "version/"

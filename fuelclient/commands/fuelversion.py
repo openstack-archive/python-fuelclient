@@ -12,14 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient. v1 import environment
-from fuelclient. v1 import node
-from fuelclient. v1 import task
-from fuelclient. v1 import fuelversion
+from fuelclient.commands import base
 
-__all__ = (
-    'environment',
-    'node',
-    'task',
-    'fuelversion'
-)
+
+class FuelVersion(base.BaseCommand):
+    """Show fuel version."""
+
+    entity_name = 'fuel-version'
+
+    def take_action(self, parsed_args):
+        version = self.client.get_all()
+        msg = self.serializer.serialize(version)
+        self.app.stdout.write(msg)
