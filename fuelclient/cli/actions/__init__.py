@@ -38,6 +38,7 @@ from fuelclient.cli.actions.snapshot import SnapshotAction
 from fuelclient.cli.actions.task import TaskAction
 from fuelclient.cli.actions.user import UserAction
 from fuelclient.cli.actions.plugins import PluginAction
+from fuelclient.cli.actions.fuelversion import FuelVersionAction
 
 actions_tuple = (
     ReleaseAction,
@@ -62,6 +63,7 @@ actions_tuple = (
     NotifyAction,
     TokenAction,
     GraphAction,
+    FuelVersionAction,
 )
 
 actions = dict(
