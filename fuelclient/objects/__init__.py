@@ -24,3 +24,4 @@ from fuelclient.objects.release import Release
 from fuelclient.objects.task import DeployTask
 from fuelclient.objects.task import SnapshotTask
 from fuelclient.objects.task import Task
+from fuelclient.objects.fuelversion import FuelVersion
