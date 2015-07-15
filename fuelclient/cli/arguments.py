@@ -133,7 +133,9 @@ def get_fuel_version_arg():
         "args": ["--fuel-version"],
         "params": {
             "action": fuel_version.FuelVersionAction,
-            "help": "show Fuel server's version number and exit"
+            "help": "show Fuel server's version number and exit. "
+                    "WARNING: deprecated since 7.0 release. "
+                    "Please use fuel-version command instead"
         }
     }
 
