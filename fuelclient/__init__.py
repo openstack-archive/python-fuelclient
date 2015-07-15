@@ -49,8 +49,9 @@ def get_client(resource, version='v1'):
     version_map = {
         'v1': {
             'environment': v1.environment,
+            'fuel-version': v1.fuelversion,
             'node': v1.node,
-            'task': v1.task
+            'task': v1.task,
         }
     }
 
