@@ -28,18 +28,25 @@ class BaseLibTest(base.UnitTestCase):
         self.m_request = rm.Mocker()
         self.m_request.start()
 
-        self.session_adapter = self.m_request._adapter.register_uri(rm.ANY,
-                                                                    rm.ANY)
+        self.top_matcher = self.m_request.register_uri(rm.ANY,
+                                                       rm.ANY,
+                                                       text='{}')
 
-        self.api_client_patcher = patch.object(client.Client,
-                                               'auth_required',
-                                               new_callable=mock.PropertyMock)
-        self.m_api_client = self.api_client_patcher.start()
-        self.m_api_client.return_value = False
+        self.auth_required_patch = patch.object(client.Client,
+                                                'auth_required',
+                                                new_callable=mock.PropertyMock)
+        self.m_auth_required = self.auth_required_patch.start()
+        self.m_auth_required.return_value = False
+
+        self.addCleanup(self.m_request.stop)
+        self.addCleanup(self.auth_required_patch.stop)
 
     def tearDown(self):
-        self.m_request.stop()
-        self.api_client_patcher.stop()
+        calls = ['{method} {path}'.format(method=req.method, path=req.path)
+                 for req in self.top_matcher.request_history]
+        msg = 'Unexpected HTTP requests were detected:\n %s' % '\n'.join(calls)
+
+        self.assertFalse(self.top_matcher.called, msg=msg)
 
     def get_object_uri(self, collection_path, object_id, attribute='/'):
         return urlparse.urljoin(collection_path, str(object_id) + attribute)
