@@ -19,7 +19,6 @@ import requests
 from keystoneclient.v2_0 import client as auth_client
 from six.moves.urllib import parse as urlparse
 
-from fuelclient.cli.error import exceptions_decorator
 from fuelclient import fuelclient_settings
 from fuelclient.logs import NullHandler
 
@@ -59,7 +58,6 @@ class Client(object):
         return ''
 
     @property
-    @exceptions_decorator
     def auth_required(self):
         if self._auth_required is None:
             url = self.api_root + 'version'
@@ -98,7 +96,6 @@ class Client(object):
         if self.debug:
             print(message)
 
-    @exceptions_decorator
     def delete_request(self, api):
         """Make DELETE request to specific API with some data
         """
@@ -114,7 +111,6 @@ class Client(object):
 
         return resp.json()
 
-    @exceptions_decorator
     def put_request(self, api, data):
         """Make PUT request to specific API with some data
         """
@@ -149,7 +145,6 @@ class Client(object):
         params = params or {}
         return requests.get(url, params=params, headers=headers)
 
-    @exceptions_decorator
     def get_request(self, api, ostf=False, params=None):
         """Make GET request to specific API
         """
@@ -180,7 +175,6 @@ class Client(object):
 
         return requests.post(url, data=data_json, headers=headers)
 
-    @exceptions_decorator
     def post_request(self, api, data=None, ostf=False):
         """Make POST request to specific API with some data
         """
@@ -189,7 +183,6 @@ class Client(object):
 
         return resp.json()
 
-    @exceptions_decorator
     def get_fuel_version(self):
         return self.get_request("version")
 
