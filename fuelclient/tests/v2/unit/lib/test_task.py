@@ -14,9 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
+import re
+
 import requests_mock as rm
 
 import fuelclient
+from fuelclient.tests import utils
 from fuelclient.tests.v2.unit.lib import test_api
 
 
@@ -28,19 +32,27 @@ class TestTaskFacade(test_api.BaseLibTest):
         self.version = 'v1'
         self.res_uri = '/api/{version}/tasks/'.format(version=self.version)
 
+        self.fake_task = utils.get_fake_task()
+        self.fake_tasks = [utils.get_fake_task() for _ in range(10)]
+
         self.client = fuelclient.get_client('task', self.version)
 
-    def test_node_list(self):
+    def test_task_list(self):
+
+        matcher = self.m_request.get(self.res_uri,
+                                     text=json.dumps(self.fake_task))
+
         self.client.get_all()
 
-        self.assertEqual(rm.GET, self.session_adapter.last_request.method)
-        self.assertEqual(self.res_uri, self.session_adapter.last_request.path)
+        self.assertTrue(self.res_uri, matcher.called)
 
-    def test_node_show(self):
+    def test_task_show(self):
         task_id = 42
         expected_uri = self.get_object_uri(self.res_uri, task_id)
 
+        matcher = self.m_request.get(expected_uri,
+                                     text=json.dumps(self.fake_tasks))
+
         self.client.get_by_id(task_id)
 
-        self.assertEqual(rm.GET, self.session_adapter.last_request.method)
-        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertTrue(matcher.called)
