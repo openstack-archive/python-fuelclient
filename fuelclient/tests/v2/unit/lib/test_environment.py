@@ -14,6 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
+import re
+
 import mock
 import requests_mock as rm
 
@@ -22,6 +25,7 @@ from fuelclient.cli import error
 from fuelclient.objects import base as base_object
 from fuelclient.objects import environment as env_object
 from fuelclient.objects import task as task_object
+from fuelclient.tests import utils
 from fuelclient.tests.v2.unit.lib import test_api
 
 
@@ -33,13 +37,22 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.version = 'v1'
         self.res_uri = '/api/{version}/clusters/'.format(version=self.version)
 
+        single_regexp = re.compile('{0}\d+/?$'.format(self.res_uri))
+
+        fake_envs = [utils.get_fake_env() for i in range(5)]
+        self.multiple_matcher = self.m_request.get(self.res_uri,
+                                                   text=json.dumps(fake_envs))
+
+        fake_env = utils.get_fake_env()
+        self.single_matcher = self.m_request.get(single_regexp,
+                                                 text=json.dumps(fake_env))
+
         self.client = fuelclient.get_client('environment', self.version)
 
     def test_env_list(self):
         self.client.get_all()
 
-        self.assertEqual(rm.GET, self.session_adapter.last_request.method)
-        self.assertEqual(self.res_uri, self.session_adapter.last_request.path)
+        self.assertEqual(self.res_uri, self.multiple_matcher.last_request.path)
 
     def test_env_show(self):
         env_id = 42
@@ -47,17 +60,17 @@ class TestEnvFacade(test_api.BaseLibTest):
 
         self.client.get_by_id(env_id)
 
-        self.assertEqual(rm.GET, self.session_adapter.last_request.method)
-        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual(expected_uri, self.single_matcher.last_request.path)
 
     def test_env_delete(self):
         env_id = 42
         expected_uri = self.get_object_uri(self.res_uri, env_id)
 
+        matcher = self.m_request.delete(expected_uri, text='{}')
+
         self.client.delete_by_id(env_id)
 
-        self.assertEqual(rm.DELETE, self.session_adapter.last_request.method)
-        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual(expected_uri, matcher.last_request.path)
 
     @mock.patch.object(env_object.Environment, 'init_with_data')
     def test_env_create(self, m_init):
@@ -67,12 +80,15 @@ class TestEnvFacade(test_api.BaseLibTest):
         net = 'neutron'
         mode = 'ha_compact'
 
+        fake_node = json.dumps(utils.get_fake_env())
+        matcher = self.m_request.post(self.res_uri, text=fake_node)
+
         self.client.create(node_name, release_id, net, mode, nst)
 
-        req_data = self.session_adapter.last_request.json()
+        req_data = matcher.last_request.json()
 
-        self.assertEqual(rm.POST, self.session_adapter.last_request.method)
-        self.assertEqual(self.res_uri, self.session_adapter.last_request.path)
+        self.assertEqual(rm.POST, matcher.last_request.method)
+        self.assertEqual(self.res_uri, matcher.last_request.path)
 
         # TODO(romcheg): deployment mode requires investigation
         self.assertEqual(release_id, req_data['release_id'])
@@ -102,35 +118,44 @@ class TestEnvFacade(test_api.BaseLibTest):
     def test_env_deploy(self, m_init):
         env_id = 42
         expected_uri = self.get_object_uri(self.res_uri, env_id, '/changes')
+        matcher = self.m_request.put(expected_uri, text='{}')
 
         self.client.deploy_changes(env_id)
 
-        self.assertEqual(rm.PUT, self.session_adapter.last_request.method)
-        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual(expected_uri, matcher.last_request.path)
 
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_upgrade(self, m_init):
         env_id = 42
         release_id = 10
-        expected_uri = self.get_object_uri(self.res_uri, env_id, '/update/')
+
+        fake_env = json.dumps(utils.get_fake_env())
+        expected = [(self.get_object_uri(self.res_uri, env_id), fake_env),
+                    (self.get_object_uri(self.res_uri, env_id, '/update/'),
+                     '{}')]
+
+        matchers = [self.m_request.put(uri, text=text)
+                    for uri, text in expected]
 
         self.client.upgrade(env_id, release_id)
 
-        self.assertEqual(rm.PUT, self.session_adapter.last_request.method)
-        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        for i in range(len(expected)):
+            matcher = matchers[i]
+            expected_uri, _ = expected[i]
+            self.assertEqual(expected_uri, matcher.last_request.path)
 
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_update(self, m_init):
         env_id = 42
         expected_uri = self.get_object_uri(self.res_uri, env_id)
 
-        self.client.update(env_id, name="new_name")
-        req_data = self.session_adapter.request_history[0].json()
+        fake_env = json.dumps(utils.get_fake_env())
+        matcher = self.m_request.put(expected_uri, text=fake_env)
 
-        self.assertEqual(rm.PUT,
-                         self.session_adapter.request_history[0].method)
-        self.assertEqual(expected_uri,
-                         self.session_adapter.request_history[0].path)
+        self.client.update(env_id, name="new_name")
+        req_data = matcher.last_request.json()
+
+        self.assertEqual(expected_uri, matcher.last_request.path)
         self.assertEqual('new_name', req_data['name'])
 
     def test_env_update_wrong_attribute(self):
@@ -150,19 +175,22 @@ class TestEnvFacade(test_api.BaseLibTest):
         expected_uri = self.get_object_uri(self.res_uri,
                                            env_id, '/assignment/')
 
+        matcher = self.m_request.post(expected_uri, text='{}')
+
         self.client.add_nodes(env_id, nodes, roles)
 
-        self.assertEqual(rm.POST, self.session_adapter.last_request.method)
-        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual(expected_uri, matcher.last_request.path)
 
-        for assignment in self.session_adapter.last_request.json():
+        for assignment in matcher.last_request.json():
             # Check whether all assignments are expected
             self.assertIn(assignment, expected_body)
 
     def test_env_spawn_vms(self):
         env_id = 10
         expected_uri = '/api/v1/clusters/{0}/spawn_vms/'.format(env_id)
+
+        matcher = self.m_request.put(expected_uri, text='{}')
+
         self.client.spawn_vms(env_id)
 
-        self.assertEqual(rm.PUT, self.session_adapter.last_request.method)
-        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual(expected_uri, matcher.last_request.path)
