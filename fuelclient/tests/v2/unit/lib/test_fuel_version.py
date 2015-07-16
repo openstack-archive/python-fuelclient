@@ -18,6 +18,7 @@ import requests_mock as rm
 
 import fuelclient
 from fuelclient.tests.v2.unit.lib import test_api
+from fuelclient.tests import utils
 
 
 class TestFuelVersionFacade(test_api.BaseLibTest):
@@ -28,10 +29,13 @@ class TestFuelVersionFacade(test_api.BaseLibTest):
         self.version = 'v1'
         self.res_uri = '/api/{version}/version/'.format(version=self.version)
 
+        self.fake_version = utils.get_fake_fuel_version()
+
         self.client = fuelclient.get_client('fuel-version', self.version)
 
     def test_fuel_version(self):
+        matcher = self.m_request.get(self.res_uri, json=self.fake_version)
+
         self.client.get_all()
 
-        self.assertEqual(rm.GET, self.session_adapter.last_request.method)
-        self.assertEqual(self.res_uri, self.session_adapter.last_request.path)
+        self.assertTrue(matcher.called)
