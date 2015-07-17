@@ -61,7 +61,7 @@ class TestNodeFacade(test_api.BaseLibTest):
         node_id = 42
 
         expected_uri = "/api/v1/nodes/{0}/vms_conf/".format(node_id)
-        expected_body = json.dumps(config)
+        expected_body = json.dumps({'vms_conf': config})
 
         self.client.node_vms_create(node_id, config)
 

@@ -123,7 +123,7 @@ class Node(BaseObject):
 
     def node_vms_create(self, config):
         url = "nodes/{0}/vms_conf/".format(self.id)
-        return self.connection.put_request(url, config)
+        return self.connection.put_request(url, {'vms_conf': config})
 
     def get_node_vms_conf(self):
         url = "nodes/{0}/vms_conf/".format(self.id)
