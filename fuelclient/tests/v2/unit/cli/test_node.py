@@ -36,7 +36,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
-        self.m_client.get_all.assert_called_once_with(environment_id=None)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, labels=None)
 
     def test_node_list_with_env(self):
         env_id = 42
@@ -45,7 +46,31 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
-        self.m_client.get_all.assert_called_once_with(environment_id=env_id)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=env_id, labels=None)
+
+    def test_node_list_with_labels(self):
+        labels = ["key_1=val_1", "key_2=val_2"]
+        args = 'node list --labels {labels}'.format(
+            labels=','.join(labels))
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, labels=labels)
+
+    def test_node_list_with_env_and_labels(self):
+        env_id = 42
+        labels = ["key_1=val_1", "key_2=val_2"]
+        args = 'node list --env {env} --labels {labels}'.format(
+            env=env_id, labels=','.join(labels))
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=env_id, labels=labels)
 
     def test_node_show(self):
         node_id = 42
@@ -97,4 +122,4 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.update.assert_called_once_with(
-            node_id, {"hostname": hostname})
+            node_id, **{"hostname": hostname})
