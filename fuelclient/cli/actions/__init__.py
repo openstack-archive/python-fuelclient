@@ -26,6 +26,7 @@ from fuelclient.cli.actions.health import HealthCheckAction
 from fuelclient.cli.actions.interrupt import ResetAction
 from fuelclient.cli.actions.interrupt import StopAction
 from fuelclient.cli.actions.network import NetworkAction
+from fuelclient.cli.actions.network import NetworkTemplateAction
 from fuelclient.cli.actions.node import NodeAction
 from fuelclient.cli.actions.nodegroup import NodeGroupAction
 from fuelclient.cli.actions.notifications import NotificationsAction
@@ -52,6 +53,7 @@ actions_tuple = (
     SettingsAction,
     VmwareSettingsAction,
     NetworkAction,
+    NetworkTemplateAction,
     TaskAction,
     SnapshotAction,
     HealthCheckAction,
