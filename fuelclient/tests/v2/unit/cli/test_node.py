@@ -18,6 +18,7 @@ import mock
 
 from fuelclient.tests.utils import fake_node
 from fuelclient.tests.v2.unit.cli import test_engine
+from fuelclient.v1 import node
 
 
 class TestNodeCommand(test_engine.BaseCLITest):
@@ -78,3 +79,22 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.node_vms_create.assert_called_once_with(node_id, config)
+
+    def test_node_set_hostname(self):
+        self.m_client._updatable_attributes = \
+            node.NodeClient._updatable_attributes
+        node_id = 42
+        hostname = 'test-name'
+
+        self.m_client.update.return_value = \
+            fake_node.get_fake_node(node_id=node_id,
+                                    hostname=hostname)
+
+        args = 'node update {node_id} --hostname {hostname}'\
+            .format(node_id=node_id, hostname=hostname)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.update.assert_called_once_with(
+            node_id, {"hostname": hostname})

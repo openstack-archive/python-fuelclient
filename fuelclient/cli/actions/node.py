@@ -45,6 +45,7 @@ class NodeAction(Action):
                 Args.get_network_arg("Node network configuration."),
                 Args.get_disk_arg("Node disk configuration."),
                 Args.get_deploy_arg("Deploy specific nodes."),
+                Args.get_hostname_arg("Set node hostname."),
                 Args.get_delete_from_db_arg(
                     "Delete specific nodes only from fuel db.\n"
                     "User should still delete node from cobbler"),
@@ -79,6 +80,7 @@ class NodeAction(Action):
             ("disk", self.attributes),
             ("deploy", self.start),
             ("provision", self.start),
+            ("hostname", self.set_hostname),
             ("delete-from-db", self.delete_from_db),
             ("tasks", self.execute_tasks),
             ("skip", self.execute_tasks),
@@ -325,4 +327,22 @@ class NodeAction(Action):
             {},
             "Nodes with ids {0} have been deleted from Fuel db.".format(
                 params.node)
+        )
+
+    @check_all("node", "hostname")
+    def set_hostname(self, params):
+        """To set node hostname:
+                fuel node --node-id 1 --hostname ctrl-01
+        """
+        nodes = Node.get_by_ids(params.node)
+
+        if len(nodes) > 1:
+            raise error.ArgumentException(
+                "You should select only one node to change hostname."
+            )
+        nodes[0].set({"hostname": params.hostname})
+        self.serializer.print_to_output(
+            {},
+            "Hostname for node with id {0} has been changed to {1}."
+            .format(params.node[0], params.hostname)
         )
