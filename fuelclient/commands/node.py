@@ -43,14 +43,19 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             '-e',
             '--env',
             type=int,
-            help='Show only nodes that are in the specified environment'
-        )
+            help='Show only nodes that are in the specified environment')
+
+        parser.add_argument(
+            '-l',
+            '--labels',
+            type=lambda v: v.split(","),
+            help='Show only nodes that have specific labels')
 
         return parser
 
     def take_action(self, parsed_args):
-
-        data = self.client.get_all(environment_id=parsed_args.env)
+        data = self.client.get_all(
+            environment_id=parsed_args.env, labels=parsed_args.labels)
         data = data_utils.get_display_data_multi(self.columns, data)
 
         return (self.columns, data)
@@ -79,7 +84,45 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                'group_id',
                # TODO(romcheg): network_data mostly never fits the screen
                # 'network_data',
-               'manufacturer')
+               'manufacturer',
+               'labels')
+
+
+class NodeUpdate(NodeMixIn, base.BaseShowCommand):
+    """Change given attributes for a node."""
+
+    columns = NodeShow.columns
+
+    def get_parser(self, prog_name):
+        parser = super(NodeUpdate, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-H',
+            '--hostname',
+            type=str,
+            default=None,
+            help='New hostname for node')
+
+        parser.add_argument(
+            '-l',
+            '--labels',
+            type=lambda v: v.split(","),
+            help='Updates specific labels')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        updates = {}
+        for attr in self.client._updatable_attributes:
+            if getattr(parsed_args, attr, None):
+                updates[attr] = getattr(parsed_args, attr)
+
+        updated_node = self.client.update(
+            parsed_args.id, updates)
+        updated_node = data_utils.get_display_data_single(
+            self.columns, updated_node)
+
+        return (self.columns, updated_node)
 
 
 class NodeVmsList(NodeMixIn, base.BaseShowCommand):
@@ -118,31 +161,36 @@ class NodeCreateVMsConf(NodeMixIn, base.BaseCommand):
         self.app.stdout.write(msg)
 
 
-class NodeUpdate(NodeMixIn, base.BaseShowCommand):
-    """Change given attributes for a node."""
+class NodeLabelList(NodeMixIn, base.BaseListCommand):
+    """Show list of all labels"""
 
-    columns = NodeShow.columns
+    columns = (
+        'node_id',
+        'label_name',
+        'label_value')
 
     def get_parser(self, prog_name):
-        parser = super(NodeUpdate, self).get_parser(prog_name)
+        parser = super(NodeLabelList, self).get_parser(prog_name)
 
-        parser.add_argument('-H',
-                            '--hostname',
-                            type=str,
-                            default=None,
-                            help='New hostname for node')
+        parser.add_argument(
+            '-n',
+            '--nodes',
+            type=lambda v: v.split(","),
+            help='Show labels for specific nodes')
 
         return parser
 
     def take_action(self, parsed_args):
-        updates = {}
-        for attr in self.client._updatable_attributes:
-            if getattr(parsed_args, attr, None):
-                updates[attr] = getattr(parsed_args, attr)
+        data = self.client.get_all_labels_for_nodes(
+            node_ids=parsed_args.nodes)
+        data = data_utils.get_display_data_multi(self.columns, data)
 
-        updated_node = self.client.update(parsed_args.id,
-                                          updates)
-        updated_node = data_utils.get_display_data_single(self.columns,
-                                                          updated_node)
+        return (self.columns, data)
 
-        return (self.columns, updated_node)
+
+class NodeLabelSet(NodeMixIn,):
+    """Create or update specifc labels on nodes"""
+
+
+class NodeLabelDelete(NodeMixIn,):
+    """Delete specific labels on nodes"""
