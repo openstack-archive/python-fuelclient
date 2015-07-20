@@ -87,3 +87,121 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         self.assertTrue(matcher.called)
         self.assertEqual(data, matcher.last_request.json())
+
+    def test_get_all_labels_for_all_nodes(self):
+        matcher = self.m_request.get(self.res_uri, json=self.fake_nodes)
+        self.client.get_all_labels_for_nodes()
+
+        self.assertTrue(matcher.called)
+
+    def test_set_labels_for_all_nodes(self):
+        labels = ['key_1=val_1', 'key_2=val_2', 'key_3   =   val_4']
+        data = {'labels': {
+            'key_1': 'val_1',
+            'key_2': 'val_2',
+            'key_3': 'val_4'
+        }}
+
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        matcher_get = self.m_request.get(self.res_uri, json=self.fake_nodes)
+        matcher_put = self.m_request.put(expected_uri, json=data)
+
+        self.client.set_labels_for_nodes(labels=labels)
+
+        self.assertTrue(matcher_get.called)
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(data, matcher_put.last_request.json())
+
+    def test_set_labels_for_specific_nodes(self):
+        labels = ['key_1=val_1', 'key_2=val_2', 'key_3   =   val_4']
+        node_ids = ['42']
+        data = {'labels': {
+            'key_1': 'val_1',
+            'key_2': 'val_2',
+            'key_3': 'val_4'
+        }}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        matcher_get = self.m_request.get(expected_uri, json=self.fake_node)
+        matcher_put = self.m_request.put(expected_uri, json=data)
+
+        self.client.set_labels_for_nodes(
+            labels=labels, node_ids=node_ids)
+
+        self.assertTrue(matcher_get.called)
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(data, matcher_put.last_request.json())
+
+    def test_delete_labels_for_all_nodes(self):
+        labels_keys = ['key_1', '   key_3   ']
+        data = {'labels': {'key_2': None}}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        matcher_get = self.m_request.get(self.res_uri, json=self.fake_nodes)
+        matcher_put = self.m_request.put(expected_uri, json=data)
+
+        self.client.delete_labels_for_nodes(labels_keys=labels_keys)
+
+        self.assertTrue(matcher_get.called)
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(data, matcher_put.last_request.json())
+
+    def test_delete_labels_for_specific_nodes(self):
+        labels_keys = ['key_2']
+        node_ids = ['42']
+        data = {'labels': {'key_1': 'val_1', 'key_3': 'val_3'}}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        matcher_get = self.m_request.get(expected_uri, json=self.fake_node)
+        matcher_put = self.m_request.put(expected_uri, json=data)
+
+        self.client.delete_labels_for_nodes(
+            labels_keys=labels_keys, node_ids=node_ids)
+
+        self.assertTrue(matcher_get.called)
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(data, matcher_put.last_request.json())
+
+    def test_get_name_and_value_from_labels(self):
+        for label in (
+            'key=value',
+            '   key   =value',
+            'key=    value    ',
+            '  key  =  value   ',
+        ):
+            name, value = self.client._split_label(label)
+            self.assertEqual(name, 'key')
+            self.assertEqual(value, 'value')
+
+    def test_get_name_and_empty_value_from_lables(self):
+        for label in (
+            'key=',
+            '   key   =',
+            'key=        ',
+            '  key  =     ',
+        ):
+            name, value = self.client._split_label(label)
+            self.assertEqual(name, 'key')
+            self.assertIsNone(value)
+
+    def test_labels_after_delete(self):
+        all_labels = {
+            'label_A': 'A',
+            'label_B': None,
+            'label_C': 'C',
+            'label_D': None,
+        }
+        expected_labels = {
+            'label_A': 'A',
+            'label_D': None,
+        }
+
+        for labels_to_delete in (
+            ('label_B', 'label_C'),
+            ('   label_B', 'label_C   '),
+            ('label_B', 'label_C  ', 'unknown_label'),
+        ):
+            result = self.client._labels_after_delete(
+                all_labels, labels_to_delete)
+            self.assertEqual(result, expected_labels)

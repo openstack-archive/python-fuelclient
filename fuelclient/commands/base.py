@@ -116,9 +116,10 @@ class BaseDeleteCommand(BaseCommand):
     def get_parser(self, prog_name):
         parser = super(BaseDeleteCommand, self).get_parser(prog_name)
 
-        parser.add_argument('id', type=int,
-                            help='Id of the {0} to '
-                                 'delete.'.format(self.entity_name))
+        parser.add_argument(
+            'id',
+            type=int,
+            help='Id of the {0} to delete.'.format(self.entity_name))
 
         return parser
 
@@ -127,5 +128,7 @@ class BaseDeleteCommand(BaseCommand):
 
         msg = '{ent} with id {ent_id} was deleted\n'
 
-        self.app.stdout.write(msg.format(ent=self.entity_name.capitalize(),
-                                         ent_id=parsed_args.id))
+        self.app.stdout.write(
+            msg.format(
+                ent=self.entity_name.capitalize(),
+                ent_id=parsed_args.id))
