@@ -80,3 +80,25 @@ class TestNodeFacade(test_api.BaseLibTest):
         self.assertEqual(rm.PUT, self.session_adapter.last_request.method)
         self.assertEqual(expected_uri, self.session_adapter.last_request.path)
         self.assertEqual(data, self.session_adapter.last_request.json())
+
+    def test_get_all_labels_for_all_nodes(self):
+        self.client.get_all_labels_for_nodes()
+
+        self.assertEqual(rm.GET, self.session_adapter.last_request.method)
+        self.assertEqual(self.res_uri, self.session_adapter.last_request.path)
+
+    def test_set_labels_for_nodes(self):
+        labels = ['key_1=val_1', 'key_2=val_2']
+        node_ids = ['42']
+        data = {'labels': {
+            'key_1': 'val_1',
+            'key_2': 'val_2'
+        }}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        self.client.set_labels_for_nodes(
+            labels=labels, node_ids=node_ids)
+
+        self.assertEqual(rm.PUT, self.session_adapter.last_request.method)
+        self.assertEqual(expected_uri, self.session_adapter.last_request.path)
+        self.assertEqual(data, self.session_adapter.last_request.json())
