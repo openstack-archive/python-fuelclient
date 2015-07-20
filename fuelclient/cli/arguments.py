@@ -254,6 +254,10 @@ def get_file_pattern_arg():
 def get_network_arg(help_msg):
     return get_boolean_arg("network", flags=("--net",), help=help_msg)
 
+#
+# def get_network_template_arg(help_msg):
+#     return get_boolean_arg("network-template", flags=("--net-template",), help=help_msg)
+
 
 def get_force_arg(help_msg):
     return get_boolean_arg("force", flags=("-f",), help=help_msg)
