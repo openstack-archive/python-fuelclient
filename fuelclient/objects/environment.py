@@ -31,6 +31,7 @@ class Environment(BaseObject):
     deployment_tasks_path = 'clusters/{0}/deployment_tasks'
     deployment_tasks_graph_path = 'clusters/{0}/deploy_tasks/graph.gv'
     attributes_path = 'clusters/{0}/attributes'
+    network_template_path = 'clusters/{0}/network_configuration/template'
 
     @classmethod
     def create(cls, name, release_id, net, net_segment_type,
@@ -135,6 +136,12 @@ class Environment(BaseObject):
             "vmware_settings_{0}".format(self.id)
         )
 
+    def get_network_template_data_path(self, directory=os.curdir):
+        return os.path.join(
+            os.path.abspath(directory),
+            "network_template_{0}".format(self.id)
+        )
+
     def write_network_data(self, network_data, directory=os.curdir,
                            serializer=None):
         return (serializer or self.serializer).write_to_path(
@@ -156,6 +163,13 @@ class Environment(BaseObject):
             settings_data
         )
 
+    def write_network_template_data(self, settings_data, directory=os.curdir,
+                                    serializer=None):
+        return (serializer or self.serializer).write_to_path(
+            self.get_network_template_data_path(directory),
+            settings_data
+        )
+
     def read_network_data(self, directory=os.curdir,
                           serializer=None):
         network_file_path = self.get_network_data_path(directory)
@@ -170,6 +184,13 @@ class Environment(BaseObject):
     def read_vmware_settings_data(self, directory=os.curdir, serializer=None):
         return (serializer or self.serializer).read_from_file(
             self.get_vmware_settings_data_path(directory))
+
+    def read_network_template_data(self, directory=os.curdir,
+                                   serializer=None):
+        network_template_file_path = self.get_network_template_data_path(
+            directory)
+        return (serializer or self.serializer).read_from_file(
+            network_template_file_path)
 
     @property
     def status(self):
@@ -198,6 +219,10 @@ class Environment(BaseObject):
         )
 
     @property
+    def network_template_url(self):
+        return "clusters/{0}/network_configuration/template".format(self.id)
+
+    @property
     def network_verification_url(self):
         return self.network_url + "/verify"
 
@@ -216,6 +241,9 @@ class Environment(BaseObject):
     def get_default_vmware_settings_data(self):
         return self.connection.get_request(self.default_vmware_settings_url)
 
+    def get_network_template_data(self):
+        return self.connection.get_request(self.network_template_url)
+
     def set_network_data(self, data):
         return self.connection.put_request(
             self.network_url, data)
@@ -231,6 +259,10 @@ class Environment(BaseObject):
     def verify_network(self):
         return self.connection.put_request(
             self.network_verification_url, self.get_network_data())
+
+    def set_network_template_data(self, data):
+        return self.connection.put_request(
+            self.network_template_url, data)
 
     def _get_fact_dir_name(self, fact_type, directory=os.path.curdir):
         return os.path.join(

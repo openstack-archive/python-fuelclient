@@ -87,3 +87,55 @@ class NetworkAction(Action):
             " downloaded to {1}"
             .format(env.id, network_file_path)
         )
+
+
+class NetworkTemplateAction(Action):
+    """Manipulate network templates for a specific environment
+    """
+    action_name = 'network-template'
+
+    def __init__(self):
+        super(NetworkTemplateAction, self).__init__()
+        self.args = (
+            Args.get_env_arg(required=True),
+            Args.get_dir_arg("Directory with network templates."),
+            group(
+                Args.get_download_arg(
+                    "Download current network template configuration."),
+                Args.get_verify_arg(
+                    "Verify current network template configuration."),
+                Args.get_upload_arg(
+                    "Upload changed network template configuration."),
+                required=True))
+
+        self.flag_func_map = (
+            ("upload", self.upload),
+            ("download", self.download))
+
+    def upload(self, params):
+        """Uploads network template from filesystem path
+           for specified environment:
+               fuel --env 1 network --upload --dir path/to/directory
+        """
+        env = Environment(params.env)
+        network_data = env.read_network_template_data(
+            directory=params.dir,
+            serializer=self.serializer)
+
+        env.set_network_template_data(network_data)
+        print("Network template {0} has been uploaded.".format(params.dir))
+
+    def download(self, params):
+        """Downloads network template in current
+           directory for specified environment:
+               fuel --env 1 network-template --download
+        """
+        env = Environment(params.env)
+        network_data = env.get_network_template_data()
+        network_template_file_path = env.write_network_template_data(
+            network_data,
+            directory=params.dir,
+            serializer=self.serializer)
+
+        print("Network template configuration for environment with id={0}"
+              " downloaded to {1}".format(env.id, network_template_file_path))
