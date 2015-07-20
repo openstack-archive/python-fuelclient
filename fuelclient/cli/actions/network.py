@@ -87,3 +87,8 @@ class NetworkAction(Action):
             " downloaded to {1}"
             .format(env.id, network_file_path)
         )
+
+
+class NetworkTemlateAction(Action):
+    """Manipulate network templates for specific environments
+    """
