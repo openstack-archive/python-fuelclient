@@ -43,14 +43,19 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             '-e',
             '--env',
             type=int,
-            help='Show only nodes that are in the specified environment'
-        )
+            help='Show only nodes that are in the specified environment')
+
+        parser.add_argument(
+            '-l',
+            '--labels',
+            nargs='+',
+            help='Show only nodes that have specific labels')
 
         return parser
 
     def take_action(self, parsed_args):
-
-        data = self.client.get_all(environment_id=parsed_args.env)
+        data = self.client.get_all(
+            environment_id=parsed_args.env, labels=parsed_args.labels)
         data = data_utils.get_display_data_multi(self.columns, data)
 
         return (self.columns, data)
@@ -80,6 +85,37 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                # TODO(romcheg): network_data mostly never fits the screen
                # 'network_data',
                'manufacturer')
+
+
+class NodeUpdate(NodeMixIn, base.BaseShowCommand):
+    """Change given attributes for a node."""
+
+    columns = NodeShow.columns
+
+    def get_parser(self, prog_name):
+        parser = super(NodeUpdate, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-H',
+            '--hostname',
+            type=str,
+            default=None,
+            help='New hostname for node')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        updates = {}
+        for attr in self.client._updatable_attributes:
+            if getattr(parsed_args, attr, None):
+                updates[attr] = getattr(parsed_args, attr)
+
+        updated_node = self.client.update(
+            parsed_args.id, **updates)
+        updated_node = data_utils.get_display_data_single(
+            self.columns, updated_node)
+
+        return (self.columns, updated_node)
 
 
 class NodeVmsList(NodeMixIn, base.BaseShowCommand):
@@ -118,31 +154,82 @@ class NodeCreateVMsConf(NodeMixIn, base.BaseCommand):
         self.app.stdout.write(msg)
 
 
-class NodeUpdate(NodeMixIn, base.BaseShowCommand):
-    """Change given attributes for a node."""
+class NodeLabelList(NodeMixIn, base.BaseListCommand):
+    """Show list of all labels."""
 
-    columns = NodeShow.columns
+    columns = (
+        'node_id',
+        'label_name',
+        'label_value')
 
     def get_parser(self, prog_name):
-        parser = super(NodeUpdate, self).get_parser(prog_name)
+        parser = super(NodeLabelList, self).get_parser(prog_name)
 
-        parser.add_argument('-H',
-                            '--hostname',
-                            type=str,
-                            default=None,
-                            help='New hostname for node')
+        parser.add_argument(
+            '-n',
+            '--nodes',
+            nargs='+',
+            help='Show labels for specific nodes')
 
         return parser
 
     def take_action(self, parsed_args):
-        updates = {}
-        for attr in self.client._updatable_attributes:
-            if getattr(parsed_args, attr, None):
-                updates[attr] = getattr(parsed_args, attr)
+        data = self.client.get_all_labels_for_nodes(
+            node_ids=parsed_args.nodes)
+        data = data_utils.get_display_data_multi(self.columns, data)
 
-        updated_node = self.client.update(parsed_args.id,
-                                          updates)
-        updated_node = data_utils.get_display_data_single(self.columns,
-                                                          updated_node)
+        return (self.columns, data)
 
-        return (self.columns, updated_node)
+
+class NodeLabelSet(NodeMixIn, base.BaseCommand):
+    """Create or update specifc labels on nodes."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeLabelSet, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'labels',
+            nargs='+',
+            help='List of labels for create or update')
+
+        parser.add_argument(
+            '-n',
+            '--nodes',
+            nargs='+',
+            help='Create or update labels only for specific nodes')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.set_labels_for_nodes(
+            labels=parsed_args.labels, node_ids=parsed_args.nodes)
+        msg = "Labels have been updated on nodes: {0} \n".format(
+            ','.join(data))
+        self.app.stdout.write(msg)
+
+
+class NodeLabelDelete(NodeMixIn, base.BaseCommand):
+    """Delete specific labels on nodes."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeLabelDelete, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'labels_keys',
+            nargs='+',
+            help='List of labels keys for delete')
+
+        parser.add_argument(
+            '-n',
+            '--nodes',
+            nargs='+',
+            help='Delete labels only for specific nodes')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.delete_labels_for_nodes(
+            labels_keys=parsed_args.labels_keys, node_ids=parsed_args.nodes)
+        msg = "Labels have been deleted on nodes: {0} \n".format(
+            ','.join(data))
+        self.app.stdout.write(msg)
