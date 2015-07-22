@@ -17,8 +17,6 @@
 import os
 import tempfile
 
-import nose
-
 from fuelclient.tests import base
 
 
@@ -96,17 +94,6 @@ class TestHandlers(base.BaseTestCase):
         msg = "Started provisioning nodes [1].\n"
 
         self.check_for_stdout(cmd, msg)
-
-    def test_selected_node_deploy(self):
-        raise nose.SkipTest("Skipping the test to unlock the CI while "
-                            "#1448977 is been resolved.")
-        self.load_data_to_nailgun_server()
-        self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
-            "--env-id=1 node set --node 1 --role=controller"
-        ))
-        cmd = "--env-id=1 node --deploy --node=1"
-        msg = "Started deploying nodes [1].\n"
 
         self.check_for_stdout(cmd, msg)
 
