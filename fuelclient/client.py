@@ -109,7 +109,7 @@ class Client(object):
         resp = requests.delete(url, headers=headers)
         resp.raise_for_status()
 
-        return resp.json()
+        return resp.text
 
     def put_request(self, api, data):
         """Make PUT request to specific API with some data
