@@ -374,3 +374,29 @@ class TestDeployChanges(base.BaseTestCase):
         add_node = "--env-id=1 node set --node 1 --role=controller"
         deploy_changes = "deploy-changes --env 1"
         self.run_cli_commands((env_create, add_node, deploy_changes))
+
+
+class TestNetworkGroups(base.BaseTestCase):
+    def test_create_network_group_fails_w_duplicate_name(self):
+        err_msg = ("(Network with name storage already exists "
+                   "in node group default)\n")
+
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1 --nst=gre",
+        ))
+        self.check_for_stderr(
+            ("network-group --create --name storage --node-group 1 "
+             "--vlan 10 --cidr 10.0.0.0/24"),
+            err_msg,
+            check_errors=False
+        )
+
+    def test_create_network_group_fails_w_invalid_group(self):
+        err_msg = "(Node group with ID 0 does not exist)\n"
+
+        self.check_for_stderr(
+            ("network-group --create --name test --node-group 0 "
+             "--vlan 10 --cidr 10.0.0.0/24"),
+            err_msg,
+            check_errors=False
+        )
