@@ -439,6 +439,38 @@ def get_group_arg(help_msg):
     return get_set_type_arg("group", help=help_msg)
 
 
+def get_node_group_arg(help_msg):
+    return get_set_type_arg("nodegroup", flags=("--node-group",),
+                            help=help_msg)
+
+
+def get_vlan_arg(help_msg):
+    return get_int_arg("vlan", help=help_msg)
+
+
+def get_cidr_arg(help_msg):
+    return get_str_arg("cidr", help=help_msg)
+
+
+def get_gateway_arg(help_msg):
+    return get_str_arg("gateway", help=help_msg)
+
+
+def get_meta_arg(help_msg):
+    return get_str_arg("meta", help=help_msg)
+
+
+def get_create_network_arg(help_msg):
+    return get_boolean_arg(
+        "create",
+        flags=("-c", "--create"),
+        help=help_msg)
+
+
+def get_network_group_arg(help_msg):
+    return get_set_type_arg("network", help=help_msg)
+
+
 def get_release_arg(help_msg, required=False):
     return get_int_arg(
         "release",
