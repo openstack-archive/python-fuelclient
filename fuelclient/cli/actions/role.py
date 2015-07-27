@@ -60,7 +60,7 @@ class RoleAction(Action):
         """
         roles = Role.get_all(params.release)
 
-        acceptable_keys = ("name", "id")
+        acceptable_keys = ("name",)
 
         self.serializer.print_to_output(
             roles,
