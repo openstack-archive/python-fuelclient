@@ -17,10 +17,10 @@ import json
 from mock import patch
 import yaml
 
+from fuelclient.cli.serializers import Serializer
 from fuelclient.tests import base
 
-API_IN = """id: 2
-name: my_role
+API_IN = """name: my_role
 """
 
 API_OUT = yaml.load(API_IN)
@@ -78,7 +78,18 @@ class TestRoleActions(base.UnitTestCase):
 
     def test_delete_role(self, mreq):
         self.execute(['fuel', 'role',
-                      '--delete', '--role', '3', '--rel', '2'])
+                      '--delete', '--role', 'my_role', '--rel', '2'])
         role_call = mreq.delete.call_args_list[-1]
         url = role_call[0][0]
-        self.assertIn('releases/2/roles/3', url)
+        self.assertIn('releases/2/roles/my_role', url)
+
+    def test_formatting_for_list_roles(self, _):
+        with patch('fuelclient.objects.role.Role.get_all') \
+                as role_get_all:
+            role_get_all.return_value = [API_OUT]
+            with patch.object(Serializer, 'print_to_output') \
+                    as mock_print:
+                self.execute(['fuel', 'role', '--rel', '2'])
+
+                mock_print.assert_called_once_with(
+                    [API_OUT], 'name   \n-------\nmy_role')
