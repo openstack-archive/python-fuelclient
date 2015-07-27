@@ -192,17 +192,23 @@ class NodeLabelSet(NodeMixIn, base.BaseCommand):
             nargs='+',
             help='List of labels for create or update')
 
-        parser.add_argument(
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
             '-n',
             '--nodes',
             nargs='+',
             help='Create or update labels only for specific nodes')
+        group.add_argument(
+            '--nodes-all',
+            action='store_true',
+            help='Create or update labels for all nodes')
 
         return parser
 
     def take_action(self, parsed_args):
+        nodes_ids = None if parsed_args.nodes_all else parsed_args.nodes
         data = self.client.set_labels_for_nodes(
-            labels=parsed_args.labels, node_ids=parsed_args.nodes)
+            labels=parsed_args.labels, node_ids=nodes_ids)
         msg = "Labels have been updated on nodes: {0} \n".format(
             ','.join(data))
         self.app.stdout.write(msg)
@@ -219,17 +225,23 @@ class NodeLabelDelete(NodeMixIn, base.BaseCommand):
             nargs='+',
             help='List of labels keys for delete')
 
-        parser.add_argument(
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
             '-n',
             '--nodes',
             nargs='+',
             help='Delete labels only for specific nodes')
+        group.add_argument(
+            '--nodes-all',
+            action='store_true',
+            help='Create or update labels for all nodes')
 
         return parser
 
     def take_action(self, parsed_args):
+        nodes_ids = None if parsed_args.nodes_all else parsed_args.nodes
         data = self.client.delete_labels_for_nodes(
-            labels_keys=parsed_args.labels_keys, node_ids=parsed_args.nodes)
+            labels_keys=parsed_args.labels_keys, node_ids=nodes_ids)
         msg = "Labels have been deleted on nodes: {0} \n".format(
             ','.join(data))
         self.app.stdout.write(msg)

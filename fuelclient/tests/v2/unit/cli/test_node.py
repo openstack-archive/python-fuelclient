@@ -146,7 +146,7 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
     def test_node_label_set_for_all_nodes(self):
         labels = ['key_1=val_1', 'key_2=val_2']
-        args = 'node label set {labels}'.format(
+        args = 'node label set {labels} --nodes-all'.format(
             labels=' '.join(labels))
 
         self.exec_command(args)
@@ -169,7 +169,7 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
     def test_node_label_delete_for_all_nodes(self):
         labels_keys = ['key_1', 'key_2']
-        args = 'node label delete {labels_keys}'.format(
+        args = 'node label delete {labels_keys} --nodes-all'.format(
             labels_keys=' '.join(labels_keys))
 
         self.exec_command(args)
