@@ -12,73 +12,118 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
 from mock import patch
+import requests_mock
 import yaml
 
+from fuelclient.cli.serializers import Serializer
 from fuelclient.tests import base
 
-API_IN = """id: 2
-name: my_role
+API_IN = """name: my_role
 """
 
 API_OUT = yaml.load(API_IN)
 
 
-@patch('fuelclient.client.requests')
+@requests_mock.mock()
 class TestRoleActions(base.UnitTestCase):
 
     def test_list_roles(self, mreq):
-        self.execute(['fuel', 'role', '--rel', '2'])
-        role_call = mreq.get.call_args_list[-1]
-        url = role_call[0][0]
-        self.assertIn('/releases/2/roles/', url)
+        release_id = 2
+        url = '/api/v1/releases/{0}/roles/'.format(release_id)
+        cmd = 'fuel role --rel {0}'.format(release_id)
+        get_request = mreq.get(url, json=[API_OUT])
+
+        self.execute(cmd.split())
+
+        self.assertTrue(get_request.called)
+        self.assertIn(
+            '/api/v1/releases/2/roles/',
+            get_request.last_request.url)
 
     @patch('fuelclient.cli.serializers.open', create=True)
-    def test_get_role(self, mopen, mreq):
-        mreq.get().json.return_value = API_OUT
-        self.execute(['fuel', 'role',
-                      '--role', 'my_role', '--file', 'myfile.yaml',
-                      '--rel', '2'])
+    def test_get_role(self, mreq, mopen):
+        release_id = 2
+        url = '/api/v1/releases/{0}/roles/my_role/'.format(release_id)
+        cmd = 'fuel role --role my_role --file myfile.yaml --rel {0}'.format(
+            release_id)
+        get_request = mreq.get(url, json=API_OUT)
+
+        self.execute(cmd.split())
 
         mopen().__enter__().write.assert_called_once_with(API_IN)
-
-        call_args = mreq.get.call_args_list[1]
-        url = call_args[0][0]
-        self.assertIn('releases/2/roles/my_role', url)
-
-    @patch('fuelclient.cli.serializers.open', create=True)
-    def test_create_role(self, mopen, mreq):
-        mopen().__enter__().read.return_value = API_IN
-
-        self.execute(['fuel', 'role', '--create',
-                      '--file', 'myfile.yaml', '--rel', '2'])
-
-        call_args = mreq.post.call_args_list[0]
-        url = call_args[0][0]
-        kwargs = call_args[1]
-        self.assertIn('releases/2/roles/', url)
-        self.assertEqual(
-            json.loads(kwargs['data']), API_OUT)
+        self.assertTrue(get_request.called)
+        self.assertIn(
+            '/api/v1/releases/2/roles/my_role/',
+            get_request.last_request.url)
 
     @patch('fuelclient.cli.serializers.open', create=True)
-    def test_update_role(self, mopen, mreq):
+    def test_create_role(self, mreq, mopen):
+        release_id = 2
+        url = '/api/v1/releases/{0}/roles/'.format(release_id)
+        cmd = 'fuel role --create --file myfile.yaml --rel {0}'.format(
+            release_id)
         mopen().__enter__().read.return_value = API_IN
+        post_request = mreq.post(url, json=API_OUT)
 
-        self.execute(['fuel', 'role', '--update',
-                      '--file', 'myfile.yaml', '--rel', '2'])
+        self.execute(cmd.split())
 
-        call_args = mreq.put.call_args_list[0]
-        url = call_args[0][0]
-        kwargs = call_args[1]
-        self.assertIn('releases/2/roles/my_role', url)
+        self.assertTrue(post_request.called)
+        self.assertIn(
+            '/api/v1/releases/2/roles/',
+            post_request.last_request.url)
         self.assertEqual(
-            json.loads(kwargs['data']), API_OUT)
+            API_OUT, post_request.last_request.json())
+
+    @patch('fuelclient.cli.serializers.open', create=True)
+    def test_update_role(self, mreq, mopen):
+        release_id = 2
+        url = '/api/v1/releases/{0}/roles/my_role/'.format(release_id)
+        cmd = 'fuel role --update --file myfile.yaml --rel {0}'.format(
+            release_id)
+        mopen().__enter__().read.return_value = API_IN
+        put_request = mreq.put(url, json=API_OUT)
+
+        self.execute(cmd.split())
+
+        self.assertTrue(put_request.called)
+        self.assertIn(
+            '/api/v1/releases/2/roles/my_role/',
+            put_request.last_request.url)
+        self.assertEqual(
+            API_OUT, put_request.last_request.json())
 
     def test_delete_role(self, mreq):
-        self.execute(['fuel', 'role',
-                      '--delete', '--role', '3', '--rel', '2'])
-        role_call = mreq.delete.call_args_list[-1]
-        url = role_call[0][0]
-        self.assertIn('releases/2/roles/3', url)
+        release_id = 2
+        url = '/api/v1/releases/{0}/roles/my_role/'.format(release_id)
+        cmd = 'fuel role --delete --role my_role --rel {0}'.format(
+            release_id)
+        delete_request = mreq.delete(url, json=API_OUT)
+
+        self.execute(cmd.split())
+
+        self.assertTrue(delete_request.called)
+        self.assertIn(
+            '/api/v1/releases/2/roles/my_role/',
+            delete_request.last_request.url)
+
+    def test_formatting_for_list_roles(self, mreq):
+        release_id = 2
+        url = '/api/v1/releases/{0}/roles/'.format(release_id)
+        cmd = 'fuel role --rel {0}'.format(release_id)
+        get_request = mreq.get(url, json=[API_OUT])
+
+        with patch.object(Serializer, 'print_to_output') as mock_print:
+            with patch('fuelclient.cli.actions.role.format_table') \
+                    as format_table_mock:
+                self.execute(cmd.split())
+
+                self.assertTrue(get_request.called)
+                self.assertIn(
+                    '/api/v1/releases/2/roles/',
+                    get_request.last_request.url)
+
+                format_table_mock.assert_called_once_with(
+                    [API_OUT], acceptable_keys=('name',))
+                mock_print.assert_called_once_with(
+                    [API_OUT], format_table_mock.return_value)
