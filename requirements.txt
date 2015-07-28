@@ -1,6 +1,7 @@
 argparse==1.2.1
 cliff>=1.7.0,<=1.9.0
 pbr>=0.6,!=0.7,<1.0
+debtcollector<0.6.0
 # NOTE(prmtl): specified version of keystoneclient doesn't
 # work properly with 2.0.0 version of oslo.i18n which is
 # released on pypi
