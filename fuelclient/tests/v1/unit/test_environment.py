@@ -17,43 +17,87 @@
 import cStringIO
 
 import mock
+import requests_mock
 
 from fuelclient.objects.environment import Environment
 from fuelclient.tests import base
 
 
+@requests_mock.mock()
 class TestEnvironment(base.UnitTestCase):
 
-    @mock.patch('requests.Response', new_callable=mock.MagicMock)
-    @mock.patch('requests.delete')
-    @mock.patch('requests.get')
-    def test_delete_operational_wo_force(self, m_get, m_del, m_resp):
-        m_resp.json.return_value = {'id': 1, 'status': 'operational'}
-        m_get.return_value = m_resp
+    def test_delete_operational_wo_force(self, m_requests):
+        cluster_id = 1
+        url = '/api/v1/clusters/{0}/'.format(cluster_id)
+        cmd = 'fuel --env {0} env delete'.format(cluster_id)
+
+        m_requests.get(url, json={'id': cluster_id, 'status': 'operational'})
+        m_delete = m_requests.delete(url)
 
         with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
-            self.execute('fuel --env 1 env delete'.split())
+            self.execute(cmd.split())
             self.assertIn('--force', m_stdout.getvalue())
 
-        self.assertEqual(0, m_del.call_count)
+        self.assertFalse(m_delete.called)
 
-    @mock.patch('requests.Response', new_callable=mock.MagicMock)
-    @mock.patch('requests.post')
-    @mock.patch('requests.get')
-    def test_nova_network_using_warning(self, m_get, m_post, m_resp):
-        m_resp.json.return_value = {'id': 1, 'name': 'test',
-                                    'mode': 'ha_compact',
-                                    'net_provider': 'neutron'}
-        m_get.return_value = m_resp
+    def test_nova_network_using_warning(self, m_requests):
+        cluster_id = 1
+        cluster_data = {
+            'id': cluster_id,
+            'name': 'test',
+            'mode': 'ha_compact',
+            'net_provider': 'neutron'
+        }
+        m_requests.post('/api/v1/clusters/', json=cluster_data)
+        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                       json=cluster_data)
 
         with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
             self.execute(
                 'fuel env create --name test --rel 1 --network-mode nova'
                 .split()
             )
-            self.assertIn('Warning: nova-network is '
+            self.assertIn('WARNING: nova-network is '
                           'deprecated since 6.1 release.',
                           m_stdout.getvalue())
+
+    def test_create_env_with_mode_set(self, m_requests):
+        cluster_id = 1
+        cluster_data = {
+            'id': cluster_id,
+            'name': 'test',
+            'mode': 'ha_compact',
+            'net_provider': 'neutron'
+        }
+        m_post = m_requests.post('/api/v1/clusters/', json=cluster_data)
+        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                       json=cluster_data)
+
+        self.execute('fuel env create'
+                     ' --name test --rel 1 --mode ha'.split())
+        self.assertEqual('ha_compact', m_post.last_request.json()['mode'])
+
+    def test_multimode_warning(self, m_requests):
+        cluster_id = 1
+        cluster_data = {
+            'id': cluster_id,
+            'name': 'test',
+            'mode': 'multinode',
+            'net_provider': 'neutron'
+        }
+        m_post = m_requests.post('/api/v1/clusters/', json=cluster_data)
+        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                       json=cluster_data)
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.execute('fuel env create'
+                         ' --name test --rel 1 --mode multinode'.split())
+
+        self.assertIn('WARNING: \'multinode\' mode is '
+                      'deprecated since 6.1 release.',
+                      m_stdout.getvalue())
+
+        self.assertEqual('multinode', m_post.last_request.json()['mode'])
 
 
 class TestEnvironmentOstf(base.UnitTestCase):

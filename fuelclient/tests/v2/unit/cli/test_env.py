@@ -67,7 +67,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
         with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
             self.exec_command(args)
             self.assertIn(
-                'Warning: nova-network is deprecated since 6.1 release',
+                'WARNING: nova-network is deprecated since 6.1 release',
                 m_stdout.getvalue()
             )
 

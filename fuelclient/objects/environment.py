@@ -43,6 +43,10 @@ class Environment(BaseObject):
             "release_id": release_id,
             "net_segment_type": net_segment_type,
         }
+
+        if mode:
+            data['mode'] = cls._get_mode(mode)
+
         if net.lower() == "nova":
             data["net_provider"] = "nova_network"
         else:
@@ -55,10 +59,17 @@ class Environment(BaseObject):
         super(Environment, self).__init__(*args, **kwargs)
         self._testruns_ids = []
 
+    @staticmethod
+    def _get_mode(mode):
+        mode = mode.lower()
+        if mode in ('ha_compact', 'ha'):
+            return 'ha_compact'
+        return 'multinode'
+
     def set(self, data):
-        if data.get('mode'):
-            data["mode"] = "ha_compact" \
-                if data['mode'].lower() == "ha" else "multinode"
+        mode = data.get('mode')
+        if mode:
+            data["mode"] = self._get_mode(mode)
 
         return self.connection.put_request(
             "clusters/{0}/".format(self.id),
