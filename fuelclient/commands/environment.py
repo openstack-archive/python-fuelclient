@@ -93,7 +93,7 @@ class EnvCreate(EnvMixIn, base.BaseShowCommand):
 
     def take_action(self, parsed_args):
         if parsed_args.net_provider == 'nova':
-            self.app.stdout.write('Warning: nova-network is deprecated '
+            self.app.stdout.write('WARNING: nova-network is deprecated '
                                   'since 6.1 release')
 
         new_env = self.client.create(name=parsed_args.name,

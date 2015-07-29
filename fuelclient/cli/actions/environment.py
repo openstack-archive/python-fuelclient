@@ -102,20 +102,24 @@ class EnvironmentAction(Action):
         if params.net == "nova":
             self.serializer.print_to_output(
                 {},
-                "Warning: nova-network is deprecated since 6.1 release."
+                "WARNING: nova-network is deprecated since 6.1 release."
+            )
+
+        if params.mode == 'multinode':
+            self.serializer.print_to_output(
+                {},
+                "WARNING: 'multinode' mode is deprecated since 6.1 release."
             )
 
         env = Environment.create(
             params.name,
             params.release,
             params.net,
-            params.nst
+            params.nst,
+            params.mode,
         )
 
-        if params.mode:
-            data = env.set({'mode': params.mode})
-        else:
-            data = env.get_fresh_data()
+        data = env.get_fresh_data()
 
         self.serializer.print_to_output(
             data,
