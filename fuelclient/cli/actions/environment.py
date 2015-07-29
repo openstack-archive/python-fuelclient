@@ -109,13 +109,11 @@ class EnvironmentAction(Action):
             params.name,
             params.release,
             params.net,
-            params.nst
+            params.nst,
+            params.mode,
         )
 
-        if params.mode:
-            data = env.set({'mode': params.mode})
-        else:
-            data = env.get_fresh_data()
+        data = env.get_fresh_data()
 
         self.serializer.print_to_output(
             data,
