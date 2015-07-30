@@ -50,6 +50,7 @@ def get_client(resource, version='v1'):
         'v1': {
             'environment': v1.environment,
             'fuel-version': v1.fuelversion,
+            'network-group': v1.network_group,
             'node': v1.node,
             'task': v1.task,
         }

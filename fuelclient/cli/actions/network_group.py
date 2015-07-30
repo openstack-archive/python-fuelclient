@@ -89,8 +89,8 @@ class NetworkGroupAction(Action):
                fuel network-group --delete --network 2,3,4
         """
         ngs = NetworkGroup.get_by_ids(params.network)
-        for n in ngs:
-            NetworkGroup.delete(n.id)
+        for network_group in ngs:
+            network_group.delete()
 
         self.serializer.print_to_output(
             {},
