@@ -23,6 +23,7 @@ from fuelclient.cli.actions.fact import ProvisioningAction
 from fuelclient.cli.actions.graph import GraphAction
 from fuelclient.cli.actions.token import TokenAction
 from fuelclient.cli.actions.health import HealthCheckAction
+from fuelclient.cli.actions.inteface_names import InterfaceNamesAction
 from fuelclient.cli.actions.interrupt import ResetAction
 from fuelclient.cli.actions.interrupt import StopAction
 from fuelclient.cli.actions.network import NetworkAction
@@ -68,6 +69,7 @@ actions_tuple = (
     GraphAction,
     FuelVersionAction,
     NetworkGroupAction,
+    InterfaceNamesAction
 )
 
 actions = dict(

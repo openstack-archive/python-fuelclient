@@ -16,6 +16,8 @@ from operator import attrgetter
 import os
 
 from fuelclient.cli.error import exit_with_error
+from fuelclient.cli.serializers import Serializer
+from fuelclient.client import APIClient
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.environment import Environment
 
@@ -187,3 +189,41 @@ class NodeCollection(object):
     def filter_by_env_id(self, env_id):
         predicate = lambda node: node.data['cluster'] == env_id
         self.collection = filter(predicate, self.collection)
+
+
+class InterfaceNamesManager(object):
+    interface_names_api_path = "nodes/interfaces/logical_names/"
+    interface_names_file_prefix = "interface_names"
+
+    def __init__(self, **kwargs):
+        self.connection = APIClient
+        self.serializer = Serializer.from_params(kwargs.get('params'))
+
+    def get_interface_names_url(self):
+            return self.interface_names_api_path
+
+    def get_interface_names(self, node_id=None, cluster_id=None,
+                            mac=None, bus_info=None):
+        params = {}
+        if node_id is not None:
+            params['node_id'] = node_id
+        if cluster_id is not None:
+            params['cluster_id'] = cluster_id
+        if mac is not None:
+            params['mac'] = mac
+        if bus_info is not None:
+            params['bus_info'] = bus_info
+        return self.connection.get_request(
+            self.get_interface_names_url(), params=params)
+
+    def upload_interface_names(self, data):
+        return self.connection.put_request(
+            self.get_interface_names_url(), data)
+
+    def read_interface_names(self, directory, serializer=None):
+        return (serializer or self.serializer).read_from_file(
+            os.path.join(directory, self.interface_names_file_prefix))
+
+    def write_interface_names(self, data, directory, serializer=None):
+        return (serializer or self.serializer).write_to_path(
+            os.path.join(directory, self.interface_names_file_prefix), data)
