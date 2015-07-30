@@ -45,11 +45,9 @@ class TestNetworkGroupActions(base.UnitTestCase):
         self.assertEqual(mreq.last_request.method, 'GET')
         self.assertEqual(mreq.last_request.path, self.req_base_path)
 
-    def test_create_network_group(self, mreq):
+    def create_network_group(self, mreq, cmd):
         mreq.post(self.req_base_path)
-        self.execute(['fuel', 'network-group', '--create', '--cidr',
-                      '10.0.0.0/24', '--name', 'test network',
-                      '--node-group', '1'])
+        self.execute(cmd)
 
         call_data = mreq.last_request.json()
         self.assertEqual(1, call_data['group_id'])
@@ -57,6 +55,22 @@ class TestNetworkGroupActions(base.UnitTestCase):
 
         self.assertEqual(mreq.last_request.method, 'POST')
         self.assertEqual(mreq.last_request.path, self.req_base_path)
+
+        return call_data
+
+    def test_create_network_group(self, mreq):
+        cmd = ['fuel', 'network-group', '--create', '--cidr', '10.0.0.0/24',
+               '--name', 'test network', '--node-group', '1']
+        self.create_network_group(mreq, cmd)
+
+    def test_create_network_group_w_meta(self, mreq):
+        cmd = ['fuel', 'network-group', '--create', '--cidr', '10.0.0.0/24',
+               '--name', 'test network', '--node-group', '1', '--meta',
+               '{"ip_ranges": ["10.0.0.2", "10.0.0.254"]}']
+        self.create_network_group(mreq, cmd)
+
+        meta = mreq.last_request.json()['meta']
+        self.assertEqual(meta['ip_ranges'], ["10.0.0.2", "10.0.0.254"])
 
     def test_create_network_group_required_args(self, mreq):
         with mock.patch("sys.stderr") as m_stderr:
