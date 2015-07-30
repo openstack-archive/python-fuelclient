@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 #    Copyright 2014 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -12,17 +14,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""fuelclient.objects sub-module contains classes that mirror
-functionality from nailgun objects.
-"""
 
-from fuelclient.objects.base import BaseObject
-from fuelclient.objects.environment import Environment
-from fuelclient.objects.node import Node
-from fuelclient.objects.node import NodeCollection
-from fuelclient.objects.release import Release
-from fuelclient.objects.task import DeployTask
-from fuelclient.objects.task import SnapshotTask
-from fuelclient.objects.task import Task
-from fuelclient.objects.fuelversion import FuelVersion
-from fuelclient.objects.network_group import NetworkGroup
+def get_fake_netwrok_group(
+        name=None, release=None, vlan=None, cidr=None, gateway=None,
+        group_id=None, meta=None):
+    """Create a random fake netwrok group
+
+    Returns the serialized and parametrized representation of a dumped Fuel
+    environment. Represents the average amount of data.
+
+    """
+    return {
+        'name': name or 'testng',
+        'release': release or 24,
+        'vlan': vlan or 10,
+        'cidr': cidr or '10.0.0.0/24',
+        'gateway': gateway or '10.0.0.1',
+        'group_id': group_id or 42,
+        'meta': meta or None
+    }
