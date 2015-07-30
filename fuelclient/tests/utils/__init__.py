@@ -17,6 +17,7 @@
 from fuelclient.tests.utils.random_data import random_string
 from fuelclient.tests.utils.fake_net_conf import get_fake_interface_config
 from fuelclient.tests.utils.fake_net_conf import get_fake_network_config
+from fuelclient.tests.utils.fake_network_group import get_fake_network_group
 from fuelclient.tests.utils.fake_node import get_fake_node
 from fuelclient.tests.utils.fake_env import get_fake_env
 from fuelclient.tests.utils.fake_fuel_version import get_fake_fuel_version
@@ -26,6 +27,7 @@ from fuelclient.tests.utils.fake_task import get_fake_task
 __all__ = (get_fake_env,
            get_fake_fuel_version,
            get_fake_interface_config,
+           get_fake_network_group,
            get_fake_node,
            get_fake_network_config,
            get_fake_task,

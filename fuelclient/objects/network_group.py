@@ -53,15 +53,23 @@ class NetworkGroup(BaseObject):
             'group_id': group_id,
         }
 
-        return cls.connection.post_request(
+        data = cls.connection.post_request(
             cls.class_api_path,
             network_group,
         )
+        return cls.init_with_data(data)
 
-    @classmethod
-    def delete(cls, network_id):
-        return cls.connection.delete_request(
-            cls.instance_api_path.format(network_id)
+    def set(self, data):
+        vlan = data.pop('vlan', None)
+        if vlan is not None:
+            data['vlan_start'] = vlan
+
+        return self.connection.put_request(
+            self.instance_api_path.format(self.id), data)
+
+    def delete(self):
+        return self.connection.delete_request(
+            self.instance_api_path.format(self.id)
         )
 
 
