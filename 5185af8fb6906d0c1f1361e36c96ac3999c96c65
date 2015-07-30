@@ -1,0 +1,13 @@
+Verified+2: Jenkins
+Code-Review+1: Roman Prykhodchenko <me@romcheg.me>
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Code-Review+2: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Code-Review+1: Ivan Kliuk <ikliuk@mirantis.com>
+Code-Review+2: Sebastian Kalinowski <skalinowski@mirantis.com>
+Workflow+1: Sebastian Kalinowski <skalinowski@mirantis.com>
+Code-Review+1: Maciej Kwiek <mkwiek@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Thu, 30 Jul 2015 15:35:58 +0000
+Reviewed-on: https://review.openstack.org/198249
+Project: stackforge/python-fuelclient
+Branch: refs/heads/master
