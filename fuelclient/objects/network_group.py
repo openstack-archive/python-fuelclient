@@ -58,10 +58,9 @@ class NetworkGroup(BaseObject):
             network_group,
         )
 
-    @classmethod
-    def delete(cls, network_id):
-        return cls.connection.delete_request(
-            cls.instance_api_path.format(network_id)
+    def delete(self):
+        return self.connection.delete_request(
+            self.instance_api_path.format(self.id)
         )
 
 

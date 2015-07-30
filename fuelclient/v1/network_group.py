@@ -12,16 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient.v1 import environment
-from fuelclient.v1 import fuelversion
-from fuelclient.v1 import network_group
-from fuelclient.v1 import node
-from fuelclient.v1 import task
+from fuelclient import objects
+from fuelclient.v1 import base_v1
 
 
-# Please keeps the list in alphabetical order
-__all__ = ('environment',
-           'fuelversion',
-           'network_group',
-           'node',
-           'task')
+class NetworkGroupClient(base_v1.BaseV1Client):
+
+    _entity_wrapper = objects.NetworkGroup
+
+    def create(self, name, release, vlan, cidr,
+               gateway, group_id, meta=None):
+        net_group = self._entity_wrapper.create(
+            name, release, vlan, cidr, gateway, group_id, meta)
+        return net_group.data
+
+    def delete_by_id(self, network_id):
+        env_obj = self._entity_wrapper(network_id)
+        env_obj.delete()
+
+
+def get_client():
+    return NetworkGroupClient()
