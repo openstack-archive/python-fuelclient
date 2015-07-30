@@ -31,7 +31,7 @@ class NetworkGroup(BaseObject):
                group_id, meta=None):
 
         metadata = {
-            'notation': 'ip_ranges',
+            'notation': 'cidr',
             'render_type': None,
             'map_priority': 2,
             'configurable': True,
