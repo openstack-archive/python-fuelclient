@@ -61,7 +61,12 @@ class NetworkGroupAction(Action):
         """Create a new network group
                fuel network-group --create --node-group 1 --name "new network"
                 --release 2 --vlan 100 --cidr 10.0.0.0/24
+
+               fuel network-group --create --node-group 2 --name "new network"
+               --release 2 --vlan 100 --cidr 10.0.0.0/24 --gateway 10.0.0.1
+               --meta '{"ip_ranges": ["10.0.0.2", "10.0.0.254"]}'
         """
+        meta = self.serializer.deserialize(params.meta)
         NetworkGroup.create(
             params.name,
             params.release,
@@ -69,9 +74,8 @@ class NetworkGroupAction(Action):
             params.cidr,
             params.gateway,
             int(params.nodegroup.pop()),
-            params.meta
+            meta
         )
-
         self.serializer.print_to_output(
             {},
             "Network group {0} has been created".format(params.name)
