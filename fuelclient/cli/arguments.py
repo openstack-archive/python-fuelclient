@@ -616,3 +616,41 @@ def get_notify_topic_arg(help_msg):
         ),
         help=help_msg
     )
+
+
+def get_rename_arg(help_msg):
+    return get_boolean_arg("rename", help=help_msg)
+
+
+def get_mac_arg():
+    return get_str_arg(
+        "mac",
+        nargs="?",
+        help="MAC address to filter on"
+    )
+
+
+def get_bus_arg():
+    return get_str_arg(
+        "bus",
+        nargs="?",
+        help="Bus ID to filter on"
+    )
+
+
+def get_rename_nic_from_arg():
+    return get_str_arg(
+        "from-nic",
+        dest="from_nic",
+        nargs="?",
+        help="Old interface name"
+    )
+
+
+def get_rename_nic_to_arg():
+    return get_str_arg(
+        "to-nic",
+        dest="to_nic",
+        nargs="?",
+        help="New interface name"
+    )
