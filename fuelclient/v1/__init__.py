@@ -14,6 +14,7 @@
 
 from fuelclient.v1 import environment
 from fuelclient.v1 import fuelversion
+from fuelclient.v1 import network_group
 from fuelclient.v1 import node
 from fuelclient.v1 import task
 
@@ -21,5 +22,6 @@ from fuelclient.v1 import task
 # Please keeps the list in alphabetical order
 __all__ = ('environment',
            'fuelversion',
+           'network_group',
            'node',
            'task')
