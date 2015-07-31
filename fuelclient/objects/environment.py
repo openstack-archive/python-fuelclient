@@ -147,7 +147,9 @@ class Environment(BaseObject):
             "vmware_settings_{0}".format(self.id)
         )
 
-    def get_network_template_data_path(self, directory=os.curdir):
+    def get_network_template_data_path(self, directory=None):
+        if directory is None:
+            directory = os.curdir
         return os.path.join(
             os.path.abspath(directory),
             "network_template_{0}".format(self.id)
@@ -167,15 +169,19 @@ class Environment(BaseObject):
             settings_data
         )
 
-    def write_vmware_settings_data(self, settings_data, directory=os.curdir,
+    def write_vmware_settings_data(self, settings_data, directory=None,
                                    serializer=None):
+        if directory is None:
+            directory = os.curdir
         return (serializer or self.serializer).write_to_path(
             self.get_vmware_settings_data_path(directory),
             settings_data
         )
 
-    def write_network_template_data(self, template_data, directory=os.curdir,
+    def write_network_template_data(self, template_data, directory=None,
                                     serializer=None):
+        if directory is None:
+            directory = os.curdir
         return (serializer or self.serializer).write_to_path(
             self.get_network_template_data_path(directory),
             template_data
@@ -274,6 +280,9 @@ class Environment(BaseObject):
     def set_network_template_data(self, data):
         return self.connection.put_request(
             self.network_template_url, data)
+
+    def delete_network_template_data(self):
+        return self.connection.delete_request(self.network_template_url)
 
     def _get_fact_dir_name(self, fact_type, directory=os.path.curdir):
         return os.path.join(
