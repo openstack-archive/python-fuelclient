@@ -28,7 +28,7 @@ FUEL_COMMIT=${FUEL_COMMIT:-master}
 # Nailgun server parameters
 NAILGUN_PORT=${NAILGUN_PORT:-8003}
 NAILGUN_CHECK_URL=${NAILGUN_CHECK_URL:-"http://0.0.0.0:$NAILGUN_PORT/api/version"}
-NAILGUN_START_MAX_WAIT_TIME=${NAILGUN_START_MAX_WAIT_TIME:-10}
+NAILGUN_START_MAX_WAIT_TIME=${NAILGUN_START_MAX_WAIT_TIME:-20}
 TEST_NAILGUN_DB=${TEST_NAILGUN_DB:-nailgun}
 
 # pytest options
@@ -53,8 +53,7 @@ usage() {
     msg "  -f  --fetch-repo            URI of a remote repo for fetching changes to fuel-web."
     msg "                              If not specified, \$FETCH_REPO or nothing will be used."
     msg "  -h, --help                  Print this usage message and exit."
-    msg "  -i  --functional-tests      Run only functional tests."
-    msg "  -I  --no-functional-tests   Don't run functional tests."
+    msg "  -F  --functional-tests      Run only functional tests."
     msg "  -n  --no-clone              Do not clone fuel-web repo and use existing"
     msg "                              one specified in \$FUEL_WEB_ROOT. Make sure it"
     msg "                              does not have pending changes."
@@ -67,7 +66,6 @@ usage() {
     msg "                              Runs all tests, if not specified. "
     msg "  -u  --unit-tests            Run only unit tests."
     msg "  -U  --no-unit-tests         Don't run unit tests."
-    msg "  -V  --client-version        Which version of python-fuelclient should be tested, for example:"
     msg "                              ./run_tests.sh -V v1"
     msg "                              To test multiple versions, pass this flag multiple times."
     exit
@@ -85,8 +83,8 @@ msg() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o 67huUiInpPc:f:r:t:V: \
-        --long py26,py27,help,functional-tests,no-functional-tests,no-pep8,pep8,unit-tests,no-unit-tests,no-clone,client-version:,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67hFnpPc:f:r:t: \
+        --long py26,py27,help,functional-tests,no-pep8,pep8,no-clone,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
@@ -95,6 +93,7 @@ process_options() {
         case "$1" in
             -6|--py26) python_26=1;                             shift 1;;
             -7|--py27) python_27=1;                             shift 1;;
+            -F|--functional-tests) functional_tests=1;          shift 1;;
             -h|--help) usage;                                   shift 1;;
             -f|--fetch-repo) fetch_repo="$2";                   shift 2;;
             -r|--fetch-refspec) fetch_refspec="$2";             shift 2;;
@@ -103,11 +102,6 @@ process_options() {
             -t|--test) certain_tests+=("$2");                   shift 2;;
             -p|--pep8) pep8_only=1;                             shift 1;;
             -P|--no-pep8) do_pep8=0;                            shift 1;;
-            -i|--functional-tests) functional_tests=1;        shift 1;;
-            -I|--no-functional-tests) no_functional_tests=1;  shift 1;;
-            -u|--unit-tests) unit_tests=1;                      shift 1;;
-            -U|--no-unit-tests) no_unit_tests=1;                shift 1;;
-            -V|--client-version) client_version+=("$2");        shift 2;;
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
                 break;;
@@ -120,39 +114,6 @@ process_options() {
         err "--fetch-refspec option requires --fetch-repo to be specified."
         exit 1
     fi
-
-    if [[ $unit_tests -eq 0 && \
-        $functional_tests -eq 0 && \
-        ${#certain_tests[@]} -eq 0 ]]; then
-
-        if [[ $no_unit_tests -ne 1 ]]; then
-            unit_tests=1
-        fi
-
-        if [[ $no_functional_tests -ne 1 ]]; then
-            functional_tests=1
-        fi
-
-    else
-        do_pep8=0
-    fi
-
-    # when no version specified, choose all of the versions available
-    if [[ ${#client_version[@]} -eq 0 ]]; then
-        client_version+=("common")
-        for version in ${ROOT}/fuelclient/tests/v[0-9]; do
-            client_version+=(`basename $version`)
-        done
-    fi
-
-    for version in ${client_version[@]}; do
-        if [[ $unit_tests -eq 1 ]]; then
-            certain_tests+=("${ROOT}/fuelclient/tests/unit/${version}/")
-        fi
-        if [[ $functional_tests -eq 1 ]]; then
-            certain_tests+=("${ROOT}/fuelclient/tests/functional/${version}/")
-        fi
-    done
 
     # Check that specified test file/dir exists. Fail otherwise.
     if [[ ${#certain_tests[@]} -ne 0 ]]; then
@@ -179,23 +140,36 @@ run_cli_tests() {
 
     local py26_env="py26"
     local py27_env="py27"
+    local functional_env="functional"
+    local env_to_run=""
 
-    if [[ $run_single_env -eq 1 ]]; then
-        if [[ $python_26 -eq 1 ]]; then
-            env_to_run=$py26_env
-        else
-            env_to_run=$py27_env
-        fi
-    else
-        env_to_run=$py26_env,$py27_env
+    if [[ $python_26 -ne 0 ]]; then
+        env_to_run=$env_to_run,$py26_env
     fi
 
-    pushd $ROOT/fuelclient > /dev/null
+    if [[ $python_27 -ne 0 ]]; then
+        env_to_run=$env_to_run,$py27_env
+    fi
+
+    if [[ $functional_tests -ne 0 ]]; then
+        env_to_run=$env_to_run,$functional_env
+    fi
+
+    if [[ -z $env_to_run ]]; then
+        env_to_run=$py26_env,$py27_env,$functional_env
+    fi
+
+    if [[ "$env_to_run" == *"$functional_env"* ]]; then
+        prepare_env $config
+    fi
+
+    # pushd $ROOT/fuelclient > /dev/null
+    echo $certain_tests
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
-        NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
-        ${certain_tests[@]} --junit-xml $FUELCLIENT_JUNIT || return 1
-    popd > /dev/null
+        NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- $testropts \
+        ${certain_tests[@]} || return 1
+    # popd > /dev/null
 
     return 0
 }
@@ -413,7 +387,6 @@ obtain_nailgun() {
 # Sets default values for parameters
 init_default_params() {
     certain_tests=()
-    client_version=()
     do_clone=1
     do_pep8=1
     fetch_refspec=$FETCH_REFSPEC
@@ -425,7 +398,7 @@ init_default_params() {
     pep8_only=0
     python_26=0
     python_27=0
-    testropts="--with-timer --timer-warning=10 --timer-ok=2 --timer-top-n=10"
+    testropts=""
     unit_tests=0
 }
 
@@ -444,10 +417,6 @@ run() {
 
         [[ $pep8_ret -ne 0 ]] && err "Failed tests: pep8"
         [[ $pep8_only -eq 1 ]] && exit $pep8_ret
-    fi
-
-    if [[ "${certain_tests[@]}" == *"functional"* ]]; then
-        prepare_env $config
     fi
 
     err "Starting python-fuelclient tests..."
