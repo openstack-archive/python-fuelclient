@@ -92,6 +92,22 @@ class EnvironmentClient(base_v1.BaseV1Client):
         env = self._entity_wrapper(obj_id=environment_id)
         return env.spawn_vms()
 
+    def upload_network_template(self, environment_id, directory):
+        env = self._entity_wrapper(environment_id)
+        network_data = env.read_network_data(directory)
+        env.set_network_data(network_data)
+
+    def download_network_template(self, environment_id, directory):
+        env = self._entity_wrapper(environment_id)
+        network_data = env.get_network_data()
+        network_file_path = env.write_network_data(network_data, directory)
+
+        return network_file_path
+
+    def verify_network_template(self, environment_id):
+        env = self._entity_wrapper(environment_id)
+        return env.verify_network()
+
 
 def get_client():
     return EnvironmentClient()
