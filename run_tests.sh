@@ -85,8 +85,8 @@ msg() {
 process_options() {
     # Read the options
     TEMP=$(getopt \
-        -o 67huUiInpPc:f:r:t:V: \
-        --long py26,py27,help,functional-tests,no-functional-tests,no-pep8,pep8,unit-tests,no-unit-tests,no-clone,client-version:,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
+        -o 67hFnpPc:f:r:t:V: \
+        --long py26,py27,help,functional-tests,no-pep8,pep8,no-clone,client-version:,fuel-commit:,fetch-repo:,fetch-refspec:,tests: \
         -n 'run_tests.sh' -- "$@")
 
     eval set -- "$TEMP"
@@ -95,6 +95,7 @@ process_options() {
         case "$1" in
             -6|--py26) python_26=1;                             shift 1;;
             -7|--py27) python_27=1;                             shift 1;;
+            -F|--functional-tests) functional_tests=1;          shift 1;;
             -h|--help) usage;                                   shift 1;;
             -f|--fetch-repo) fetch_repo="$2";                   shift 2;;
             -r|--fetch-refspec) fetch_refspec="$2";             shift 2;;
@@ -103,10 +104,6 @@ process_options() {
             -t|--test) certain_tests+=("$2");                   shift 2;;
             -p|--pep8) pep8_only=1;                             shift 1;;
             -P|--no-pep8) do_pep8=0;                            shift 1;;
-            -i|--functional-tests) functional_tests=1;        shift 1;;
-            -I|--no-functional-tests) no_functional_tests=1;  shift 1;;
-            -u|--unit-tests) unit_tests=1;                      shift 1;;
-            -U|--no-unit-tests) no_unit_tests=1;                shift 1;;
             -V|--client-version) client_version+=("$2");        shift 2;;
             # All parameters and alien options will be passed to testr
             --) shift 1; testropts="$@";
@@ -119,22 +116,6 @@ process_options() {
     if [[ -z $fetch_repo && -n $fetch_refspec ]]; then
         err "--fetch-refspec option requires --fetch-repo to be specified."
         exit 1
-    fi
-
-    if [[ $unit_tests -eq 0 && \
-        $functional_tests -eq 0 && \
-        ${#certain_tests[@]} -eq 0 ]]; then
-
-        if [[ $no_unit_tests -ne 1 ]]; then
-            unit_tests=1
-        fi
-
-        if [[ $no_functional_tests -ne 1 ]]; then
-            functional_tests=1
-        fi
-
-    else
-        do_pep8=0
     fi
 
     # when no version specified, choose all of the versions available
@@ -179,15 +160,27 @@ run_cli_tests() {
 
     local py26_env="py26"
     local py27_env="py27"
+    local functional_env="functional"
+    local env_to_run=""
 
-    if [[ $run_single_env -eq 1 ]]; then
-        if [[ $python_26 -eq 1 ]]; then
-            env_to_run=$py26_env
-        else
-            env_to_run=$py27_env
-        fi
-    else
-        env_to_run=$py26_env,$py27_env
+    if [[ $python_26 -ne 0 ]]; then
+        env_to_run=$env_to_run,$py26_env
+    fi
+
+    if [[ $python_27 -ne 0 ]]; then
+        env_to_run=$env_to_run,$py27_env
+    fi
+
+    if [[ $functional_tests -ne 0 ]]; then
+        env_to_run=$env_to_run,$functional_env
+    fi
+
+    if [[ -z $env_to_run ]]; then
+        env_to_run=$py26_env,$py27_env,$functional_env
+    fi
+
+    if [[ "$env_to_run" == *"$functional_env"* ]]; then
+        prepare_env $config
     fi
 
     pushd $ROOT/fuelclient > /dev/null
@@ -444,10 +437,6 @@ run() {
 
         [[ $pep8_ret -ne 0 ]] && err "Failed tests: pep8"
         [[ $pep8_only -eq 1 ]] && exit $pep8_ret
-    fi
-
-    if [[ "${certain_tests[@]}" == *"functional"* ]]; then
-        prepare_env $config
     fi
 
     err "Starting python-fuelclient tests..."
