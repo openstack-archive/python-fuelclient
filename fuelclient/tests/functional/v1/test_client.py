@@ -174,7 +174,7 @@ class TestHandlers(base.BaseTestCase):
     def test_destroy_multiple_nodes(self):
         self.load_data_to_nailgun_server()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewTestEnv --release=1",
             "--env-id=1 node set --node 1 2 --role=controller"
         ))
         msg = ("Nodes with ids [1, 2] have been deleted from Fuel db.\n")
