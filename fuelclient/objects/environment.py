@@ -275,6 +275,9 @@ class Environment(BaseObject):
         return self.connection.put_request(
             self.network_template_url, data)
 
+    def delete_network_template_data(self):
+        return self.connection.delete_request(self.network_template_url)
+
     def _get_fact_dir_name(self, fact_type, directory=os.path.curdir):
         return os.path.join(
             os.path.abspath(directory),
