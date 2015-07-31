@@ -27,3 +27,4 @@ test_run/*
 
 *.egg-info
 
+fuelclient.xml
