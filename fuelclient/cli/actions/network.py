@@ -104,11 +104,14 @@ class NetworkTemplateAction(Action):
                     "Download current network template configuration."),
                 Args.get_upload_arg(
                     "Upload changed network template configuration."),
+                Args.get_delete_arg(
+                    "Delete network template configuration."),
                 required=True))
 
         self.flag_func_map = (
             ("upload", self.upload),
-            ("download", self.download))
+            ("download", self.download),
+            ("delete", self.delete))
 
     def upload(self, params):
         """Uploads network template from filesystem path
@@ -138,3 +141,13 @@ class NetworkTemplateAction(Action):
 
         print("Network template configuration for environment with id={0}"
               " downloaded to {1}".format(env.id, network_template_file_path))
+
+    def delete(self, params):
+        """Deletes network template for specified environment:
+            fuel --env 1 --network-template --delete
+        """
+        env = Environment(params.env)
+        env.delete_network_template_data()
+
+        print("Network template configuration for environment id={0}"
+              " has been deleted.".format(env.id))
