@@ -13,8 +13,10 @@
 #    under the License.
 
 
+from fuelclient.cli import arguments
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient.objects import node
 from fuelclient import utils
 
 
@@ -245,3 +247,113 @@ class NodeLabelDelete(NodeMixIn, base.BaseCommand):
         msg = "Labels have been deleted on nodes: {0} \n".format(
             ','.join(data))
         self.app.stdout.write(msg)
+
+
+class NodeInterfaceNamesMixIn(object):
+    entity_name = 'node'
+    columns = ('id',
+               'node_id',
+               'name',
+               'mac',
+               'max_speed',
+               'current_speed',
+               'ip_addr',
+               'netmask',
+               'bus_info')
+
+
+class NodeInterfaceNamesFilteredMixIn(NodeInterfaceNamesMixIn):
+
+    def get_parser(self, prog_name):
+        parser = (super(NodeInterfaceNamesFilteredMixIn, self)
+                  .get_parser(prog_name))
+        env_arg = arguments.get_env_arg()
+        parser.add_argument(*env_arg['args'], **env_arg['params'])
+        node_arg = arguments.get_node_arg("Node IDs to filter on")
+        parser.add_argument(*node_arg['args'], **node_arg['params'])
+        mac_arg = arguments.get_mac_arg()
+        parser.add_argument(*mac_arg['args'], **mac_arg['params'])
+        bus_arg = arguments.get_bus_arg()
+        parser.add_argument(*bus_arg['args'], **bus_arg['params'])
+        return parser
+
+
+class NodeInterfaceNamesList(NodeInterfaceNamesFilteredMixIn,
+                             base.BaseListCommand):
+    """List network interfaces and their attributes."""
+
+    def take_action(self, parsed_args):
+        ifnames_mgr = node.InterfaceNamesManager(params=parsed_args)
+        ifnames_data = ifnames_mgr.get_interface_names(
+            node_id=parsed_args.node, cluster_id=parsed_args.env,
+            mac=parsed_args.mac, bus_info=parsed_args.bus)
+        result = data_utils.get_display_data_multi(self.columns, ifnames_data)
+        return self.columns, result
+
+
+class NodeInterfaceNamesRename(NodeInterfaceNamesFilteredMixIn,
+                               base.BaseListCommand):
+    """Rename network interfaces."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeInterfaceNamesRename, self).get_parser(prog_name)
+        from_arg = arguments.get_rename_nic_from_arg()
+        parser.add_argument(*from_arg['args'], **from_arg['params'])
+        to_arg = arguments.get_rename_nic_to_arg()
+        parser.add_argument(*to_arg['args'], **from_arg['params'])
+        return parser
+
+    def take_action(self, parsed_args):
+        ifnames_mgr = node.InterfaceNamesManager(params=parsed_args)
+        ifnames_data = ifnames_mgr.get_interface_names(
+            node_id=parsed_args.node, cluster_id=parsed_args.env,
+            mac=parsed_args.mac, bus_info=parsed_args.bus)
+        for nic in ifnames_data:
+            if nic['name'] == parsed_args.from_nic:
+                nic['name'] = parsed_args.to_nic
+        new_ifnames_data = ifnames_mgr.upload_interface_names(ifnames_data)
+        result = data_utils.get_display_data_multi(self.columns, ifnames_data)
+        return self.columns, result
+
+
+class NodeInterfaceNamesDownload(NodeInterfaceNamesFilteredMixIn,
+                                 base.BaseCommand):
+    """Download interface names configuration to a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeInterfaceNamesDownload, self).get_parser(prog_name)
+        dir_arg = arguments.get_dir_arg(
+            "Directory with interface names configuration.")
+        parser.add_argument(*dir_arg['args'], **dir_arg['params'])
+        return parser
+
+    def take_action(self, parsed_args):
+        ifnames_mgr = node.InterfaceNamesManager(params=parsed_args)
+        ifnames_data = ifnames_mgr.get_interface_names(
+            node_id=parsed_args.node, cluster_id=parsed_args.env,
+            mac=parsed_args.mac, bus_info=parsed_args.bus)
+        ifnames_file_path = ifnames_mgr.write_interface_names(
+            ifnames_data, parsed_args.dir)
+        print(
+            "Interface names configuration saved to {0}"
+            .format(ifnames_file_path)
+        )
+
+
+class NodeInterfaceNamesUpload(NodeInterfaceNamesMixIn, base.BaseCommand):
+    """Upload interface names configuration from a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeInterfaceNamesUpload, self).get_parser(prog_name)
+        dir_arg = arguments.get_dir_arg(
+            "Directory with interface names configuration.")
+        parser.add_argument(*dir_arg['args'], **dir_arg['params'])
+        return parser
+
+    def take_action(self, parsed_args):
+        ifnames_mgr = node.InterfaceNamesManager(params=parsed_args)
+        ifnames_data = ifnames_mgr.read_interface_names(parsed_args.dir)
+        ifnames_mgr.upload_interface_names(ifnames_data)
+        print(
+            "Interface names configuration uploaded."
+        )
