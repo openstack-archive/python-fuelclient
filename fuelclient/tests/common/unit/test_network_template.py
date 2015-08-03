@@ -147,3 +147,13 @@ class TestNetworkTemplate(base.UnitTestCase):
         written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
         expected_yaml = yaml.safe_load(YAML_TEMPLATE)
         self.assertEqual(written_yaml, expected_yaml)
+
+    def test_delete_action(self):
+        self.mocker.delete(self.req_path)
+
+        cmd = ['fuel', 'network-template', '--env', str(self.env_id),
+               '--delete']
+        self.execute(cmd)
+
+        self.assertEqual(self.mocker.last_request.method, 'DELETE')
+        self.assertEqual(self.mocker.last_request.path, self.req_path)
