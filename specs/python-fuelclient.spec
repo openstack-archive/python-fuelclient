@@ -1,19 +1,26 @@
+%if 0%{?rhel} && 0%{?rhel} <= 6
+%{!?__python2: %global __python2 /usr/bin/python2}
+%{!?python2_sitelib: %global python2_sitelib %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+%{!?python2_sitearch: %global python2_sitearch %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
+%endif
+
 %define name python-fuelclient
 %{!?version: %define version 8.0.0}
 %{!?release: %define release 1}
 
-Summary: Console utility for working with fuel rest api
-Name: %{name}
-Version: %{version}
-Release: %{release}
-Source0: %{name}-%{version}.tar.gz
-License: Apache
-Group: Development/Libraries
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Prefix: %{_prefix}
-BuildArch: noarch
-BuildRequires: python-setuptools
+Summary:    Console utility for working with fuel rest api
+Name:       %{name}
+Version:    %{version}
+Release:    %{release}
+Source0:    %{name}-%{version}.tar.gz
+License:    Apache
+Group:      Development/Libraries
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+Prefix:     %{_prefix}
 
+BuildArch:  noarch
+
+BuildRequires: python-setuptools
 BuildRequires: python-pbr > 0.7
 BuildRequires: python-pbr < 1.0
 
@@ -54,13 +61,16 @@ Summary: Console utility for working with fuel rest api
 %setup -cq -n %{name}-%{version}
 
 %build
-cd %{_builddir}/%{name}-%{version} && python setup.py build
+cd %{_builddir}/%{name}-%{version} && %{__python2} setup.py build
 
 %install
-cd %{_builddir}/%{name}-%{version} && python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=%{_builddir}/%{name}-%{version}/INSTALLED_FILES
+rm -rf $RPM_BUILD_ROOT
+cd %{_builddir}/%{name}-%{version} && %{__python2} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -f %{_builddir}/%{name}-%{version}/INSTALLED_FILES
+%files
 %defattr(-,root,root)
+%{python2_sitelib}/*
+%{_bindir}/*
