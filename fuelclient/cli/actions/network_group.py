@@ -27,6 +27,8 @@ class NetworkGroupAction(Action):
     action_name = "network-group"
     acceptable_keys = ("id", "name", "vlan_start", "cidr",
                        "gateway", "group_id")
+    updatable_keys = (
+        'name', 'vlan', 'cidr', 'gateway', 'group_id', 'meta')
 
     def __init__(self):
         super(NetworkGroupAction, self).__init__()
@@ -47,13 +49,15 @@ class NetworkGroupAction(Action):
                     " node group."
                 ),
                 Args.get_delete_arg("Delete specified network groups."),
-                Args.get_list_arg("List all network groups.")
+                Args.get_list_arg("List all network groups."),
+                Args.get_set_arg("Set network group parameters.")
             )
         )
         self.flag_func_map = (
             ("create", self.create),
             ("delete", self.delete),
-            (None, self.list)
+            ("set", self.set),
+            (None, self.list),
         )
 
     @check_all('nodegroup', 'name', 'cidr')
@@ -92,6 +96,17 @@ class NetworkGroupAction(Action):
             "Network groups with IDS {0} have been deleted.".format(
                 ','.join(params.network))
         )
+
+    @check_all('network')
+    def set(self, params):
+        ng = NetworkGroup(params.network)
+        update_params = {}
+        for key in self.updatable_keys:
+            value = getattr(params, key, None)
+            if value is not None:
+                update_params[key] = value
+
+        ng.set(update_params)
 
     def list(self, params):
         """To list all available network groups:
