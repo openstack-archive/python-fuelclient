@@ -98,3 +98,13 @@ class TestNetworkGroupActions(base.UnitTestCase):
         self.assertIn("409 Client Error", m_stderr.write.call_args[0][0])
         self.assertEqual(mreq.last_request.method, 'POST')
         self.assertEqual(mreq.last_request.path, self.req_base_path)
+
+    def test_set_network_group(self, mreq):
+        path = self.req_base_path + str(self.env_id) + '/'
+        mreq.put(path)
+        self.execute([
+            'fuel', 'network-group', '--set', '--network', '42',
+            '--name', 'new name'])
+
+        self.assertEqual(mreq.last_request.method, 'PUT')
+        self.assertEqual(mreq.last_request.path, path)
