@@ -13,8 +13,12 @@
 #    under the License.
 
 from operator import attrgetter
+import sys
+
+import six
 
 from fuelclient.objects.base import BaseObject
+from fuelclient.objects.environment import Environment
 from fuelclient.objects import NodeCollection
 
 
@@ -33,6 +37,14 @@ class NodeGroup(BaseObject):
 
     @classmethod
     def create(cls, name, cluster_id):
+        env = Environment(cluster_id)
+        network_data = env.get_network_data()
+        if (env.data['net_provider'] == 'nova_network' or
+                network_data['networking_parameters'][
+                    'segmentation_type'] == 'gre'):
+            six.print_('WARNING: Node groups should be used for OpenStack '
+                       'environments that use an encapsulation protocol '
+                       'such as Neutron GRE.', file=sys.stderr)
         return cls.connection.post_request(
             cls.class_api_path,
             {'cluster_id': cluster_id, 'name': name},

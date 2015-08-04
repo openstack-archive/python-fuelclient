@@ -225,6 +225,7 @@ class Environment(BaseObject):
 
     @property
     def network_url(self):
+        # import pdb; pdb.set_trace()
         return "clusters/{id}/network_configuration/{net_provider}".format(
             **self.data
         )

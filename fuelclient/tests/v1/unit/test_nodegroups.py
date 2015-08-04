@@ -27,6 +27,13 @@ class TestNodeGroupActions(base.UnitTestCase):
         self.assertIn('nodegroups/', url)
 
     def test_create_nodegroup(self, mreq):
+        mreq.get.return_value.json.return_value = {
+            'id': '_id_',
+            'net_provider': '_net_provider_',
+            'networking_parameters': {
+                'segmentation_type': 'vlan'
+            }
+        }
         self.execute(['fuel', 'nodegroup', '--create',
                       '--name', 'test group', '--env', '1'])
 
