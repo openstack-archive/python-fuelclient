@@ -17,6 +17,7 @@ from fuelclient.cli.actions.base import check_all
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli.formatting import format_table
+from fuelclient.commands.network_group import get_args_for_update
 from fuelclient.objects.network_group import NetworkGroup
 from fuelclient.objects.network_group import NetworkGroupCollection
 
@@ -47,13 +48,15 @@ class NetworkGroupAction(Action):
                     " node group."
                 ),
                 Args.get_delete_arg("Delete specified network groups."),
-                Args.get_list_arg("List all network groups.")
+                Args.get_list_arg("List all network groups."),
+                Args.get_set_arg("Set network group parameters.")
             )
         )
         self.flag_func_map = (
             ("create", self.create),
             ("delete", self.delete),
-            (None, self.list)
+            ("set", self.set),
+            (None, self.list),
         )
 
     @check_all('nodegroup', 'name', 'cidr')
@@ -97,6 +100,29 @@ class NetworkGroupAction(Action):
             "Network groups with IDS {0} have been deleted.".format(
                 ','.join(params.network))
         )
+
+    @check_all('network')
+    def set(self, params):
+        """Set parameters for the specified network group:
+            fuel network-group --set --network 1 --name new_name
+        """
+        # Since network has set type and we cannot update multiple network
+        # groups at once, we pick first network group id from set.
+        ng_id = next(iter(params.network))
+
+        if len(params.network) > 1:
+            msg = ("Warning: Only first network with id={0}"
+                   " will be updated.".format(ng_id))
+            self.serializer.print_to_output({}, msg)
+
+        ng = NetworkGroup(ng_id)
+
+        update_params = get_args_for_update(params, self.serializer)
+        data = ng.set(update_params)
+
+        self.serializer.print_to_output(
+            data,
+            "Network group id={0} has been updated".format(ng_id))
 
     def list(self, params):
         """To list all available network groups:
