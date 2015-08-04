@@ -225,6 +225,65 @@ class TestHandlers(base.BaseTestCase):
         cmd = 'release --list'
         self.run_cli_command(cmd)
 
+    def test_reassign_node_group(self):
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1 --nst=gre",
+            "--env-id=1 node set --node 1 2 --role=controller",
+            "nodegroup --create --env 1 --name 'new group'"
+        ))
+        msg = ['PUT http://127.0.0.1',
+               '/api/v1/nodes/ data=',
+               '"id": 1',
+               '"group_id": 2']
+        self.check_all_in_msg(
+            "nodegroup --env 1 --assign --group 2 --node 1 --debug",
+            msg
+        )
+
+    def test_node_group_creation_prints_warning_w_seg_type_vlan(self):
+        warn_msg = ("WARNING: In VLAN segmentation type, there will be no "
+                    "connectivity over private network between instances "
+                    "running on hypervisors in different segments and that "
+                    "it's a user's responsibility to handle this "
+                    "situation.")
+
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1 --nst=vlan",
+
+        ))
+        self.check_for_stderr(
+            ("network-group --create --name storage --node-group 1 "
+             "--vlan 10 --cidr 10.0.0.0/24"),
+            warn_msg,
+            check_errors=False
+        )
+
+    def test_create_network_group_fails_w_duplicate_name(self):
+        err_msg = ("(Network with name storage already exists "
+                   "in node group default)\n")
+
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1 --nst=gre",
+        ))
+        self.check_for_stderr(
+            ("network-group --create --name storage --node-group 1 "
+             "--vlan 10 --cidr 10.0.0.0/24"),
+            err_msg,
+            check_errors=False
+        )
+
+    def test_create_network_group_fails_w_invalid_group(self):
+        err_msg = "(Node group with ID 0 does not exist)\n"
+
+        self.check_for_stderr(
+            ("network-group --create --name test --node-group 0 "
+             "--vlan 10 --cidr 10.0.0.0/24"),
+            err_msg,
+            check_errors=False
+        )
+
 
 class TestUserActions(base.BaseTestCase):
 
