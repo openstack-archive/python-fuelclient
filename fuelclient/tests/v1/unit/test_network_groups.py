@@ -112,3 +112,26 @@ class TestNetworkGroupActions(base.UnitTestCase):
         self.assertIn("409 Client Error", m_stderr.write.call_args[0][0])
         self.assertEqual(mreq.last_request.method, 'POST')
         self.assertEqual(mreq.last_request.path, self.req_base_path)
+
+    def test_set_network_group(self, mreq):
+        path = self.req_base_path + str(self.env_id) + '/'
+        mreq.put(path)
+        self.execute([
+            'fuel', 'network-group', '--set', '--network', '42',
+            '--name', 'new name'])
+
+        self.assertEqual(mreq.last_request.method, 'PUT')
+        self.assertEqual(mreq.last_request.path, path)
+
+    def test_set_network_group_meta(self, mreq):
+        path = self.req_base_path + str(self.env_id) + '/'
+        mreq.put(path)
+        self.execute([
+            'fuel', 'network-group', '--set', '--network', '42',
+            '--meta', '{"ip_ranges": ["10.0.0.2", "10.0.0.254"]}'])
+
+        self.assertEqual(mreq.last_request.method, 'PUT')
+        self.assertEqual(mreq.last_request.path, path)
+
+        meta = mreq.last_request.json()['meta']
+        self.assertEqual(meta['ip_ranges'], ["10.0.0.2", "10.0.0.254"])
