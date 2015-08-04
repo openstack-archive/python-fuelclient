@@ -239,6 +239,23 @@ class TestHandlers(base.BaseTestCase):
             msg
         )
 
+    def test_node_group_creation_prints_warning_w_seg_type_vlan(self):
+        warn_msg = ('WARNING: Node groups should be used for OpenStack '
+                    'environments that use an encapsulation protocol '
+                    'such as Neutron GRE.')
+
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1 --nst=vlan",
+
+        ))
+        self.check_for_stderr(
+            ("network-group --create --name storage --node-group 1 "
+             "--vlan 10 --cidr 10.0.0.0/24"),
+            warn_msg,
+            check_errors=False
+        )
+
     def test_create_network_group_fails_w_duplicate_name(self):
         err_msg = ("(Network with name storage already exists "
                    "in node group default)\n")
