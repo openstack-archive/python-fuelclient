@@ -12,12 +12,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sys
+
+import six
+
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli.error import ActionException
 from fuelclient.cli.formatting import format_table
+from fuelclient.objects import Environment
 from fuelclient.objects.nodegroup import NodeGroup
 from fuelclient.objects.nodegroup import NodeGroupCollection
 
@@ -57,7 +62,18 @@ class NodeGroupAction(Action):
         """Create a new node group
                fuel --env 1 nodegroup --create --name "group 1"
         """
-        NodeGroup.create(params.name, int(params.env))
+        env_id = int(params.env)
+        NodeGroup.create(params.name, env_id)
+        env = Environment(env_id)
+        network_data = env.get_network_data()
+        seg_type = network_data['networking_parameters']['segmentation_type']
+        if (env.data['net_provider'] == 'neutron'
+                and seg_type == 'vlan'):
+                six.print_("WARNING: There will be no connectivity over "
+                           "private network between instances running on "
+                           "hypervisors in different segments and that it's "
+                           "a user's responsibility to handle this situation.",
+                           file=sys.stderr)
 
     def delete(self, params):
         """Delete the specified node groups
