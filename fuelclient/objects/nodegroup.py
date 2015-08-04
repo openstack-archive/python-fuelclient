@@ -13,8 +13,12 @@
 #    under the License.
 
 from operator import attrgetter
+import sys
+
+import six
 
 from fuelclient.objects.base import BaseObject
+from fuelclient.objects.environment import Environment
 from fuelclient.objects import NodeCollection
 
 
