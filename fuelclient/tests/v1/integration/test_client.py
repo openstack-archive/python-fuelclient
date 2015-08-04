@@ -239,6 +239,25 @@ class TestHandlers(base.BaseTestCase):
             msg
         )
 
+    def test_node_group_creation_prints_warning_w_seg_type_vlan(self):
+        warn_msg = ("WARNING: In VLAN segmentation type, there will be no "
+                    "connectivity over private network between instances "
+                    "running on hypervisors in different segments and that "
+                    "it's a user's responsibility to handle this "
+                    "situation.")
+
+        self.load_data_to_nailgun_server()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release=1 --nst=vlan",
+
+        ))
+        self.check_for_stderr(
+            ("network-group --create --name admin_group --node-group 1 "
+             "--vlan 10 --cidr 10.0.0.0/24"),
+            warn_msg,
+            check_errors=False
+        )
+
     def test_create_network_group_fails_w_duplicate_name(self):
         err_msg = ("(Network with name storage already exists "
                    "in node group default)\n")
