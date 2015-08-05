@@ -50,7 +50,7 @@ class TestNodeCommand(test_engine.BaseCLITest):
             environment_id=env_id, labels=None)
 
     def test_node_list_with_labels(self):
-        labels = ['key_1=val_1', 'key_2=val_2']
+        labels = ['key_1=val_1', 'key_2=val_2', 'key3']
         args = 'node list --labels {labels}'.format(
             labels=' '.join(labels))
 
@@ -62,7 +62,7 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
     def test_node_list_with_env_and_labels(self):
         env_id = 42
-        labels = ["key_1=val_1", "key_2=val_2"]
+        labels = ['key_1=val_1', 'key_2=val_2', 'key3']
         args = 'node list --env {env} --labels {labels}'.format(
             env=env_id, labels=' '.join(labels))
 
