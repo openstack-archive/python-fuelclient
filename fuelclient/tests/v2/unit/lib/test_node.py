@@ -38,6 +38,26 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         self.assertTrue(matcher.called)
 
+    def test_node_list_with_labels(self):
+        labels = ['key1']
+        fake_nodes = [
+            utils.get_fake_node(
+                node_name='node_1', labels={'key1': 'val1'}),
+            utils.get_fake_node(
+                node_name='node_2', labels={'key2': 'val2'}),
+            utils.get_fake_node(
+                node_name='node_3', labels={'key1': 'val2', 'key3': 'val3'})
+        ]
+
+        matcher_get = self.m_request.get(self.res_uri, json=fake_nodes)
+
+        data = self.client.get_all(labels=labels)
+
+        self.assertTrue(matcher_get.called)
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]['name'], 'node_1')
+        self.assertEqual(data[1]['name'], 'node_3')
+
     def test_node_show(self):
         node_id = 42
         expected_uri = self.get_object_uri(self.res_uri, node_id)
@@ -170,7 +190,7 @@ class TestNodeFacade(test_api.BaseLibTest):
             'key=    value    ',
             '  key  =  value   ',
         ):
-            name, value = self.client._split_label(label)
+            name, _, value = self.client._split_label(label)
             self.assertEqual(name, 'key')
             self.assertEqual(value, 'value')
 
@@ -181,7 +201,7 @@ class TestNodeFacade(test_api.BaseLibTest):
             'key=        ',
             '  key  =     ',
         ):
-            name, value = self.client._split_label(label)
+            name, _, value = self.client._split_label(label)
             self.assertEqual(name, 'key')
             self.assertIsNone(value)
 

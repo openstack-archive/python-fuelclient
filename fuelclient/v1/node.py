@@ -107,7 +107,7 @@ class NodeClient(base_v1.BaseV1Client):
         labels_to_update = {}
 
         for label in labels:
-            key, val = self._split_label(label)
+            key, sep, val = self._split_label(label)
             labels_to_update[key] = val
 
         if node_ids:
@@ -164,10 +164,12 @@ class NodeClient(base_v1.BaseV1Client):
         checking_list = []
 
         for label in labels:
-            key, val = self._split_label(label)
-
+            key, sep, val = self._split_label(label)
             if key in item.get('labels'):
-                checking_val = item['labels'][key] == val
+                if sep is '':
+                    checking_val = True
+                else:
+                    checking_val = item['labels'][key] == val
                 checking_list.append(checking_val)
 
         return True in checking_list
@@ -183,11 +185,11 @@ class NodeClient(base_v1.BaseV1Client):
 
     @staticmethod
     def _split_label(label):
-        name, value = label.split('=')
+        name, separator, value = label.partition('=')
         name = name.strip()
         value = value.strip()
         value = None if value == '' else value
-        return name, value
+        return name, separator, value
 
 
 def get_client():
