@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import namedtuple
 import copy
 from functools import partial
 
@@ -20,6 +21,9 @@ import six
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
+
+
+SplittedLabel = namedtuple('SplittedLabel', ['key', 'value', 'has_separator'])
 
 
 class NodeClient(base_v1.BaseV1Client):
@@ -107,7 +111,7 @@ class NodeClient(base_v1.BaseV1Client):
         labels_to_update = {}
 
         for label in labels:
-            key, val = self._split_label(label)
+            key, val, _ = self._split_label(label)
             labels_to_update[key] = val
 
         if node_ids:
@@ -164,13 +168,15 @@ class NodeClient(base_v1.BaseV1Client):
         checking_list = []
 
         for label in labels:
-            key, val = self._split_label(label)
-
+            key, val, has_separator = self._split_label(label)
             if key in item.get('labels'):
-                checking_val = item['labels'][key] == val
+                if not has_separator:
+                    checking_val = True
+                else:
+                    checking_val = item['labels'][key] == val
                 checking_list.append(checking_val)
 
-        return True in checking_list
+        return any(checking_list)
 
     @staticmethod
     def _labels_after_delete(labels, labels_keys):
@@ -183,11 +189,11 @@ class NodeClient(base_v1.BaseV1Client):
 
     @staticmethod
     def _split_label(label):
-        name, value = label.split('=')
+        name, separator, value = label.partition('=')
         name = name.strip()
         value = value.strip()
         value = None if value == '' else value
-        return name, value
+        return SplittedLabel(name, value, bool(separator))
 
 
 def get_client():
