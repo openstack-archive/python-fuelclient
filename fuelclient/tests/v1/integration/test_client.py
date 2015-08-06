@@ -268,9 +268,9 @@ class TestUserActions(base.BaseTestCase):
 
     def test_change_password_params(self):
         cmd = "user change-password"
-        msg = "Expect password [--newpass NEWPASS]"
+        msg = "Expect password [--newpass NEWPASS] or --pwprompt, -P flag"
         result = self.run_cli_command(cmd, check_errors=False)
-        self.assertTrue(msg, result)
+        self.assertEqual(msg, result)
 
 
 class TestCharset(base.BaseTestCase):

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from getpass import getpass
+
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.error import ArgumentException
@@ -27,6 +29,7 @@ class UserAction(Action):
         super(UserAction, self).__init__()
         self.args = (
             Args.get_new_password_arg(),
+            Args.get_boolean_arg("pwprompt", flags=("-P", "--pwprompt")),
             Args.get_change_password_arg("Change user password")
         )
 
@@ -34,12 +37,23 @@ class UserAction(Action):
             ("change-password", self.change_password),
         )
 
+    def _get_password(self):
+        password1 = getpass("Changing password for Fuel User.\nNew Password:")
+        password2 = getpass("Retype New Password:")
+        if password1 != password2:
+            raise ArgumentException("Passwords are not the same.")
+        return password1
+
     def change_password(self, params):
         """To change user password:
                 fuel user change-password
         """
-        if params.newpass:
-            APIClient.update_own_password(params.newpass)
+        if params.pwprompt:
+            password = self._get_password()
+        elif params.newpass:
+            password = params.newpass
         else:
             raise ArgumentException(
-                "Expect password [--newpass NEWPASS]")
+                "Expect password [--newpass NEWPASS] or --pwprompt, -P flag")
+
+        APIClient.update_own_password(password)
