@@ -38,20 +38,22 @@ class NetworkGroup(BaseObject):
             'use_gateway': False,
             'name': name,
             'cidr': cidr,
-            'vlan_start': vlan
         }
+        if vlan:
+            metadata['vlan_start'] = vlan
         if meta:
             metadata.update(meta)
 
         network_group = {
             'name': name,
             'release': release,
-            'vlan_start': vlan,
             'cidr': cidr,
             'gateway': gateway,
             'meta': metadata,
             'group_id': group_id,
         }
+        if vlan:
+            metadata['vlan_start'] = vlan
 
         return cls.connection.post_request(
             cls.class_api_path,
