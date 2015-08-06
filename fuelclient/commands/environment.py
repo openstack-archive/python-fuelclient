@@ -83,11 +83,13 @@ class EnvCreate(EnvMixIn, base.BaseShowCommand):
         parser.add_argument('-nst',
                             '--net-segmentation-type',
                             type=str,
-                            choices=['vlan', 'gre'],
+                            choices=['vlan', 'gre', 'tun'],
                             dest='nst',
                             default='vlan',
                             help='Network segmentation type. Is only '
-                                 'used if network provider is  Neutron')
+                                 'used if network provider is Neutron.'
+                                 'WARNING: GRE network segmentation type '
+                                 'is deprecated since 7.0 release.')
 
         return parser
 
@@ -95,6 +97,10 @@ class EnvCreate(EnvMixIn, base.BaseShowCommand):
         if parsed_args.net_provider == 'nova':
             self.app.stdout.write('WARNING: nova-network is deprecated '
                                   'since 6.1 release')
+
+        if parsed_args.net_provider == 'neutron' and parsed_args.nst == 'gre':
+            self.app.stdout.write('WARNING: GRE network segmentation type is '
+                                  'deprecated since 7.0 release')
 
         new_env = self.client.create(name=parsed_args.name,
                                      release_id=parsed_args.release,

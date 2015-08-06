@@ -164,6 +164,13 @@ class TestHandlers(base.BaseTestCase):
             msg
         )
 
+    def test_env_create_neutron_tun(self):
+        self.load_data_to_nailgun_server()
+        self.check_for_stdout(
+            "env create --name=NewEnv --release=1 --nst=tun",
+            "Environment 'NewEnv' with id=1, mode=ha_compact and "
+            "network-mode=neutron was created!\n")
+
     def test_destroy_multiple_nodes(self):
         self.load_data_to_nailgun_server()
         self.run_cli_commands((

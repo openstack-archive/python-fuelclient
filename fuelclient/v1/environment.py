@@ -29,7 +29,7 @@ class EnvironmentClient(base_v1.BaseV1Client):
                deployment_mode='ha_compact', net_segment_type=None):
 
         if network_provider == 'neutron':
-            if net_segment_type not in ('gre', 'vlan'):
+            if net_segment_type not in ('gre', 'vlan', 'tun'):
                 msg = 'Using  Neutron as a network provider requires '\
                       'specifying network segmentation type.'
                 raise error.ArgumentException(msg)

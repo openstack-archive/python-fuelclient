@@ -71,6 +71,17 @@ class TestEnvCommand(test_engine.BaseCLITest):
                 m_stdout.getvalue()
             )
 
+    def test_neutron_gre_deprecation_warning(self):
+        args = 'env create -r 1 -n neutron -nst gre env42'
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.exec_command(args)
+            self.assertIn(
+                "WARNING: GRE network segmentation type is deprecated "
+                "since 7.0 release",
+                m_stdout.getvalue()
+            )
+
     def test_env_delete(self):
         args = 'env delete --force 42'
         self.exec_command(args)
