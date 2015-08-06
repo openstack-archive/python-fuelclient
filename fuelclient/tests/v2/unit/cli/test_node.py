@@ -91,13 +91,13 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_client.get_node_vms_conf.assert_called_once_with(node_id)
 
     def test_node_vms_conf_create(self):
-        vms_conf = """{"id":2} {"id":3}"""
+        vms_conf = r'{\"id\":2} {\"id\":3}'
         config = [{'id': 2},
                   {'id': 3}]
 
         node_id = 42
 
-        args = "node create-vms-conf {0} --conf {1}".format(
+        args = 'node create-vms-conf {0} --conf {1}'.format(
             node_id,
             vms_conf)
         self.exec_command(args)

@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import shlex
 import sys
 
 import mock
@@ -48,7 +49,7 @@ class BaseCLITest(base.UnitTestCase):
     def exec_command(self, command=''):
         """Executes fuelclient with the specified arguments."""
 
-        return main_mod.main(argv=command.split())
+        return main_mod.main(argv=shlex.split(command))
 
     def exec_command_interactive(self, commands):
         """Executes specified commands in one sesstion of interactive mode
