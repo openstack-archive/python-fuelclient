@@ -167,7 +167,7 @@ class BaseTestCase(UnitTestCase):
 
     def check_if_required(self, command):
         call = self.run_cli_command(command, check_errors=False)
-        #should not work without env id
+        # should not work without env id
         self.assertIn("required", call.stderr)
 
     def check_for_stdout(self, command, msg, check_errors=True):
