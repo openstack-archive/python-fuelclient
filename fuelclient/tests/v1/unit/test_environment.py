@@ -61,6 +61,27 @@ class TestEnvironment(base.UnitTestCase):
                           'deprecated since 6.1 release.',
                           m_stdout.getvalue())
 
+    def test_neutron_gre_using_warning(self, m_requests):
+        cluster_id = 1
+        cluster_data = {
+            'id': cluster_id,
+            'name': 'test',
+            'mode': 'ha_compact',
+            'net_provider': 'neutron'
+        }
+        m_requests.post('/api/v1/clusters/', json=cluster_data)
+        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                       json=cluster_data)
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.execute(
+                'fuel env create --name test --rel 1 --nst gre'
+                .split()
+            )
+            self.assertIn("WARNING: GRE network segmentation type deprecated "
+                          "is since 7.0 release.",
+                          m_stdout.getvalue())
+
     def test_create_env_with_mode_set(self, m_requests):
         cluster_id = 1
         cluster_data = {

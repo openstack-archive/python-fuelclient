@@ -105,6 +105,13 @@ class EnvironmentAction(Action):
                 "WARNING: nova-network is deprecated since 6.1 release."
             )
 
+        if params.net == "neutron" and params.nst == 'gre':
+            self.serializer.print_to_output(
+                {},
+                "WARNING: GRE network segmentation type deprecated is "
+                "since 7.0 release."
+            )
+
         if params.mode == 'multinode':
             self.serializer.print_to_output(
                 {},

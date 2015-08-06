@@ -106,6 +106,27 @@ class TestEnvFacade(test_api.BaseLibTest):
                           self.client.create,
                           node_name, release_id, net, net_segment_type=nst)
 
+    def test_env_create_neutron_tun(self):
+        env = utils.get_fake_env()
+        env_name = env['name']
+        release_id = env['release_id']
+        nst = env['net_segment_type'] = 'tun'
+        net = env['net_provider']
+
+        matcher = self.m_request.post(self.res_uri, json=env)
+
+        self.client.create(name=env_name,
+                           release_id=release_id,
+                           network_provider=net,
+                           net_segment_type=nst)
+
+        req_data = matcher.last_request.json()
+
+        self.assertEqual(release_id, req_data['release_id'])
+        self.assertEqual(env_name, req_data['name'])
+        self.assertEqual(nst, req_data['net_segment_type'])
+        self.assertEqual(net, req_data['net_provider'])
+
     @mock.patch.object(task_object.DeployTask, 'init_with_data')
     def test_env_deploy(self, m_init):
         env_id = 42
