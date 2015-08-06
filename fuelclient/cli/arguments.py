@@ -374,7 +374,7 @@ def get_nst_arg(help_msg):
     return get_arg("nst",
                    flags=("--net-segment-type",),
                    action="store",
-                   choices=("gre", "vlan"),
+                   choices=("gre", "vlan", "tun"),
                    help_=help_msg,
                    default="vlan")
 
