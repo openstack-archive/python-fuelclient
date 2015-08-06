@@ -167,7 +167,7 @@ class BaseTestCase(UnitTestCase):
 
     def check_if_required(self, command):
         call = self.run_cli_command(command, check_errors=False)
-        #should not work without env id
+        # should not work without env id
         self.assertIn("required", call.stderr)
 
     def check_for_stdout(self, command, msg, check_errors=True):
@@ -186,7 +186,7 @@ class BaseTestCase(UnitTestCase):
     def check_for_rows_in_table(self, command):
         output = self.run_cli_command(command)
         message = output.stdout.split("\n")
-        #no env
+        # no env
         self.assertEqual(message[2], '')
 
     def check_number_of_rows_in_table(self, command, number_of_rows):
