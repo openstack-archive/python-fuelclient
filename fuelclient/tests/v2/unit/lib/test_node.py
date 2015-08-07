@@ -146,29 +146,28 @@ class TestNodeFacade(test_api.BaseLibTest):
         matcher_get = self.m_request.get(expected_uri, json=self.fake_node)
         matcher_put = self.m_request.put(expected_uri, json=data)
 
-        self.client.set_labels_for_nodes(
-            labels=labels, node_ids=node_ids)
+        self.client.set_labels_for_nodes(labels=labels, node_ids=node_ids)
 
         self.assertTrue(matcher_get.called)
         self.assertTrue(matcher_put.called)
         self.assertEqual(data, matcher_put.last_request.json())
 
-    def test_delete_labels_for_all_nodes(self):
-        labels_keys = ['key_1', '   key_3   ']
+    def test_delete_specific_labels_for_all_nodes(self):
+        labels = ['key_1', '   key_3   ']
         data = {'labels': {'key_2': None}}
         expected_uri = self.get_object_uri(self.res_uri, 42)
 
         matcher_get = self.m_request.get(self.res_uri, json=self.fake_nodes)
         matcher_put = self.m_request.put(expected_uri, json=data)
 
-        self.client.delete_labels_for_nodes(labels_keys=labels_keys)
+        self.client.delete_labels_for_nodes(labels=labels)
 
         self.assertTrue(matcher_get.called)
         self.assertTrue(matcher_put.called)
         self.assertEqual(data, matcher_put.last_request.json())
 
-    def test_delete_labels_for_specific_nodes(self):
-        labels_keys = ['key_2']
+    def test_delete_specific_labels_for_specific_nodes(self):
+        labels = ['key_2']
         node_ids = ['42']
         data = {'labels': {'key_1': 'val_1', 'key_3': 'val_3'}}
         expected_uri = self.get_object_uri(self.res_uri, 42)
@@ -176,8 +175,34 @@ class TestNodeFacade(test_api.BaseLibTest):
         matcher_get = self.m_request.get(expected_uri, json=self.fake_node)
         matcher_put = self.m_request.put(expected_uri, json=data)
 
-        self.client.delete_labels_for_nodes(
-            labels_keys=labels_keys, node_ids=node_ids)
+        self.client.delete_labels_for_nodes(labels=labels, node_ids=node_ids)
+
+        self.assertTrue(matcher_get.called)
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(data, matcher_put.last_request.json())
+
+    def test_delete_all_labels_for_all_nodes(self):
+        data = {'labels': {}}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        matcher_get = self.m_request.get(self.res_uri, json=self.fake_nodes)
+        matcher_put = self.m_request.put(expected_uri, json=data)
+
+        self.client.delete_labels_for_nodes(labels=None)
+
+        self.assertTrue(matcher_get.called)
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(data, matcher_put.last_request.json())
+
+    def test_delete_all_labels_for_specific_nodes(self):
+        node_ids = ['42']
+        data = {'labels': {}}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        matcher_get = self.m_request.get(expected_uri, json=self.fake_node)
+        matcher_put = self.m_request.put(expected_uri, json=data)
+
+        self.client.delete_labels_for_nodes(labels=None, node_ids=node_ids)
 
         self.assertTrue(matcher_get.called)
         self.assertTrue(matcher_put.called)
