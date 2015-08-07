@@ -133,7 +133,7 @@ class NodeClient(base_v1.BaseV1Client):
 
         return data_to_return
 
-    def delete_labels_for_nodes(self, labels_keys=None, node_ids=None):
+    def delete_labels_for_nodes(self, labels=None, node_ids=None):
         """Delete labels data from nodes labels. If node_ids are
         empty list then labels will be deleted on all nodes
 
@@ -149,7 +149,7 @@ class NodeClient(base_v1.BaseV1Client):
             for node_id in node_ids:
                 node = self._entity_wrapper(obj_id=node_id)
                 updated_labels = self._labels_after_delete(
-                    node.labels, labels_keys)
+                    node.labels, labels)
 
                 result = self.update(node_id, **{'labels': updated_labels})
                 data_to_return.append(str(result.get('id')))
@@ -157,7 +157,7 @@ class NodeClient(base_v1.BaseV1Client):
             nodes = self._entity_wrapper.get_all_data()
             for node in nodes:
                 updated_labels = self._labels_after_delete(
-                    node['labels'], labels_keys)
+                    node['labels'], labels)
 
                 result = self.update(node['id'], **{'labels': updated_labels})
                 data_to_return.append(str(result.get('id')))
@@ -180,6 +180,9 @@ class NodeClient(base_v1.BaseV1Client):
 
     @staticmethod
     def _labels_after_delete(labels, labels_keys):
+        if not labels_keys:
+            return {}
+
         db_labels = copy.deepcopy(labels)
         for label_key in labels_keys:
             label_key = label_key.strip()
