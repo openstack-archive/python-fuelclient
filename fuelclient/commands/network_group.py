@@ -77,11 +77,10 @@ class NetworkGroupList(NetworkGroupMixin, base.BaseListCommand):
     )
 
 
-# TODO(asaprykin): Include metadata field to the output
 class NetworkGroupShow(NetworkGroupMixin, base.BaseShowCommand):
     """Show network group."""
 
-    columns = NetworkGroupList.columns
+    columns = NetworkGroupList.columns + ('meta',)
 
 
 class NetworkGroupCreate(NetworkGroupMixin, base.BaseShowCommand):
