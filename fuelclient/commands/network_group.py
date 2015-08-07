@@ -73,11 +73,11 @@ class NetworkGroupList(NetworkGroupMixin, base.BaseListCommand):
         'vlan_start',
         'cidr',
         'gateway',
-        'group_id'
+        'group_id',
+        'meta'
     )
 
 
-# TODO(asaprykin): Include metadata field to the output
 class NetworkGroupShow(NetworkGroupMixin, base.BaseShowCommand):
     """Show network group."""
 
