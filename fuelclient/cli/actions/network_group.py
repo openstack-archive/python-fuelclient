@@ -26,7 +26,7 @@ class NetworkGroupAction(Action):
     """
     action_name = "network-group"
     acceptable_keys = ("id", "name", "vlan_start", "cidr",
-                       "gateway", "group_id")
+                       "gateway", "group_id", "meta")
 
     def __init__(self):
         super(NetworkGroupAction, self).__init__()
