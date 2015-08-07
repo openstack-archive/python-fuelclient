@@ -180,6 +180,9 @@ class NodeClient(base_v1.BaseV1Client):
 
     @staticmethod
     def _labels_after_delete(labels, labels_keys):
+        if not labels_keys:
+            return {}
+
         db_labels = copy.deepcopy(labels)
         for label_key in labels_keys:
             label_key = label_key.strip()
