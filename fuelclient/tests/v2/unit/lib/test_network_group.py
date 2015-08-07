@@ -39,15 +39,26 @@ class TestNetworkGroupFacade(test_api.BaseLibTest):
         self.assertTrue(matcher.called)
 
     def test_network_group_show(self):
+        expected_fields_names = (
+            'id',
+            'name',
+            'vlan_start',
+            'cidr',
+            'gateway',
+            'group_id',
+            'meta'
+        )
         net_id = 42
         uri = self.get_object_uri(self.res_uri, net_id)
 
         matcher = self.m_request.get(
             uri, json=self.fake_network_group)
 
-        self.client.get_by_id(net_id)
+        data = self.client.get_by_id(net_id)
 
         self.assertTrue(matcher.called)
+        self.assertTrue(all(f in data for f
+                            in expected_fields_names))
 
     def test_network_group_create(self):
         fake_ng = self.fake_network_group
