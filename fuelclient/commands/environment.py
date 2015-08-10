@@ -39,7 +39,6 @@ class EnvShow(EnvMixIn, base.BaseShowCommand):
                "status",
                "fuel_version",
                "name",
-               "grouping",
                "mode",
                "release_id",
                "pending_release_id",
