@@ -29,7 +29,7 @@ Requires: python-requests >= 2.1.0
 Requires: python-requests <= 2.2.1
 
 Requires: python-keystoneclient >= 1:0.10.0
-Requires: python-keystoneclient <= 1:1.1.0
+Requires: python-keystoneclient < 1:1.4.0
 
 Requires: python-cliff >= 1.7.0
 Requires: python-cliff <= 1.9.0
@@ -38,14 +38,14 @@ Requires: python-six >= 1.7.0
 Requires: python-six <= 1.9.0
 
 Requires: python-oslo-serialization >= 1.0.0
-Requires: python-oslo-serialization <= 1.2.0
+Requires: python-oslo-serialization < 1.5.0
 
 Requires: python-oslo-i18n >= 1.3.0
-Requires: python-oslo-i18n <= 1.7.0
+Requires: python-oslo-i18n < 1.6.0
 
-Requires: python-oslo-utils < 1:2.0.0
+Requires: python-oslo-utils < 1:1.5.0
 
-Requires: python-oslo-config < 1:2.0.0
+Requires: python-oslo-config < 1:1.10.0
 
 %description
 Summary: Console utility for working with fuel rest api
