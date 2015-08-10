@@ -18,7 +18,9 @@ import glob
 import io
 import json
 import os
+import six
 import subprocess
+import sys
 import yaml
 
 from distutils.version import StrictVersion
@@ -149,3 +151,13 @@ def parse_to_list_of_dicts(str_list):
                     'Not valid JSON data: {0}'.format(json_str))
         dict_list.append(json_str)
     return dict_list
+
+
+def str_to_unicode(string):
+    """Normalize input string from command line to unicode standard.
+
+    :param str string: string to normalize
+    :returns: normalized string
+
+    """
+    return string if six.PY3 else string.decode(sys.getfilesystemencoding())

@@ -48,6 +48,7 @@ class NodeList(NodeMixIn, base.BaseListCommand):
         parser.add_argument(
             '-l',
             '--labels',
+            type=utils.str_to_unicode,
             nargs='+',
             help='Show only nodes that have specific labels')
 

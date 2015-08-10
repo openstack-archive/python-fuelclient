@@ -16,6 +16,7 @@
 
 import json
 import os
+import six
 import subprocess
 
 import mock
@@ -220,3 +221,19 @@ class TestUtils(base.UnitTestCase):
 
         result = data_utils.get_display_data_multi(fields, test_data)
         self.assertEqual([[2, 3], [8, 9]], result)
+
+    @mock.patch('sys.getfilesystemencoding', return_value='utf-8')
+    def test_str_to_unicode(self, _):
+        test_data = 'тест'
+        expected_data = test_data if six.PY3 else u'тест'
+        result = utils.str_to_unicode(test_data)
+        self.assertIsInstance(result, six.text_type)
+        self.assertEqual(result, expected_data)
+
+    @mock.patch('sys.getfilesystemencoding', return_value='iso-8859-16')
+    def test_latin_str_to_unicode(self, _):
+        test_data = 'czegoś' if six.PY3 else u'czegoś'.encode('iso-8859-16')
+        expected_data = test_data if six.PY3 else u'czegoś'
+        result = utils.str_to_unicode(test_data)
+        self.assertIsInstance(result, six.text_type)
+        self.assertEqual(result, expected_data)

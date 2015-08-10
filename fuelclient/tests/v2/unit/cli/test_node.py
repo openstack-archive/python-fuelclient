@@ -15,6 +15,7 @@
 #    under the License.
 
 import mock
+import six
 
 from fuelclient.tests.utils import fake_node
 from fuelclient.tests.v2.unit.cli import test_engine
@@ -71,6 +72,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
             environment_id=env_id, labels=labels)
+        self.assertIsInstance(
+            self.m_client.get_all.call_args[1].get('labels')[0], six.text_type)
 
     def test_node_show(self):
         node_id = 42
