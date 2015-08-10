@@ -459,24 +459,27 @@ class Environment(BaseObject):
             )
         )
 
-    def get_tasks(self, skip=None, end=None, start=None):
+    def get_tasks(self, skip=None, end=None, start=None, include=None):
         """Stores logic to filter tasks by known parameters.
 
         :param skip: list of tasks or None
         :param end: string or None
         :param start: string or None
         """
-        tasks = [t['id'] for t
-                 in self.get_deployment_tasks(end=end, start=start)]
+        tasks = [t['id'] for t in self.get_deployment_tasks(
+                 end=end, start=start, include=include)]
         if skip:
             tasks_to_execute = set(tasks) - set(skip)
             return list(tasks_to_execute)
         return tasks
 
-    def get_deployment_tasks(self, end=None, start=None):
+    def get_deployment_tasks(self, end=None, start=None, include=None):
         url = self.deployment_tasks_path.format(self.id)
         return self.connection.get_request(
-            url, params={'end': end, 'start': start})
+            url, params={
+                'end': end,
+                'start': start,
+                'include': include})
 
     def update_deployment_tasks(self, data):
         url = self.deployment_tasks_path.format(self.id)

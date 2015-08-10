@@ -162,4 +162,6 @@ class TestEnvironmentOstf(base.UnitTestCase):
         end = 'task1'
         self.env.get_deployment_tasks(end=end)
         kwargs = mrequests.get.call_args[1]
-        self.assertEqual(kwargs['params'], {'start': None, 'end': 'task1'})
+        self.assertEqual(
+            kwargs['params'],
+            {'start': None, 'end': 'task1', 'include': None})
