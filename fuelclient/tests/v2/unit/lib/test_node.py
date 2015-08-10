@@ -58,6 +58,34 @@ class TestNodeFacade(test_api.BaseLibTest):
         self.assertEqual(data[0]['name'], 'node_1')
         self.assertEqual(data[1]['name'], 'node_3')
 
+    def test_node_list_with_cyrillic_labels(self):
+        fake_nodes = [
+            utils.get_fake_node(node_name='node_1',
+                                labels={u'key1': u'тест 1'}),
+            utils.get_fake_node(node_name='node_2',
+                                labels={u'метка': u'тест2'}),
+            utils.get_fake_node(node_name='node_3',
+                                labels={u'key1': u'val2', u'метка': u'val3'})
+        ]
+
+        matcher_get = self.m_request.get(self.res_uri, json=fake_nodes)
+
+        data = self.client.get_all(labels=['key1=тест 1'])
+        self.assertTrue(matcher_get.called)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['name'], 'node_1')
+
+        data = self.client.get_all(labels=['метка=тест2'])
+        self.assertTrue(matcher_get.called)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['name'], 'node_2')
+
+        data = self.client.get_all(labels=['метка'])
+        self.assertTrue(matcher_get.called)
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]['name'], 'node_2')
+        self.assertEqual(data[1]['name'], 'node_3')
+
     def test_node_show(self):
         node_id = 42
         expected_uri = self.get_object_uri(self.res_uri, node_id)

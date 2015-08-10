@@ -189,6 +189,7 @@ class NodeClient(base_v1.BaseV1Client):
 
     @staticmethod
     def _split_label(label):
+        label = unicode(label, encoding='utf-8')
         name, separator, value = label.partition('=')
         name = name.strip()
         value = value.strip()
