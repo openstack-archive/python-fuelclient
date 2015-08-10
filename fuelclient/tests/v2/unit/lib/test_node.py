@@ -183,6 +183,36 @@ class TestNodeFacade(test_api.BaseLibTest):
         self.assertTrue(matcher_put.called)
         self.assertEqual(data, matcher_put.last_request.json())
 
+    def test_delete_labels_by_value(self):
+        labels_keys = ['key_1=val_1', 'key_3=anothervalue', 'key_2']
+        node_ids = ['42']
+        result_labels = {'labels': {'key_3': 'val_3'}}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        self.m_request.get(expected_uri, json=self.fake_node)
+        matcher_put = self.m_request.put(expected_uri, json=self.fake_node)
+
+        self.client.delete_labels_for_nodes(
+            labels_keys=labels_keys, node_ids=node_ids)
+
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(result_labels, matcher_put.last_request.json())
+
+    def test_delete_labels_by_value_with_whitespace(self):
+        labels_keys = ['key_1    =val_1', 'key_3=    anothervalue', 'key_2']
+        node_ids = ['42']
+        result_labels = {'labels': {'key_3': 'val_3'}}
+        expected_uri = self.get_object_uri(self.res_uri, 42)
+
+        self.m_request.get(expected_uri, json=self.fake_node)
+        matcher_put = self.m_request.put(expected_uri, json=self.fake_node)
+
+        self.client.delete_labels_for_nodes(
+            labels_keys=labels_keys, node_ids=node_ids)
+
+        self.assertTrue(matcher_put.called)
+        self.assertEqual(result_labels, matcher_put.last_request.json())
+
     def test_get_name_and_value_from_labels(self):
         for label in (
             'key=value',

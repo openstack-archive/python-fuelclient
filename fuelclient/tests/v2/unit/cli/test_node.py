@@ -189,3 +189,28 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.delete_labels_for_nodes.assert_called_once_with(
             labels_keys=labels_keys, node_ids=node_ids)
+
+    def test_node_label_delete_by_value(self):
+        labels = ['key_1', 'key_2=value2']
+        node_ids = ['42', '43']
+        args = 'node label delete {labels} --nodes {node_ids}'.format(
+            labels=' '.join(labels), node_ids=' '.join(node_ids))
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.delete_labels_for_nodes.assert_called_once_with(
+            labels_keys=labels, node_ids=node_ids)
+
+    def test_node_label_delete_by_value_with_whitespace(self):
+        labels = ['key_1', "'key_2   =value2'"]
+        labels_expected = [x.strip("'") for x in labels]
+        node_ids = ['42', '43']
+        args = 'node label delete {labels} --nodes {node_ids}'.format(
+            labels=' '.join(labels), node_ids=' '.join(node_ids))
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.delete_labels_for_nodes.assert_called_once_with(
+            labels_keys=labels_expected, node_ids=node_ids)
