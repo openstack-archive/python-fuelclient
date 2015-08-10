@@ -62,7 +62,20 @@ class NodeGroupAction(Action):
         """Create a new node group
                fuel --env 1 nodegroup --create --name "group 1"
         """
+        if not params.env:
+            raise ActionException(
+                "Please, specify environment id with option --env."
+            )
+        if not params.name:
+            raise ActionException(
+                "Please, specify nodegroup name with option --name."
+            )
         env_id = int(params.env)
+        data = NodeGroup.get_all_data()
+        if not any(i['id'] == env_id for i in data):
+            raise ActionException('Environment id not found.')
+        if any(i['name'] == params.name for i in data):
+            raise ActionException('Nodegroup name already exist.')
         NodeGroup.create(params.name, env_id)
         env = Environment(env_id)
         network_data = env.get_network_data()
