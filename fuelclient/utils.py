@@ -19,12 +19,16 @@ import io
 import json
 import os
 import subprocess
+import sys
 import yaml
 
 from distutils.version import StrictVersion
 from fnmatch import fnmatch
 
 from fuelclient.cli import error
+
+
+PY3 = sys.version_info[0] == 3
 
 
 def _wait_and_check_exit_code(cmd, child):
@@ -149,3 +153,13 @@ def parse_to_list_of_dicts(str_list):
                     'Not valid JSON data: {0}'.format(json_str))
         dict_list.append(json_str)
     return dict_list
+
+
+def str_to_unicode(string):
+    """Normalize string to unicode standard.
+
+    :param str string: string to normalize
+    :returns: normalized string
+
+    """
+    return string if PY3 else string.decode(sys.getfilesystemencoding())

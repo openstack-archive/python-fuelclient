@@ -61,6 +61,7 @@ class TestNodeCommand(test_engine.BaseCLITest):
             environment_id=None, labels=labels)
 
     def test_node_list_with_env_and_labels(self):
+        import six
         env_id = 42
         labels = ['key_1=val_1', 'key_2=val_2', 'key3']
         args = 'node list --env {env} --labels {labels}'.format(
@@ -71,6 +72,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
             environment_id=env_id, labels=labels)
+        self.assertIsInstance(
+            self.m_client.get_all.call_args[1].get('labels')[0], six.text_type)
 
     def test_node_show(self):
         node_id = 42

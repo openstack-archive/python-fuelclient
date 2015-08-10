@@ -220,3 +220,10 @@ class TestUtils(base.UnitTestCase):
 
         result = data_utils.get_display_data_multi(fields, test_data)
         self.assertEqual([[2, 3], [8, 9]], result)
+
+    @mock.patch('sys.getfilesystemencoding', return_value='utf-8')
+    def test_str_to_unicode(self, _):
+        import six
+        test_data = "тест"
+        result = utils.str_to_unicode(test_data)
+        self.assertIsInstance(result, six.text_type)
