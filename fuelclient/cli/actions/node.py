@@ -261,11 +261,18 @@ class NodeAction(Action):
 
         env = Environment(env_id_to_start)
 
-        if params.tasks:
-            tasks = params.tasks
-        else:
+        tasks = params.tasks or None
+
+        if params.skip or params.end or params.start:
             tasks = env.get_tasks(
-                skip=params.skip, end=params.end, start=params.start)
+                skip=params.skip,
+                end=params.end,
+                start=params.start,
+                include=tasks)
+
+        if not tasks:
+            self.serializer.print_to_output({}, "Nothing to run.")
+            return
 
         task = env.execute_tasks(node_collection.collection, tasks=tasks)
 
