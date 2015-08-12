@@ -146,7 +146,7 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
     def test_node_label_set_for_all_nodes(self):
         labels = ['key_1=val_1', 'key_2=val_2']
-        args = 'node label set {labels} --nodes-all'.format(
+        args = 'node label set -l {labels} --nodes-all'.format(
             labels=' '.join(labels))
 
         self.exec_command(args)
@@ -158,7 +158,7 @@ class TestNodeCommand(test_engine.BaseCLITest):
     def test_node_label_set_for_specific_nodes(self):
         labels = ['key_1=val_1', 'key_2=val_2']
         node_ids = ['42', '43']
-        args = 'node label set {labels} --nodes {node_ids}'.format(
+        args = 'node label set -l {labels} --nodes {node_ids}'.format(
             labels=' '.join(labels), node_ids=' '.join(node_ids))
 
         self.exec_command(args)
@@ -167,25 +167,45 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_client.set_labels_for_nodes.assert_called_once_with(
             labels=labels, node_ids=node_ids)
 
-    def test_node_label_delete_for_all_nodes(self):
-        labels_keys = ['key_1', 'key_2']
-        args = 'node label delete {labels_keys} --nodes-all'.format(
-            labels_keys=' '.join(labels_keys))
+    def test_node_delete_specific_labels_for_all_nodes(self):
+        labels = ['key_1', 'key_2']
+        args = 'node label delete -l {labels} --nodes-all'.format(
+            labels=' '.join(labels))
 
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.delete_labels_for_nodes.assert_called_once_with(
-            labels_keys=labels_keys, node_ids=None)
+            labels=labels, node_ids=None)
 
-    def test_node_label_delete_for_specific_nodes(self):
+    def test_node_delete_specific_labels_for_specific_nodes(self):
         labels_keys = ['key_1', 'key_2']
         node_ids = ['42', '43']
-        args = 'node label delete {labels_keys} --nodes {node_ids}'.format(
-            labels_keys=' '.join(labels_keys), node_ids=' '.join(node_ids))
+        args = 'node label delete -l {labels} --nodes {node_ids}'.format(
+            labels=' '.join(labels_keys), node_ids=' '.join(node_ids))
 
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.delete_labels_for_nodes.assert_called_once_with(
-            labels_keys=labels_keys, node_ids=node_ids)
+            labels=labels_keys, node_ids=node_ids)
+
+    def test_node_delete_all_labels_for_all_nodes(self):
+        args = 'node label delete --labels-all --nodes-all'
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.delete_labels_for_nodes.assert_called_once_with(
+            labels=None, node_ids=None)
+
+    def test_node_delete_all_labels_for_specific_nodes(self):
+        node_ids = ['42', '43']
+        args = 'node label delete --labels-all --nodes {node_ids}'.format(
+            node_ids=' '.join(node_ids))
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.delete_labels_for_nodes.assert_called_once_with(
+            labels=None, node_ids=node_ids)

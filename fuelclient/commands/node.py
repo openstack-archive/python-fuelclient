@@ -188,7 +188,8 @@ class NodeLabelSet(NodeMixIn, base.BaseCommand):
         parser = super(NodeLabelSet, self).get_parser(prog_name)
 
         parser.add_argument(
-            'labels',
+            '-l',
+            '--labels',
             nargs='+',
             help='List of labels for create or update')
 
@@ -220,10 +221,16 @@ class NodeLabelDelete(NodeMixIn, base.BaseCommand):
     def get_parser(self, prog_name):
         parser = super(NodeLabelDelete, self).get_parser(prog_name)
 
-        parser.add_argument(
-            'labels_keys',
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            '-l',
+            '--labels',
             nargs='+',
             help='List of labels keys for delete')
+        group.add_argument(
+            '--labels-all',
+            action='store_true',
+            help='Delete all labels for node')
 
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument(
@@ -234,14 +241,16 @@ class NodeLabelDelete(NodeMixIn, base.BaseCommand):
         group.add_argument(
             '--nodes-all',
             action='store_true',
-            help='Create or update labels for all nodes')
+            help='Delete labels for all nodes')
 
         return parser
 
     def take_action(self, parsed_args):
         nodes_ids = None if parsed_args.nodes_all else parsed_args.nodes
+        labels = None if parsed_args.labels_all \
+            else parsed_args.labels
         data = self.client.delete_labels_for_nodes(
-            labels_keys=parsed_args.labels_keys, node_ids=nodes_ids)
+            labels=labels, node_ids=nodes_ids)
         msg = "Labels have been deleted on nodes: {0} \n".format(
             ','.join(data))
         self.app.stdout.write(msg)
