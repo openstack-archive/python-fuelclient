@@ -116,22 +116,22 @@ class TestNetworkTemplate(base.UnitTestCase):
         self.mocker.stop()
 
     def test_upload_action(self):
-        self.mocker.put(self.req_path)
+        mput = self.mocker.put(self.req_path, json={})
         test_command = [
             'fuel', 'network-template', '--env', str(self.env_id), '--upload']
 
         m_open = mock.mock_open(read_data=YAML_TEMPLATE)
-        with mock.patch('__builtin__.open', m_open, create=True):
+        with mock.patch('fuelclient.cli.serializers.open',
+                        m_open,
+                        create=True):
             self.execute(test_command)
 
-        self.assertEqual(self.mocker.last_request.method, 'PUT')
-        self.assertEqual(self.mocker.last_request.path, self.req_path)
-        self.assertEqual(self.mocker.last_request.json(),
-                         json.loads(JSON_TEMPLATE))
+        self.assertTrue(mput.called)
+        self.assertEqual(mput.last_request.json(), json.loads(JSON_TEMPLATE))
         m_open().read.assert_called_once_with()
 
     def test_download_action(self):
-        self.mocker.get(self.req_path, text=JSON_TEMPLATE)
+        mget = self.mocker.get(self.req_path, text=JSON_TEMPLATE)
 
         test_command = [
             'fuel', 'network-template', '--env', str(self.env_id),
@@ -142,15 +142,14 @@ class TestNetworkTemplate(base.UnitTestCase):
                         create=True):
             self.execute(test_command)
 
-        self.assertEqual(self.mocker.last_request.method, 'GET')
-        self.assertEqual(self.mocker.last_request.path, self.req_path)
+        self.assertTrue(mget.called)
 
         written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
         expected_yaml = yaml.safe_load(YAML_TEMPLATE)
         self.assertEqual(written_yaml, expected_yaml)
 
     def test_delete_action(self):
-        self.mocker.delete(self.req_path, json={})
+        mdelete = self.mocker.delete(self.req_path, json={})
 
         cmd = ['fuel', 'network-template', '--env', str(self.env_id),
                '--delete']
@@ -158,8 +157,7 @@ class TestNetworkTemplate(base.UnitTestCase):
         with mock.patch('sys.stdout', new=six.StringIO()) as m_out:
             self.execute(cmd)
 
-        self.assertEqual(self.mocker.last_request.method, 'DELETE')
-        self.assertEqual(self.mocker.last_request.path, self.req_path)
+        self.assertTrue(mdelete.called)
 
         msg = ("Network template configuration for environment id={0}"
                " has been deleted.".format(self.env_id))
