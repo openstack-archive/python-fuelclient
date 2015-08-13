@@ -66,11 +66,11 @@ class BaseCLITest(base.UnitTestCase):
             m_stdin.readline.side_effect = commands
             self.exec_command()
 
-    @mock.patch('cliff.commandmanager.CommandManager.find_command')
-    def test_command_non_interactive(self, m_find_command):
+    @mock.patch('cliff.app.App.run_subcommand')
+    def test_command_non_interactive(self, m_run_command):
         args = ['help']
         self.exec_command(*args)
-        m_find_command.assert_called_once_with(args)
+        m_run_command.assert_called_once_with(args)
 
     @mock.patch.object(sys, 'stderr')
     @mock.patch('cliff.app.App.run_subcommand')

@@ -109,6 +109,9 @@ class Client(object):
         resp = requests.delete(url, headers=headers)
         resp.raise_for_status()
 
+        if resp.status_code == 204:
+            return {}
+
         return resp.json()
 
     def put_request(self, api, data):
