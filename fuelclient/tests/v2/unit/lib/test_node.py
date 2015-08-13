@@ -17,6 +17,7 @@
 import fuelclient
 from fuelclient.tests import utils
 from fuelclient.tests.v2.unit.lib import test_api
+from fuelclient.v1 import error
 
 
 class TestNodeFacade(test_api.BaseLibTest):
@@ -151,6 +152,17 @@ class TestNodeFacade(test_api.BaseLibTest):
         self.assertTrue(matcher_get.called)
         self.assertTrue(matcher_put.called)
         self.assertEqual(data, matcher_put.last_request.json())
+
+    def test_set_labels_with_empty_key(self):
+        labels = ['key_1=val_1', ' =   val_2', 'key_3   = ']
+        node_ids = ['42']
+
+        msg = 'Wrong label "{0}" was provided. Label key couldn\'t ' \
+              'be an empty string.'.format(labels[1])
+        with self.assertRaisesRegexp(error.LabelEmptyKeyError, msg):
+            self.client.set_labels_for_nodes(labels=labels, node_ids=node_ids)
+
+        self.assertFalse(self.top_matcher.called)
 
     def test_delete_specific_labels_for_all_nodes(self):
         labels = ['key_1', '   key_3   ']

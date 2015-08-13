@@ -18,9 +18,9 @@ from functools import partial
 
 import six
 
-from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
+from fuelclient.v1 import error
 
 
 SplittedLabel = namedtuple('SplittedLabel', ['key', 'value', 'has_separator'])
@@ -66,7 +66,7 @@ class NodeClient(base_v1.BaseV1Client):
             if attr not in self._updatable_attributes:
                 msg = 'Only {0} are updatable'.format(
                     self._updatable_attributes)
-                raise error.ArgumentException(msg)
+                raise error.FieldUpdateException(msg)
 
         return node.set(updated_attributes)
 
@@ -112,6 +112,10 @@ class NodeClient(base_v1.BaseV1Client):
 
         for label in labels:
             key, val, _ = self._split_label(label)
+            if not key:
+                msg = 'Wrong label "{0}" was provided. Label key couldn\'t ' \
+                      'be an empty string.'.format(label)
+                raise error.LabelEmptyKeyError(msg)
             labels_to_update[key] = val
 
         if node_ids:
