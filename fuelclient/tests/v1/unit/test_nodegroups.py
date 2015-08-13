@@ -28,28 +28,36 @@ class TestNodeGroupActions(base.UnitTestCase):
         self.req_base_path = '/api/v1/nodegroups/'
 
     def test_list_nodegroups(self, mreq):
-        mreq.get(self.req_base_path)
+        mreq.get(self.req_base_path, json=[])
         self.execute(['fuel', 'nodegroup', '--list'])
         self.assertEqual(mreq.last_request.method, 'GET')
         self.assertEqual(mreq.last_request.path, self.req_base_path)
 
     def test_create_nodegroup(self, mreq):
-        mreq.post(self.req_base_path)
+        neutron_url = \
+            '/api/v1/clusters/{0}/network_configuration/neutron'.format(
+            self.env_id
+        )
+
+        mreq.get('/api/v1/clusters/{0}/'.format(self.env_id),
+                 json={'id': self.env_id, 'net_provider': 'neutron'})
+        mpost = mreq.post(self.req_base_path, json={'id': 1})
+        mreq.get(neutron_url, json={'networking_parameters': {}})
         self.execute(['fuel', 'nodegroup', '--create',
                       '--name', 'test group', '--env', str(self.env_id)])
 
-        call_data = mreq.last_request.json()
+        call_data = mpost.last_request.json()
         self.assertEqual(self.env_id, call_data['cluster_id'])
         self.assertEqual('test group', call_data['name'])
 
-        self.assertEqual(mreq.last_request.method, 'POST')
-        self.assertEqual(mreq.last_request.path, self.req_base_path)
+        self.assertEqual(mreq.last_request.method, 'GET')
+        self.assertEqual(mreq.last_request.path, neutron_url)
 
     def test_delete_nodegroup(self, mreq):
         path = self.req_base_path + str(self.env_id) + '/'
         mreq.get(path, json={'name': 'test group'})
         delete_path = self.req_base_path + str(self.env_id) + '/'
-        mreq.delete(delete_path)
+        mreq.delete(delete_path, status_code=204)
         self.execute(['fuel', 'nodegroup', '--delete', '--group',
                       str(self.env_id)])
         self.assertEqual(mreq.request_history[-2].method, 'GET')
