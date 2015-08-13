@@ -19,6 +19,24 @@ from fuelclient.commands import base
 from fuelclient.common import data_utils
 
 
+_updatable_keys = (
+    'name', 'vlan', 'cidr', 'gateway', 'group_id', 'meta')
+
+
+def get_args_for_update(params, serializer=None):
+    result = {}
+    for attr in _updatable_keys:
+        value = getattr(params, attr, None)
+        if value is not None:
+            result[attr] = value
+
+    if 'meta' in result:
+        serializer = serializer or Serializer.from_params(params)
+        result['meta'] = serializer.deserialize(result['meta'])
+
+    return result
+
+
 class NetworkGroupMixin(object):
     entity_name = 'network-group'
 
@@ -143,15 +161,7 @@ class NetworkGroupUpdate(NetworkGroupMixin, base.BaseShowCommand):
         return parser
 
     def take_action(self, parsed_args):
-        to_update = {}
-        for attr in self.client.updatable_attributes:
-            value = getattr(parsed_args, attr, None)
-            if value is not None:
-                to_update[attr] = value
-
-        if 'meta' in to_update:
-            serializer = Serializer.from_params(parsed_args)
-            to_update['meta'] = serializer.deserialize(to_update['meta'])
+        to_update = get_args_for_update(parsed_args)
 
         network_group = self.client.update(parsed_args.id, **to_update)
         network_group = data_utils.get_display_data_single(
