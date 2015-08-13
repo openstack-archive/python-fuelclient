@@ -112,6 +112,10 @@ class NodeClient(base_v1.BaseV1Client):
 
         for label in labels:
             key, val, _ = self._split_label(label)
+            if not key:
+                msg = 'Wrong label "{0}" was provided. Label key couldn\'t ' \
+                      'be an empty string.'.format(label)
+                raise error.LabelEmptyKeyError(msg)
             labels_to_update[key] = val
 
         if node_ids:
