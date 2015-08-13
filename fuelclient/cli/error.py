@@ -88,6 +88,10 @@ class ExecutedErrorNonZeroExitCode(FuelClientException):
     """Subshell command returned non-zero exit code."""
 
 
+class LabelEmptyKeyError(BadDataException):
+    """Should be raised when user provides labels with empty key."""
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class
