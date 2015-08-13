@@ -116,12 +116,14 @@ class TestNetworkTemplate(base.UnitTestCase):
         self.mocker.stop()
 
     def test_upload_action(self):
-        self.mocker.put(self.req_path)
+        self.mocker.put(self.req_path, json={})
         test_command = [
             'fuel', 'network-template', '--env', str(self.env_id), '--upload']
 
         m_open = mock.mock_open(read_data=YAML_TEMPLATE)
-        with mock.patch('__builtin__.open', m_open, create=True):
+        with mock.patch('fuelclient.cli.serializers.open',
+                        m_open,
+                        create=True):
             self.execute(test_command)
 
         self.assertEqual(self.mocker.last_request.method, 'PUT')

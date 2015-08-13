@@ -28,7 +28,7 @@ class TestNetworkGroupActions(base.UnitTestCase):
         self.req_base_path = '/api/v1/networks/'
 
     def test_list_network_groups(self, mreq):
-        mreq.get(self.req_base_path)
+        mreq.get(self.req_base_path, json={})
         list_commands = [
             ['fuel', 'network-group', '--list'], ['fuel', 'network-group']]
 
@@ -38,7 +38,7 @@ class TestNetworkGroupActions(base.UnitTestCase):
             self.assertEqual(mreq.last_request.path, self.req_base_path)
 
     def test_list_network_groups_filtering(self, mreq):
-        mreq.get(self.req_base_path)
+        mreq.get(self.req_base_path, json={})
 
         self.execute(['fuel', 'network-group', '--node-group', '1'])
 
@@ -46,7 +46,7 @@ class TestNetworkGroupActions(base.UnitTestCase):
         self.assertEqual(mreq.last_request.path, self.req_base_path)
 
     def create_network_group(self, mreq, cmd):
-        mreq.post(self.req_base_path)
+        mreq.post(self.req_base_path, json={'id': 1})
         self.execute(cmd)
 
         call_data = mreq.last_request.json()
@@ -91,7 +91,7 @@ class TestNetworkGroupActions(base.UnitTestCase):
 
     def test_delete_network_group(self, mreq):
         path = self.req_base_path + str(self.env_id) + '/'
-        mreq.delete(path)
+        mreq.delete(path, status_code=204)
         self.execute(
             ['fuel', 'network-group', '--delete',
              '--network', str(self.env_id)])
