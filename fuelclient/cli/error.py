@@ -115,9 +115,6 @@ def exceptions_decorator(func):
             /etc/fuel/client/config.yaml""")
         except FuelClientException as exc:
             exit_with_error(exc.message)
-        # not all responses return data
-        except ValueError:
-            return {}
 
     return wrapper
 
