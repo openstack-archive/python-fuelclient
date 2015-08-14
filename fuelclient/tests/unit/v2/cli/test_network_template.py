@@ -28,13 +28,13 @@ class TestNetworkTemplateCommand(test_engine.BaseCLITest):
         self.m_client.upload_network_template.assert_called_once_with(
             1, None)
 
-    def test_network_template_upload_w_dir(self):
-        args = 'network-template upload --dir /tmp/test-dir 1'
+    def test_network_template_upload_w_file(self):
+        args = 'network-template upload --file /tmp/test-file 1'
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.upload_network_template.assert_called_once_with(
-            1, '/tmp/test-dir')
+            1, '/tmp/test-file')
 
     def test_network_template_download(self):
         download_mock = self.m_client.download_network_template
