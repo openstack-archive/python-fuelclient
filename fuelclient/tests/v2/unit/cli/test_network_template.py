@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import cStringIO
+
 import mock
 
 from fuelclient.tests.v2.unit.cli import test_engine
@@ -34,7 +36,26 @@ class TestNetworkTemplateCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.upload_network_template.assert_called_once_with(
-            1, '/tmp/test-dir')
+            1, '/tmp/test-dir', None)
+
+    def test_network_template_upload_w_file(self):
+        args = 'network-template upload --file /tmp/test-file 1'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.upload_network_template.assert_called_once_with(
+            1, None, '/tmp/test-file')
+
+    def test_network_template_upload_w_file_and_directory(self):
+        args = 'network-template upload --file /tmp/test-file --dir /tmp/test-dir 1'
+        self.exec_command(args)
+
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.exec_command(args)
+            self.assertIn(
+                'Please specify either file (-f, --file) or directory (-d, --dir)',
+                m_stdout.getvalue()
+            )
 
     def test_network_template_download(self):
         download_mock = self.m_client.download_network_template
