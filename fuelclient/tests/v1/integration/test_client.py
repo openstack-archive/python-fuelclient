@@ -61,7 +61,8 @@ class TestHandlers(base.BaseTestCase):
         cases = [
             ("env --create --name=TestEnv --release=1 --mode=multinode",
              "400 Client Error: Bad Request (Cannot deploy in multinode "
-             "mode in current release. Need to be one of [u'ha_compact']")
+             "mode in current release. Need to be one of: ha_compact)"
+             )
         ]
         for cmd, err in cases:
             self.check_for_stderr(cmd, err, check_errors=False)

@@ -35,25 +35,34 @@ class NetworkTemplateMixin(object):
             help='Directory with network data'
         )
 
+    @staticmethod
+    def add_file_argument(parser):
+        parser.add_argument(
+            '-f', '--file',
+            type=str,
+            help='File of network template'
+        )
+
 
 class NetworkTemplateUpload(NetworkTemplateMixin, base.BaseCommand):
     """To upload network configuration for specified environment:
 
-        fuel2 network-template upload --dir path/to/directory 1
+        fuel2 network-template upload --file path/to/file_name.yaml 1
     """
 
     def get_parser(self, prog_name):
         parser = super(NetworkTemplateUpload, self).get_parser(prog_name)
 
-        self.add_dir_argument(parser)
         self.add_env_argument(parser)
+        self.add_file_argument(parser)
 
         return parser
 
     def take_action(self, parsed_args):
+
         file_path = self.client.upload_network_template(
-            parsed_args.env, parsed_args.dir)
-        msg = "Network template {0} has been uploaded.".format(file_path)
+            parsed_args.env, parsed_args.file)
+        msg = "Network template {0} has been uploaded.\n".format(file_path)
         self.app.stdout.write(msg)
 
 
@@ -94,5 +103,5 @@ class NetworkTemplateDelete(NetworkTemplateMixin, base.BaseCommand):
         self.client.delete_network_template(parsed_args.env)
 
         msg = ("Network template for environment id={0}"
-               " has been deleted.".format(parsed_args.env))
+               " has been deleted.\n".format(parsed_args.env))
         self.app.stdout.write(msg)
