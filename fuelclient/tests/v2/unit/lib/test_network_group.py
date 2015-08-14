@@ -13,6 +13,7 @@
 #    under the License.
 
 import fuelclient
+from fuelclient.cli import error
 from fuelclient.tests import utils
 from fuelclient.tests.v2.unit.lib import test_api
 
@@ -98,6 +99,11 @@ class TestNetworkGroupFacade(test_api.BaseLibTest):
 
         req_data = put_matcher.last_request.json()
         self.assertEqual('new_name', req_data['name'])
+
+    def test_network_group_update_wrong_attribute(self):
+        net_id = 42
+        self.assertRaises(error.BadDataException,
+                          self.client.update, net_id, vlan_start=42)
 
     def test_network_group_delete(self):
         env_id = 42

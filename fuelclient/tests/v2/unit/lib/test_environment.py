@@ -92,7 +92,7 @@ class TestEnvFacade(test_api.BaseLibTest):
         release_id = 20
         net = 'neutron'
 
-        self.assertRaises(error.ArgumentException,
+        self.assertRaises(error.BadDataException,
                           self.client.create,
                           node_name, release_id, net)
 
@@ -102,7 +102,7 @@ class TestEnvFacade(test_api.BaseLibTest):
         net = 'nova'
         nst = 'gre'
 
-        self.assertRaises(error.ArgumentException,
+        self.assertRaises(error.BadDataException,
                           self.client.create,
                           node_name, release_id, net, net_segment_type=nst)
 
@@ -171,7 +171,7 @@ class TestEnvFacade(test_api.BaseLibTest):
 
     def test_env_update_wrong_attribute(self):
         env_id = 42
-        self.assertRaises(error.ArgumentException,
+        self.assertRaises(error.BadDataException,
                           self.client.update, env_id, id=43)
 
     def test_env_add_nodes(self):

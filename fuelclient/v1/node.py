@@ -66,7 +66,7 @@ class NodeClient(base_v1.BaseV1Client):
             if attr not in self._updatable_attributes:
                 msg = 'Only {0} are updatable'.format(
                     self._updatable_attributes)
-                raise error.ArgumentException(msg)
+                raise error.BadDataException(msg)
 
         return node.set(updated_attributes)
 

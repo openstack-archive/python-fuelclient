@@ -33,7 +33,7 @@ class NetworkGroupClient(base_v1.BaseV1Client):
     def update(self, network_id, **kwargs):
         for attr in kwargs:
             if attr not in self.updatable_attributes:
-                raise error.ArgumentException(
+                raise error.BadDataException(
                     'Update of attribute "{0}" is not allowed'.format(attr))
 
         net_group = self._entity_wrapper(network_id)

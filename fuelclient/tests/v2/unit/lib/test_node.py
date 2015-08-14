@@ -14,7 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
+
 import fuelclient
+from fuelclient.cli import error
+from fuelclient.objects import base as base_object
 from fuelclient.tests import utils
 from fuelclient.tests.v2.unit.lib import test_api
 
@@ -300,3 +304,24 @@ class TestNodeFacade(test_api.BaseLibTest):
             result = self.client._labels_after_delete(
                 all_labels, labels_to_delete)
             self.assertEqual(result, expected_labels)
+
+    @mock.patch.object(base_object.BaseObject, 'init_with_data')
+    def test_node_update(self, m_init):
+        node_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, node_id)
+
+        get_matcher = self.m_request.get(expected_uri, json=self.fake_node)
+        upd_matcher = self.m_request.put(expected_uri, json=self.fake_node)
+
+        self.client.update(node_id, hostname="new-name")
+
+        self.assertTrue(expected_uri, get_matcher.called)
+        self.assertTrue(expected_uri, upd_matcher.called)
+
+        req_data = upd_matcher.last_request.json()
+        self.assertEqual('new-name', req_data['hostname'])
+
+    def test_node_update_wrong_attribute(self):
+        node_id = 42
+        self.assertRaises(error.BadDataException,
+                          self.client.update, node_id, status=42)
