@@ -199,12 +199,19 @@ class Environment(BaseObject):
         return (serializer or self.serializer).read_from_file(
             self.get_vmware_settings_data_path(directory))
 
+    ''' Used by fuel command line utility'''
     def read_network_template_data(self, directory=os.curdir,
                                    serializer=None):
         network_template_file_path = self.get_network_template_data_path(
             directory)
         return (serializer or self.serializer).read_from_file(
             network_template_file_path)
+
+    ''' Used by fuel2 command line utility'''
+    def read_network_template_data_from_file(self, file_path=None,
+                                             serializer=None):
+        return (serializer or self.serializer).\
+            read_from_file(file_path)
 
     @property
     def status(self):
