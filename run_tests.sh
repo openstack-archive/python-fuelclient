@@ -16,6 +16,9 @@
 
 set -e
 
+pip install "tox>=2.1"
+env
+
 # settings
 ROOT=$(dirname $(readlink -f $0))
 FUEL_WEB_REPO=${FUEL_WEB_REPO:-"https://github.com/stackforge/fuel-web.git"}
