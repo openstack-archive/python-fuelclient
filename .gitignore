@@ -27,5 +27,5 @@ test_run/*
 
 *.egg-info
 
-fuelclient.xml
+fuelclient-*.xml
 .coverage
