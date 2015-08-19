@@ -9,6 +9,8 @@ with `Fuel <https://github.com/stackforge/fuel-web>`_.
 Project resources
 -----------------
 
+TEST OLOLOLOLO
+
 Project status, bugs, and blueprints are tracked on Launchpad:
   https://launchpad.net/fuel
 
