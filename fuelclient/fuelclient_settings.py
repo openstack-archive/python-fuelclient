@@ -30,8 +30,7 @@ class FuelClientSettings(object):
     """Represents a model of Fuel Clients settings
 
     Default settigs file are distributed with the source code in
-    the <DIST_DIR>/fuelclient_settings.yaml. Those settings can be
-    overriden by /etc/fuel/client/config.yaml file.
+    the <DIST_DIR>/fuelclient_settings.yaml.
 
     User-specific settings may be stored in any YAML-formatted file
     the path to which should be supplied via the FUELCLIENT_CUSTOM_SETTINGS
@@ -48,24 +47,9 @@ class FuelClientSettings(object):
         project_path = os.path.dirname(__file__)
         project_settings_file = os.path.join(project_path,
                                              'fuelclient_settings.yaml')
-        external_default_settings = '/etc/fuel/client/config.yaml'
         external_user_settings = os.environ.get('FUELCLIENT_CUSTOM_SETTINGS')
 
-        # NOTE(romcheg): when external default settings file is removed
-        # this deprecation warning should be removed as well.
-        if os.path.exists(external_default_settings) and \
-                external_default_settings != external_user_settings:
-            six.print_('DEPRECATION WARNING: {0} exists and will be '
-                       'used as the source for settings. This behavior is '
-                       'deprecated. Please specify the path to your custom '
-                       'settings file in the FUELCLIENT_CUSTOM_SETTINGS '
-                       'environment variable.'.format(
-                           external_default_settings),
-                       file=sys.stderr)
-
         self._add_file_if_exists(project_settings_file, settings_files)
-        self._add_file_if_exists(external_default_settings, settings_files)
-
         # Add a custom settings file specified by user
         self._add_file_if_exists(external_user_settings, settings_files)
 
