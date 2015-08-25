@@ -38,12 +38,14 @@ class TestHandlers(base.BaseTestCase):
         for action in ("set", "create", "delete"):
             self.check_if_required("env {0}".format(action))
 
+        release_id = self.get_first_deployable_release_id()
+
         # list of tuples (<fuel CLI command>, <expected output of a command>)
         expected_stdout = \
             [(
-                "env --create --name=TestEnv --release=1",
+                "env --create --name=TestEnv --release={0}",
                 "Environment 'TestEnv' with id=1, mode=ha_compact and "
-                "network-mode=neutron was created!\n"
+                "network-mode=neutron was created!\n".format(release_id)
             ), (
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
@@ -58,10 +60,12 @@ class TestHandlers(base.BaseTestCase):
             self.check_for_stdout(cmd, msg)
 
     def test_env_action_errors(self):
+        release_id = self.get_first_deployable_release_id()
         cases = [
-            ("env --create --name=TestEnv --release=1 --mode=multinode",
+            ("env --create --name=TestEnv --release={0} --mode=multinode",
              "400 Client Error: Bad Request (Cannot deploy in multinode "
              "mode in current release. Need to be one of: ha_compact)"
+             .format(release_id)
              )
         ]
         for cmd, err in cases:
@@ -87,8 +91,9 @@ class TestHandlers(base.BaseTestCase):
 
     def test_selected_node_provision(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewEnv --release={0}".format(release_id),
             "--env-id=1 node set --node 1 --role=controller"
         ))
         cmd = "--env-id=1 node --provision --node=1"
@@ -114,8 +119,9 @@ class TestHandlers(base.BaseTestCase):
 
     def test_error_when_destroying_online_node(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewEnv --release={0}".format(release_id),
             "--env-id=1 node set --node 1 --role=controller"
         ), check_errors=False)
         msg = ("Nodes with ids [1] cannot be deleted from cluster because "
@@ -128,8 +134,9 @@ class TestHandlers(base.BaseTestCase):
 
     def test_force_destroy_online_node(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewEnv --release={0}".format(release_id),
             "--env-id=1 node set --node 1 --role=controller"
         ))
         msg = ("Nodes with ids [1] have been deleted from Fuel db.\n")
@@ -141,9 +148,10 @@ class TestHandlers(base.BaseTestCase):
     def test_destroy_offline_node(self):
 
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         node_id = 4
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewEnv --release={0}".format(release_id),
             "--env-id=1 node set --node {0} --role=controller".format(node_id)
         ))
         msg = ("Nodes with ids [{0}] have been deleted from Fuel db.\n".format(
@@ -155,8 +163,9 @@ class TestHandlers(base.BaseTestCase):
 
     def test_node_change_hostname(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewEnv --release={0}".format(release_id),
             "--env-id=1 node set --node 2 --role=controller"
         ))
         msg = "Hostname for node with id 2 has been changed to test-name.\n"
@@ -167,15 +176,18 @@ class TestHandlers(base.BaseTestCase):
 
     def test_env_create_neutron_tun(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.check_for_stdout(
-            "env create --name=NewEnv --release=1 --nst=tun",
+            "env create --name=NewEnv --release={0} --nst=tun"
+            .format(release_id),
             "Environment 'NewEnv' with id=1, mode=ha_compact and "
             "network-mode=neutron was created!\n")
 
     def test_destroy_multiple_nodes(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewEnv --release={0}".format(release_id),
             "--env-id=1 node set --node 1 2 --role=controller"
         ))
         msg = ("Nodes with ids [1, 2] have been deleted from Fuel db.\n")
@@ -233,10 +245,11 @@ class TestHandlers(base.BaseTestCase):
 
     def test_reassign_node_group(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1 --nst=gre",
+            "env create --name=NewEnv --release={0} --nst=gre",
             "--env-id=1 node set --node 1 2 --role=controller",
-            "nodegroup --create --env 1 --name 'new group'"
+            "nodegroup --create --env 1 --name 'new group'".format(release_id)
         ))
         msg = ['PUT http://127.0.0.1',
                '/api/v1/nodes/ data=',
@@ -255,8 +268,10 @@ class TestHandlers(base.BaseTestCase):
                     "situation.")
 
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=2 --nst=vlan",
+            "env create --name=NewEnv --release={0} --nst=vlan"
+            .format(release_id),
 
         ))
         self.check_for_stderr(
@@ -268,9 +283,10 @@ class TestHandlers(base.BaseTestCase):
     def test_create_network_group_fails_w_duplicate_name(self):
         err_msg = ("(Network with name storage already exists "
                    "in node group default)\n")
-
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1 --nst=gre",
+            "env create --name=NewEnv --release={0} --nst=gre"
+            .format(release_id),
         ))
         self.check_for_stderr(
             ("network-group --create --name storage --node-group 1 "
@@ -294,8 +310,9 @@ class TestCharset(base.BaseTestCase):
 
     def test_charset_problem(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=привет --release=1",
+            "env create --name=привет --release={0}".format(release_id),
             "--env-id=1 node set --node 1 --role=controller",
             "env"
         ))
@@ -305,8 +322,9 @@ class TestFiles(base.BaseTestCase):
 
     def test_file_creation(self):
         self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
-            "env create --name=NewEnv --release=1",
+            "env create --name=NewEnv --release={0}".format(release_id),
             "--env-id=1 node set --node 1 --role=controller",
             "--env-id=1 node set --node 2,3 --role=compute"
         ))
@@ -411,7 +429,8 @@ class TestDeployChanges(base.BaseTestCase):
 
     def test_deploy_changes_no_failure(self):
         self.load_data_to_nailgun_server()
-        env_create = "env create --name=test --release=1"
+        release_id = self.get_first_deployable_release_id()
+        env_create = "env create --name=test --release={0}".format(release_id)
         add_node = "--env-id=1 node set --node 1 --role=controller"
         deploy_changes = "deploy-changes --env 1"
         self.run_cli_commands((env_create, add_node, deploy_changes))
