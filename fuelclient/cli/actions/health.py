@@ -78,8 +78,6 @@ class HealthCheckAction(Action):
 
     def list(self, params):
         """To list all health check test sets:
-                fuel health
-            or:
                 fuel --env 1 health --list
         """
         env = Environment(params.env)
