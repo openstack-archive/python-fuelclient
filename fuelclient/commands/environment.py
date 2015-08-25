@@ -23,7 +23,7 @@ class EnvMixIn(object):
 
 
 class EnvList(EnvMixIn, base.BaseListCommand):
-    """Show list of all avaliable envrionments."""
+    """Show list of all available environments."""
 
     columns = ("id",
                "status",
