@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from fuelclient.objects import Release
 
 try:
     from unittest.case import TestCase
@@ -160,6 +161,14 @@ class BaseTestCase(UnitTestCase):
             if not result.is_return_code_zero or result.has_errors:
                 self.fail(err)
         return result
+
+    def get_first_deployable_release_id(self):
+        releases = sorted(Release.get_all_data(),
+                          key=lambda x: x['id'])
+        for r in releases:
+            if r['is_deployable']:
+                return r['id']
+        self.fail("There are no deployable releases.")
 
     def run_cli_commands(self, command_lines, **kwargs):
         for command in command_lines:

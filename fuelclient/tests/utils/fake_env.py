@@ -26,7 +26,7 @@ def get_fake_env(name=None, status=None, release_id=None,
     """
     return {'status': status or 'new',
             'is_customized': False,
-            'release_id': release_id or 1,
+            'release_id': release_id or 2,
             'name': name or 'fake_env',
             'net_provider': net_provider or 'neutron',
             'net_segment_type': 'gre',
