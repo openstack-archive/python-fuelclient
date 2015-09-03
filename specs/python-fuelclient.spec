@@ -1,5 +1,5 @@
 %define name python-fuelclient
-%{!?version: %define version 7.0.0}
+%{!?version: %define version 8.0.0}
 %{!?release: %define release 1}
 
 Summary: Console utility for working with fuel rest api
