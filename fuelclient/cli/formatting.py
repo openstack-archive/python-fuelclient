@@ -103,7 +103,8 @@ def get_bar_for_progress(full_width, progress):
     )
 
 
-def download_snapshot_with_progress_bar(url, directory=os.path.curdir):
+def download_snapshot_with_progress_bar(
+        url, auth_token, directory=os.path.curdir):
     """downloads file from specific 'url' with progress bar and save it
     to some 'directory'.
     """
@@ -113,7 +114,8 @@ def download_snapshot_with_progress_bar(url, directory=os.path.curdir):
         os.path.abspath(directory),
         url.split('/')[-1]
     )
-    download_handle = urllib2.urlopen(url)
+    request = urllib2.Request(url, headers={'x-auth-token': auth_token})
+    download_handle = urllib2.urlopen(request)
     with open(file_name, 'wb') as file_handle:
         meta = download_handle.info()
         file_size = int(meta.getheaders("Content-Length")[0])

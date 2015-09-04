@@ -19,6 +19,7 @@ import yaml
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.formatting import download_snapshot_with_progress_bar
+from fuelclient.client import APIClient
 from fuelclient.objects.task import SnapshotTask
 
 
@@ -63,6 +64,7 @@ class SnapshotAction(Action):
         snapshot_task.wait()
         download_snapshot_with_progress_bar(
             snapshot_task.connection.root + snapshot_task.data["message"],
+            auth_token=APIClient.auth_token,
             directory=params.dir
         )
 

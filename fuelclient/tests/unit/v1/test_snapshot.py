@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+import mock
 from mock import call
 from mock import patch
 
@@ -30,11 +30,13 @@ class TestSnapshot(base.UnitTestCase):
         self.execute(['fuel', 'snapshot', '--conf'])
         self.assertEqual(mstdout.write.call_args_list, [call('key: value\n')])
 
+    @patch('fuelclient.cli.actions.snapshot.APIClient',
+           mock.Mock(auth_token='token123'))
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
     @patch('fuelclient.cli.actions.snapshot.'
            'download_snapshot_with_progress_bar')
     @patch('sys.stdin')
-    def test_snapshot_with_provided_conf(self, mstdin, mbar, mstart):
+    def test_snapshot_with_provided_conf(self, mstdin, mdownload, mstart):
         conf = 'key: value\n'
 
         mstdin.isatty.return_value = False
@@ -45,14 +47,25 @@ class TestSnapshot(base.UnitTestCase):
         mstart.assert_called_once_with({'key': 'value'})
         self.assertEqual(mstdin.read.call_count, 1)
 
+        mdownload.assert_called_once_with(
+            mock.ANY,
+            auth_token='token123',
+            directory='.')
+
+    @patch('fuelclient.cli.actions.snapshot.APIClient',
+           mock.Mock(auth_token='token123'))
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
     @patch('fuelclient.cli.actions.snapshot.'
            'download_snapshot_with_progress_bar')
     @patch('sys.stdin')
-    def test_snapshot_without_conf(self, mstdin, mbar, mstart):
+    def test_snapshot_without_conf(self, mstdin, mdownload, mstart):
 
         mstdin.isatty.return_value = True
 
         self.execute(['fuel', 'snapshot'])
 
         mstart.assert_called_once_with({})
+        mdownload.assert_called_once_with(
+            mock.ANY,
+            auth_token='token123',
+            directory='.')
