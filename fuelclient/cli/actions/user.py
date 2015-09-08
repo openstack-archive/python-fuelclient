@@ -28,10 +28,11 @@ class UserAction(Action):
     def __init__(self):
         super(UserAction, self).__init__()
         self.args = (
-            Args.get_new_password_arg(),
+            Args.get_new_password_arg(
+                "WARNING: This method of changing the "
+                "password is dangerous - it may be saved in bash history."),
             Args.get_change_password_arg(
-                "Change user password. WARNING: This method of changing the "
-                "password is dangerous - it may be saved in bash history.")
+                "Change user password using interactive prompt")
         )
 
         self.flag_func_map = (

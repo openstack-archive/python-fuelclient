@@ -177,11 +177,11 @@ def get_env_arg(required=False):
     )
 
 
-def get_new_password_arg():
+def get_new_password_arg(help_msg):
     return get_str_arg(
         "newpass",
         flags=("--new-pass",),
-        help="new_password",
+        help=help_msg,
         required=False
     )
 
