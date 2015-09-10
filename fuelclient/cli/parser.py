@@ -112,7 +112,7 @@ class Parser:
         self.add_serializers_args()
 
     def generate_actions(self):
-        for action, action_object in actions.iteritems():
+        for action, action_object in actions.items():
             action_parser = self.subparsers.add_parser(
                 action,
                 prog="fuel {0}".format(action),
