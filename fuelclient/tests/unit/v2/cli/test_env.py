@@ -14,9 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cStringIO
 
 import mock
+from six import moves
 
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_env
@@ -64,7 +64,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
     def test_nova_net_deprecation_warning(self):
         args = 'env create -r 1 -n nova env42'
 
-        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.exec_command(args)
             self.assertIn(
                 'WARNING: nova-network is deprecated since 6.1 release',
@@ -74,7 +74,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
     def test_neutron_gre_deprecation_warning(self):
         args = 'env create -r 1 -n neutron -nst gre env42'
 
-        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.exec_command(args)
             self.assertIn(
                 "WARNING: GRE network segmentation type is deprecated "
@@ -95,7 +95,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
         env = fake_env.get_fake_env(status='operational')
         self.m_client.get_by_id.return_value = env
 
-        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.exec_command(args)
             self.assertIn('--force', m_stdout.getvalue())
 
