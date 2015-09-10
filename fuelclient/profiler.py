@@ -76,7 +76,8 @@ class Profiler(object):
         # write callgraph in dot format
         parser = gprof2dot.PstatsParser(self.profiler)
 
-        def get_function_name((filename, line, name)):
+        def get_function_name(args):
+            filename, line, name = args
             module = os.path.splitext(filename)[0]
             module_pieces = module.split(os.path.sep)
             return "{module:s}:{line:d}:{name:s}".format(
