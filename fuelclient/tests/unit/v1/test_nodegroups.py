@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import cStringIO
 import mock
 import requests_mock
 
@@ -42,18 +43,27 @@ class TestNodeGroupActions(base.UnitTestCase):
                 self.env['id']
             )
 
-        mreq.get('/api/v1/clusters/{0}/'.format(self.env['id']),
-                 json={
-                     'id': self.env['id'],
-                     'net_provider': self.env['net_provider'],
-                 })
+        mreq.get('/api/v1/clusters/{0}/'.format(self.env['id']), json={
+            'id': self.env['id'],
+            'net_provider': self.env['net_provider']
+        })
         mpost = mreq.post(self.req_base_path, json={
             'id': self.ng['id'],
             'name': self.ng['name'],
         })
         mget = mreq.get(neutron_url, json={'networking_parameters': {}})
-        self.execute(['fuel', 'nodegroup', '--create',
-                      '--name', self.ng['name'], '--env', str(self.env['id'])])
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.execute([
+                'fuel', 'nodegroup', '--create',
+                '--name', self.ng['name'], '--env', str(self.env['id'])
+            ])
+
+            msg = "Node group '{name}' with id={id} "\
+                "in environment {cluster} was created!"
+            self.assertIn(
+                msg.format(cluster=self.env['id'], **self.ng),
+                m_stdout.getvalue()
+            )
 
         call_data = mpost.last_request.json()
         self.assertEqual(self.env['id'], call_data['cluster_id'])
@@ -66,8 +76,15 @@ class TestNodeGroupActions(base.UnitTestCase):
         mget = mreq.get(path, json={'name': 'test group'})
         delete_path = self.req_base_path + str(self.env['id']) + '/'
         mdelete = mreq.delete(delete_path, status_code=204)
-        self.execute(['fuel', 'nodegroup', '--delete', '--group',
-                      str(self.env['id'])])
+        ngid = self.env['id']
+        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+            self.execute(['fuel', 'nodegroup', '--delete', '--group',
+                         str(ngid)])
+            msg = u"Node group with id={id} was deleted!"
+            self.assertIn(
+                msg.format(id=ngid),
+                m_stdout.getvalue()
+            )
 
         self.assertTrue(mget.called)
         self.assertTrue(mdelete.called)
