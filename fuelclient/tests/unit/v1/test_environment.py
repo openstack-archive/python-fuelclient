@@ -14,10 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cStringIO
 
 import mock
 import requests_mock
+from six import moves
 
 from fuelclient.objects.environment import Environment
 from fuelclient.tests import base
@@ -34,7 +34,7 @@ class TestEnvironment(base.UnitTestCase):
         m_requests.get(url, json={'id': cluster_id, 'status': 'operational'})
         m_delete = m_requests.delete(url)
 
-        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute(cmd.split())
             self.assertIn('--force', m_stdout.getvalue())
 
@@ -52,7 +52,7 @@ class TestEnvironment(base.UnitTestCase):
         m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
                        json=cluster_data)
 
-        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute(
                 'fuel env create --name test --rel 1 --network-mode nova'
                 .split()
@@ -73,7 +73,7 @@ class TestEnvironment(base.UnitTestCase):
         m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
                        json=cluster_data)
 
-        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute(
                 'fuel env create --name test --rel 1 --nst gre'
                 .split()
@@ -111,7 +111,7 @@ class TestEnvironment(base.UnitTestCase):
         m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
                        json=cluster_data)
 
-        with mock.patch('sys.stdout', new=cStringIO.StringIO()) as m_stdout:
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute('fuel env create'
                          ' --name test --rel 1 --mode multinode'.split())
 
