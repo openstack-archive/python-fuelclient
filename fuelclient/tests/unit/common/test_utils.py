@@ -165,10 +165,14 @@ class TestUtils(base.UnitTestCase):
     def test_get_error_body_get_from_json(self):
         error_body = 'This is error body'
 
-        resp = requests.Response()
-        resp._content = json.dumps({
+        body_json = json.dumps({
             'message': error_body
         })
+        if isinstance(body_json, six.text_type):
+            body_json = body_json.encode('utf-8')
+
+        resp = requests.Response()
+        resp._content = body_json
 
         exception = requests.HTTPError()
         exception.response = resp
@@ -176,7 +180,7 @@ class TestUtils(base.UnitTestCase):
         self.assertEqual(error.get_error_body(exception), error_body)
 
     def test_get_error_body_get_from_plaintext(self):
-        error_body = 'This is error body'
+        error_body = b'This is error body'
 
         resp = requests.Response()
         resp._content = error_body
@@ -184,7 +188,8 @@ class TestUtils(base.UnitTestCase):
         exception = requests.HTTPError()
         exception.response = resp
 
-        self.assertEqual(error.get_error_body(exception), error_body)
+        self.assertEqual(error.get_error_body(exception),
+                         error_body.decode('utf-8'))
 
     def test_get_display_data_single(self):
         test_data = {'a': 1, 'b': 2, 'c': 3}
