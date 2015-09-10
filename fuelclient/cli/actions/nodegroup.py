@@ -63,7 +63,7 @@ class NodeGroupAction(Action):
                fuel --env 1 nodegroup --create --name "group 1"
         """
         env_id = int(params.env)
-        NodeGroup.create(params.name, env_id)
+        data = NodeGroup.create(params.name, env_id)
         env = Environment(env_id)
         network_data = env.get_network_data()
         seg_type = network_data['networking_parameters'].get(
@@ -77,6 +77,13 @@ class NodeGroupAction(Action):
                        "situation.",
                        file=sys.stderr)
 
+        self.serializer.print_to_output(
+            data,
+            u"Node group '{name}' with id={id} "
+            u"in environment {env} was created!"
+            .format(env=env_id, **data)
+        )
+
     def delete(self, params):
         """Delete the specified node groups
                fuel --env 1 nodegroup --delete --group 1
@@ -88,7 +95,12 @@ class NodeGroupAction(Action):
                 raise ActionException(
                     "Default node groups cannot be deleted."
                 )
-            NodeGroup.delete(n.id)
+            data = NodeGroup.delete(n.id)
+            self.serializer.print_to_output(
+                data,
+                u"Node group with id={id} was deleted!"
+                .format(id=n.id)
+            )
 
     @check_all("env")
     def assign(self, params):
