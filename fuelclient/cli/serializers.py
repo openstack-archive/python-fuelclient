@@ -13,8 +13,6 @@
 #    under the License.
 from __future__ import print_function
 
-from itertools import ifilter
-from itertools import imap
 import json
 import os
 
@@ -132,9 +130,9 @@ class FileFormatBasedSerializer(Serializer):
 
 
 def listdir_without_extensions(dir_path):
-    return ifilter(
+    return six.moves.map(
         lambda f: f != "",
-        imap(
+        six.moves.map(
             lambda f: f.split(".")[0],
             os.listdir(dir_path)
         )
