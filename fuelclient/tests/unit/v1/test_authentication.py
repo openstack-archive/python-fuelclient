@@ -16,7 +16,7 @@
 
 from mock import Mock
 from mock import patch
-import urllib2
+from six.moves import urllib
 
 from fuelclient import fuelclient_settings
 from fuelclient.tests import base
@@ -38,7 +38,7 @@ class TestAuthentication(base.UnitTestCase):
         self.assertEqual(args['username'], username)
         self.assertEqual(args['password'], password)
         self.assertEqual(args['tenant_name'], tenant_name)
-        pr = urllib2.urlparse.urlparse(args['auth_url'])
+        pr = urllib.parse.urlparse(args['auth_url'])
         self.assertEqual(conf.SERVER_ADDRESS, pr.hostname)
         self.assertEqual(int(conf.LISTEN_PORT), int(pr.port))
         self.assertEqual('/keystone/v2.0', pr.path)
