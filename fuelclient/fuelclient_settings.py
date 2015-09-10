@@ -92,7 +92,7 @@ class FuelClientSettings(object):
             )
 
     def _update_from_env(self):
-        for k in six.iterkeys(self.config):
+        for k in self.config:
             if k in os.environ:
                 self.config[k] = os.environ[k]
 

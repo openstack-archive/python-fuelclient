@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
@@ -49,7 +47,7 @@ class EnvironmentClient(base_v1.BaseV1Client):
         allowed_changes = {}
         extra_args = {}
 
-        for i in six.iterkeys(kwargs):
+        for i in kwargs:
             if i in self._updatable_attributes:
                 allowed_changes[i] = kwargs[i]
             else:
