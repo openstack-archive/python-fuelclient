@@ -22,6 +22,8 @@ import sys
 from time import sleep
 import urllib2
 
+import six
+
 from fuelclient.cli.error import DeployProgressError
 from fuelclient.cli.error import exit_with_error
 
@@ -54,7 +56,7 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
     )
     for row in rows:
         column_widths.update(
-            (index, max(column_widths[index], len(unicode(element))))
+            (index, max(column_widths[index], len(six.text_type(element))))
             for index, element in enumerate(row)
         )
     row_template = u' | '.join(
@@ -66,7 +68,7 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
         (row_template.format(*header),
          u'-|-'.join(column_widths[column_index] * u'-'
                      for column_index in range(number_of_columns)),
-         u'\n'.join(row_template.format(*map(unicode, x))
+         u'\n'.join(row_template.format(*map(six.text_type, x))
                     for x in rows))
     )
 
