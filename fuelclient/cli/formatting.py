@@ -20,12 +20,12 @@ from operator import itemgetter
 import os
 import sys
 from time import sleep
-import urllib2
 
 import six
 
 from fuelclient.cli.error import DeployProgressError
 from fuelclient.cli.error import exit_with_error
+from six.moves import urllib
 
 
 def format_table(data, acceptable_keys=None, column_to_join=None):
@@ -116,8 +116,8 @@ def download_snapshot_with_progress_bar(
         os.path.abspath(directory),
         url.split('/')[-1]
     )
-    request = urllib2.Request(url, headers={'x-auth-token': auth_token})
-    download_handle = urllib2.urlopen(request)
+    request = urllib.request.Request(url, headers={'x-auth-token': auth_token})
+    download_handle = urllib.request.urlopen(request)
     with open(file_name, 'wb') as file_handle:
         meta = download_handle.info()
         file_size = int(meta.getheaders("Content-Length")[0])
