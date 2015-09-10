@@ -61,7 +61,7 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
         )
     row_template = u' | '.join(
         u"{{{0}:{1}}}".format(idx, width)
-        for idx, width in column_widths.iteritems()
+        for idx, width in column_widths.items()
     )
 
     return u'\n'.join(

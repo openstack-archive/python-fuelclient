@@ -16,7 +16,6 @@
 import json
 
 import mock
-import six
 import yaml
 
 from fuelclient.cli.serializers import Serializer
@@ -46,13 +45,13 @@ class TestSerializers(base.UnitTestCase):
 
     def test_serialize(self):
         deserializers = {'json': json.loads, 'yaml': yaml.load}
-        for format, deserialize in six.iteritems(deserializers):
+        for format, deserialize in deserializers.items():
             serialized = Serializer(format).serialize(self.DATA)
             self.assertEqual(self.DATA, deserialize(serialized))
 
     def test_deserialize(self):
         serializers = {'json': json.dumps, 'yaml': yaml.safe_dump}
-        for format, serialize in six.iteritems(serializers):
+        for format, serialize in serializers.items():
             serialized = serialize(self.DATA)
             deserialized = Serializer(format).deserialize(serialized)
             self.assertEqual(self.DATA, deserialized)

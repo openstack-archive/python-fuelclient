@@ -16,8 +16,6 @@ from collections import namedtuple
 import copy
 from functools import partial
 
-import six
-
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
@@ -62,7 +60,7 @@ class NodeClient(base_v1.BaseV1Client):
     def update(self, node_id, **updated_attributes):
         node = self._entity_wrapper(obj_id=node_id)
 
-        for attr in six.iterkeys(updated_attributes):
+        for attr in updated_attributes:
             if attr not in self._updatable_attributes:
                 msg = 'Only {0} are updatable'.format(
                     self._updatable_attributes)
@@ -86,7 +84,7 @@ class NodeClient(base_v1.BaseV1Client):
             result = filter(lambda node: str(node['id']) in node_ids, result)
 
         for node in result:
-            for key, value in six.iteritems(node.get('labels', [])):
+            for key, value in node.get('labels', []).items():
                 labels.append({
                     'node_id': node.get('id'),
                     'label_name': key,
