@@ -14,7 +14,6 @@
 
 from functools import partial
 from functools import wraps
-from itertools import imap
 import os
 
 import six
@@ -75,7 +74,7 @@ class Action(object):
         )
         return "Examples:\n\n" + \
                "\n".join(
-                   imap(
+                   six.moves.map(
                        lambda method: (
                            "\t" + method.__doc__.replace("\n    ", "\n")
                        ),
