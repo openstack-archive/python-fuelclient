@@ -35,7 +35,7 @@ def random_string(lenght, prefix='', postfix='', charset=None):
     charset = charset or string.ascii_letters + string.digits
     base_length = lenght - (len(prefix) + len(postfix))
 
-    base = ''.join([str(random.choice(charset)) for i in xrange(base_length)])
+    base = ''.join([str(random.choice(charset)) for i in range(base_length)])
 
     return '{prefix}{base}{postfix}'.format(prefix=prefix,
                                             postfix=postfix,
