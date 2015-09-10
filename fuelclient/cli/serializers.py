@@ -18,6 +18,7 @@ from itertools import imap
 import json
 import os
 
+import six
 import yaml
 
 from fuelclient.cli import error
@@ -78,7 +79,7 @@ class Serializer(object):
         if self.format_flags:
             self.print_formatted(formatted_data)
         else:
-            if isinstance(arg, unicode):
+            if isinstance(arg, six.text_type):
                 arg = arg.encode('utf-8')
             print_method(arg)
 

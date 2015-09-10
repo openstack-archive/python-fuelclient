@@ -26,9 +26,9 @@ import subprocess
 import sys
 import tempfile
 
-from StringIO import StringIO
 
 import mock
+from six import StringIO
 
 from fuelclient.cli.parser import main
 
