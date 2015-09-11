@@ -25,8 +25,8 @@ import six
 import yaml
 
 from fuelclient.cli import error
+from fuelclient.common import utils
 from fuelclient.objects import base
-from fuelclient import utils
 
 IS_MASTER = None
 FUEL_PACKAGE = 'fuel'

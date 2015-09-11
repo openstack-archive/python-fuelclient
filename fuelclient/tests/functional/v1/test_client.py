@@ -60,7 +60,7 @@ class TestHandlers(base.BaseTestCase):
                     " --delete-from-db | --provision]", "-h", "--help", " -s",
                     "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",
-                    "--role", "--net", "--hostname", "--name"]
+                    "--role", "--net", "--hostname", "--name", "--diff"]
         self.check_all_in_msg("node --help", help_msg)
 
         self.check_for_rows_in_table("node")
@@ -392,26 +392,37 @@ class TestFiles(base.BaseTestCase):
             ))
 
 
-class TestDownloadUploadNodeAttributes(base.BaseTestCase):
+class TestDownloadUploadDiffNodeAttributes(base.BaseTestCase):
 
-    def test_upload_download_interfaces(self):
+    def setUp(self):
+        super(TestDownloadUploadDiffNodeAttributes, self).setUp()
         self.load_data_to_nailgun_server()
-
         release_id = self.get_first_deployable_release_id()
         env_create = "env create --name=test --release={0}".format(release_id)
         add_node = "--env-id=1 node set --node 1 --role=controller"
-
         cmd = "node --node-id 1 --network"
         self.run_cli_commands((env_create,
                               add_node,
                               self.download_command(cmd),
                               self.upload_command(cmd)))
 
+    def test_upload_download_interfaces(self):
+        cmd = "node --node-id 1 --network"
+        self.run_cli_commands((self.download_command(cmd),
+                              self.upload_command(cmd)))
+
     def test_upload_download_disks(self):
-        self.load_data_to_nailgun_server()
         cmd = "node --node-id 1 --disk"
         self.run_cli_commands((self.download_command(cmd),
                               self.upload_command(cmd)))
+
+    def test_diff_interfaces(self):
+        # to create folder with yaml file:
+        cmd_download = "node --node-id 1 --network"
+        self.run_cli_command(self.download_command(cmd_download))
+
+        cmd = "node --node-id 1 --network"
+        self.run_cli_command(self.diff_command(cmd))
 
 
 class TestDeployChanges(base.BaseTestCase):

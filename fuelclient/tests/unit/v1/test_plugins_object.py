@@ -188,7 +188,7 @@ class TestPluginsObject(base.UnitTestCase):
 
         return plugin_obj
 
-    @patch('fuelclient.utils.glob_and_parse_yaml',
+    @patch('fuelclient.common.utils.glob_and_parse_yaml',
            return_value=[
                {'name': 'name1', 'version': 'version1'},
                {'name': 'name2', 'version': 'version2'},
@@ -202,7 +202,7 @@ class TestPluginsObject(base.UnitTestCase):
             {'name': 'name3', 'version': 'version3'},
             force=False)
 
-    @patch('fuelclient.utils.glob_and_parse_yaml', return_value=[])
+    @patch('fuelclient.common.utils.glob_and_parse_yaml', return_value=[])
     def test_register_raises_error(self, glob_parse_mock):
         self.assertRaisesRegexp(
             error.BadDataException,

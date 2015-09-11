@@ -37,6 +37,8 @@ Requires: python-requests >= 2.5.2
 Requires: python-six >= 1.9.0
 
 
+Requires: python-dictdiffer == 0.4.0
+
 %description
 Summary: Console utility for working with fuel rest api
 

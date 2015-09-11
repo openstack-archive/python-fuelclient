@@ -20,8 +20,8 @@ import six
 import yaml
 
 from fuelclient.cli import error
+from fuelclient.common import utils
 from fuelclient import consts
-from fuelclient import utils
 
 
 class Serializer(object):

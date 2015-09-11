@@ -17,8 +17,8 @@ import fuelclient.cli.arguments as Args
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli import error
 from fuelclient.cli.formatting import format_table
+from fuelclient.common import utils
 from fuelclient.objects.plugins import Plugins
-from fuelclient import utils
 
 
 class PluginAction(Action):
