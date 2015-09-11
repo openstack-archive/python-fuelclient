@@ -49,6 +49,19 @@ class BaseSettings(base.UnitTestCase):
         self.assertTrue(put.called)
         self.assertDictEqual(put.last_request.json(), JSON_SETTINGS_DATA)
 
+    def check_diff_action(self, test_command, test_url, read_mock):
+        m = mock_open()
+        self.m_request.get(test_url, json=JSON_SETTINGS_DATA)
+
+        with patch('six.moves.builtins.open', m, create=True):
+            with patch('fuelclient.cli.actions.settings.'
+                       'DictDiffer') as mdictdiffer:
+                read_data = {"key": "value"}
+                read_mock.return_value = read_data
+                self.execute(test_command)
+
+        mdictdiffer.diff.assert_called_once_with(JSON_SETTINGS_DATA, read_data)
+
     def check_default_action(self, test_command, test_url):
         m = mock_open()
         get = self.m_request.get(test_url, json=JSON_SETTINGS_DATA)
@@ -90,6 +103,14 @@ class TestSettings(BaseSettings):
                 'fuel', 'settings', '--env', '1', '--download'],
             test_url='/api/v1/clusters/1/attributes')
 
+    @patch('fuelclient.cli.actions.settings.Environment.read_settings_data')
+    def test_diff_action(self, mread):
+        self.check_diff_action(
+            test_command=[
+                'fuel', 'settings', '--env', '1', '--diff'],
+            test_url='/api/v1/clusters/1/attributes',
+            read_mock=mread)
+
 
 class TestVmwareSettings(BaseSettings):
 
@@ -110,3 +131,12 @@ class TestVmwareSettings(BaseSettings):
             test_command=[
                 'fuel', 'vmware-settings', '--env', '1', '--download'],
             test_url='/api/v1/clusters/1/vmware_attributes')
+
+    @patch('fuelclient.cli.actions.settings.Environment.'
+           'read_vmware_settings_data')
+    def test_diff_action(self, mread):
+        self.check_diff_action(
+            test_command=[
+                'fuel', 'vmware-settings', '--env', '1', '--diff'],
+            test_url='/api/v1/clusters/1/vmware_attributes',
+            read_mock=mread)

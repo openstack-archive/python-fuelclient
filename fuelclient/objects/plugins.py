@@ -24,8 +24,8 @@ import six
 import yaml
 
 from fuelclient.cli import error
+from fuelclient.common import utils
 from fuelclient.objects import base
-from fuelclient import utils
 
 
 PLUGINS_PATH = '/var/www/nailgun/plugins/'

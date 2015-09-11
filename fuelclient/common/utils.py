@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import defaultdict
 import glob
 import io
 import json
@@ -23,6 +24,7 @@ import subprocess
 import sys
 import yaml
 
+import dictdiffer
 from distutils.version import StrictVersion
 from fnmatch import fnmatch
 
@@ -161,3 +163,69 @@ def str_to_unicode(string):
 
     """
     return string if six.PY3 else string.decode(sys.getfilesystemencoding())
+
+
+class DictDiffer(object):
+    """Facade class for dictdiffer module.
+
+    Class provides methods to compare two dictionaries using dictdiffer module
+    and to generate readable diff to show the changes between input dicts.
+    """
+    DIFF_MAP = {
+        dictdiffer.ADD: 'ADDED:',
+        dictdiffer.REMOVE: 'DELETED:',
+        dictdiffer.CHANGE: '-->',
+    }
+
+    @classmethod
+    def generate_diff(cls, dict1, dict2):
+        """Creates dictdiffer.diff and makes it human readable.
+
+        :param dict1: dict
+        :param dict1: dict
+        :returns: defaultdict
+        """
+        cmp_dict = defaultdict(list)
+        for change_type, path, change in dictdiffer.diff(dict1, dict2):
+            path = '.'.join(map(str, path)) if isinstance(path, list) else path
+
+            if change_type in (dictdiffer.ADD, dictdiffer.REMOVE):
+                for index, value in sorted(change, key=lambda x: x[0]):
+                    cmp_dict[path].append(
+                        '{type} [{index}] {value}'.format(
+                            type=cls.DIFF_MAP[change_type],
+                            index=index,
+                            value=value))
+
+            elif change_type == dictdiffer.CHANGE:
+                from_value, to_value = change
+                cmp_dict[path].append(
+                    '{from_value} {type} {to_value}'.format(
+                        from_value=from_value,
+                        type=cls.DIFF_MAP[change_type],
+                        to_value=to_value))
+        return cmp_dict
+
+    @classmethod
+    def pretty_str(cls, cmp_dict):
+        """Converts dictionary of diffs to human readable string.
+
+        :param cmp_dict: dict - output of `generate_diff` method
+        :returns: str
+        """
+        pr_str = ''
+        for path, values in sorted(six.iteritems(cmp_dict)):
+            value = '\n'.join('    {0}'.format(v) for v in values)
+            pr_str += '\n\n{0}\n{1}'.format(path, value)
+
+        return pr_str.strip() or 'None'
+
+    @classmethod
+    def diff(cls, dict1, dict2):
+        """Combines generating diff dictionary with prettifying it to string.
+
+        :param dict1: dict
+        :param dict2: dict
+        :returns: str
+        """
+        return cls.pretty_str(cls.generate_diff(dict1, dict2))
