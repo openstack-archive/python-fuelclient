@@ -45,7 +45,10 @@ class ReleaseAction(Action):
                 Args.get_download_arg(
                     "Download configuration of specific release"),
                 Args.get_upload_arg(
-                    "Upload configuration to specific release")
+                    "Upload configuration to specific release"),
+                Args.get_diff_arg(
+                    "See diff of local configuration to specific release with "
+                    "the one in nailgun")
             )
         ]
         self.flag_func_map = (
@@ -83,7 +86,7 @@ class ReleaseAction(Action):
         )
 
     @check_all("release")
-    @check_any("download", "upload")
+    @check_any("download", "upload", "diff")
     def network(self, params):
         """Modify release networks configuration.
         fuel rel --rel 1 --network --download
@@ -103,9 +106,14 @@ class ReleaseAction(Action):
             release.update_networks(networks)
             print("Networks for release {0} uploaded from {1}.yaml".format(
                 release.id, full_path))
+        elif params.diff:
+            local_networks = self.serializer.read_from_file(full_path)
+            remote_networks = release.get_networks()
+            print("Differences:\n{0}".format(
+                utils.DictDiffer.diff(remote_networks, local_networks)))
 
     @check_all("release")
-    @check_any("download", "upload")
+    @check_any("download", "upload", "diff")
     def deployment_tasks(self, params):
         """Modify deployment_tasks for release.
         fuel rel --rel 1 --deployment-tasks --download
@@ -125,6 +133,11 @@ class ReleaseAction(Action):
             release.update_deployment_tasks(tasks)
             print("Deployment tasks for release {0}"
                   " uploaded from {1}.yaml".format(release.id, dir_path))
+        elif params.diff:
+            local_tasks = self.serializer.read_from_file(full_path)
+            remote_tasks = release.get_deployment_tasks()
+            print("Differences:\n{0}".format(
+                utils.DictDiffer.diff(remote_tasks, local_tasks)))
 
     @check_all("dir")
     def sync_deployment_tasks(self, params):
