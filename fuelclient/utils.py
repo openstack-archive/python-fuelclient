@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import defaultdict
 import glob
 import io
 import json
@@ -23,6 +24,8 @@ import subprocess
 import sys
 import yaml
 
+
+import dictdiffer
 from distutils.version import StrictVersion
 from fnmatch import fnmatch
 
@@ -161,3 +164,44 @@ def str_to_unicode(string):
 
     """
     return string if six.PY3 else string.decode(sys.getfilesystemencoding())
+
+
+class DictDiffer(object):
+    DIFF_MAP = {
+        dictdiffer.ADD: 'ADDED:',
+        dictdiffer.REMOVE: 'DELETED:',
+        dictdiffer.CHANGE: '-->',
+    }
+
+    @classmethod
+    def generate_diff(cls, dict1, dict2):
+        cmp_dict = defaultdict(list)
+        for change_type, path, change in dictdiffer.diff(dict1, dict2):
+            path = '.'.join(map(str, path)) if isinstance(path, list) else path
+
+            if change_type in (dictdiffer.ADD, dictdiffer.REMOVE):
+                for index, value in sorted(change, key=lambda x: x[0]):
+                    cmp_dict[path].append(
+                        '{0} [{1}] {2}'.format(cls.DIFF_MAP[change_type],
+                                               index, value))
+
+            elif change_type == dictdiffer.CHANGE:
+                from_value, to_value = change
+                cmp_dict[path].append(
+                    '{0} {1} {2}'.format(from_value,
+                                         cls.DIFF_MAP[change_type],
+                                         to_value))
+        return cmp_dict
+
+    @classmethod
+    def pretty_str(cls, cmp_dict):
+        pr_str = ''
+        for path, values in sorted(six.iteritems(cmp_dict)):
+            value = '\n'.join('    {0}'.format(v) for v in values)
+            pr_str += '\n\n{0}\n{1}'.format(path, value)
+
+        return pr_str.strip() or 'None'
+
+    @classmethod
+    def diff(cls, dict1, dict2):
+        return cls.pretty_str(cls.generate_diff(dict1, dict2))
