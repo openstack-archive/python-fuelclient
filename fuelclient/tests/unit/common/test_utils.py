@@ -18,6 +18,7 @@ import json
 import os
 import six
 import subprocess
+import yaml
 
 import mock
 import requests
@@ -242,3 +243,106 @@ class TestUtils(base.UnitTestCase):
         result = utils.str_to_unicode(test_data)
         self.assertIsInstance(result, six.text_type)
         self.assertEqual(result, expected_data)
+
+
+class TestDictDiffer(base.UnitTestCase):
+
+    def setUp(self):
+        super(TestDictDiffer, self).setUp()
+        self.base_yaml = '\n'.join((
+            'public_vip: 172.16.0.3',
+            'public_vrouter_vip: 172.16.0.2',
+            'vips:',
+            '  management:',
+            '    ipaddr: 192.168.0.2',
+            '    namespace: haproxy',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  public:',
+            '    ipaddr: 172.16.0.3',
+            '    namespace: haproxy',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  vrouter:',
+            '    ipaddr: 192.168.0.1',
+            '    namespace: vrouter',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  vrouter_pub:',
+            '    ipaddr: 172.16.0.2',
+            '    namespace: vrouter',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+        ))
+        self.changed_yaml = '\n'.join((
+            'public_vip: 172.16.0.3',
+            'public_vrouter_vip: 172.16.0.2',
+            'vips:',
+            '  management:',
+            '    ipaddr: 192.168.0.2',
+            '    namespace: haproxy',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  public:',
+            # change 3 to 4
+            '    ipaddr: 172.16.0.4',
+            '    namespace: haproxy',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  vrouter:',
+            # remove ipaddr
+            '    namespace: vrouter',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            # added 2 test roles
+            '    - test_role1',
+            '    - test_role2',
+            '  vrouter_pub:',
+            '    ipaddr: 172.16.0.2',
+            # typo
+            '    namespace: vroutert',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+        ))
+
+    def test_pretty_diff(self):
+        expected = '\n'.join((
+            'vips.public.ipaddr',
+            '    172.16.0.3 --> 172.16.0.4',
+            '',
+            'vips.vrouter',
+            '    DELETED: [ipaddr] 192.168.0.1',
+            '',
+            'vips.vrouter.node_roles',
+            '    ADDED: [2] test_role1',
+            '    ADDED: [3] test_role2',
+            '',
+            'vips.vrouter_pub.namespace',
+            '    vrouter --> vroutert',
+        ))
+        diff_result = utils.DictDiffer.diff(
+            yaml.load(self.base_yaml),
+            yaml.load(self.changed_yaml),
+        )
+        self.assertEqual(diff_result, expected)
+
+    def test_empty_diff(self):
+        test_dict = yaml.load(self.base_yaml)
+        diff_dict = utils.DictDiffer.generate_diff(test_dict, test_dict)
+        self.assertEqual({}, diff_dict)
