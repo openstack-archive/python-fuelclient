@@ -25,6 +25,7 @@ from fuelclient.cli.formatting import format_table
 from fuelclient.objects.environment import Environment
 from fuelclient.objects.node import Node
 from fuelclient.objects.node import NodeCollection
+from fuelclient.utils import DictDiffer
 
 
 class NodeAction(Action):
@@ -57,7 +58,10 @@ class NodeAction(Action):
                 Args.get_download_arg(
                     "Download configuration of specific node"),
                 Args.get_upload_arg(
-                    "Upload configuration to specific node")
+                    "Upload configuration to specific node"),
+                Args.get_diff_arg(
+                    "See diff of local changes to configuration of specific "
+                    "node with the one in nailgun")
             ),
             Args.get_dir_arg(
                 "Select directory to which download node attributes"),
@@ -158,7 +162,7 @@ class NodeAction(Action):
                     )
 
     @check_all("node")
-    @check_any("default", "download", "upload")
+    @check_any("default", "download", "upload", "diff")
     def attributes(self, params):
         """Download current or default disk, network,
            configuration for some node:
@@ -201,6 +205,19 @@ class NodeAction(Action):
                 attributes.append(attribute)
             message = "Node attributes for {0} were uploaded" \
                       " from {1}".format(attribute_type, params.dir)
+        elif params.diff:
+            message = ""
+            for node in nodes:
+                local_attr = node.read_attribute(
+                    attribute_type,
+                    params.dir,
+                    serializer=self.serializer
+                )
+                remote_attr = node.get_attribute(attribute_type)
+                message += "Node {0} attribute {1}\n{2}".format(
+                    node.id,
+                    attribute_type,
+                    DictDiffer.diff(remote_attr, local_attr))
         else:
             for node in nodes:
                 downloaded_attribute = node.get_attribute(attribute_type)
