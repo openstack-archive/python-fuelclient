@@ -32,6 +32,7 @@ substitutions = {
     "delete": "--delete",
     "download": "--download",
     "upload": "--upload",
+    "diff": "--diff",
     "default": "--default",
     "create": "--create",
     "remove": "--delete",
@@ -429,6 +430,10 @@ def get_set_arg(help_msg):
 
 def get_delete_arg(help_msg):
     return get_boolean_arg("delete", help=help_msg)
+
+
+def get_diff_arg(help_msg):
+    return get_boolean_arg("diff", help=help_msg)
 
 
 def get_assign_arg(help_msg):
