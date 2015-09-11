@@ -40,3 +40,11 @@ class TestReleaseNetworkActions(base.UnitTestCase):
 
         self.assertTrue(put.called)
         self.assertEqual(put.last_request.json(), API_INPUT)
+
+    @patch('fuelclient.cli.actions.release.utils.DictDiffer')
+    def test_attributes_diff(self, mdictdiffer, mos, mopen):
+        mget = self.m_request.get(rm.ANY, json=API_INPUT)
+        mopen().__enter__().read.return_value = API_OUTPUT
+        self.execute(['fuel', 'rel', '--rel', '1', '--network', '--diff'])
+        self.assertTrue(mget.called)
+        mdictdiffer.diff.assert_called_once_with(API_INPUT, API_INPUT)
