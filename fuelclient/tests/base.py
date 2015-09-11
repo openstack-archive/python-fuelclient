@@ -128,6 +128,9 @@ class BaseTestCase(UnitTestCase):
     def download_command(self, cmd):
         return "{0} --download --dir {1}".format(cmd, self.temp_directory)
 
+    def diff_command(self, cmd):
+        return "{0} --diff --dir {1}".format(cmd, self.temp_directory)
+
     @classmethod
     def reload_nailgun_server(cls):
         for action in ("dropdb", "syncdb", "loaddefault"):
