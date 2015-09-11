@@ -177,12 +177,12 @@ class TestPluginsActions(base.UnitTestCase):
             'Syntax: fuel plugins <action> fuel_plugin==1.0.0',
             plugin.parse_name_version, 'some_string')
 
-    @patch('fuelclient.utils.file_exists', return_value=True)
+    @patch('fuelclient.common.utils.file_exists', return_value=True)
     def test_check_file(self, _):
         plugin = PluginAction()
         plugin.check_file(self.file_name)
 
-    @patch('fuelclient.utils.file_exists', return_value=False)
+    @patch('fuelclient.common.utils.file_exists', return_value=False)
     def test_check_file_raises_error(self, _):
         plugin = PluginAction()
         self.assertRaisesRegexp(

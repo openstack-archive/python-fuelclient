@@ -22,6 +22,7 @@ import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli import error
 from fuelclient.cli.formatting import format_table
+from fuelclient.common.utils import DictDiffer
 from fuelclient.objects.environment import Environment
 from fuelclient.objects.node import Node
 from fuelclient.objects.node import NodeCollection
@@ -57,7 +58,10 @@ class NodeAction(Action):
                 Args.get_download_arg(
                     "Download configuration of specific node"),
                 Args.get_upload_arg(
-                    "Upload configuration to specific node")
+                    "Upload configuration to specific node"),
+                Args.get_diff_arg(
+                    "See diff of configuration of specific "
+                    "node in nailgun to the locally edited one.")
             ),
             Args.get_dir_arg(
                 "Select directory to which download node attributes"),
@@ -158,7 +162,7 @@ class NodeAction(Action):
                     )
 
     @check_all("node")
-    @check_any("default", "download", "upload")
+    @check_any("default", "download", "upload", "diff")
     def attributes(self, params):
         """Download current or default disk, network,
            configuration for some node:
@@ -169,6 +173,10 @@ class NodeAction(Action):
            Upload disk, network, configuration for some node:
                 fuel node --node-id 2 --network --upload
                 fuel node --node-id 2 --disk --upload --dir path/to/directory
+
+          See diff of configuration for specific node in nailgun
+          to the locally edited one:
+                fuel node --node-id 2 --network --diff
         """
         nodes = Node.get_by_ids(params.node)
         attribute_type = "interfaces" if params.network else "disks"
@@ -201,6 +209,19 @@ class NodeAction(Action):
                 attributes.append(attribute)
             message = "Node attributes for {0} were uploaded" \
                       " from {1}".format(attribute_type, params.dir)
+        elif params.diff:
+            message = ""
+            for node in nodes:
+                local_attr = node.read_attribute(
+                    attribute_type,
+                    params.dir,
+                    serializer=self.serializer
+                )
+                remote_attr = node.get_attribute(attribute_type)
+                message += "Node {0} attribute {1}\n{2}".format(
+                    node.id,
+                    attribute_type,
+                    DictDiffer.diff(remote_attr, local_attr))
         else:
             for node in nodes:
                 downloaded_attribute = node.get_attribute(attribute_type)

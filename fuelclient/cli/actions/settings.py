@@ -15,6 +15,7 @@
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
+from fuelclient.common.utils import DictDiffer
 from fuelclient.objects.environment import Environment
 
 
@@ -31,6 +32,9 @@ class SettingsAction(Action):
                 Args.get_download_arg("Modify current configuration."),
                 Args.get_default_arg("Open default configuration."),
                 Args.get_upload_arg("Save current changes in configuration."),
+                Args.get_diff_arg(
+                    "See diff of settings for specific cluster in nailgun "
+                    "to locally edited settings."),
                 required=True
             ),
             Args.get_dir_arg("Directory with configuration data.")
@@ -38,7 +42,8 @@ class SettingsAction(Action):
         self.flag_func_map = (
             ("upload", self.upload),
             ("default", self.default),
-            ("download", self.download)
+            ("download", self.download),
+            ("diff", self.diff)
         )
 
     def upload(self, params):
@@ -52,6 +57,20 @@ class SettingsAction(Action):
         )
         env.set_settings_data(settings_data)
         print("Settings configuration uploaded.")
+
+    def diff(self, params):
+        """To see differences in locally edited cluster settings with
+        the one existing in nailgun.
+            fuel --env 1 settings --diff --dir path/to/directory
+        """
+        env = Environment(params.env)
+        local_settings = env.read_settings_data(
+            directory=params.dir,
+            serializer=self.serializer
+        )
+        remote_settings = env.get_settings_data()
+        print("Differences:\n{0}".format(DictDiffer.diff(remote_settings,
+                                                         local_settings)))
 
     def default(self, params):
         """To download default settings for some environment in some directory:
@@ -117,6 +136,20 @@ class VmwareSettingsAction(SettingsAction):
             "Default vmware settings configuration downloaded to {0}."
             .format(settings_file_path)
         )
+
+    def diff(self, params):
+        """To see differences in locally edited vmware settings with
+        the one existing in nailgun.
+            fuel --env 1 vmware-settings --diff --dir path/to/directory
+        """
+        env = Environment(params.env)
+        local_settings = env.read_vmware_settings_data(
+            directory=params.dir,
+            serializer=self.serializer
+        )
+        remote_settings = env.get_vmware_settings_data()
+        print("Differences:\n{0}".format(DictDiffer.diff(remote_settings,
+                                                         local_settings)))
 
     def download(self, params):
         """To download vmware settings for some environment in this directory:

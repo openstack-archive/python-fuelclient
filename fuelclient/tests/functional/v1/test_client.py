@@ -60,7 +60,7 @@ class TestHandlers(base.BaseTestCase):
                     " --provision]", "-h", "--help", " -s",
                     "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",
-                    "--role", "--net", "--hostname"]
+                    "--role", "--net", "--hostname", "--diff"]
         self.check_all_in_msg("node --help", help_msg)
 
         self.check_for_rows_in_table("node")
@@ -392,19 +392,29 @@ class TestFiles(base.BaseTestCase):
             ))
 
 
-class TestDownloadUploadNodeAttributes(base.BaseTestCase):
+class TestDownloadUploadDiffNodeAttributes(base.BaseTestCase):
+
+    def setUp(self):
+        super(TestDownloadUploadDiffNodeAttributes, self).setUp()
+        self.load_data_to_nailgun_server()
 
     def test_upload_download_interfaces(self):
-        self.load_data_to_nailgun_server()
         cmd = "node --node-id 1 --network"
         self.run_cli_commands((self.download_command(cmd),
                               self.upload_command(cmd)))
 
     def test_upload_download_disks(self):
-        self.load_data_to_nailgun_server()
         cmd = "node --node-id 1 --disk"
         self.run_cli_commands((self.download_command(cmd),
                               self.upload_command(cmd)))
+
+    def test_diff_interfaces(self):
+        # to create folder with yaml file:
+        cmd_download = "node --node-id 1 --network"
+        self.run_cli_command(self.download_command(cmd_download))
+
+        cmd = "node --node-id 1 --network"
+        self.run_cli_command(self.diff_command(cmd))
 
 
 class TestDeployChanges(base.BaseTestCase):
