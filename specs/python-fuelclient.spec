@@ -47,6 +47,8 @@ Requires: python-oslo-utils < 1:1.5.0
 
 Requires: python-oslo-config < 1:1.10.0
 
+Requires: python-dictdiffer >= 0.4.0
+
 %description
 Summary: Console utility for working with fuel rest api
 

@@ -148,6 +148,29 @@ class TestNetworkTemplate(base.UnitTestCase):
         expected_yaml = yaml.safe_load(YAML_TEMPLATE)
         self.assertEqual(written_yaml, expected_yaml)
 
+    @mock.patch('fuelclient.cli.actions.network.DictDiffer')
+    def test_diff_action(self, mdictdiffer):
+        mget = self.mocker.get(self.req_path, text=JSON_TEMPLATE)
+
+        test_command = [
+            'fuel', 'network-template', '--env', str(self.env_id), '--diff'
+        ]
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.cli.serializers.open', m_open,
+                        create=True):
+            read_data = {"key": "value"}
+            with mock.patch('fuelclient.cli.actions.network.Environment.'
+                            'read_network_template_data',
+                            return_value=read_data) as mread:
+                self.execute(test_command)
+
+        self.assertTrue(mget.called)
+        self.assertTrue(mread.called)
+        self.assertTrue(mdictdiffer.diff.called)
+        mdictdiffer.diff.assert_called_once_with(
+            json.loads(JSON_TEMPLATE), read_data)
+
     def test_delete_action(self):
         mdelete = self.mocker.delete(self.req_path, json={})
 
