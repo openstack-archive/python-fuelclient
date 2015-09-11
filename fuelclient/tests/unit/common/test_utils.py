@@ -237,3 +237,43 @@ class TestUtils(base.UnitTestCase):
         result = utils.str_to_unicode(test_data)
         self.assertIsInstance(result, six.text_type)
         self.assertEqual(result, expected_data)
+
+
+class TestDictDiffer(base.UnitTestCase):
+
+    def test_convert(self):
+        cmp_dict = {}
+        dict_ = {
+            'key': [
+                'value1',
+                'value2',
+            ],
+        }
+        utils.DictDiffer._convert(cmp_dict, dict_)
+        self.assertEqual({'key[0]': 'value1', 'key[1]': 'value2'}, cmp_dict)
+
+    def test_diff(self):
+        dict1 = {
+            'key': [
+                'value1',
+                'value2',
+            ],
+        }
+        dict2 = {
+            'key': (
+                'value1',
+                'value23',
+            ),
+        }
+        diff_dict = utils.DictDiffer.generate_diff(dict1, dict2)
+        self.assertEqual({'key[1]': '"value2" -> "value23"'}, diff_dict)
+
+    def test_empty_diff(self):
+        dict_ = {
+            'key': [
+                'value1',
+                'value2',
+            ],
+        }
+        diff_dict = utils.DictDiffer.generate_diff(dict_, dict_)
+        self.assertEqual({}, diff_dict)

@@ -55,3 +55,14 @@ class TestClusterAttributesActions(base.UnitTestCase):
 
         self.assertIn('clusters/1/attributes', url)
         self.assertEqual(json.loads(kwargs['data']), self._input)
+
+    def test_attributes_diff(self, mos, mopen, mrequests):
+        mrequests.get().json.return_value = self._input
+        mopen().__enter__().read.return_value = self._output
+        with patch('fuelclient.cli.actions.environment.'
+                   'DictDiffer') as mdictdiffer:
+            self.execute(
+                ['fuel', 'env', '--env', '1', '--attributes', '--diff'])
+
+        self.assertTrue(mrequests.get.called)
+        mdictdiffer.diff.assert_called_once_with(self._input, self._input)
