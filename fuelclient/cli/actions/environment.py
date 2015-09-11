@@ -19,6 +19,7 @@ import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli.formatting import format_table
 from fuelclient.objects.environment import Environment
+from fuelclient.utils import DictDiffer
 
 
 class EnvironmentAction(Action):
@@ -72,7 +73,10 @@ class EnvironmentAction(Action):
                 Args.get_download_arg(
                     "Download configuration of specific cluster"),
                 Args.get_upload_arg(
-                    "Upload configuration to specific cluster")
+                    "Upload configuration to specific cluster"),
+                Args.get_diff_arg(
+                    "See diff of configuration in nailgun to the locally "
+                    "edited one."),
             ),
             Args.get_dir_arg(
                 "Select directory to which download release attributes"),
@@ -227,11 +231,13 @@ class EnvironmentAction(Action):
         )
 
     @check_all("env")
-    @check_any("download", "upload")
+    @check_any("download", "upload", "diff")
     def deployment_tasks(self, params):
         """Modify deployment_tasks for environment:
                 fuel env --env 1 --deployment-tasks --download
                 fuel env --env 1 --deployment-tasks --upload
+           See diff of deployment-tasks to local changes:
+                fuel env --env 1 --deployment-tasks --diff
         """
         cluster = Environment(params.env)
         dir_path = self.full_path_directory(
@@ -247,13 +253,19 @@ class EnvironmentAction(Action):
             cluster.update_deployment_tasks(tasks)
             print("Deployment tasks for cluster {0} "
                   "uploaded from {1}.yaml".format(cluster.id, full_path))
+        elif params.diff:
+            local_tasks = self.serializer.read_from_file(full_path)
+            remote_tasks = cluster.get_deployment_tasks()
+            print("Differences:\n{0}".format(DictDiffer.diff(remote_tasks,
+                                                             local_tasks)))
 
     @check_all("env")
-    @check_any("download", "upload")
+    @check_any("download", "upload", "diff")
     def attributes(self, params):
         """Modify attributes of the environment:
                 fuel env --env 1 --attributes --download
                 fuel env --env 1 --attributes --upload
+                fuel env --env 1 --attributes --diff
         """
         cluster = Environment(params.env)
         dir_path = self.full_path_directory(
@@ -270,3 +282,8 @@ class EnvironmentAction(Action):
             cluster.update_attributes(attributes)
             print("Attributes of cluster {0} "
                   "uploaded from {1}.yaml".format(cluster.id, full_path))
+        elif params.diff:
+            local_attrs = self.serializer.read_from_file(full_path)
+            remote_attrs = cluster.get_attributes()
+            print("Differences:\n{0}".format(DictDiffer.diff(remote_attrs,
+                                                             local_attrs)))
