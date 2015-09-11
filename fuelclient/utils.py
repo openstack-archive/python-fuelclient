@@ -161,3 +161,51 @@ def str_to_unicode(string):
 
     """
     return string if six.PY3 else string.decode(sys.getfilesystemencoding())
+
+
+class DictDiffer(object):
+    DELIMITER = ':'
+
+    @classmethod
+    def generate_diff(cls, dict1, dict2):
+        map_dict1, map_dict2, diff_dict = {}, {}, {}
+        cls._convert(map_dict1, dict1)
+        cls._convert(map_dict2, dict2)
+        for key in map_dict1:
+            if key in map_dict2:
+                if map_dict1[key] != map_dict2[key]:
+                    diff_dict[key] = '"{0}" -> "{1}"'.format(map_dict1[key],
+                                                             map_dict2[key])
+            else:
+                diff_dict[key] = 'deleted: "{0}"'.format(map_dict1[key])
+
+        for key in set(map_dict2) - set(map_dict1):
+            diff_dict[key] = 'added: "{0}"'.format(map_dict2[key])
+
+        return diff_dict
+
+    @classmethod
+    def pretty_str(cls, cmp_dict):
+        pr_str = ''
+        for path in sorted(cmp_dict):
+            pr_str += "{0}\n\t{1}\n\n".format(path, cmp_dict[path])
+
+        return pr_str.strip() or 'None'
+
+    @classmethod
+    def diff(cls, dict1, dict2):
+        return cls.pretty_str(cls.generate_diff(dict1, dict2))
+
+    @classmethod
+    def _convert(cls, cmp_dict, item, path=''):
+        if isinstance(item, six.string_types):
+            # without delimiter [1:]
+            cmp_dict[path[1:]] = item
+        elif isinstance(item, (list, tuple)):
+            for i, elem in enumerate(item):
+                sub_path = path + '[{0}]'.format(i)
+                cls._convert(cmp_dict, elem, sub_path)
+        elif isinstance(item, dict):
+            for key, value in item.items():
+                sub_path = path + cls.DELIMITER + key
+                cls._convert(cmp_dict, value, sub_path)

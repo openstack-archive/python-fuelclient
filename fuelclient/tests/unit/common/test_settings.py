@@ -55,6 +55,22 @@ class BaseSettings(base.UnitTestCase):
         self.assertIn(test_url, url)
         self.assertDictEqual(json.loads(data), JSON_SETTINGS_DATA)
 
+    def check_diff_action(self, mrequests, test_command, read_mock):
+        m = mock_open()
+        mresponse = Mock(status_code=200)
+        mresponse.json.return_value = JSON_SETTINGS_DATA
+        mrequests.get.return_value = mresponse
+
+        with patch('__builtin__.open', m, create=True):
+            with patch('fuelclient.cli.actions.settings.'
+                       'DictDiffer') as mdictdiffer:
+                read_data = {"key": "value"}
+                with read_mock as mread:
+                    mread.return_value = read_data
+                    self.execute(test_command)
+
+        mdictdiffer.diff.assert_called_once_with(JSON_SETTINGS_DATA, read_data)
+
     def check_default_action(self, mrequests, test_command, test_url):
         m = mock_open()
         mresponse = Mock(status_code=200)
@@ -112,6 +128,14 @@ class TestSettings(BaseSettings):
                 'fuel', 'settings', '--env', '1', '--download'],
             test_url='/api/v1/clusters/1/attributes')
 
+    def test_diff_action(self, mrequests):
+        self.check_diff_action(
+            mrequests=mrequests,
+            test_command=[
+                'fuel', 'settings', '--env', '1', '--diff'],
+            read_mock=patch('fuelclient.cli.actions.settings.Environment.'
+                            'read_settings_data'))
+
 
 @patch('fuelclient.client.requests')
 class TestVmwareSettings(BaseSettings):
@@ -136,3 +160,11 @@ class TestVmwareSettings(BaseSettings):
             test_command=[
                 'fuel', 'vmware-settings', '--env', '1', '--download'],
             test_url='/api/v1/clusters/1/vmware_attributes')
+
+    def test_diff_action(self, mrequests):
+        self.check_diff_action(
+            mrequests=mrequests,
+            test_command=[
+                'fuel', 'vmware-settings', '--env', '1', '--diff'],
+            read_mock=patch('fuelclient.cli.actions.settings.Environment.'
+                            'read_vmware_settings_data'))
