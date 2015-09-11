@@ -16,7 +16,7 @@ import six
 
 from fuelclient.commands import base
 from fuelclient.common import data_utils
-from fuelclient import utils
+from fuelclient.common import utils
 
 
 class NodeMixIn(object):

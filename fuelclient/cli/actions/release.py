@@ -21,8 +21,8 @@ from fuelclient.cli.actions.base import check_any
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli.formatting import format_table
+from fuelclient.common import utils
 from fuelclient.objects.release import Release
-from fuelclient import utils
 
 
 class ReleaseAction(Action):
@@ -45,7 +45,10 @@ class ReleaseAction(Action):
                 Args.get_download_arg(
                     "Download configuration of specific release"),
                 Args.get_upload_arg(
-                    "Upload configuration to specific release")
+                    "Upload configuration to specific release"),
+                Args.get_diff_arg(
+                    "See diff of configuration for specific release in "
+                    "nailgun to the locally edited one.")
             )
         ]
         self.flag_func_map = (
@@ -83,11 +86,15 @@ class ReleaseAction(Action):
         )
 
     @check_all("release")
-    @check_any("download", "upload")
+    @check_any("download", "upload", "diff")
     def network(self, params):
-        """Modify release networks configuration.
-        fuel rel --rel 1 --network --download
-        fuel rel --rel 2 --network --upload
+        """Modify release networks configuration:
+            fuel rel --rel 1 --network --download
+            fuel rel --rel 2 --network --upload
+
+        See diff of configuration for specific release in nailgun
+        to the locally edited one:
+            fuel rel --rel 2 --network --diff
         """
         release = Release(params.release)
         dir_path = self.full_path_directory(
@@ -103,13 +110,22 @@ class ReleaseAction(Action):
             release.update_networks(networks)
             print("Networks for release {0} uploaded from {1}.yaml".format(
                 release.id, full_path))
+        elif params.diff:
+            local_networks = self.serializer.read_from_file(full_path)
+            remote_networks = release.get_networks()
+            print("Differences:\n{0}".format(
+                utils.DictDiffer.diff(remote_networks, local_networks)))
 
     @check_all("release")
-    @check_any("download", "upload")
+    @check_any("download", "upload", "diff")
     def deployment_tasks(self, params):
         """Modify deployment_tasks for release.
-        fuel rel --rel 1 --deployment-tasks --download
-        fuel rel --rel 1 --deployment-tasks --upload
+            fuel rel --rel 1 --deployment-tasks --download
+            fuel rel --rel 1 --deployment-tasks --upload
+
+        See diff of deployment-tasks for specific release in nailgun
+        to the locally edited one:
+            fuel rel --rel 2 --network --diff
         """
         release = Release(params.release)
         dir_path = self.full_path_directory(
@@ -125,6 +141,11 @@ class ReleaseAction(Action):
             release.update_deployment_tasks(tasks)
             print("Deployment tasks for release {0}"
                   " uploaded from {1}.yaml".format(release.id, dir_path))
+        elif params.diff:
+            local_tasks = self.serializer.read_from_file(full_path)
+            remote_tasks = release.get_deployment_tasks()
+            print("Differences:\n{0}".format(
+                utils.DictDiffer.diff(remote_tasks, local_tasks)))
 
     @check_all("dir")
     def sync_deployment_tasks(self, params):

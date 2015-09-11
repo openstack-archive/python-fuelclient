@@ -18,19 +18,20 @@ import json
 import os
 import six
 import subprocess
+import yaml
 
 import mock
 import requests
 
 from fuelclient.cli import error
 from fuelclient.common import data_utils
+from fuelclient.common import utils
 from fuelclient.tests.unit.v1 import base
-from fuelclient import utils
 
 
 class TestUtils(base.UnitTestCase):
 
-    @mock.patch('fuelclient.utils.os.walk')
+    @mock.patch('fuelclient.common.utils.os.walk')
     def test_iterfiles(self, mwalk):
         mwalk.return_value = [
             ('/some_directory/', [], ['valid.yaml', 'invalid.yml'])]
@@ -118,14 +119,14 @@ class TestUtils(base.UnitTestCase):
     def test_parse_yaml_file(self):
         mock_open = self.mock_open("key: value")
 
-        with mock.patch('fuelclient.utils.io.open', mock_open):
+        with mock.patch('fuelclient.common.utils.io.open', mock_open):
             self.assertEqual(
                 utils.parse_yaml_file('some_file_name'),
                 {'key': 'value'})
 
-    @mock.patch('fuelclient.utils.glob.iglob',
+    @mock.patch('fuelclient.common.utils.glob.iglob',
                 return_value=['file1', 'file2'])
-    @mock.patch('fuelclient.utils.parse_yaml_file',
+    @mock.patch('fuelclient.common.utils.parse_yaml_file',
                 side_effect=['content_file1', 'content_file2'])
     def test_glob_and_parse_yaml(self, parse_mock, iglob_mock):
         path = '/tmp/path/mask*'
@@ -153,7 +154,8 @@ class TestUtils(base.UnitTestCase):
                 utils.major_plugin_version(arg),
                 expected)
 
-    @mock.patch('fuelclient.utils.os.path.lexists', side_effect=[True, False])
+    @mock.patch('fuelclient.common.utils.os.path.lexists',
+                side_effect=[True, False])
     def test_file_exists(self, lexists_mock):
         self.assertTrue(utils.file_exists('file1'))
         self.assertFalse(utils.file_exists('file2'))
@@ -242,3 +244,106 @@ class TestUtils(base.UnitTestCase):
         result = utils.str_to_unicode(test_data)
         self.assertIsInstance(result, six.text_type)
         self.assertEqual(result, expected_data)
+
+
+class TestDictDiffer(base.UnitTestCase):
+
+    def setUp(self):
+        super(TestDictDiffer, self).setUp()
+        self.base_yaml = '\n'.join((
+            'public_vip: 172.16.0.3',
+            'public_vrouter_vip: 172.16.0.2',
+            'vips:',
+            '  management:',
+            '    ipaddr: 192.168.0.2',
+            '    namespace: haproxy',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  public:',
+            '    ipaddr: 172.16.0.3',
+            '    namespace: haproxy',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  vrouter:',
+            '    ipaddr: 192.168.0.1',
+            '    namespace: vrouter',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  vrouter_pub:',
+            '    ipaddr: 172.16.0.2',
+            '    namespace: vrouter',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+        ))
+        self.changed_yaml = '\n'.join((
+            'public_vip: 172.16.0.3',
+            'public_vrouter_vip: 172.16.0.2',
+            'vips:',
+            '  management:',
+            '    ipaddr: 192.168.0.2',
+            '    namespace: haproxy',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  public:',
+            # change 3 to 4
+            '    ipaddr: 172.16.0.4',
+            '    namespace: haproxy',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            '  vrouter:',
+            # remove ipaddr
+            '    namespace: vrouter',
+            '    network_role: mgmt/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+            # added 2 test roles
+            '    - test_role1',
+            '    - test_role2',
+            '  vrouter_pub:',
+            '    ipaddr: 172.16.0.2',
+            # typo
+            '    namespace: vroutert',
+            '    network_role: public/vip',
+            '    node_roles:',
+            '    - controller',
+            '    - primary-controller',
+        ))
+
+    def test_pretty_diff(self):
+        expected = '\n'.join((
+            'vips.public.ipaddr',
+            '    172.16.0.3 --> 172.16.0.4',
+            '',
+            'vips.vrouter',
+            '    DELETED: [ipaddr] 192.168.0.1',
+            '',
+            'vips.vrouter.node_roles',
+            '    ADDED: [2] test_role1',
+            '    ADDED: [3] test_role2',
+            '',
+            'vips.vrouter_pub.namespace',
+            '    vrouter --> vroutert',
+        ))
+        diff_result = utils.DictDiffer.diff(
+            yaml.load(self.base_yaml),
+            yaml.load(self.changed_yaml),
+        )
+        self.assertEqual(diff_result, expected)
+
+    def test_empty_diff(self):
+        test_dict = yaml.load(self.base_yaml)
+        diff_dict = utils.DictDiffer.generate_diff(test_dict, test_dict)
+        self.assertEqual({}, diff_dict)
