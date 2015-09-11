@@ -16,6 +16,7 @@ from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.objects.environment import Environment
+from fuelclient.utils import DictDiffer
 
 
 class NetworkAction(Action):
@@ -35,14 +36,32 @@ class NetworkAction(Action):
                     "Verify current network configuration."),
                 Args.get_upload_arg(
                     "Upload changed network configuration."),
+                Args.get_diff_arg(
+                    "See diff of network configuration in nailgun to "
+                    "locally edited one."),
                 required=True
             )
         )
         self.flag_func_map = (
             ("upload", self.upload),
             ("verify", self.verify),
-            ("download", self.download)
+            ("download", self.download),
+            ("diff", self.diff),
         )
+
+    def diff(self, params):
+        """To see differences in locally edited network configuration with
+           the one existing in nailgun.
+                fuel --env 1 network --diff --dir path/to/directory
+        """
+        env = Environment(params.env)
+        local_data = env.read_network_data(
+            directory=params.dir,
+            serializer=self.serializer
+        )
+        remote_data = env.get_network_data()
+        print("Differences:\n{0}".format(DictDiffer.diff(remote_data,
+                                                         local_data)))
 
     def upload(self, params):
         """To upload network configuration from some
@@ -104,12 +123,16 @@ class NetworkTemplateAction(Action):
                     "Upload changed network template configuration."),
                 Args.get_delete_arg(
                     "Delete network template configuration."),
+                Args.get_diff_arg(
+                    "See diff of template configuration in nailgun to the "
+                    "locally edited one."),
                 required=True))
 
         self.flag_func_map = (
             ("upload", self.upload),
             ("download", self.download),
-            ("delete", self.delete))
+            ("delete", self.delete),
+            ("diff", self.diff))
 
     def upload(self, params):
         """Uploads network template from filesystem path
@@ -140,9 +163,22 @@ class NetworkTemplateAction(Action):
         print("Network template configuration for environment with id={0}"
               " downloaded to {1}".format(env.id, network_template_file_path))
 
+    def diff(self, params):
+        """To see differences in locally edited network template with
+           the one existing in nailgun.
+                fuel --env 1 network-template --diff
+        """
+        env = Environment(params.env)
+        local_data = env.read_network_template_data(
+            directory=params.dir,
+            serializer=self.serializer)
+        remote_data = env.get_network_template_data()
+        print("Differences:\n{0}".format(DictDiffer.diff(remote_data,
+                                                         local_data)))
+
     def delete(self, params):
         """Deletes network template for specified environment:
-            fuel --env 1 --network-template --delete
+                fuel --env 1 --network-template --delete
         """
         env = Environment(params.env)
         env.delete_network_template_data()
