@@ -49,6 +49,21 @@ NETWORK_CONFIG_ERROR_OUTPUT = {
 @patch('fuelclient.cli.actions.base.os')
 class TestNetworkActions(base.UnitTestCase):
 
+    @patch('fuelclient.cli.actions.network.Environment.read_network_data')
+    @patch('fuelclient.cli.actions.network.DictDiffer')
+    def test_network_diff(self, mdictdiffer, mread, mos, mopen,
+                          mrequests=None):
+        input_data = yaml.load(FILE_INPUT)
+        mrequests.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
+        mrequests.get('/api/v1/clusters/1/network_configuration/neutron',
+                      json=input_data)
+        read_data = {'key': 'value'}
+        mread.return_value = read_data
+        self.execute(['fuel', 'network', '--env', '1', '--diff'])
+
+        self.assertTrue(mread.called)
+        mdictdiffer.diff.assert_called_once_with(input_data, read_data)
+
     def test_network_download(self, mos, mopen, mrequests=None):
         mrequests.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         mrequests.get('/api/v1/clusters/1/network_configuration/neutron',

@@ -52,6 +52,17 @@ class TestReleaseDeploymentTasksActions(base.UnitTestCase):
         self.assertEqual(
             json.loads(kwargs['data']), API_INPUT)
 
+    @patch('fuelclient.cli.actions.release.utils.DictDiffer')
+    def test_cluster_tasks_diff(self, mdictdiffer, mos, mopen, mrequests):
+        mopen().__enter__().read.return_value = API_OUTPUT
+        mrequests.get().json.return_value = API_INPUT
+
+        self.execute(
+            ['fuel', 'rel', '--rel', '1', '--deployment-tasks', '--diff'])
+
+        self.assertTrue(mrequests.get.called)
+        mdictdiffer.diff.assert_called_once_with(API_INPUT, API_INPUT)
+
 
 @patch('fuelclient.client.requests')
 @patch('fuelclient.cli.serializers.open', create=True)
@@ -75,6 +86,17 @@ class TestClusterDeploymentTasksActions(base.UnitTestCase):
         self.assertIn('clusters/1/deployment_tasks', url)
         self.assertEqual(
             json.loads(kwargs['data']), API_INPUT)
+
+    @patch('fuelclient.cli.actions.environment.DictDiffer')
+    def test_cluster_tasks_diff(self, mdictdiffer, mos, mopen, mrequests):
+        mopen().__enter__().read.return_value = API_OUTPUT
+        mrequests.get().json.return_value = API_INPUT
+
+        self.execute(
+            ['fuel', 'env', '--env', '1', '--deployment-tasks', '--diff'])
+
+        self.assertTrue(mrequests.get.called)
+        mdictdiffer.diff.assert_called_once_with(API_INPUT, API_INPUT)
 
 
 @patch('fuelclient.client.requests')
