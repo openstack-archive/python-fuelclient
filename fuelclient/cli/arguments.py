@@ -54,7 +54,8 @@ class ArrayAction(argparse.Action):
     :returns: list of ids
     """
     def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, map(int, chain(*values)))
+        list_ids = [int(value) for value in chain(*values)]
+        setattr(namespace, self.dest, list_ids)
 
 
 class NodeAction(argparse.Action):
@@ -91,7 +92,8 @@ class NodeAction(argparse.Action):
                             'Node with mac endfix "{0}" was not found.'
                             .format(short_mac)
                         )
-            setattr(namespace, self.dest, map(int, only_ids))
+            node_ids = [int(node_id) for node_id in only_ids]
+            setattr(namespace, self.dest, node_ids)
 
 
 class SetAction(argparse.Action):

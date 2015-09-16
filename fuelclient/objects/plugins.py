@@ -448,12 +448,11 @@ class Plugins(base.BaseObject):
         if not cls.is_updatable(metadata['package_version']):
             return
 
-        plugins = filter(
-            lambda p: p['name'] == metadata['name'] and
-            cls.is_updatable(p['package_version']) and
-            utils.major_plugin_version(metadata['version']) ==
-            utils.major_plugin_version(p['version']),
-            cls.get_all_data())
+        plugins = [p for p in cls.get_all_data()
+                   if (p['name'] == metadata['name'] and
+                       cls.is_updatable(p['package_version']) and
+                       utils.major_plugin_version(metadata['version']) ==
+                       utils.major_plugin_version(p['version']))]
 
         plugin = None
         if plugins:
@@ -485,9 +484,8 @@ class Plugins(base.BaseObject):
         :returns: dictionary with plugin data
         :raises: error.BadDataException if no plugin was found
         """
-        plugins = filter(
-            lambda p: (p['name'], p['version']) == (name, version),
-            cls.get_all_data())
+        plugins = [p for p in cls.get_all_data()
+                   if (p['name'], p['version']) == (name, version)]
 
         if not plugins:
             raise error.BadDataException(

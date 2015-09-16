@@ -43,7 +43,7 @@ class BaseSettings(base.UnitTestCase):
 
     def check_upload_action(self, mrequests, test_command, test_url):
         m = mock_open(read_data=YAML_SETTINGS_DATA)
-        with patch('__builtin__.open', m, create=True):
+        with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
         request = mrequests.put.call_args_list[0]
@@ -61,7 +61,7 @@ class BaseSettings(base.UnitTestCase):
         mresponse.json.return_value = JSON_SETTINGS_DATA
         mrequests.get.return_value = mresponse
 
-        with patch('__builtin__.open', m, create=True):
+        with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
         request = mrequests.get.call_args_list[0]
@@ -77,7 +77,7 @@ class BaseSettings(base.UnitTestCase):
         mresponse.json.return_value = JSON_SETTINGS_DATA
         mrequests.get.return_value = mresponse
 
-        with patch('__builtin__.open', m, create=True):
+        with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
         request = mrequests.get.call_args_list[0]

@@ -14,7 +14,6 @@
 
 from collections import namedtuple
 import copy
-from functools import partial
 
 from fuelclient.cli import error
 from fuelclient import objects
@@ -41,11 +40,12 @@ class NodeClient(base_v1.BaseV1Client):
         result = self._entity_wrapper.get_all_data()
 
         if environment_id is not None:
-            result = filter(lambda n: n['cluster'] == environment_id, result)
+            result = [item for item in result
+                      if item['cluster'] == environment_id]
 
         if labels:
-            result = filter(
-                partial(self._check_label, labels), result)
+            result = [item for item in result
+                      if self._check_label(labels, item)]
 
         return result
 

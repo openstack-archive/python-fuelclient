@@ -80,10 +80,7 @@ def quote_and_join(words):
     if len(words) > 1:
         return '{0} and "{1}"'.format(
             ", ".join(
-                map(
-                    lambda x: '"{0}"'.format(x),
-                    words
-                )[0:-1]
+                ['"{0}"'.format(x) for x in words][:-1]
             ),
             words[-1]
         )

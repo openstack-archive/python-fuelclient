@@ -213,10 +213,7 @@ class Parser:
 
     def prepare_args(self):
         # replace some args from dict substitutions
-        self.args = map(
-            lambda x: substitutions.get(x, x),
-            self.args
-        )
+        self.args = [substitutions.get(arg, arg) for arg in self.args]
 
         # move general used flags before actions, otherwise they will be used
         # as a part of action by action_generator

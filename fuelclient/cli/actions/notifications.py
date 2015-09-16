@@ -59,10 +59,8 @@ class NotificationsAction(Action):
         notifications = Notifications.get_all_data()
 
         if not params.all:
-            notifications = filter(
-                lambda notification: notification['status'] == 'unread',
-                notifications
-            )
+            notifications = [notification for notification in notifications
+                             if notification['status'] == 'unread']
 
         self.serializer.print_to_output(
             notifications,
