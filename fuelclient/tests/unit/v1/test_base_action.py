@@ -15,8 +15,10 @@
 #    under the License.
 
 import json
+import sys
 
 import mock
+import pytest
 import requests_mock
 import yaml
 
@@ -74,6 +76,8 @@ class TestFuelVersion(base_tests.UnitTestCase):
 
     VERSION = fake_fuel_version.get_fake_fuel_version()
 
+    @pytest.mark.xfail(sys.version_info >= (3, 0),
+                       reason="Python 3 api changes")
     def test_return_yaml(self, mrequests):
         mrequests.get('/api/v1/version', json=self.VERSION)
 

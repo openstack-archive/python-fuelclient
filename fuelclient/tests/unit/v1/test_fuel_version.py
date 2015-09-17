@@ -13,7 +13,10 @@
 #    under the License.
 
 import json
+import sys
+
 import mock
+import pytest
 import requests_mock
 import yaml
 
@@ -24,6 +27,8 @@ from fuelclient.tests.utils import fake_fuel_version
 @requests_mock.mock()
 class TestFuelVersion(base.UnitTestCase):
 
+    @pytest.mark.xfail(sys.version_info >= (3, 0),
+                       reason="Python 3 api changes")
     def test_return_yaml(self, mrequests):
         mrequests.get('/api/v1/version/',
                       json=fake_fuel_version.get_fake_fuel_version())

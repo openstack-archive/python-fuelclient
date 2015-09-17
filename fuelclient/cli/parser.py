@@ -15,6 +15,8 @@
 import argparse
 import sys
 
+from six.moves import map
+
 from fuelclient.cli.actions import actions
 from fuelclient.cli.arguments import get_fuel_version_arg
 from fuelclient.cli.arguments import get_version_arg
@@ -213,10 +215,10 @@ class Parser:
 
     def prepare_args(self):
         # replace some args from dict substitutions
-        self.args = map(
+        self.args = list(map(
             lambda x: substitutions.get(x, x),
             self.args
-        )
+        ))
 
         # move general used flags before actions, otherwise they will be used
         # as a part of action by action_generator

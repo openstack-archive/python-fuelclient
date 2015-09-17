@@ -14,15 +14,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from mock import patch
+import sys
 
-from fuelclient.tests import base
+from mock import patch
+import pytest
 
 from fuelclient.cli.actions import PluginAction
 from fuelclient.cli import error
 from fuelclient.cli.formatting import format_table
 from fuelclient.cli.serializers import Serializer
 from fuelclient.objects.plugins import Plugins
+from fuelclient.tests import base
 
 
 plugin_data = {
@@ -134,6 +136,8 @@ class TestPluginsActions(base.UnitTestCase):
             'Plugins were successfully synchronized.')
         sync_mock.assert_called_once()
 
+    @pytest.mark.xfail(sys.version_info >= (3, 0),
+                       reason="Python 3 api changes")
     @patch.object(Serializer, 'print_to_output')
     @patch.object(Plugins, 'sync')
     def test_sync_with_specific_plugins(self, sync_mock, print_mock):

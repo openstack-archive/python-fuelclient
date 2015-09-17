@@ -12,7 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sys
+
 import mock
+import pytest
 import requests_mock
 
 from fuelclient.tests import base
@@ -77,6 +80,8 @@ class TestNetworkGroupActions(base.UnitTestCase):
         meta = mreq.last_request.json()['meta']
         self.assertEqual(meta['ip_ranges'], ["10.0.0.2", "10.0.0.254"])
 
+    @pytest.mark.xfail(sys.version_info >= (3, 0),
+                       reason="Python 3 api changes")
     def test_create_network_group_required_args(self, mreq):
         with mock.patch("sys.stderr") as m_stderr:
             with self.assertRaises(SystemExit):

@@ -15,10 +15,12 @@
 #    under the License.
 
 import json
+import sys
 
 from mock import Mock
 from mock import mock_open
 from mock import patch
+import pytest
 
 from fuelclient.tests import base
 
@@ -88,6 +90,8 @@ class BaseSettings(base.UnitTestCase):
         self.assertIn(test_url, url)
 
 
+@pytest.mark.xfail(sys.version_info >= (3, 0),
+                   reason="Python 3 api changes")
 @patch('fuelclient.client.requests')
 class TestSettings(BaseSettings):
 
@@ -113,6 +117,8 @@ class TestSettings(BaseSettings):
             test_url='/api/v1/clusters/1/attributes')
 
 
+@pytest.mark.xfail(sys.version_info >= (3, 0),
+                   reason="Python 3 api changes")
 @patch('fuelclient.client.requests')
 class TestVmwareSettings(BaseSettings):
 
