@@ -100,11 +100,12 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
         self.assertEqual(
             json.loads(kwargs['data']), API_INPUT)
 
-    def test_sync_with_directory_path(self, mfiles, mopen, mrequests):
+    @patch('fuelclient.cli.actions.release.os')
+    def test_sync_with_directory_path(self, mos, mfiles, mopen, mrequests):
         mrequests.get().json.return_value = RELEASE_OUTPUT
-        mfiles.return_value = ['/etc/puppet/2014.2-6.0/tasks.yaml']
+        mos.path.realpath.return_value = real_path = '/etc/puppet'
+        mfiles.return_value = [real_path + '/2014.2-6.0/tasks.yaml']
         mopen().__enter__().read.return_value = API_OUTPUT
-        real_path = '/etc/puppet'
         self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks', '--dir', real_path])
         mfiles.assert_called_once_with(real_path, '*tasks.yaml')
