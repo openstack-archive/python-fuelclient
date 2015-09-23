@@ -59,6 +59,10 @@ cd %{_builddir}/%{name}-%{version} && python setup.py build
 %install
 cd %{_builddir}/%{name}-%{version} && python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=%{_builddir}/%{name}-%{version}/INSTALLED_FILES
 
+%post
+# FIXME(mkwiek): fix fuelclient to generate usable autocomplete bash
+fuel2 complete | perl -pe "s/-(?=.*=')/_/g" | perl -pe 's;(?<=cmds_\$\{)proposed;proposed//-/_;g' | sed -e "s/local cur prev words/local -a words/g" > %{_datadir}/bash-completion/completions/fuel2
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
