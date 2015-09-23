@@ -89,6 +89,16 @@ class TestNodeGroupActions(base.UnitTestCase):
         self.assertTrue(mget.called)
         self.assertTrue(mdelete.called)
 
+    def test_delete_nodegroup_group_arg_required(self, mreq):
+        err_msg = '"--group" required!\n'
+        with mock.patch('sys.stderr') as m_stderr:
+            with self.assertRaises(SystemExit):
+                self.execute(['fuel', 'nodegroup', '--delete',
+                              '--default'])
+
+        msg = m_stderr.write.call_args[0][0]
+        self.assertEqual(msg, err_msg)
+
     def test_assign_nodegroup_fails_w_multiple_groups(self, mreq):
         err_msg = "Nodes can only be assigned to one node group.\n"
         with mock.patch("sys.stderr") as m_stderr:

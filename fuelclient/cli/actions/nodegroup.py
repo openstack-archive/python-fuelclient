@@ -84,6 +84,7 @@ class NodeGroupAction(Action):
             .format(env=env_id, **data)
         )
 
+    @check_all("group")
     def delete(self, params):
         """Delete the specified node groups
                fuel --env 1 nodegroup --delete --group 1
