@@ -59,6 +59,9 @@ cd %{_builddir}/%{name}-%{version} && python setup.py build
 %install
 cd %{_builddir}/%{name}-%{version} && python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=%{_builddir}/%{name}-%{version}/INSTALLED_FILES
 
+%post
+fuel2 complete > %{_datadir}/bash-completion/completions/python-fuelclient
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
