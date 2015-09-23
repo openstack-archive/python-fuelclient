@@ -89,6 +89,16 @@ class TestNodeGroupActions(base.UnitTestCase):
         self.assertTrue(mget.called)
         self.assertTrue(mdelete.called)
 
+    def test_delete_nodegroup_group_arg_required(self, mreq):
+        err_msg = '"--group" required!\n'
+        with mock.patch('sys.stderr') as m_stderr:
+            with self.assertRaises(SystemExit):
+                self.execute(['fuel', 'nodegroup', '--delete',
+                              '--default'])
+
+        msg = m_stderr.write.call_args[0][0]
+        self.assertEqual(msg, err_msg)
+
     def test_assign_nodegroup_fails_w_multiple_groups(self, mreq):
         err_msg = "Nodes can only be assigned to one node group.\n"
         with mock.patch("sys.stderr") as m_stderr:
@@ -108,3 +118,26 @@ class TestNodeGroupActions(base.UnitTestCase):
         self.execute(['fuel', 'nodegroup', '--assign', '--node', '1,2,3',
                       '--env', str(self.env['id']), '--group', '2'])
         m_assign.assert_called_with([1, 2, 3])
+
+    def test_node_group_assign_arguments_required(self, mreq):
+        err_msg = '"--env", "--node" and "--group" required!\n'
+
+        node_not_present_cmd = ['fuel', 'nodegroup', '--env',
+                                str(self.env['id']), '--assign', '--group',
+                                '1']
+        group_not_present_cmd = ['fuel', 'nodegroup', '--env',
+                                 str(self.env['id']), '--assign',
+                                 '--node', '1']
+        env_not_present_cmd = ['fuel', 'nodegroup', '--assign', '--node', '1',
+                               '--group', '1']
+
+        commands = (node_not_present_cmd, group_not_present_cmd,
+                    env_not_present_cmd)
+
+        for cmd in commands:
+            with mock.patch("sys.stderr") as m_stderr:
+                with self.assertRaises(SystemExit):
+                    self.execute(cmd)
+
+            msg = m_stderr.write.call_args[0][0]
+            self.assertEqual(msg, err_msg)

@@ -84,10 +84,11 @@ class NodeGroupAction(Action):
             .format(env=env_id, **data)
         )
 
+    @check_all("group")
     def delete(self, params):
         """Delete the specified node groups
-               fuel --env 1 nodegroup --delete --group 1
-               fuel --env 1 nodegroup --delete --group 2,3,4
+               fuel nodegroup --delete --group 1
+               fuel nodegroup --delete --group 2,3,4
         """
         ngs = NodeGroup.get_by_ids(params.group)
         for n in ngs:
@@ -102,7 +103,7 @@ class NodeGroupAction(Action):
                 .format(id=n.id)
             )
 
-    @check_all("env")
+    @check_all("env", "node", "group")
     def assign(self, params):
         """Assign nodes to specified node group:
                 fuel --env 1 nodegroup --assign --node 1 --group 1
