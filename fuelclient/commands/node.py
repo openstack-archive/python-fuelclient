@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 
 from fuelclient.commands import base
 from fuelclient.common import data_utils
@@ -102,6 +103,12 @@ class NodeUpdate(NodeMixIn, base.BaseShowCommand):
             type=str,
             default=None,
             help='New hostname for node')
+
+        parser.add_argument(
+            '--name',
+            type=lambda x: unicode(x, 'utf-8') if six.PY2 else x,
+            default=None,
+            help='New name for node')
 
         return parser
 
