@@ -46,6 +46,7 @@ class NodeAction(Action):
                 Args.get_disk_arg("Node disk configuration."),
                 Args.get_deploy_arg("Deploy specific nodes."),
                 Args.get_hostname_arg("Set node hostname."),
+                Args.get_node_name_arg("Set node name."),
                 Args.get_delete_from_db_arg(
                     "Delete specific nodes only from fuel db.\n"
                     "User should still delete node from cobbler"),
@@ -81,6 +82,7 @@ class NodeAction(Action):
             ("deploy", self.start),
             ("provision", self.start),
             ("hostname", self.set_hostname),
+            ("name", self.set_name),
             ("delete-from-db", self.delete_from_db),
             ("tasks", self.execute_tasks),
             ("skip", self.execute_tasks),
@@ -336,20 +338,42 @@ class NodeAction(Action):
                 params.node)
         )
 
+    @staticmethod
+    def _get_first_node(params):
+        """Ensures that only one node was passed in the command and returns it.
+
+        :raises ArgumentException: When more than 1 node provided.
+        """
+        nodes = list(Node.get_by_ids(params.node))
+
+        if len(nodes) > 1:
+            raise error.ArgumentException(
+                "You should select only one node to change.")
+
+        return nodes[0]
+
+    @check_all("node", "name")
+    def set_name(self, params):
+        """To set node name:
+                fuel node --node-id 1 --name NewName
+        """
+        node = self._get_first_node(params)
+        node.set({"name": params.name})
+        self.serializer.print_to_output(
+            {},
+            "Name for node with id {0} has been changed to {1}."
+            .format(node.id, params.name)
+        )
+
     @check_all("node", "hostname")
     def set_hostname(self, params):
         """To set node hostname:
                 fuel node --node-id 1 --hostname ctrl-01
         """
-        nodes = Node.get_by_ids(params.node)
-
-        if len(nodes) > 1:
-            raise error.ArgumentException(
-                "You should select only one node to change hostname."
-            )
-        nodes[0].set({"hostname": params.hostname})
+        node = self._get_first_node(params)
+        node.set({"hostname": params.hostname})
         self.serializer.print_to_output(
             {},
             "Hostname for node with id {0} has been changed to {1}."
-            .format(params.node[0], params.hostname)
+            .format(node.id, params.hostname)
         )
