@@ -19,6 +19,7 @@ import six
 
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_node
+from fuelclient import main as main_mod
 from fuelclient.v1 import node
 
 
@@ -125,7 +126,29 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.update.assert_called_once_with(
-            node_id, **{"hostname": hostname})
+            node_id, hostname=hostname)
+
+    def test_node_set_name(self):
+        self.m_client._updatable_attributes = \
+            node.NodeClient._updatable_attributes
+        node_id = 37
+
+        test_cases = ('new-name', 'New Name', u'śćż∑ Pó', u'你一定是无聊')
+        for name in test_cases:
+            self.m_client.update.return_value = fake_node.get_fake_node(
+                node_id=node_id, node_name=name)
+
+            cmd = ['node', 'update', str(node_id), '--name', name]
+
+            # NOTE(sbrzeczkowski): due to shlex inability to accept
+            # unicode arguments prior to python 2.7.3
+            main_mod.main(argv=cmd)
+
+            self.m_get_client.assert_called_once_with('node', mock.ANY)
+            self.m_client.update.assert_called_once_with(
+                node_id, name=name)
+            self.m_get_client.reset_mock()
+            self.m_client.reset_mock()
 
     def test_node_label_list_for_all_nodes(self):
         args = 'node label list'
