@@ -12,9 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
+from fuelclient.cli.error import exit_with_error
 from fuelclient.objects.environment import Environment
 
 
@@ -46,10 +49,16 @@ class SettingsAction(Action):
                 fuel --env 1 settings --upload --dir path/to/directory
         """
         env = Environment(params.env)
+
+        if not os.path.exists(params.dir):
+            exit_with_error(
+                "Directory '{0}' doesn't exist.".format(params.dir))
+
         settings_data = env.read_settings_data(
             directory=params.dir,
             serializer=self.serializer
         )
+
         env.set_settings_data(settings_data)
         print("Settings configuration uploaded.")
 
