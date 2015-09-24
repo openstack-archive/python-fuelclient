@@ -125,7 +125,26 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.update.assert_called_once_with(
-            node_id, **{"hostname": hostname})
+            node_id, hostname=hostname)
+
+    def test_node_set_name(self):
+        self.m_client._updatable_attributes = \
+            node.NodeClient._updatable_attributes
+        node_id = 42
+        name = 'test-name'
+
+        self.m_client.update.return_value = \
+            fake_node.get_fake_node(node_id=node_id,
+                                    node_name=name)
+
+        args = 'node update {node_id} --name {name}'\
+            .format(node_id=node_id, name=name)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.update.assert_called_once_with(
+            node_id, name=name)
 
     def test_node_label_list_for_all_nodes(self):
         args = 'node label list'
