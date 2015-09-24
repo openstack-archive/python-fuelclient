@@ -96,8 +96,12 @@ class Serializer(object):
         return self.read_from_full_path(self.prepare_path(path))
 
     def read_from_full_path(self, full_path):
-        with open(full_path, "r") as file_to_read:
-            return self.serializer["r"](file_to_read.read())
+        try:
+            with open(full_path, "r") as file_to_read:
+                return self.serializer["r"](file_to_read.read())
+        except IOError as e:
+            error.exit_with_error(
+                "Can't open file '{0}': {1}.".format(full_path, e.strerror))
 
     def write_to_file(self, file_obj, data):
         """Writes to opened file or file like object

@@ -92,6 +92,24 @@ class LabelEmptyKeyError(BadDataException):
     """Should be raised when user provides labels with empty key."""
 
 
+class DirectoryDoesntExistException(FuelClientException):
+
+    """Indicates that specified directory doesn't exist."""
+
+    def __init__(self, directory):
+        super(DirectoryDoesntExistException, self).__init__(
+            "Directory '{0}' doesn't exist.".format(directory))
+
+
+class IsNotDirectoryException(FuelClientException):
+
+    """Indicates that specified file is not a directory."""
+
+    def __init__(self, directory):
+        super(IsNotDirectoryException, self).__init__(
+            "Error: '{0}' is not a directory.".format(directory))
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class
