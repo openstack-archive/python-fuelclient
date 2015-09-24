@@ -56,11 +56,11 @@ class TestHandlers(base.BaseTestCase):
     def test_node_action(self):
         help_msg = ["fuel node [-h] [--env ENV]",
                     "[--list | --set | --delete | --network | --disk |"
-                    " --deploy | --hostname HOSTNAME | --delete-from-db |"
-                    " --provision]", "-h", "--help", " -s",
+                    " --deploy | --hostname HOSTNAME | --name NAME |"
+                    " --delete-from-db | --provision]", "-h", "--help", " -s",
                     "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",
-                    "--role", "--net", "--hostname"]
+                    "--role", "--net", "--hostname", "--name"]
         self.check_all_in_msg("node --help", help_msg)
 
         self.check_for_rows_in_table("node")
