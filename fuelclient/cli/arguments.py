@@ -254,6 +254,10 @@ def get_file_pattern_arg():
         help="Provide unix file pattern to filter tasks with files.")
 
 
+def get_node_name_arg(help_msg):
+    return get_str_arg("name", help=help_msg)
+
+
 def get_hostname_arg(help_msg):
     return get_str_arg("hostname", help=help_msg)
 
