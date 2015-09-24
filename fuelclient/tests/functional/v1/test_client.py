@@ -78,7 +78,7 @@ class TestHandlers(base.BaseTestCase):
                     " --provision]", "-h", "--help", " -s",
                     "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",
-                    "--role", "--net", "--hostname"]
+                    "--role", "--net", "--hostname", "--name"]
         self.check_all_in_msg("node --help", help_msg)
 
         self.check_for_rows_in_table("node")
