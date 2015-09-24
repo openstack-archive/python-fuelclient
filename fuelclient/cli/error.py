@@ -17,12 +17,22 @@ import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
+import traceback
 
 
 def exit_with_error(message):
-    """exit_with_error - writes message to stderr and exits with exit code 1.
+    """
+    Writes message to stderr and exits with exit code 1.
     """
     sys.stderr.write(message + "\n")
+    exit(1)
+
+
+def exit_with_traceback():
+    """
+    Writes traceback to stderr and exits with exit code 1.
+    """
+    sys.stderr.write(traceback.format_exc())
     exit(1)
 
 
@@ -34,6 +44,21 @@ class FuelClientException(Exception):
     def __init__(self, *args, **kwargs):
         super(FuelClientException, self).__init__(*args, **kwargs)
         self.message = args[0]
+
+
+def exit_with_error_or_traceback(exception, message=None):
+    """
+    If debug mode is on then exit with traceback, otherwise exit with
+    given `message`. If `message` is not provided then it takes from the
+    given `exception`.
+    """
+    from fuelclient.client import APIClient
+    if not APIClient.debug:
+        if not message:
+            message = str(exception)
+        exit_with_error(message)
+    else:
+        exit_with_traceback()
 
 
 class BadDataException(FuelClientException):
@@ -92,6 +117,14 @@ class LabelEmptyKeyError(BadDataException):
     """Should be raised when user provides labels with empty key."""
 
 
+class InvalidDirectoryException(FuelClientException):
+    """Indicates that a directory is not valid."""
+
+
+class InvalidFileException(FuelClientException):
+    """Indicates that a file is not valid."""
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class
@@ -104,7 +137,8 @@ def exceptions_decorator(func):
         # when server returns to us bad request check that
         # and print meaningful reason
         except requests.HTTPError as exc:
-            exit_with_error("{0} ({1})".format(exc, get_error_body(exc)))
+            exit_with_error_or_traceback(exc,
+                "{0} ({1})".format(exc, get_error_body(exc)))
         except requests.ConnectionError:
             exit_with_error("""
             Can't connect to Nailgun server!
@@ -118,7 +152,9 @@ def exceptions_decorator(func):
             or modify "KEYSTONE_USER" and "KEYSTONE_PASS" in
             /etc/fuel/client/config.yaml""")
         except FuelClientException as exc:
-            exit_with_error(exc.message)
+            exit_with_error_or_traceback(exc)
+        except Exception as exc:
+            exit_with_error_or_traceback(exc)
 
     return wrapper
 
