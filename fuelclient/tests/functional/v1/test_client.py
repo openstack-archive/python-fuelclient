@@ -435,3 +435,80 @@ class TestDeployChanges(base.BaseTestCase):
         add_node = "--env-id=1 node set --node 1 --role=controller"
         deploy_changes = "deploy-changes --env 1"
         self.run_cli_commands((env_create, add_node, deploy_changes))
+
+
+class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
+
+    def test_settings_upload(self):
+        self.check_for_stderr(
+            "settings --upload --dir /foo/bar/baz --env 1",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
+
+    def test_deployment_upload(self):
+        self.check_for_stderr(
+            "deployment --upload --dir /foo/bar/baz --env 1",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
+
+    def test_net_upload(self):
+        self.check_for_stderr(
+            "net --upload --dir /foo/bar/baz --env 1 network",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
+
+    def test_env_download(self):
+        self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release={0}".format(release_id),
+            "--env-id=1 node set --node 2 --role=controller"
+        ))
+        self.check_for_stderr(
+            "network --download --dir /foo/bar/baz --env 1",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
+
+    def test_download_network_configuration(self):
+        self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release={0}".format(release_id),
+            "--env-id=1 node set --node 2 --role=controller"
+        ))
+        self.check_for_stderr(
+            "--env 1 network --download --dir /foo/bar/baz",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
+
+    def test_download_default_settings(self):
+        self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
+        self.run_cli_commands((
+            "env create --name=NewEnv --release={0}".format(release_id),
+            "--env-id=1 node set --node 2 --role=controller"
+        ))
+        self.check_for_stderr(
+            "--env 1 settings --default --dir /foo/bar/baz",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
+
+    def test_upload_network_configuration(self):
+        self.check_for_stderr(
+            "--env 1 network --upload --dir /foo/bar/baz",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
+
+    def test_upload_network_template(self):
+        self.check_for_stderr(
+            "--env 1 network-template --upload --dir /foo/bar/baz",
+            "Directory '/foo/bar/baz' doesn't exist.\n",
+            check_errors=False
+        )
