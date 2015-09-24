@@ -103,6 +103,12 @@ class NodeUpdate(NodeMixIn, base.BaseShowCommand):
             default=None,
             help='New hostname for node')
 
+        parser.add_argument(
+            '--name',
+            type=str,
+            default=None,
+            help='New name for node')
+
         return parser
 
     def take_action(self, parsed_args):
