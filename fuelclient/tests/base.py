@@ -52,7 +52,7 @@ class FakeFile(StringIO):
         pass
 
 
-class CliExectutionResult:
+class CliExectutionResult(object):
     def __init__(self, process_handle, out, err):
         self.return_code = process_handle.returncode
         self.stdout = out
