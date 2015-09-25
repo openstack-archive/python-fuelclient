@@ -76,6 +76,10 @@ class ClientPerfTest(base.UnitTestCase):
             shutil.rmtree(test_base)
 
     def setUp(self):
+        if not profiler.profiling_enabled():
+            self.skipTest('Performance profiling tests are not '
+                          'enabled in settings.yaml.')
+
         super(ClientPerfTest, self).setUp()
 
         token_patcher = mock.patch.object(client.Client, 'auth_token',
