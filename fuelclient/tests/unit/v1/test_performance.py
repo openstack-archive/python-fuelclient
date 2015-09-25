@@ -21,7 +21,6 @@ import tarfile
 import time
 
 import mock
-import pytest
 import requests
 from six import moves as six_moves
 
@@ -33,9 +32,6 @@ from fuelclient.tests import base
 from fuelclient.tests import utils
 
 
-@pytest.mark.skipif(not profiler.profiling_enabled(),
-                    reason='Performance profiling tests are not '
-                           'enabled in settings.yaml')
 class ClientPerfTest(base.UnitTestCase):
 
     NUMBER_OF_NODES = 100
@@ -75,6 +71,10 @@ class ClientPerfTest(base.UnitTestCase):
             shutil.rmtree(test_base)
 
     def setUp(self):
+        if not profiler.profiling_enabled():
+            self.skipTest('Performance profiling tests are not '
+                          'enabled in settings.yaml.')
+
         super(ClientPerfTest, self).setUp()
 
         req_patcher = mock.patch.object(requests.api, 'request')
