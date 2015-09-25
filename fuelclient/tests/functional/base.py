@@ -18,12 +18,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-
-try:
-    from unittest.case import TestCase
-except ImportError:
-    # Runing unit-tests in production environment all
-    from unittest2.case import TestCase
+import testtools
 
 from fuelclient.objects import Release
 
@@ -48,7 +43,7 @@ class CliExectutionResult(object):
         return self.return_code == 0
 
 
-class BaseTestCase(TestCase):
+class BaseTestCase(testtools.TestCase):
     nailgun_root = os.environ.get('NAILGUN_ROOT', '/tmp/fuel_web/nailgun')
 
     def setUp(self):

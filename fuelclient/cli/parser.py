@@ -26,7 +26,7 @@ from fuelclient import consts
 from fuelclient import profiler
 
 
-class Parser:
+class Parser(object):
     """Parser class - encapsulates argparse's ArgumentParser
     and based on available actions, serializers and additional flags
     populates it.

@@ -21,9 +21,9 @@ import tarfile
 import time
 
 import mock
-import pytest
 import requests_mock as rm
 from six import moves as six_moves
+import testtools
 
 from fuelclient import client
 from fuelclient import fuelclient_settings
@@ -33,9 +33,9 @@ from fuelclient.tests.unit.v1 import base
 from fuelclient.tests import utils
 
 
-@pytest.mark.skipif(not profiler.profiling_enabled(),
-                    reason='Performance profiling tests are not '
-                           'enabled in settings.yaml')
+@testtools.skipUnless(profiler.profiling_enabled(),
+                      'Performance profiling tests are not '
+                      'enabled in settings.yaml.')
 class ClientPerfTest(base.UnitTestCase):
 
     NUMBER_OF_NODES = 100
@@ -43,6 +43,7 @@ class ClientPerfTest(base.UnitTestCase):
     @classmethod
     def setUpClass(cls):
         super(ClientPerfTest, cls).setUpClass()
+
         cls.nodes = cls.get_random_nodes(cls.NUMBER_OF_NODES)
         settings = fuelclient_settings.get_settings()
         test_base = settings.PERF_TESTS_PATHS['perf_tests_base']

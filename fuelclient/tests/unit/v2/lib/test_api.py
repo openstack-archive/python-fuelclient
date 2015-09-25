@@ -18,17 +18,12 @@ import mock
 from mock import patch
 import requests_mock as rm
 from six.moves.urllib import parse as urlparse
-
-try:
-    from unittest.case import TestCase
-except ImportError:
-    # Runing unit-tests in production environment all
-    from unittest2.case import TestCase
+import testtools
 
 from fuelclient import client
 
 
-class BaseLibTest(TestCase):
+class BaseLibTest(testtools.TestCase):
     def setUp(self):
         super(BaseLibTest, self).setUp()
 
