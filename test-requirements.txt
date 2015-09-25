@@ -1,8 +1,12 @@
-hacking==0.7
-mock==1.0.1
-unittest2
-pyprof2calltree==1.3.2
-gprof2dot==2014.09.29
-requests-mock>=0.6.0
-pytest==2.7.2
-pytest-cov==2.0.0
+hacking>=0.10.0,<0.11
+mock>=1.0
+oslotest>=1.5.1,<1.6.0 # Apache-2.0
+requests-mock>=0.6.0 # Apache-2.0
+testtools>=0.9.36,!=1.2.0
+
+# Files beyond this line are not in Global Requirements list
+# and must be added there.
+pyprof2calltree>=1.3.2
+gprof2dot>=2014.09.29
+pytest<2.8.0
+pytest-cov>=2.0.0

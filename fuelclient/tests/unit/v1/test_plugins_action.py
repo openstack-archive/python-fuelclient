@@ -131,7 +131,7 @@ class TestPluginsActions(base.UnitTestCase):
             print_mock,
             None,
             'Plugins were successfully synchronized.')
-        sync_mock.assert_called_once()
+        self.assertTrue(sync_mock.called)
 
     @patch.object(Serializer, 'print_to_output')
     @patch.object(Plugins, 'sync')

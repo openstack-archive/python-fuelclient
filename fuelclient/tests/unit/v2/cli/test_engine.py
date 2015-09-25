@@ -18,12 +18,7 @@ import shlex
 import sys
 
 import mock
-
-try:
-    from unittest.case import TestCase
-except ImportError:
-    # Runing unit-tests in production environment all
-    from unittest2.case import TestCase
+from oslotest import base as oslo_base
 
 import fuelclient
 from fuelclient.cli import error
@@ -31,7 +26,7 @@ from fuelclient.commands import environment as env
 from fuelclient import main as main_mod
 
 
-class BaseCLITest(TestCase):
+class BaseCLITest(oslo_base.BaseTestCase):
     """Base class for testing the new CLI
 
     It mocks the whole API layer in order to be sure the

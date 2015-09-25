@@ -13,14 +13,9 @@
 #    under the License.
 
 import mock
+from oslotest import base as oslo_base
 import requests_mock as rm
 import six
-
-try:
-    from unittest.case import TestCase
-except ImportError:
-    # Runing unit-tests in production environment all
-    from unittest2.case import TestCase
 
 from fuelclient.cli import parser
 
@@ -40,7 +35,7 @@ class FakeFile(six.StringIO):
         pass
 
 
-class UnitTestCase(TestCase):
+class UnitTestCase(oslo_base.BaseTestCase):
     """Base test class which does not require nailgun server to run."""
 
     def setUp(self):
