@@ -12,16 +12,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import wraps
+from contextlib import contextmanager
 import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
 
+import six
+
 
 def exit_with_error(message):
-    """exit_with_error - writes message to stderr and exits with exit code 1.
-    """
+    """Writes message to stderr and exits with exit code 1."""
     sys.stderr.write(message + "\n")
     exit(1)
 
@@ -104,33 +105,41 @@ class EnvironmentException(Exception):
     pass
 
 
-def exceptions_decorator(func):
+@contextmanager
+def exceptions_handler(debug=False):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class
     """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-
-        # when server returns to us bad request check that
-        # and print meaningful reason
-        except requests.HTTPError as exc:
-            exit_with_error("{0} ({1})".format(exc, get_error_body(exc)))
-        except requests.ConnectionError:
-            exit_with_error("""
-            Can't connect to Nailgun server!
-            Please check connection settings in your configuration file.""")
-        except Unauthorized:
-            exit_with_error("""
-            Unauthorized: need authentication!
-            Please provide user and password via client
-             fuel --user=user --password=pass [action]
-            or modify your credentials in your configuration file.""")
-        except FuelClientException as exc:
-            exit_with_error(exc.message)
-
-    return wrapper
+    try:
+        yield
+    # when server returns to us bad request check that
+    # and print meaningful reason
+    except requests.HTTPError as exc:
+        exit_with_error("{0} ({1})".format(exc, get_error_body(exc)))
+    except requests.ConnectionError:
+        exit_with_error("Can't connect to Nailgun server!\n"
+                        "Please check connection settings in "
+                        "your configuration file.")
+    except Unauthorized:
+        exit_with_error("Unauthorized: need authentication!\n"
+                        "Please provide user and password via client\n"
+                        "fuel --user=user --password=pass [action]\n"
+                        "or modify your credentials in "
+                        "your configuration file.")
+    except FuelClientException as e:
+        exit_with_error(six.text_type(e))
+    except Exception as e:
+        if not debug:
+            error = ("Error: Unexpected error happened while "
+                     "attempting to execute operation.\n"
+                     "Error: {0}.".format(six.text_type(e)))
+            error += ("\n\nPlease file a bug report at "
+                      "https://bugs.launchpad.net/fuel/.\n\nExecute "
+                      "again the last command with --debug option. "
+                      "Please include the output in your bug report.")
+            exit_with_error(error)
+        else:
+            raise
 
 
 def get_error_body(error):
