@@ -17,9 +17,9 @@ import sys
 
 from cliff import app
 from cliff.commandmanager import CommandManager
+from fuelclient.cli.error import exceptions_handler
 
 from fuelclient.actions import fuel_version
-from fuelclient.cli.error import exceptions_decorator
 
 
 LOG = logging.getLogger(__name__)
@@ -50,6 +50,22 @@ class FuelClient(app.App):
         return parser
 
     def configure_logging(self):
+        if not self.options.debug:
+            message_format = \
+                ("Error: Unexpected error happened while attempting to "
+                 "execute operation.\nError: %(message)s\n\nPlease file "
+                 "a bug report at https://bugs.launchpad.net/fuel/.")
+            if not self.interactive_mode:
+                message_format += \
+                    ("\n\nPlease execute again the last command with --debug "
+                     "option and include the output in your bug report.")
+            else:
+                message_format += \
+                    ("\n\nExecute fuel2 with --debug option: fuel2 --debug. "
+                     "Then please execute again the last command and "
+                     "include the output in your bug report.")
+            self.CONSOLE_MESSAGE_FORMAT = message_format
+
         super(FuelClient, self).configure_logging()
 
         # there is issue with management url processing by keystone client
@@ -66,8 +82,16 @@ class FuelClient(app.App):
                             'urllib3.connectionpool'):
             logging.getLogger(logger_name).setLevel(logging.WARNING)
 
+    def run(self, argv):
+        self.options, remainder = self.parser.parse_known_args(argv)
+        # interactive_mode is set in the parent class, but it is set
+        # after the call of `configure_logging`, we need it before
+        # that call.
+        self.interactive_mode = not remainder
+        with exceptions_handler(self.options.debug):
+            return super(FuelClient, self).run(argv)
 
-@exceptions_decorator
+
 def main(argv=sys.argv[1:]):
     fuelclient_app = FuelClient(
         description='Command line interface and Python API wrapper for Fuel.',
