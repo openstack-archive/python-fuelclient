@@ -17,12 +17,18 @@ import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
+import traceback
 
 
-def exit_with_error(message):
-    """exit_with_error - writes message to stderr and exits with exit code 1.
+def exit_with_error(message, output_traceback=False):
+    """Writes message to stderr and exits with exit code 1. Stack
+    traceback will be outputted as well in case of output_traceback is
+    True and debug mode is turned on.
     """
     sys.stderr.write(message + "\n")
+    from fuelclient.client import APIClient
+    if output_traceback and APIClient.debug:
+        sys.stderr.write(traceback.format_exc())
     exit(1)
 
 
@@ -104,7 +110,7 @@ def exceptions_decorator(func):
         # when server returns to us bad request check that
         # and print meaningful reason
         except requests.HTTPError as exc:
-            exit_with_error("{0} ({1})".format(exc, get_error_body(exc)))
+            exit_with_error("{0} ({1})".format(exc, get_error_body(exc)), True)
         except requests.ConnectionError:
             exit_with_error("""
             Can't connect to Nailgun server!
@@ -117,8 +123,8 @@ def exceptions_decorator(func):
              fuel --user=user --password=pass [action]
             or modify "KEYSTONE_USER" and "KEYSTONE_PASS" in
             /etc/fuel/client/config.yaml""")
-        except FuelClientException as exc:
-            exit_with_error(exc.message)
+        except Exception as exc:
+            exit_with_error(str(exc), True)
 
     return wrapper
 
