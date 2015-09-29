@@ -17,12 +17,18 @@ import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
+import traceback
 
 
 def exit_with_error(message):
-    """exit_with_error - writes message to stderr and exits with exit code 1.
+    """Writes message to stderr and exits with exit code 1. Stack
+    traceback will be outputted as well in case of debug mode is
+    turned on.
     """
     sys.stderr.write(message + "\n")
+    from fuelclient.client import APIClient
+    if APIClient.debug:
+        sys.stderr.write(traceback.format_exc())
     exit(1)
 
 
@@ -117,8 +123,8 @@ def exceptions_decorator(func):
              fuel --user=user --password=pass [action]
             or modify "KEYSTONE_USER" and "KEYSTONE_PASS" in
             /etc/fuel/client/config.yaml""")
-        except FuelClientException as exc:
-            exit_with_error(exc.message)
+        except Exception as exc:
+            exit_with_error(str(exc))
 
     return wrapper
 
