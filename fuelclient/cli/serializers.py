@@ -105,7 +105,7 @@ class Serializer(object):
             with open(full_path, "r") as file_to_read:
                 return self.serializer["r"](file_to_read.read())
         except IOError as e:
-            raise error.InvalidFileException(
+            raise Exception(
                 "Can't open file '{0}': {1}.".format(full_path, e.strerror))
 
     def write_to_file(self, file_obj, data):
