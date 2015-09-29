@@ -257,7 +257,7 @@ class TestHandlers(base.BaseTestCase):
                '"id": 1',
                '"group_id": 2']
         self.check_all_in_msg(
-            "nodegroup --env 1 --assign --group 2 --node 1 --debug",
+            "nodegroup --assign --group 2 --node 1 --debug",
             msg
         )
 

@@ -58,6 +58,7 @@ class NodeGroupAction(Action):
             (None, self.list)
         )
 
+    @check_all("env", "name")
     def create(self, params):
         """Create a new node group
                fuel --env 1 nodegroup --create --name "group 1"
@@ -103,11 +104,11 @@ class NodeGroupAction(Action):
                 .format(id=n.id)
             )
 
-    @check_all("env", "node", "group")
+    @check_all("node", "group")
     def assign(self, params):
         """Assign nodes to specified node group:
-                fuel --env 1 nodegroup --assign --node 1 --group 1
-                fuel --env 1 nodegroup --assign --node 2,3,4 --group 1
+                fuel nodegroup --assign --node 1 --group 1
+                fuel nodegroup --assign --node 2,3,4 --group 1
         """
         if len(params.group) > 1:
             raise ActionException(
