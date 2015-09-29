@@ -19,7 +19,7 @@ from fuelclient.cli.actions import actions
 from fuelclient.cli.arguments import get_fuel_version_arg
 from fuelclient.cli.arguments import get_version_arg
 from fuelclient.cli.arguments import substitutions
-from fuelclient.cli.error import exceptions_decorator
+from fuelclient.cli.error import exceptions_handler
 from fuelclient.cli.error import ParserException
 from fuelclient.cli.serializers import Serializer
 from fuelclient import consts
@@ -98,6 +98,7 @@ class Parser(object):
         self.add_debug_arg()
         self.add_keystone_credentials_args()
         self.add_serializers_args()
+        self.parse_args()
 
     def generate_actions(self):
         for action, action_object in actions.items():
@@ -124,23 +125,29 @@ class Parser(object):
                             **argument_in_group["params"]
                         )
 
-    def parse(self):
+    def parse_args(self):
         self.prepare_args()
         if len(self.args) < 2:
             self.parser.print_help()
             sys.exit(0)
-        parsed_params, _ = self.parser.parse_known_args(self.args[1:])
-        if parsed_params.action not in actions:
+        self.parsed_params, _ = self.parser.parse_known_args(self.args[1:])
+
+    def is_debug(self):
+        return self.parsed_params.debug
+
+    def run_action(self):
+        params = self.parsed_params
+        if params.action not in actions:
             self.parser.print_help()
             sys.exit(0)
 
         if profiler.profiling_enabled():
-            handler_name = parsed_params.action
-            method_name = ''.join([method for method in parsed_params.__dict__
-                                   if getattr(parsed_params, method) is True])
+            handler_name = params.action
+            method_name = ''.join([method for method in params.__dict__
+                                   if getattr(params, method) is True])
             prof = profiler.Profiler(method_name, handler_name)
 
-        actions[parsed_params.action].action_func(parsed_params)
+        actions[params.action].action_func(params)
 
         if profiler.profiling_enabled():
             prof.save_data()
@@ -260,7 +267,7 @@ class Parser(object):
                 break
 
 
-@exceptions_decorator
 def main(args=sys.argv):
     parser = Parser(args)
-    parser.parse()
+    with exceptions_handler(parser.is_debug()):
+        parser.run_action()
