@@ -17,13 +17,26 @@ import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
+import traceback
+
+import six
 
 
 def exit_with_error(message):
-    """exit_with_error - writes message to stderr and exits with exit code 1.
+    """
+    Writes message to stderr and exits with exit code 1. Stack
+    traceback will be outputted as well in case of debug mode is
+    turned on.
     """
     sys.stderr.write(message + "\n")
+    if is_debug_mode_turned_on():
+        sys.stderr.write(traceback.format_exc())
     exit(1)
+
+
+def is_debug_mode_turned_on():
+    from fuelclient.client import APIClient
+    return APIClient.debug
 
 
 class FuelClientException(Exception):
@@ -125,8 +138,17 @@ def exceptions_decorator(func):
              fuel --user=user --password=pass [action]
             or modify "KEYSTONE_USER" and "KEYSTONE_PASS" in
             /etc/fuel/client/config.yaml""")
-        except FuelClientException as exc:
-            exit_with_error(exc.message)
+        except FuelClientException as e:
+            exit_with_error(six.text_type(e))
+        except Exception as e:
+            error = "Unexpected error happened while attempting to " \
+                    "execute operation. Error: {0}.".format(six.text_type(e))
+            if not is_debug_mode_turned_on():
+                error += "\n\nPlease file a bug report at " \
+                         "https://bugs.launchpad.net/fuel/.\n\nExecute " \
+                         "again the last command with --debug option. " \
+                         "Please include the output in your bug report."
+            exit_with_error(error)
 
     return wrapper
 
