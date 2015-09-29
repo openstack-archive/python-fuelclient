@@ -435,3 +435,18 @@ class TestDeployChanges(base.BaseTestCase):
         add_node = "--env-id=1 node set --node 1 --role=controller"
         deploy_changes = "deploy-changes --env 1"
         self.run_cli_commands((env_create, add_node, deploy_changes))
+
+
+class TestOutputTracebackOnException(base.BaseTestCase):
+
+    def test_debug_is_off_traceback_is_absent(self):
+        command = "settings --upload --dir /foo/bar/baz --env 1"
+        call = self.run_cli_command(command, check_errors=False)
+        self.assertIn("No such file or directory", call.stderr)
+        self.assertNotIn("Traceback (most recent call last)", call.stderr)
+
+    def test_debug_is_on_output_traceback(self):
+        command = "settings --upload --dir /foo/bar/baz --env 1 --debug"
+        call = self.run_cli_command(command, check_errors=False)
+        self.assertIn("No such file or directory", call.stderr)
+        self.assertIn("Traceback (most recent call last)", call.stderr)
