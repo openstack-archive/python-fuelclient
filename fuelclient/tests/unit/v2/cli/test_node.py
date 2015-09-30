@@ -158,6 +158,15 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_client.set_labels_for_nodes.assert_called_once_with(
             labels=labels, node_ids=None)
 
+    def test_node_label_set_for_all_nodes_wo_labels_arg(self):
+        args = 'node label set --nodes-all'
+        with mock.patch('sys.stderr', new=six.moves.cStringIO()) as mstderr:
+            with self.assertRaises(SystemExit):
+                self.exec_command(args)
+
+        mstderr.seek(0)
+        self.assertIn("argument -l/--labels is required", mstderr.read())
+
     def test_node_label_set_for_specific_nodes(self):
         labels = ['key_1=val_1', 'key_2=val_2']
         node_ids = ['42', '43']
