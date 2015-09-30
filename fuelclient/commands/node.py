@@ -191,6 +191,7 @@ class NodeLabelSet(NodeMixIn, base.BaseCommand):
         parser.add_argument(
             '-l',
             '--labels',
+            required=True,
             nargs='+',
             help='List of labels for create or update')
 
