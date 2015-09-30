@@ -158,6 +158,14 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_client.set_labels_for_nodes.assert_called_once_with(
             labels=labels, node_ids=None)
 
+    def test_node_label_set_for_all_nodes_wo_labels_arg(self):
+        cmd = 'node label set --nodes-all'
+        with mock.patch('argparse.ArgumentParser.error') as merror:
+            self.exec_command(cmd)
+
+        args, _ = merror.call_args
+        self.assertIn('-l/--labels', args[0])
+
     def test_node_label_set_for_specific_nodes(self):
         labels = ['key_1=val_1', 'key_2=val_2']
         node_ids = ['42', '43']
