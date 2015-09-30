@@ -290,7 +290,7 @@ class Plugins(base.BaseObject):
         :returns: None
         """
         post_data = None
-        if plugin_ids:
+        if plugin_ids is not None:
             post_data = {'ids': plugin_ids}
 
         cls.connection.post_request(
