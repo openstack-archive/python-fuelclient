@@ -92,6 +92,14 @@ class LabelEmptyKeyError(BadDataException):
     """Should be raised when user provides labels with empty key."""
 
 
+class InvalidDirectoryException(FuelClientException):
+    pass
+
+
+class InvalidFileException(FuelClientException):
+    pass
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class
