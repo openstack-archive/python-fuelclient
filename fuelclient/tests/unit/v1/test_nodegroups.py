@@ -13,15 +13,13 @@
 #    under the License.
 
 import mock
-import requests_mock
 from six import StringIO
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 from fuelclient.tests.utils import fake_env
 from fuelclient.tests.utils import fake_network_group
 
 
-@requests_mock.mock()
 class TestNodeGroupActions(base.UnitTestCase):
 
     def setUp(self):
@@ -31,27 +29,26 @@ class TestNodeGroupActions(base.UnitTestCase):
         self.req_base_path = '/api/v1/nodegroups/'
         self.ng = fake_network_group.get_fake_network_group()
 
-    def test_list_nodegroups(self, mreq):
-        mget = mreq.get(self.req_base_path, json=[])
+    def test_list_nodegroups(self):
+        mget = self.m_request.get(self.req_base_path, json=[])
         self.execute(['fuel', 'nodegroup', '--list'])
 
         self.assertTrue(mget.called)
 
-    def test_create_nodegroup(self, mreq):
+    def test_create_nodegroup(self):
         neutron_url = \
             '/api/v1/clusters/{0}/network_configuration/neutron'.format(
                 self.env['id']
             )
 
-        mreq.get('/api/v1/clusters/{0}/'.format(self.env['id']), json={
-            'id': self.env['id'],
-            'net_provider': self.env['net_provider']
-        })
-        mpost = mreq.post(self.req_base_path, json={
-            'id': self.ng['id'],
-            'name': self.ng['name'],
-        })
-        mget = mreq.get(neutron_url, json={'networking_parameters': {}})
+        self.m_request.get('/api/v1/clusters/{0}/'.format(self.env['id']),
+                           json={'id': self.env['id'],
+                                 'net_provider': self.env['net_provider']})
+        mpost = self.m_request.post(self.req_base_path,
+                                    json={'id': self.ng['id'],
+                                          'name': self.ng['name']})
+        mget = self.m_request.get(neutron_url,
+                                  json={'networking_parameters': {}})
         with mock.patch('sys.stdout', new=StringIO()) as m_stdout:
             self.execute([
                 'fuel', 'nodegroup', '--create',
@@ -74,12 +71,11 @@ class TestNodeGroupActions(base.UnitTestCase):
     def _check_required_message_for_commands(self, err_msg, commands):
         for cmd in commands:
             with mock.patch("sys.stderr") as m_stderr:
-                with self.assertRaises(SystemExit):
-                    self.execute(cmd)
+                self.assertRaises(SystemExit, self.execute, cmd)
 
                 m_stderr.write.assert_called_with(err_msg)
 
-    def test_create_nodegroup_arguments_required(self, mreq):
+    def test_create_nodegroup_arguments_required(self):
         err_msg = '"--env" and "--name" required!\n'
 
         env_not_present = ['fuel', 'nodegroup', '--create',
@@ -91,11 +87,11 @@ class TestNodeGroupActions(base.UnitTestCase):
         self._check_required_message_for_commands(
             err_msg, (env_not_present, name_not_present))
 
-    def test_delete_nodegroup(self, mreq):
+    def test_delete_nodegroup(self):
         path = self.req_base_path + str(self.env['id']) + '/'
-        mget = mreq.get(path, json={'name': 'test group'})
+        mget = self.m_request.get(path, json={'name': 'test group'})
         delete_path = self.req_base_path + str(self.env['id']) + '/'
-        mdelete = mreq.delete(delete_path, status_code=204)
+        mdelete = self.m_request.delete(delete_path, status_code=204)
         ngid = self.env['id']
         with mock.patch('sys.stdout', new=StringIO()) as m_stdout:
             self.execute(['fuel', 'nodegroup', '--delete', '--group',
@@ -109,25 +105,26 @@ class TestNodeGroupActions(base.UnitTestCase):
         self.assertTrue(mget.called)
         self.assertTrue(mdelete.called)
 
-    def test_delete_nodegroup_group_arg_required(self, mreq):
+    def test_delete_nodegroup_group_arg_required(self):
         err_msg = '"--group" required!\n'
         self._check_required_message_for_commands(
             err_msg,
             (['fuel', 'nodegroup', '--delete', '--default'],)
         )
 
-    def test_assign_nodegroup_fails_w_multiple_groups(self, mreq):
+    def test_assign_nodegroup_fails_w_multiple_groups(self):
         err_msg = "Nodes can only be assigned to one node group.\n"
         with mock.patch("sys.stderr") as m_stderr:
-            with self.assertRaises(SystemExit):
-                self.execute(['fuel', 'nodegroup', '--assign', '--node', '1',
-                              '--group', '2,3'])
+            self.assertRaises(SystemExit,
+                              self.execute,
+                              ['fuel', 'nodegroup', '--assign', '--node',
+                               '1', '--group', '2,3'])
 
         msg = m_stderr.write.call_args[0][0]
         self.assertEqual(msg, err_msg)
 
     @mock.patch('fuelclient.objects.nodegroup.NodeGroup.assign')
-    def test_assign_nodegroup(self, m_req, m_assign):
+    def test_assign_nodegroup(self, m_assign):
         self.execute(['fuel', 'nodegroup', '--assign', '--node', '1',
                       '--group', '2'])
         m_assign.assert_called_with([1])
@@ -136,7 +133,7 @@ class TestNodeGroupActions(base.UnitTestCase):
                       '--group', '2'])
         m_assign.assert_called_with([1, 2, 3])
 
-    def test_node_group_assign_arguments_required(self, mreq):
+    def test_node_group_assign_arguments_required(self):
         err_msg = '"--node" and "--group" required!\n'
 
         node_not_present_cmd = ['fuel', 'nodegroup', '--assign',

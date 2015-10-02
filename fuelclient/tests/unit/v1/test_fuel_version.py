@@ -14,19 +14,17 @@
 
 import json
 import mock
-import requests_mock
 import yaml
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 from fuelclient.tests.utils import fake_fuel_version
 
 
-@requests_mock.mock()
 class TestFuelVersion(base.UnitTestCase):
 
-    def test_return_yaml(self, mrequests):
-        mrequests.get('/api/v1/version/',
-                      json=fake_fuel_version.get_fake_fuel_version())
+    def test_return_yaml(self):
+        self.m_request.get('/api/v1/version/',
+                           json=fake_fuel_version.get_fake_fuel_version())
 
         with mock.patch('sys.stdout') as mstdout:
             self.execute(['fuel', 'fuel-version', '--yaml'])
@@ -39,9 +37,9 @@ class TestFuelVersion(base.UnitTestCase):
             fake_fuel_version.get_fake_fuel_version(),
             yaml.safe_load(args[0]))
 
-    def test_return_json(self, mrequests):
-        mrequests.get('/api/v1/version/',
-                      json=fake_fuel_version.get_fake_fuel_version())
+    def test_return_json(self):
+        self.m_request.get('/api/v1/version/',
+                           json=fake_fuel_version.get_fake_fuel_version())
 
         with mock.patch('sys.stdout') as mstdout:
             self.execute(['fuel', 'fuel-version', '--json'])

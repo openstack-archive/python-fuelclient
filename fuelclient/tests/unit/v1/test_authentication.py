@@ -19,7 +19,7 @@ from mock import patch
 from six.moves import urllib
 
 from fuelclient import fuelclient_settings
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 class TestAuthentication(base.UnitTestCase):
@@ -43,11 +43,9 @@ class TestAuthentication(base.UnitTestCase):
         self.assertEqual(int(conf.LISTEN_PORT), int(pr.port))
         self.assertEqual('/keystone/v2.0', pr.path)
 
-    @patch('fuelclient.client.requests')
     @patch('fuelclient.client.auth_client')
-    def test_credentials(self, mkeystone_cli, mrequests):
+    def test_credentials(self, mkeystone_cli):
         mkeystone_cli.return_value = Mock(auth_token='')
-        mrequests.get_request.return_value = Mock(status_code=200)
         self.execute(
             ['fuel', '--user=a', '--password=b', 'node'])
         self.validate_credentials_response(

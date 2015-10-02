@@ -14,13 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
-from mock import Mock
 from mock import mock_open
 from mock import patch
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 YAML_SETTINGS_DATA = """editable:
@@ -41,98 +38,75 @@ JSON_SETTINGS_DATA = {
 
 class BaseSettings(base.UnitTestCase):
 
-    def check_upload_action(self, mrequests, test_command, test_url):
+    def check_upload_action(self, test_command, test_url):
         m = mock_open(read_data=YAML_SETTINGS_DATA)
+        put = self.m_request.put(test_url, json={})
+
         with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
-
-        request = mrequests.put.call_args_list[0]
-        url = request[0][0]
-        data = request[1]['data']
 
         m().read.assert_called_once_with()
-        self.assertEqual(mrequests.put.call_count, 1)
-        self.assertIn(test_url, url)
-        self.assertDictEqual(json.loads(data), JSON_SETTINGS_DATA)
+        self.assertTrue(put.called)
+        self.assertDictEqual(put.last_request.json(), JSON_SETTINGS_DATA)
 
-    def check_default_action(self, mrequests, test_command, test_url):
+    def check_default_action(self, test_command, test_url):
         m = mock_open()
-        mresponse = Mock(status_code=200)
-        mresponse.json.return_value = JSON_SETTINGS_DATA
-        mrequests.get.return_value = mresponse
+        get = self.m_request.get(test_url, json=JSON_SETTINGS_DATA)
 
         with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
-        request = mrequests.get.call_args_list[0]
-        url = request[0][0]
-
+        self.assertTrue(get.called)
         m().write.assert_called_once_with(YAML_SETTINGS_DATA)
-        self.assertEqual(mrequests.get.call_count, 1)
-        self.assertIn(test_url, url)
 
-    def check_download_action(self, mrequests, test_command, test_url):
+    def check_download_action(self, test_command, test_url):
         m = mock_open()
-        mresponse = Mock(status_code=200)
-        mresponse.json.return_value = JSON_SETTINGS_DATA
-        mrequests.get.return_value = mresponse
+        get = self.m_request.get(test_url, json=JSON_SETTINGS_DATA)
 
         with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
-        request = mrequests.get.call_args_list[0]
-        url = request[0][0]
-
         m().write.assert_called_once_with(YAML_SETTINGS_DATA)
-        self.assertEqual(mrequests.get.call_count, 1)
-        self.assertIn(test_url, url)
+        self.assertTrue(get.called)
 
 
-@patch('fuelclient.client.requests')
 class TestSettings(BaseSettings):
 
-    def test_upload_action(self, mrequests):
+    def test_upload_action(self):
         self.check_upload_action(
-            mrequests=mrequests,
             test_command=[
                 'fuel', 'settings', '--env', '1', '--upload'],
             test_url='/api/v1/clusters/1/attributes')
 
-    def test_default_action(self, mrequests):
+    def test_default_action(self):
         self.check_default_action(
-            mrequests=mrequests,
             test_command=[
                 'fuel', 'settings', '--env', '1', '--default'],
-            test_url='/api/v1/clusters/1/attributes/default')
+            test_url='/api/v1/clusters/1/attributes/defaults')
 
-    def test_download_action(self, mrequests):
+    def test_download_action(self):
         self.check_download_action(
-            mrequests=mrequests,
             test_command=[
                 'fuel', 'settings', '--env', '1', '--download'],
             test_url='/api/v1/clusters/1/attributes')
 
 
-@patch('fuelclient.client.requests')
 class TestVmwareSettings(BaseSettings):
 
-    def test_upload_action(self, mrequests):
+    def test_upload_action(self):
         self.check_upload_action(
-            mrequests=mrequests,
             test_command=[
                 'fuel', 'vmware-settings', '--env', '1', '--upload'],
             test_url='/api/v1/clusters/1/vmware_attributes')
 
-    def test_default_action(self, mrequests):
+    def test_default_action(self):
         self.check_default_action(
-            mrequests=mrequests,
             test_command=[
                 'fuel', 'vmware-settings', '--env', '1', '--default'],
-            test_url='/api/v1/clusters/1/vmware_attributes/default')
+            test_url='/api/v1/clusters/1/vmware_attributes/defaults')
 
-    def test_download_action(self, mrequests):
+    def test_download_action(self):
         self.check_download_action(
-            mrequests=mrequests,
             test_command=[
                 'fuel', 'vmware-settings', '--env', '1', '--download'],
             test_url='/api/v1/clusters/1/vmware_attributes')
