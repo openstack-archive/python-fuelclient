@@ -29,7 +29,7 @@ from fuelclient import client
 from fuelclient import fuelclient_settings
 from fuelclient.objects import node
 from fuelclient import profiler
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 from fuelclient.tests import utils
 
 
@@ -77,18 +77,10 @@ class ClientPerfTest(base.UnitTestCase):
     def setUp(self):
         super(ClientPerfTest, self).setUp()
 
-        req_patcher = mock.patch.object(requests.api, 'request')
         token_patcher = mock.patch.object(client.Client, 'auth_token',
                                           new_callable=mock.PropertyMock)
-
-        self.mock_request = req_patcher.start()
         self.mock_auth_token = token_patcher.start()
-
-    def tearDown(self):
-        super(ClientPerfTest, self).tearDown()
-
-        self.mock_request.stop()
-        self.mock_auth_token.stop()
+        self.addCleanup(mock_auth_token.stop)
 
     @classmethod
     def get_random_nodes(cls, number):

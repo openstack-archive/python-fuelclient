@@ -16,7 +16,7 @@ import mock
 from mock import call
 from mock import patch
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 class TestSnapshot(base.UnitTestCase):

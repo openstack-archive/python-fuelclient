@@ -19,10 +19,9 @@ import io
 import os
 
 import mock
-import requests_mock
 
 from fuelclient.cli.actions import graph
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 GRAPH_API_OUTPUT = "digraph G { A -> B -> C }"
@@ -36,12 +35,10 @@ class TestGraphAction(base.UnitTestCase):
 
     def setUp(self):
         super(TestGraphAction, self).setUp()
-        self.requests_mock = requests_mock.mock()
-        self.requests_mock.start()
-        self.m_tasks_api = self.requests_mock.get(
+        self.m_tasks_api = self.m_request.get(
             '/api/v1/clusters/1/deployment_tasks',
             json=TASKS_API_OUTPUT)
-        self.m_graph_api = self.requests_mock.get(
+        self.m_graph_api = self.m_request.get(
             '/api/v1/clusters/1/deploy_tasks/graph.gv',
             text=GRAPH_API_OUTPUT)
 
@@ -51,7 +48,6 @@ class TestGraphAction(base.UnitTestCase):
 
     def tearDown(self):
         super(TestGraphAction, self).tearDown()
-        self.requests_mock.stop()
         self.m_full_path.stop()
 
     def test_download_all_tasks(self):
@@ -160,10 +156,9 @@ class TestGraphAction(base.UnitTestCase):
     @mock.patch('fuelclient.cli.actions.graph.os.path.exists')
     def test_render_no_file(self, m_exists):
         m_exists.return_value = False
-        with self.assertRaises(SystemExit):
-            self.execute(
-                ['fuel', 'graph', '--render', 'graph.gv']
-            )
+        self.assertRaises(SystemExit,
+                          self.execute,
+                          ['fuel', 'graph', '--render', 'graph.gv'])
 
     @mock.patch('fuelclient.cli.actions.graph.open', create=True)
     @mock.patch('fuelclient.cli.actions.graph.render_graph')
@@ -206,8 +201,8 @@ class TestGraphAction(base.UnitTestCase):
         output_dir = '/output/dir'
         self.m_full_path.return_value = output_dir
 
-        with self.assertRaises(SystemExit):
-            self.execute(
-                ['fuel', 'graph', '--render', 'graph.gv', '--dir', output_dir]
-            )
+        self.assertRaises(SystemExit,
+                          self.execute,
+                          ['fuel', 'graph', '--render',
+                           'graph.gv', '--dir', output_dir])
         m_access.assert_called_once_with(output_dir, os.W_OK)

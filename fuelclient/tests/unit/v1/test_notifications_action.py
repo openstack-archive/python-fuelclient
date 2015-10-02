@@ -19,7 +19,7 @@ import json
 from mock import Mock
 from mock import patch
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 @patch('fuelclient.client.requests')
