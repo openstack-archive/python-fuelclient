@@ -16,7 +16,7 @@ import mock
 
 from fuelclient.cli.actions.user import UserAction
 from fuelclient.cli.error import ArgumentException
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 class TestChangePassword(base.UnitTestCase):

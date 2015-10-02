@@ -13,13 +13,11 @@
 #    under the License.
 
 import mock
-import requests_mock
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 from fuelclient.tests.utils import fake_network_group
 
 
-@requests_mock.mock()
 class TestNetworkGroupActions(base.UnitTestCase):
 
     def setUp(self):
@@ -30,8 +28,8 @@ class TestNetworkGroupActions(base.UnitTestCase):
 
         self.ng = fake_network_group.get_fake_network_group()
 
-    def test_list_network_groups(self, mreq):
-        mget = mreq.get(self.req_base_path, json={})
+    def test_list_network_groups(self):
+        mget = self.m_request.get(self.req_base_path, json={})
         list_commands = [
             ['fuel', 'network-group', '--list'], ['fuel', 'network-group']]
 
@@ -39,8 +37,8 @@ class TestNetworkGroupActions(base.UnitTestCase):
             self.execute(cmd)
             self.assertTrue(mget.called)
 
-    def test_list_network_groups_filtering(self, mreq):
-        mget = mreq.get(self.req_base_path, json={})
+    def test_list_network_groups_filtering(self):
+        mget = self.m_request.get(self.req_base_path, json={})
 
         self.execute(
             ['fuel', 'network-group', '--node-group', str(self.ng['id'])]
@@ -48,8 +46,8 @@ class TestNetworkGroupActions(base.UnitTestCase):
 
         self.assertTrue(mget.called)
 
-    def create_network_group(self, mreq, cmd):
-        mpost = mreq.post(self.req_base_path, json={
+    def create_network_group(self, cmd):
+        mpost = self.m_request.post(self.req_base_path, json={
             'id': self.ng['id'],
             'name': self.ng['name'],
         })
@@ -63,76 +61,76 @@ class TestNetworkGroupActions(base.UnitTestCase):
 
         return call_data
 
-    def test_create_network_group(self, mreq):
+    def test_create_network_group(self):
         cmd = ['fuel', 'network-group', '--create', '--cidr', self.ng['cidr'],
                '--name', self.ng['name'], '--node-group', str(self.ng['id'])]
-        self.create_network_group(mreq, cmd)
+        self.create_network_group(cmd)
 
-    def test_create_network_group_w_meta(self, mreq):
+    def test_create_network_group_w_meta(self):
         cmd = ['fuel', 'network-group', '--create', '--cidr', self.ng['cidr'],
                '--name', self.ng['name'], '--node-group', str(self.ng['id']),
                '--meta', '{"ip_ranges": ["10.0.0.2", "10.0.0.254"]}']
-        self.create_network_group(mreq, cmd)
+        self.create_network_group(cmd)
 
-        meta = mreq.last_request.json()['meta']
+        meta = self.m_request.last_request.json()['meta']
         self.assertEqual(meta['ip_ranges'], ["10.0.0.2", "10.0.0.254"])
 
-    def test_create_network_group_required_args(self, mreq):
+    def test_create_network_group_required_args(self):
         with mock.patch("sys.stderr") as m_stderr:
-            with self.assertRaises(SystemExit):
-                self.execute(
-                    ['fuel', 'network-group', '--create'])
+            self.assertRaises(SystemExit,
+                              self.execute,
+                              ['fuel', 'network-group', '--create'])
 
         self.assertIn('--nodegroup", "--name" and "--cidr" required!',
                       m_stderr.write.call_args[0][0])
 
-    def test_delete_network_group_required_args(self, mreq):
+    def test_delete_network_group_required_args(self):
         with mock.patch("sys.stderr") as m_stderr:
-            with self.assertRaises(SystemExit):
-                self.execute(
-                    ['fuel', 'network-group', '--delete'])
+            self.assertRaises(SystemExit,
+                              self.execute,
+                              ['fuel', 'network-group', '--delete'])
 
         self.assertIn('"--network" required!', m_stderr.write.call_args[0][0])
 
-    def test_delete_network_group(self, mreq):
+    def test_delete_network_group(self):
         path = self.req_base_path + str(self.env_id) + '/'
-        mdelete = mreq.delete(path, status_code=204)
+        mdelete = self.m_request.delete(path, status_code=204)
         self.execute(
             ['fuel', 'network-group', '--delete',
              '--network', str(self.env_id)])
 
         self.assertTrue(mdelete.called)
 
-    def test_network_group_duplicate_name(self, mreq):
-        mpost = mreq.post(self.req_base_path, status_code=409)
+    def test_network_group_duplicate_name(self):
+        mpost = self.m_request.post(self.req_base_path, status_code=409)
 
         with mock.patch("sys.stderr") as m_stderr:
-            with self.assertRaises(SystemExit):
-                self.execute(
-                    ['fuel', 'network-group', '--create', '--cidr',
-                     self.ng['cidr'], '--name', self.ng['name'],
-                     '--node-group', str(self.ng['id'])])
+            self.assertRaises(SystemExit,
+                              self.execute,
+                              ['fuel', 'network-group', '--create', '--cidr',
+                               self.ng['cidr'], '--name', self.ng['name'],
+                               '--node-group', str(self.ng['id'])])
 
         self.assertIn("409 Client Error", m_stderr.write.call_args[0][0])
         self.assertTrue(mpost.called)
 
-    def test_set_network_group(self, mreq):
+    def test_set_network_group(self):
         path = self.req_base_path + str(self.env_id) + '/'
-        mput = mreq.put(path, json={})
+        mput = self.m_request.put(path, json={})
         self.execute([
             'fuel', 'network-group', '--set', '--network', str(self.ng['id']),
             '--name', self.ng['name']])
 
         self.assertTrue(mput.called)
 
-    def test_set_network_group_meta(self, mreq):
+    def test_set_network_group_meta(self):
         path = self.req_base_path + str(self.env_id) + '/'
-        mput = mreq.put(path, json={})
+        mput = self.m_request.put(path, json={})
         self.execute([
             'fuel', 'network-group', '--set', '--network', str(self.ng['id']),
             '--meta', '{"ip_ranges": ["10.0.0.2", "10.0.0.254"]}'])
 
         self.assertTrue(mput.called)
 
-        meta = mreq.last_request.json()['meta']
+        meta = self.m_request.last_request.json()['meta']
         self.assertEqual(meta['ip_ranges'], ["10.0.0.2", "10.0.0.254"])

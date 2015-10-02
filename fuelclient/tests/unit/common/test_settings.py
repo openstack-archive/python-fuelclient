@@ -20,7 +20,7 @@ from mock import Mock
 from mock import mock_open
 from mock import patch
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 YAML_SETTINGS_DATA = """editable:

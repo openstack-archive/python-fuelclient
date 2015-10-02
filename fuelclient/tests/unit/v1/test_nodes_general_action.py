@@ -18,7 +18,7 @@ import mock
 from six import StringIO
 
 from fuelclient.cli.actions import node
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 GRAPH_API_OUTPUT = "digraph G { A -> B -> C }"
@@ -34,8 +34,9 @@ class TestNodeStartAction(base.UnitTestCase):
     def test_node_not_assigend(self, _):
         for method in ('--deploy', '--provision'):
             with mock.patch('sys.stderr', new=StringIO()) as mstderr:
-                with self.assertRaises(SystemExit):
-                    self.execute(['fuel', 'node', method, '--node', '8'])
+                self.assertRaises(SystemExit,
+                                  self.execute,
+                                  ['fuel', 'node', method, '--node', '8'])
                 self.assertIn(
                     "Input nodes are not assigned to any environment!",
                     mstderr.getvalue())

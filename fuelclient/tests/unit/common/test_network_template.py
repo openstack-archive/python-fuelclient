@@ -16,11 +16,10 @@
 
 import json
 import mock
-import requests_mock
 import six
 import yaml
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 YAML_TEMPLATE = """adv_net_template:
   default:
@@ -109,14 +108,8 @@ class TestNetworkTemplate(base.UnitTestCase):
         self.req_path = ('/api/v1/clusters/{0}/network_configuration/'
                          'template'.format(self.env_id))
 
-        self.mocker = requests_mock.Mocker()
-        self.mocker.start()
-
-    def tearDown(self):
-        self.mocker.stop()
-
     def test_upload_action(self):
-        mput = self.mocker.put(self.req_path, json={})
+        mput = self.m_request.put(self.req_path, json={})
         test_command = [
             'fuel', 'network-template', '--env', str(self.env_id), '--upload']
 
@@ -131,7 +124,7 @@ class TestNetworkTemplate(base.UnitTestCase):
         m_open().read.assert_called_once_with()
 
     def test_download_action(self):
-        mget = self.mocker.get(self.req_path, text=JSON_TEMPLATE)
+        mget = self.m_request.get(self.req_path, text=JSON_TEMPLATE)
 
         test_command = [
             'fuel', 'network-template', '--env', str(self.env_id),
@@ -149,7 +142,7 @@ class TestNetworkTemplate(base.UnitTestCase):
         self.assertEqual(written_yaml, expected_yaml)
 
     def test_delete_action(self):
-        mdelete = self.mocker.delete(self.req_path, json={})
+        mdelete = self.m_request.delete(self.req_path, json={})
 
         cmd = ['fuel', 'network-template', '--env', str(self.env_id),
                '--delete']
