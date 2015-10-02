@@ -16,14 +16,14 @@
 import json
 
 import mock
+import testtools
 import yaml
 
 from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
-from fuelclient.tests import base
 
 
-class TestSerializers(base.UnitTestCase):
+class TestSerializers(testtools.TestCase):
 
     DATA = {
         'a': 1,
@@ -59,8 +59,9 @@ class TestSerializers(base.UnitTestCase):
 
     def test_write_to_path_invalid_file_exception(self):
         serializer = Serializer('json')
-        with self.assertRaises(error.InvalidFileException):
-            mo = mock.mock_open()
-            with mock.patch('__main__.open', mo, create=True) as mocked_open:
-                mocked_open.side_effect = IOError()
-                serializer.write_to_path('/foo/bar/baz', self.DATA)
+        mo = mock.mock_open()
+        with mock.patch('__main__.open', mo, create=True) as mocked_open:
+            mocked_open.side_effect = IOError()
+            self.assertRaises(error.InvalidFileException,
+                              serializer.write_to_path,
+                              '/foo/bar/baz', self.DATA)

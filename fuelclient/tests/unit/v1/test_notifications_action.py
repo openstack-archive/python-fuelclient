@@ -14,74 +14,69 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
-from mock import Mock
 from mock import patch
+import requests_mock as rm
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
-@patch('fuelclient.client.requests')
 class TestNotificationsActions(base.UnitTestCase):
-    def test_notification_send(self, mrequests):
-        response_mock = Mock(status_code=201)
-        mrequests.post.return_value = response_mock
+    def test_notification_send(self):
+        post = self.m_request.post(rm.ANY, json={})
 
         self.execute(
             ['fuel', 'notifications', '--send', 'test message'])
-        self.assertEqual(mrequests.post.call_count, 1)
-        request = json.loads(mrequests.post.call_args[1]['data'])
+        self.assertEqual(post.call_count, 1)
+
+        request = post.last_request.json()
         self.assertEqual('test message', request['message'])
         self.assertEqual('done', request['topic'])
 
         self.execute(
             ['fuel', 'notify', '-m', 'test message 2'])
-        self.assertEqual(mrequests.post.call_count, 2)
-        request = json.loads(mrequests.post.call_args[1]['data'])
+        self.assertEqual(post.call_count, 2)
+
+        request = post.last_request.json()
         self.assertEqual('test message 2', request['message'])
         self.assertEqual('done', request['topic'])
 
-    def test_notification_send_with_topic(self, mrequests):
-        response_mock = Mock(status_code=201)
-        mrequests.post.return_value = response_mock
+    def test_notification_send_with_topic(self):
+        post = self.m_request.post(rm.ANY, json={})
 
         self.execute(
             ['fuel', 'notifications', '--send', 'test error',
              '--topic', 'error'])
-        self.assertEqual(mrequests.post.call_count, 1)
-        request = json.loads(mrequests.post.call_args[1]['data'])
+        self.assertEqual(post.call_count, 1)
+        request = post.last_request.json()
         self.assertEqual('test error', request['message'])
         self.assertEqual('error', request['topic'])
 
         self.execute(
             ['fuel', 'notify', '-m', 'test error 2', '--topic', 'error'])
-        self.assertEqual(mrequests.post.call_count, 2)
-        request = json.loads(mrequests.post.call_args[1]['data'])
+        self.assertEqual(post.call_count, 2)
+        request = post.last_request.json()
         self.assertEqual('test error 2', request['message'])
         self.assertEqual('error', request['topic'])
 
-    def test_notification_send_no_message(self, mrequests):
-        response_mock = Mock(status_code=201)
-        mrequests.post.return_value = response_mock
+    def test_notification_send_no_message(self):
+        post = self.m_request.post(rm.ANY, json={})
 
         self.assertRaises(
             SystemExit,
             self.execute,
             ['fuel', 'notifications', '--send']
         )
-        self.assertEqual(mrequests.post.call_count, 0)
+        self.assertFalse(post.called)
 
         self.assertRaises(
             SystemExit,
             self.execute,
             ['fuel', 'notify', '-m']
         )
-        self.assertEqual(mrequests.post.call_count, 0)
+        self.assertFalse(post.called)
 
-    def test_notification_send_invalid_topic(self, mrequests):
-        response_mock = Mock(status_code=201)
-        mrequests.post.return_value = response_mock
+    def test_notification_send_invalid_topic(self):
+        post = self.m_request.post(rm.ANY, json={})
 
         self.assertRaises(
             SystemExit,
@@ -89,120 +84,109 @@ class TestNotificationsActions(base.UnitTestCase):
             ['fuel', 'notifications', '--send', 'test message',
              '--topic', 'x']
         )
-        self.assertEqual(mrequests.post.call_count, 0)
+        self.assertFalse(post.called)
 
         self.assertRaises(
             SystemExit,
             self.execute,
             ['fuel', 'notify', '-m', 'test message', '--topic', 'x']
         )
-        self.assertEqual(mrequests.post.call_count, 0)
+        self.assertFalse(post.called)
 
-    def test_mark_as_read(self, mrequests):
-        m1 = Mock(status=200)
-        m1.json.return_value = {
-            'id': 1,
-            'message': 'test message',
-            'status': 'unread',
-            'topic': 'done',
-        }
-        m2 = Mock(status=200)
-        m2.json.return_value = {
-            'id': 2,
-            'message': 'test message 2',
-            'status': 'unread',
-            'topic': 'done',
-        }
-        mrequests.get.side_effect = [m1, m2]
+    def test_mark_as_read(self):
+        results = [{'id': 1,
+                    'message': 'test message',
+                    'status': 'unread',
+                    'topic': 'done'},
+                   {'id': 2,
+                    'message': 'test message 2',
+                    'status': 'unread',
+                    'topic': 'done'}]
+        results.extend(results)
 
-        mrequests.put.return_value = Mock(status_code=200)
+        get = self.m_request.get(rm.ANY, [{'json': r} for r in results])
+        put = self.m_request.put(rm.ANY, json={})
+
         self.execute(
             ['fuel', 'notifications', '-r', '1'])
 
-        self.assertEqual(mrequests.get.call_count, 1)
-        self.assertEqual(mrequests.put.call_count, 1)
-        request = m1.json.return_value
-        self.assertEqual('test message', request['message'])
-        self.assertEqual('read', request['status'])
-        request = m2.json.return_value
-        self.assertEqual('test message 2', request['message'])
-        self.assertEqual('unread', request['status'])
+        self.assertEqual(get.call_count, 1)
+        self.assertEqual(put.call_count, 1)
 
-        mrequests.get.side_effect = [m1, m2]
+        messages = put.last_request.json()
+        self.assertEqual(1, len(messages))
+
+        msg = messages.pop()
+        self.assertEqual('test message', msg['message'])
+        self.assertEqual('read', msg['status'])
+        self.assertEqual(1, msg['id'])
 
         self.execute(
             ['fuel', 'notifications', '-r', '1', '2'])
 
-        self.assertEqual(mrequests.get.call_count, 3)
-        self.assertEqual(mrequests.put.call_count, 2)
-        request = m1.json.return_value
-        self.assertEqual('test message', request['message'])
-        self.assertEqual('read', request['status'])
-        request = m2.json.return_value
-        self.assertEqual('test message 2', request['message'])
-        self.assertEqual('read', request['status'])
+        self.assertEqual(get.call_count, 3)
+        self.assertEqual(put.call_count, 2)
 
-    def test_mark_all_as_read(self, mrequests):
-        m = Mock(status=200)
-        m.json.return_value = [
-            {
-                'id': 1,
-                'message': 'test message',
-                'status': 'unread',
-                'topic': 'done',
-            },
-            {
-                'id': 2,
-                'message': 'test message 2',
-                'status': 'unread',
-                'topic': 'done',
-            }
-        ]
-        mrequests.get.return_value = m
+        messages = put.last_request.json()
+        self.assertEqual(2, len(messages))
 
-        mrequests.put.return_value = Mock(status_code=200)
+        msg = messages.pop()
+        self.assertEqual('test message', msg['message'])
+        self.assertEqual('read', msg['status'])
+        self.assertEqual(1, msg['id'])
+
+        msg = messages.pop()
+        self.assertEqual('test message 2', msg['message'])
+        self.assertEqual('read', msg['status'])
+        self.assertEqual(2, msg['id'])
+
+    def test_mark_all_as_read(self):
+        result = [{'id': 1,
+                   'message': 'test message',
+                   'status': 'unread',
+                   'topic': 'done'},
+                  {'id': 2,
+                   'message': 'test message 2',
+                   'status': 'unread',
+                   'topic': 'done'}]
+
+        get = self.m_request.get(rm.ANY, json=result)
+        put = self.m_request.put(rm.ANY, json={})
+
         self.execute(
             ['fuel', 'notifications', '-r', '*'])
 
-        self.assertEqual(mrequests.get.call_count, 1)
-        self.assertEqual(mrequests.put.call_count, 1)
-        request = m.json.return_value
+        self.assertEqual(get.call_count, 1)
+        self.assertEqual(put.call_count, 1)
+        request = put.last_request.json()
         self.assertEqual('test message', request[0]['message'])
         self.assertEqual('read', request[0]['status'])
         self.assertEqual('test message 2', request[1]['message'])
         self.assertEqual('read', request[1]['status'])
 
     @patch('fuelclient.cli.actions.notifications.format_table')
-    def test_list_notifications(self, mformat_table, mrequests):
-        m = Mock(status=200)
-        m.json.return_value = [
-            {
-                'id': 1,
-                'message': 'test message',
-                'status': 'unread',
-                'topic': 'done',
-            },
-            {
-                'id': 2,
-                'message': 'test message 2',
-                'status': 'read',
-                'topic': 'done',
-            }
-        ]
-        mrequests.get.return_value = m
+    def test_list_notifications(self, mformat_table):
+        test_notifications = [{'id': 1,
+                               'message': 'test message',
+                               'status': 'unread',
+                               'topic': 'done'},
+                              {'id': 2,
+                               'message': 'test message 2',
+                               'status': 'read',
+                               'topic': 'done'}]
+        get = self.m_request.get(rm.ANY, json=test_notifications)
+        self.m_request.put(rm.ANY, json={})
 
-        mrequests.put.return_value = Mock(status_code=200)
         self.execute(['fuel', 'notifications'])
 
-        self.assertEqual(mrequests.get.call_count, 1)
+        self.assertEqual(get.call_count, 1)
         notifications = mformat_table.call_args[0][0]
         self.assertEqual(len(notifications), 1)
-        self.assertDictEqual(notifications[0], m.json.return_value[0])
+        self.assertDictEqual(notifications[0], test_notifications[0])
 
     @patch('fuelclient.cli.actions.notifications.format_table')
-    def test_list_all_notifications(self, mformat_table, mrequests):
-        m = Mock(status=200)
-        m.json.return_value = [
+    def test_list_all_notifications(self, mformat_table):
+        test_notifications = [
             {
                 'id': 1,
                 'message': 'test message',
@@ -216,12 +200,12 @@ class TestNotificationsActions(base.UnitTestCase):
                 'topic': 'done',
             }
         ]
-        mrequests.get.return_value = m
+        get = self.m_request.get(rm.ANY, json=test_notifications)
+        self.m_request.put(rm.ANY, json={})
 
-        mrequests.put.return_value = Mock(status_code=200)
         self.execute(['fuel', 'notifications', '-a'])
 
-        self.assertEqual(mrequests.get.call_count, 1)
+        self.assertEqual(get.call_count, 1)
         notifications = mformat_table.call_args[0][0]
         self.assertEqual(len(notifications), 2)
-        self.assertListEqual(notifications, m.json.return_value)
+        self.assertListEqual(notifications, test_notifications)
