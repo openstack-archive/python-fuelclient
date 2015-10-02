@@ -16,13 +16,13 @@
 import json
 
 import mock
+import testtools
 import yaml
 
 from fuelclient.cli.serializers import Serializer
-from fuelclient.tests import base
 
 
-class TestSerializers(base.UnitTestCase):
+class TestSerializers(testtools.TestCase):
 
     DATA = {
         'a': 1,

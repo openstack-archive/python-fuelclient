@@ -16,15 +16,16 @@
 
 import mock
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 class TestParser(base.UnitTestCase):
 
     def test_choose_only_one_format(self):
         with mock.patch('sys.stderr') as mstderr:
-            with self.assertRaises(SystemExit):
-                self.execute(['fuel', '--json', '--yaml'])
+            self.assertRaises(SystemExit,
+                              self.execute,
+                              ['fuel', '--json', '--yaml'])
         args, _ = mstderr.write.call_args
         self.assertRegexpMatches(
             args[0],

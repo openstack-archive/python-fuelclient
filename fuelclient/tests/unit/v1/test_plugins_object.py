@@ -21,7 +21,7 @@ from fuelclient.cli import error
 from fuelclient.objects.plugins import Plugins
 from fuelclient.objects.plugins import PluginV1
 from fuelclient.objects.plugins import PluginV2
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 @patch('fuelclient.objects.plugins.raise_error_if_not_master')

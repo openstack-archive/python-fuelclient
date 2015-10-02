@@ -16,23 +16,23 @@
 
 
 import mock
-import requests_mock
+import requests_mock as rm
 from six import moves
 
 from fuelclient.objects.environment import Environment
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
-@requests_mock.mock()
 class TestEnvironment(base.UnitTestCase):
 
-    def test_delete_operational_wo_force(self, m_requests):
+    def test_delete_operational_wo_force(self):
         cluster_id = 1
         url = '/api/v1/clusters/{0}/'.format(cluster_id)
         cmd = 'fuel --env {0} env delete'.format(cluster_id)
 
-        m_requests.get(url, json={'id': cluster_id, 'status': 'operational'})
-        m_delete = m_requests.delete(url)
+        self.m_request.get(url,
+                           json={'id': cluster_id, 'status': 'operational'})
+        m_delete = self.m_request.delete(url)
 
         with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute(cmd.split())
@@ -40,7 +40,7 @@ class TestEnvironment(base.UnitTestCase):
 
         self.assertFalse(m_delete.called)
 
-    def test_nova_network_using_warning(self, m_requests):
+    def test_nova_network_using_warning(self):
         cluster_id = 1
         cluster_data = {
             'id': cluster_id,
@@ -48,9 +48,9 @@ class TestEnvironment(base.UnitTestCase):
             'mode': 'ha_compact',
             'net_provider': 'neutron'
         }
-        m_requests.post('/api/v1/clusters/', json=cluster_data)
-        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
-                       json=cluster_data)
+        self.m_request.post('/api/v1/clusters/', json=cluster_data)
+        self.m_request.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                           json=cluster_data)
 
         with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute(
@@ -61,7 +61,7 @@ class TestEnvironment(base.UnitTestCase):
                           'deprecated since 6.1 release.',
                           m_stdout.getvalue())
 
-    def test_neutron_gre_using_warning(self, m_requests):
+    def test_neutron_gre_using_warning(self):
         cluster_id = 1
         cluster_data = {
             'id': cluster_id,
@@ -69,9 +69,9 @@ class TestEnvironment(base.UnitTestCase):
             'mode': 'ha_compact',
             'net_provider': 'neutron'
         }
-        m_requests.post('/api/v1/clusters/', json=cluster_data)
-        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
-                       json=cluster_data)
+        self.m_request.post('/api/v1/clusters/', json=cluster_data)
+        self.m_request.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                           json=cluster_data)
 
         with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute(
@@ -83,7 +83,7 @@ class TestEnvironment(base.UnitTestCase):
                       "deprecated since 7.0 release.",
                       m_stdout.getvalue())
 
-    def test_create_env_with_mode_set(self, m_requests):
+    def test_create_env_with_mode_set(self):
         cluster_id = 1
         cluster_data = {
             'id': cluster_id,
@@ -91,15 +91,15 @@ class TestEnvironment(base.UnitTestCase):
             'mode': 'ha_compact',
             'net_provider': 'neutron'
         }
-        m_post = m_requests.post('/api/v1/clusters/', json=cluster_data)
-        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
-                       json=cluster_data)
+        m_post = self.m_request.post('/api/v1/clusters/', json=cluster_data)
+        self.m_request.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                           json=cluster_data)
 
         self.execute('fuel env create'
                      ' --name test --rel 1 --mode ha'.split())
         self.assertEqual('ha_compact', m_post.last_request.json()['mode'])
 
-    def test_multimode_warning(self, m_requests):
+    def test_multimode_warning(self):
         cluster_id = 1
         cluster_data = {
             'id': cluster_id,
@@ -107,9 +107,9 @@ class TestEnvironment(base.UnitTestCase):
             'mode': 'multinode',
             'net_provider': 'neutron'
         }
-        m_post = m_requests.post('/api/v1/clusters/', json=cluster_data)
-        m_requests.get('/api/v1/clusters/{0}/'.format(cluster_id),
-                       json=cluster_data)
+        m_post = self.m_request.post('/api/v1/clusters/', json=cluster_data)
+        self.m_request.get('/api/v1/clusters/{0}/'.format(cluster_id),
+                           json=cluster_data)
 
         with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.execute('fuel env create'
@@ -157,11 +157,10 @@ class TestEnvironmentOstf(base.UnitTestCase):
             {'id': 1, 'status': 'running'},
             {'id': 2, 'status': 'finished'}])
 
-    @mock.patch('fuelclient.client.requests')
-    def test_get_deployment_tasks_with_end(self, mrequests):
+    def test_get_deployment_tasks_with_end(self):
         end = 'task1'
+        get = self.m_request.get(rm.ANY, json={})
+
         self.env.get_deployment_tasks(end=end)
-        kwargs = mrequests.get.call_args[1]
-        self.assertEqual(
-            kwargs['params'],
-            {'start': None, 'end': 'task1', 'include': None})
+
+        self.assertEqual(get.last_request.qs, {'end': ['task1']})

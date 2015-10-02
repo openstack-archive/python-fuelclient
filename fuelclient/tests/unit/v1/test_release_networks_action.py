@@ -14,34 +14,29 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
 from mock import patch
+import requests_mock as rm
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 API_INPUT = {'config': 'nova_network'}
 API_OUTPUT = 'config: nova_network\n'
 
 
-@patch('fuelclient.client.requests')
 @patch('fuelclient.cli.serializers.open', create=True)
 @patch('fuelclient.cli.actions.base.os')
 class TestReleaseNetworkActions(base.UnitTestCase):
 
-    def test_release_network_download(self, mos, mopen, mrequests):
-        mrequests.get().json.return_value = API_INPUT
+    def test_release_network_download(self, mos, mopen):
+        self.m_request.get(rm.ANY, json=API_INPUT)
         self.execute(['fuel', 'rel', '--rel', '1', '--network', '--download'])
         mopen().__enter__().write.assert_called_once_with(API_OUTPUT)
 
-    def test_release_network_upload(self, mos, mopen, mrequests):
+    def test_release_network_upload(self, mos, mopen):
         mopen().__enter__().read.return_value = API_OUTPUT
+        put = self.m_request.put('/api/v1/releases/1/networks', json={})
         self.execute(['fuel', 'rel', '--rel', '1', '--network', '--upload'])
-        self.assertEqual(mrequests.put.call_count, 1)
-        call_args = mrequests.put.call_args_list[0]
-        url = call_args[0][0]
-        kwargs = call_args[1]
-        self.assertIn('releases/1/networks', url)
-        self.assertEqual(
-            json.loads(kwargs['data']), API_INPUT)
+
+        self.assertTrue(put.called)
+        self.assertEqual(put.last_request.json(), API_INPUT)
