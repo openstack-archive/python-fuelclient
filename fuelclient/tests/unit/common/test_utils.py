@@ -24,7 +24,7 @@ import requests
 
 from fuelclient.cli import error
 from fuelclient.common import data_utils
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 from fuelclient import utils
 
 

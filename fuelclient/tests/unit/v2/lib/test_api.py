@@ -19,12 +19,19 @@ from mock import patch
 import requests_mock as rm
 from six.moves.urllib import parse as urlparse
 
+try:
+    from unittest.case import TestCase
+except ImportError:
+    # Runing unit-tests in production environment all
+    from unittest2.case import TestCase
+
 from fuelclient import client
-from fuelclient.tests import base
 
 
-class BaseLibTest(base.UnitTestCase):
+class BaseLibTest(TestCase):
     def setUp(self):
+        super(BaseLibTest, self).setUp()
+
         self.m_request = rm.Mocker()
         self.m_request.start()
 
@@ -48,6 +55,8 @@ class BaseLibTest(base.UnitTestCase):
         msg = 'Unexpected HTTP requests were detected:\n {0}'.format(calls)
 
         self.assertFalse(self.top_matcher.called, msg=msg)
+
+        super(BaseLibTest, self).tearDown()
 
     def get_object_uri(self, collection_path, object_id, attribute='/'):
         return urlparse.urljoin(collection_path, str(object_id) + attribute)

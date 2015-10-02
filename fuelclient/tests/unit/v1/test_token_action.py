@@ -18,14 +18,13 @@ import io
 
 import mock
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
-@mock.patch('fuelclient.client.requests')
 class TestPluginsActions(base.UnitTestCase):
 
     @mock.patch('fuelclient.cli.actions.token.APIClient')
-    def test_token_action(self, mAPIClient, mrequests):
+    def test_token_action(self, mAPIClient):
         with mock.patch('sys.stdout', new=io.StringIO()) as mstdout:
             token = u'token123'
             mauth_token = mock.PropertyMock(return_value=token)
