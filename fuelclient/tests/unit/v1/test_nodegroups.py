@@ -47,6 +47,9 @@ class TestNodeGroupActions(base.UnitTestCase):
             'id': self.env['id'],
             'net_provider': self.env['net_provider']
         })
+
+        mreq.get('/api/v1/nodegroups/', json={})
+
         mpost = mreq.post(self.req_base_path, json={
             'id': self.ng['id'],
             'name': self.ng['name'],
@@ -147,3 +150,21 @@ class TestNodeGroupActions(base.UnitTestCase):
         commands = (node_not_present_cmd, group_not_present_cmd)
 
         self._check_required_message_for_commands(err_msg, commands)
+
+    def test_create_nodegroup_with_existing_name(self, mreq):
+        group_name = 'testgroup'
+        mreq.get('/api/v1/nodegroups/', json=[{
+            'cluster': self.env['id'],
+            'id': 1,
+            'name': group_name
+        }])
+
+        with mock.patch('sys.stderr') as m_stderr:
+            with self.assertRaises(SystemExit):
+                self.execute([
+                    'fuel', 'nodegroup', '--create',
+                    '--name', group_name, '--env', str(self.env['id'])
+                ])
+            err_msg = "Error: nodegroup with name '{0}' already exists " \
+                "in environment {1}.\n".format(group_name, self.env['id'])
+            m_stderr.write.assert_called_with(err_msg)

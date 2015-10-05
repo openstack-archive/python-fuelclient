@@ -64,6 +64,15 @@ class NodeGroupAction(Action):
                fuel --env 1 nodegroup --create --name "group 1"
         """
         env_id = int(params.env)
+
+        # check whether node group already exists
+        group_collection = NodeGroupCollection.get_all()
+        group_collection.filter_by_env_id(env_id)
+        if group_collection.get_node_group_by_name(params.name):
+            raise ActionException(
+                "Error: nodegroup with name '{0}' already exists "
+                "in environment {1}.".format(params.name, env_id))
+
         data = NodeGroup.create(params.name, env_id)
         env = Environment(env_id)
         network_data = env.get_network_data()
