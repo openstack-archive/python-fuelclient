@@ -16,6 +16,7 @@
 
 import os
 import tempfile
+import uuid
 
 from fuelclient.tests import base
 
@@ -512,3 +513,23 @@ class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
             "Directory '/foo/bar/baz' doesn't exist.\n",
             check_errors=False
         )
+
+
+class TestOutputTracebackOnException(base.BaseTestCase):
+
+    def test_debug_is_off_traceback_is_absent(self):
+        directory = uuid.uuid4()
+        command = "settings --upload --dir {0} --env 1".format(directory)
+        call = self.run_cli_command(command, check_errors=False)
+        self.assertIn("Directory '{0}' doesn't exist".format(directory),
+                      call.stderr)
+        self.assertNotIn("Traceback (most recent call last)", call.stderr)
+
+    def test_debug_is_on_output_traceback(self):
+        directory = uuid.uuid4()
+        command = "settings --upload --dir {0} --env 1 --debug".format(
+            directory)
+        call = self.run_cli_command(command, check_errors=False)
+        self.assertIn("Directory '{0}' doesn't exist".format(directory),
+                      call.stderr)
+        self.assertIn("Traceback (most recent call last)", call.stderr)
