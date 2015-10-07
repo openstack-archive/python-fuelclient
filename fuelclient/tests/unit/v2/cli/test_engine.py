@@ -19,14 +19,19 @@ import sys
 
 import mock
 
+try:
+    from unittest.case import TestCase
+except ImportError:
+    # Runing unit-tests in production environment all
+    from unittest2.case import TestCase
+
 import fuelclient
 from fuelclient.cli import error
 from fuelclient.commands import environment as env
 from fuelclient import main as main_mod
-from fuelclient.tests import base
 
 
-class BaseCLITest(base.UnitTestCase):
+class BaseCLITest(TestCase):
     """Base class for testing the new CLI
 
     It mocks the whole API layer in order to be sure the
@@ -37,14 +42,14 @@ class BaseCLITest(base.UnitTestCase):
 
     """
     def setUp(self):
+        super(BaseCLITest, self).setUp()
+
         self._get_client_patcher = mock.patch.object(fuelclient, 'get_client')
         self.m_get_client = self._get_client_patcher.start()
 
         self.m_client = mock.MagicMock()
         self.m_get_client.return_value = self.m_client
-
-    def tearDown(self):
-        self._get_client_patcher.stop()
+        self.addCleanup(self._get_client_patcher.stop)
 
     def exec_command(self, command=''):
         """Executes fuelclient with the specified arguments."""

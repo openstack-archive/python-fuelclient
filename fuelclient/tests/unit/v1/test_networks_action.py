@@ -17,9 +17,8 @@
 import yaml
 
 from mock import patch
-import requests_mock
 
-from fuelclient.tests import base
+from fuelclient.tests.unit.v1 import base
 
 
 ENV_OUTPUT = {
@@ -44,22 +43,21 @@ NETWORK_CONFIG_ERROR_OUTPUT = {
 }
 
 
-@requests_mock.mock(kw='mrequests')
 @patch('fuelclient.cli.serializers.open', create=True)
 @patch('fuelclient.cli.actions.base.os')
 class TestNetworkActions(base.UnitTestCase):
 
-    def test_network_download(self, mos, mopen, mrequests=None):
-        mrequests.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
-        mrequests.get('/api/v1/clusters/1/network_configuration/neutron',
-                      json=yaml.load(FILE_INPUT))
+    def test_network_download(self, mos, mopen):
+        self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
+        self.m_request.get('/api/v1/clusters/1/network_configuration/neutron',
+                           json=yaml.load(FILE_INPUT))
         self.execute(['fuel', 'network', '--env', '1', '--download'])
         mopen().__enter__().write.assert_called_once_with(FILE_INPUT)
 
-    def test_network_upload(self, mos, mopen, mrequests=None):
+    def test_network_upload(self, mos, mopen):
         mopen().__enter__().read.return_value = FILE_INPUT
-        mrequests.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
-        mneutron_put = mrequests.put(
+        self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
+        mneutron_put = self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',
             json=NETWORK_CONFIG_OK_OUTPUT)
         self.execute(['fuel', 'network', '--env', '1', '--upload', 'smth'])
@@ -67,10 +65,10 @@ class TestNetworkActions(base.UnitTestCase):
         url = mneutron_put.request_history[0].url
         self.assertIn('clusters/1/network_configuration/neutron', url)
 
-    def test_network_upload_with_error(self, mos, mopen, mrequests=None):
+    def test_network_upload_with_error(self, mos, mopen):
         mopen().__enter__().read.return_value = FILE_INPUT
-        mrequests.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
-        mrequests.put(
+        self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
+        self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',
             json=NETWORK_CONFIG_ERROR_OUTPUT)
         with patch('sys.stdout') as fake_out:

@@ -11,13 +11,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from fuelclient.objects import Release
-
-try:
-    from unittest.case import TestCase
-except ImportError:
-    # Runing unit-tests in production environment
-    from unittest2.case import TestCase
 
 import logging
 import os
@@ -26,11 +19,13 @@ import subprocess
 import sys
 import tempfile
 
+try:
+    from unittest.case import TestCase
+except ImportError:
+    # Runing unit-tests in production environment all
+    from unittest2.case import TestCase
 
-import mock
-from six import StringIO
-
-from fuelclient.cli.parser import main
+from fuelclient.objects import Release
 
 
 logging.basicConfig(stream=sys.stderr)
@@ -38,21 +33,7 @@ log = logging.getLogger("CliTest.ExecutionLog")
 log.setLevel(logging.DEBUG)
 
 
-class FakeFile(StringIO):
-    """It's a fake file which returns StringIO
-    when file opens with 'with' statement.
-    NOTE(eli): We cannot use mock_open from mock library
-    here, because it hangs when we use 'with' statement,
-    and when we want to read file by chunks.
-    """
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        pass
-
-
-class CliExectutionResult:
+class CliExectutionResult(object):
     def __init__(self, process_handle, out, err):
         self.return_code = process_handle.returncode
         self.stdout = out
@@ -67,47 +48,16 @@ class CliExectutionResult:
         return self.return_code == 0
 
 
-class UnitTestCase(TestCase):
-    """Base test class which does not require nailgun server to run."""
-
-    def setUp(self):
-        """Mocks keystone authentication."""
-        self.auth_required_patcher = mock.patch(
-            'fuelclient.client.Client.auth_required',
-            new_callable=mock.PropertyMock
-        )
-        self.auth_required_mock = self.auth_required_patcher.start()
-        self.auth_required_mock.return_value = False
-        super(UnitTestCase, self).setUp()
-
-    def tearDown(self):
-        super(UnitTestCase, self).tearDown()
-        self.auth_required_patcher.stop()
-
-    def execute(self, command):
-        return main(command)
-
-    def mock_open(self, text, filename='some.file'):
-        """Mocks builtin open function.
-        Usage example:
-
-          with mock.patch('__builtin__.open', self.mock_open('file content')):
-              # call mocked code
-        """
-        fileobj = FakeFile(text)
-        setattr(fileobj, 'name', filename)
-        return mock.MagicMock(return_value=fileobj)
-
-
-class BaseTestCase(UnitTestCase):
+class BaseTestCase(TestCase):
     nailgun_root = os.environ.get('NAILGUN_ROOT', '/tmp/fuel_web/nailgun')
 
     def setUp(self):
+        super(BaseTestCase, self).setUp()
+
         self.reload_nailgun_server()
         self.temp_directory = tempfile.mkdtemp()
 
-    def tearDown(self):
-        shutil.rmtree(self.temp_directory)
+        self.addCleanup(shutil.rmtree, self.temp_directory)
 
     @staticmethod
     def run_command(*args, **kwargs):

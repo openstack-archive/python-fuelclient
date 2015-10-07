@@ -16,13 +16,12 @@
 
 from mock import patch
 
-from fuelclient.tests import base
-
 from fuelclient.cli.actions import PluginAction
 from fuelclient.cli import error
 from fuelclient.cli.formatting import format_table
 from fuelclient.cli.serializers import Serializer
 from fuelclient.objects.plugins import Plugins
+from fuelclient.tests.unit.v1 import base
 
 
 plugin_data = {
