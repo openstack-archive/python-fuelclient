@@ -488,6 +488,10 @@ def get_render_arg(help_msg):
         help=help_msg)
 
 
+def get_tred_arg(help_msg):
+    return get_boolean_arg("tred", help=help_msg)
+
+
 def get_node_arg(help_msg):
     default_kwargs = {
         "action": NodeAction,

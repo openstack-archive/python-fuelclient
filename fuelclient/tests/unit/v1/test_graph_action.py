@@ -151,7 +151,25 @@ class TestGraphAction(base.UnitTestCase):
         )
 
         m_open.assert_called_with('graph.gv', 'r')
-        m_render.assert_called_once_with(graph_data, '/path/graph.gv.png')
+        m_render.assert_called_once_with(
+            graph_data, '/path/graph.gv.png', False)
+
+    @mock.patch('fuelclient.cli.actions.graph.open', create=True)
+    @mock.patch('fuelclient.cli.actions.graph.render_graph')
+    @mock.patch('fuelclient.cli.actions.graph.os.access')
+    @mock.patch('fuelclient.cli.actions.graph.os.path.exists')
+    def test_render_with_tred(self, m_exists, m_access, m_render, m_open):
+        graph_data = 'some-dot-data'
+        m_exists.return_value = True
+        m_open().__enter__().read.return_value = graph_data
+
+        self.execute(
+            ['fuel', 'graph', '--render', 'graph.gv', '--tred']
+        )
+
+        m_open.assert_called_with('graph.gv', 'r')
+        m_render.assert_called_once_with(
+            graph_data, '/path/graph.gv.png', True)
 
     @mock.patch('fuelclient.cli.actions.graph.os.path.exists')
     def test_render_no_file(self, m_exists):
@@ -177,8 +195,29 @@ class TestGraphAction(base.UnitTestCase):
         )
 
         self.m_full_path.assert_called_once_with(output_dir, '')
-        m_render.assert_called_once_with(graph_data,
-                                         '/output/dir/graph.gv.png')
+        m_render.assert_called_once_with(
+            graph_data, '/output/dir/graph.gv.png', False)
+
+    @mock.patch('fuelclient.cli.actions.graph.open', create=True)
+    @mock.patch('fuelclient.cli.actions.graph.render_graph')
+    @mock.patch('fuelclient.cli.actions.graph.os.access')
+    @mock.patch('fuelclient.cli.actions.graph.os.path.exists')
+    def test_render_with_output_path_with_tred(
+            self, m_exists, m_access, m_render, m_open):
+        output_dir = '/output/dir'
+        graph_data = 'some-dot-data'
+        m_exists.return_value = True
+        m_open().__enter__().read.return_value = graph_data
+        self.m_full_path.return_value = output_dir
+
+        self.execute(
+            ['fuel', 'graph', '--render', 'graph.gv', '--dir', output_dir,
+             '--tred']
+        )
+
+        self.m_full_path.assert_called_once_with(output_dir, '')
+        m_render.assert_called_once_with(
+            graph_data, '/output/dir/graph.gv.png', True)
 
     @mock.patch('fuelclient.cli.actions.graph.os.access')
     @mock.patch('fuelclient.cli.actions.graph.render_graph')
@@ -190,7 +229,21 @@ class TestGraphAction(base.UnitTestCase):
                 ['fuel', 'graph', '--render', '-', ]
             )
 
-        m_render.assert_called_once_with(graph_data, '/path/graph.gv.png')
+        m_render.assert_called_once_with(
+            graph_data, '/path/graph.gv.png', False)
+
+    @mock.patch('fuelclient.cli.actions.graph.os.access')
+    @mock.patch('fuelclient.cli.actions.graph.render_graph')
+    def test_render_from_stdin_with_tred(self, m_render, m_access):
+        graph_data = u'graph data'
+
+        with mock.patch('sys.stdin', new=io.StringIO(graph_data)):
+            self.execute(
+                ['fuel', 'graph', '--render', '-', '--tred']
+            )
+
+        m_render.assert_called_once_with(
+            graph_data, '/path/graph.gv.png', True)
 
     @mock.patch('fuelclient.cli.actions.graph.open', create=True)
     @mock.patch('fuelclient.cli.actions.graph.os.path.exists')

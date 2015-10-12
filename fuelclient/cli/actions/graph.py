@@ -53,6 +53,7 @@ class GraphAction(base.Action):
             Args.get_graph_startpoint(),
             Args.get_remove_type_arg(self.task_types),
             Args.get_parents_arg(),
+            Args.get_tred_arg("Apply transitive reduction filter for graph."),
         )
         self.flag_func_map = (
             ('render', self.render),
@@ -68,8 +69,8 @@ class GraphAction(base.Action):
         fuel graph --env 1 --download --skip X Y --end pre_deployment
         fuel graph --env 1 --download --skip X Y --start post_deployment
 
-        Sepcify output:
-        fuel graph --env 1 --download > outpup/dir/file.gv
+        Specify output:
+        fuel graph --env 1 --download > output/dir/file.gv
 
         Get parents only for task A:
 
@@ -105,6 +106,11 @@ class GraphAction(base.Action):
         fuel graph --render graph.gv
         fuel graph --render graph.gv --dir ./output/dir/
 
+        To apply transitive reduction filter on rendered graph:
+
+        fuel graph --render graph.gv --tred
+        fuel graph --render graph.gv --dir ./output/dir/ --tred
+
         Read graph from stdin
         some_process | fuel graph --render -
         """
@@ -132,49 +138,26 @@ class GraphAction(base.Action):
         if not os.access(os.path.dirname(target_file), os.W_OK):
             raise error.ActionException(
                 'Path {0} is not writable'.format(target_file))
-
-        render_graph(dot_data, target_file)
+        render_graph(dot_data, target_file, params.tred)
         print('Graph saved in "{0}"'.format(target_file))
 
 
-def render_graph(input_data, output_path):
-    """Renders DOT graph using pydot or pygraphviz depending on their presence.
-
-    If none of the libraries is available and are fully functional it is not
-    possible to render graphs.
+def render_graph(input_data, output_path, tred=False):
+    """Renders DOT graph using pygraphviz.
 
     :param input_data: DOT graph representation
     :param output_path: path to the rendered graph
+    :param tred: applies transitive reduction of graph
     """
     try:
-        _render_with_pydot(input_data, output_path)
+        import pygraphviz
     except ImportError:
-        try:
-            _render_with_pygraphiz(input_data, output_path)
-        except ImportError:
-            raise error.WrongEnvironmentError(
-                "This action require Graphviz installed toghether with "
-                "'pydot_ng' or 'pygraphviz' Python library")
-
-
-def _render_with_pydot(input_data, output_path):
-    """Renders graph using pydot_ng library."""
-    import pydot_ng as pydot
-
-    graph = pydot.graph_from_dot_data(input_data)
-    if not graph:
-        raise error.BadDataException(
-            "Passed data does not contain graph in DOT format")
-    try:
-        graph.write_png(output_path)
-    except pydot.InvocationException as e:
         raise error.WrongEnvironmentError(
-            "There was an error with rendering graph:\n{0}".format(e))
+            "This action requires Graphviz installed "
+            "together with 'pygraphviz' Python library")
 
+    graph = pygraphviz.AGraph(string=input_data)
+    if tred:
+        graph = graph.tred()
 
-def _render_with_pygraphiz(input_data, output_path):
-    """Renders graph using pygraphviz library."""
-    import pygraphviz as pgv
-
-    graph = pgv.AGraph(string=input_data)
     graph.draw(output_path, prog='dot', format='png')
