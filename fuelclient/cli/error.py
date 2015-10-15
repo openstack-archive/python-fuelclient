@@ -116,8 +116,7 @@ def exceptions_decorator(func):
         except requests.ConnectionError:
             exit_with_error("""
             Can't connect to Nailgun server!
-            Please modify "SERVER_ADDRESS" and "LISTEN_PORT"
-            in the file /etc/fuel/client/config.yaml""")
+            Please check connection settings in your configuration file.""")
         except Unauthorized:
             exit_with_error("""
             Unauthorized: need authentication!
