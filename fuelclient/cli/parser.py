@@ -35,18 +35,6 @@ class Parser(object):
         self.args = argv
         self.parser = argparse.ArgumentParser(
             usage="""
-            Default configuration for Fuel Client uses the
-            following parameters:
-
-            SERVER_ADDRESS: "127.0.0.1"
-            LISTEN_PORT: "8000"
-            KEYSTONE_USER: "admin"
-            KEYSTONE_PASS: "admin"
-
-            These options can be changed by putting some or all of them
-            into a yaml-formatted text file and specifying its full path
-            in the FUELCLIENT_CUSTOM_SETTINGS environment variable.
-
             fuel [optional args] <namespace> [action] [flags]
 
             DEPRECATION WARNING:
