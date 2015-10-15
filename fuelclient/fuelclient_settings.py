@@ -15,7 +15,7 @@
 #    under the License.
 
 import os
-import sys
+import shutil
 
 import six
 import yaml
@@ -46,28 +46,27 @@ class FuelClientSettings(object):
 
         # Look up for a default file distributed with the source code
         project_path = os.path.dirname(__file__)
-        project_settings_file = os.path.join(project_path,
-                                             'fuelclient_settings.yaml')
-        external_default_settings = '/etc/fuel/client/config.yaml'
-        external_user_settings = os.environ.get('FUELCLIENT_CUSTOM_SETTINGS')
+        user_conf_dir = os.environ.get('XDG_CONFIG_HOME',
+                                       os.path.expanduser('~/.config/'))
 
-        # NOTE(romcheg): when external default settings file is removed
-        # this deprecation warning should be removed as well.
-        if os.path.exists(external_default_settings) and \
-                external_default_settings != external_user_settings:
-            six.print_('DEPRECATION WARNING: {0} exists and will be '
-                       'used as the source for settings. This behavior is '
-                       'deprecated. Please specify the path to your custom '
-                       'settings file in the FUELCLIENT_CUSTOM_SETTINGS '
-                       'environment variable.'.format(
-                           external_default_settings),
-                       file=sys.stderr)
+        default_settings = os.path.join(project_path,
+                                        'fuel_client.yaml')
 
-        self._add_file_if_exists(project_settings_file, settings_files)
-        self._add_file_if_exists(external_default_settings, settings_files)
+        user_settings = os.path.join(user_conf_dir, 'fuel_client.yaml')
+        custom_settings = os.environ.get('FUELCLIENT_CUSTOM_SETTINGS')
+
+        if not os.path.exists(user_settings) and not custom_settings:
+            self.populate_default_settings(default_settings, user_settings)
+            six.print_('Settings for Fuel Client have been saved to {0}.\n'
+                       'Consider exloring them and changing default '
+                       'values to the ones which are appropriate '
+                       'for you.'.format(user_settings))
+
+        self._add_file_if_exists(default_settings, settings_files)
+        self._add_file_if_exists(user_settings, settings_files)
 
         # Add a custom settings file specified by user
-        self._add_file_if_exists(external_user_settings, settings_files)
+        self._add_file_if_exists(custom_settings, settings_files)
 
         self.config = {}
         for sf in settings_files:
@@ -95,6 +94,23 @@ class FuelClientSettings(object):
         for k in self.config:
             if k in os.environ:
                 self.config[k] = os.environ[k]
+
+    def populate_default_settings(self, source, destination):
+        """Puts default configuration file to a user's home directory."""
+
+        try:
+            dst_dir = os.path.dirname(destination)
+
+            if not os.path.exists(dst_dir):
+                os.makedirs(dst_dir)
+                os.chmod(dst_dir, 0o700)
+
+            shutil.copy(source, destination)
+            os.chmod(destination, 0o600)
+        except (IOError, OSError):
+            msg = ('Could not save settings to {0}. Please make sure the '
+                   'directory is writable')
+            raise error.SettingsException(msg.format(dst_dir))
 
     def dump(self):
         return yaml.dump(self.config)
