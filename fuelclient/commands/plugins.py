@@ -36,4 +36,4 @@ class PluginsSync(PluginsMixIn, base.BaseCommand):
     def take_action(self, parsed_args):
         ids = parsed_args.ids if len(parsed_args.ids) > 0 else None
         self.client.sync(ids=ids)
-        self.app.stdout.write("Plugins were successfully synchronized.")
+        self.app.stdout.write("Plugins were successfully synchronized.\n")
