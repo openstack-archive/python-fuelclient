@@ -97,12 +97,16 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
     @patch('fuelclient.cli.actions.release.os')
     def test_sync_with_directory_path(self, mos, mfiles, mopen):
         self.m_request.get(rm.ANY, json=RELEASE_OUTPUT)
+        put = self.m_request.put('/api/v1/releases/1/deployment_tasks',
+                                 json={})
+
         mos.path.realpath.return_value = real_path = '/etc/puppet'
         mfiles.return_value = [real_path + '/2014.2-6.0/tasks.yaml']
         mopen().__enter__().read.return_value = API_OUTPUT
         self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks', '--dir', real_path])
         mfiles.assert_called_once_with(real_path, '*tasks.yaml')
+        self.assertTrue(put.called)
 
     def test_multiple_tasks_but_one_release(self, mfiles, mopen):
         self.m_request.get(rm.ANY, json=RELEASE_OUTPUT)

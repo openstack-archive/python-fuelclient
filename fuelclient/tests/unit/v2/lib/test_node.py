@@ -165,8 +165,6 @@ class TestNodeFacade(test_api.BaseLibTest):
         with self.assertRaisesRegexp(error.LabelEmptyKeyError, msg):
             self.client.set_labels_for_nodes(labels=labels, node_ids=node_ids)
 
-        self.assertFalse(self.top_matcher.called)
-
     def test_delete_specific_labels_for_all_nodes(self):
         labels = ['key_1', '   key_3   ']
         data = {'labels': {'key_2': None}}

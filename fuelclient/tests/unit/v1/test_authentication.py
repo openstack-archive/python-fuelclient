@@ -45,6 +45,8 @@ class TestAuthentication(base.UnitTestCase):
 
     @patch('fuelclient.client.auth_client')
     def test_credentials(self, mkeystone_cli):
+        self.m_request.get('/api/v1/nodes/', json={})
+
         mkeystone_cli.return_value = Mock(auth_token='')
         self.execute(
             ['fuel', '--user=a', '--password=b', 'node'])

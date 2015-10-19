@@ -30,10 +30,6 @@ class BaseLibTest(oslo_base.BaseTestCase):
         self.m_request = rm.Mocker()
         self.m_request.start()
 
-        self.top_matcher = self.m_request.register_uri(rm.ANY,
-                                                       rm.ANY,
-                                                       json={})
-
         self.auth_required_patch = patch.object(client.Client,
                                                 'auth_required',
                                                 new_callable=mock.PropertyMock)
@@ -42,16 +38,6 @@ class BaseLibTest(oslo_base.BaseTestCase):
 
         self.addCleanup(self.m_request.stop)
         self.addCleanup(self.auth_required_patch.stop)
-
-    def tearDown(self):
-        calls = ['{method} {path}'.format(method=req.method, path=req.path)
-                 for req in self.top_matcher.request_history]
-        calls = '\n'.join(calls)
-        msg = 'Unexpected HTTP requests were detected:\n {0}'.format(calls)
-
-        self.assertFalse(self.top_matcher.called, msg=msg)
-
-        super(BaseLibTest, self).tearDown()
 
     def get_object_uri(self, collection_path, object_id, attribute='/'):
         return urlparse.urljoin(collection_path, str(object_id) + attribute)

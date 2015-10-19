@@ -51,10 +51,6 @@ class UnitTestCase(oslo_base.BaseTestCase):
         self.m_request = rm.Mocker()
         self.m_request.start()
 
-        self.top_matcher = self.m_request.register_uri(rm.ANY,
-                                                       rm.ANY,
-                                                       json={})
-
         self.addCleanup(self.auth_required_patcher.stop)
         self.addCleanup(self.m_request.stop)
 
