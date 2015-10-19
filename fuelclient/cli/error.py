@@ -100,6 +100,10 @@ class InvalidFileException(FuelClientException):
     pass
 
 
+class EnvironmentException(Exception):
+    pass
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class

@@ -15,7 +15,7 @@
 
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
-from fuelclient.cli.error import exit_with_error
+from fuelclient.cli.error import EnvironmentException
 from fuelclient.cli.formatting import format_table
 from fuelclient.cli.formatting import print_health_check
 from fuelclient.objects.environment import Environment
@@ -53,7 +53,7 @@ class HealthCheckAction(Action):
         env = Environment(params.env)
 
         if env.status not in self._allowed_statuses and not params.force:
-            exit_with_error(
+            raise EnvironmentException(
                 "Environment is not ready to run health check "
                 "because it is in {0} state. "
                 "Health check is likely to fail because of "
@@ -61,7 +61,7 @@ class HealthCheckAction(Action):
             )
 
         if env.is_customized and not params.force:
-            exit_with_error(
+            raise EnvironmentException(
                 "Environment deployment facts were updated. "
                 "Health check is likely to fail because of "
                 "that. Use --force flag to proceed anyway."

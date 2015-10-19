@@ -24,7 +24,7 @@ from time import sleep
 import six
 
 from fuelclient.cli.error import DeployProgressError
-from fuelclient.cli.error import exit_with_error
+from fuelclient.cli.error import InvalidDirectoryException
 from six.moves import urllib
 
 
@@ -108,7 +108,8 @@ def download_snapshot_with_progress_bar(
     to some 'directory'.
     """
     if not os.path.exists(directory):
-        exit_with_error("Folder {0} doesn't exist.".format(directory))
+        raise InvalidDirectoryException(
+            "Folder {0} doesn't exist.".format(directory))
     file_name = os.path.join(
         os.path.abspath(directory),
         url.split('/')[-1]
