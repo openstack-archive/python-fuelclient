@@ -21,8 +21,9 @@ from fuelclient.client import APIClient
 
 
 class UserAction(Action):
-    """Change password for user
-    """
+
+    """Change password for user."""
+
     action_name = "user"
 
     def __init__(self):
@@ -47,8 +48,12 @@ class UserAction(Action):
         return password1
 
     def change_password(self, params):
-        """To change user password:
-                fuel user change-password
+        """Change user password.
+
+        To change user password:
+
+            fuel user change-password
+
         """
         if params.newpass:
             password = params.newpass

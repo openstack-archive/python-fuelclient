@@ -30,8 +30,10 @@ class InterruptAction(Action):
         )
 
     def interrupt(self, params):
-        """To {action_name} some environment:
-                fuel --env 1 {action_name}
+        """Execute an action.
+
+        Example:
+            fuel --env 1 {action_name}
         """
         env = Environment(params.env)
         intercept_task = getattr(env, self.action_name)()
@@ -47,12 +49,10 @@ class InterruptAction(Action):
 
 
 class StopAction(InterruptAction):
-    """Stop deployment process for specific environment
-    """
+    """Stop deployment process for specific environment."""
     action_name = "stop"
 
 
 class ResetAction(InterruptAction):
-    """Reset deployed process for specific environment
-    """
+    """Reset deployed process for specific environment."""
     action_name = "reset"

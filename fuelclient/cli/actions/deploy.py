@@ -19,8 +19,7 @@ from fuelclient.cli.formatting import print_deploy_progress
 
 
 class DeployChangesAction(Action):
-    """Deploy changes to environments
-    """
+    """Deploy changes to environments."""
     action_name = "deploy-changes"
 
     def __init__(self):
@@ -34,7 +33,9 @@ class DeployChangesAction(Action):
         )
 
     def deploy_changes(self, params):
-        """To deploy all applied changes to some environment:
+        """Deploy changes.
+
+        To deploy all applied changes to some environment:
             fuel --env 1 deploy-changes
         """
         from fuelclient.objects.environment import Environment

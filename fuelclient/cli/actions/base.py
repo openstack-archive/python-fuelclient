@@ -25,8 +25,10 @@ from fuelclient.client import APIClient
 
 
 class Action(object):
-    """Action class generalizes logic of action execution
-    method action_func  - entry point of parser with parsed arguments
+    """Entry point of parser with parsed arguments.
+
+    Action class generalizes logic of action execution
+    method action_func.
 
     flag_func_map - is tuple of pairs ("flag", self.some_method) where
     "flag" is name of argument which causes "some_method" to be called.
@@ -38,6 +40,7 @@ class Action(object):
     args - tuple of function calls of functions from arguments module,
     is a manifest of all arguments used in action, and is used to initialize
     argparse subparser of that action.
+
     """
     def __init__(self):
         # Mapping of flags to methods
@@ -45,8 +48,7 @@ class Action(object):
         self.serializer = Serializer()
 
     def action_func(self, params):
-        """Entry point for all actions subclasses
-        """
+        """Entry point for all actions subclasses."""
         APIClient.debug_mode(debug=params.debug)
         if getattr(params, 'user') and getattr(params, 'password'):
             APIClient.user = params.user
@@ -64,9 +66,12 @@ class Action(object):
 
     @property
     def examples(self):
-        """examples property is concatenation of __doc__ strings from
-        methods in child action classes, and is added as epilog of help
-        output
+        """Examples property.
+
+        Examples property is concatenation of __doc__ strings from
+        methods in child action classes, and is added as epilog of
+        help output
+
         """
         methods_with_docs = set(
             method
@@ -98,11 +103,14 @@ class Action(object):
 
 
 def wrap(method, args, f):
-    """wrap - is second order function, purpose of which is to
-    generalize argument checking for methods in actions in form
-    of decorator with arguments.
+    """Generalize argument checking for methods in actions.
+
+    This function is second order function, purpose of which is to
+    generalize argument checking for methods in actions in form of
+    decorator with arguments.
 
     'check_all' and 'check_any' are partial function of wrap.
+
     """
     @wraps(f)
     def wrapped_f(self, params):
@@ -120,16 +128,22 @@ def wrap(method, args, f):
 
 
 def check_all(*args):
-    """check_all - decorator with arguments, which checks that
+    """Check that all arguments are given before running action.
+
+    check_all - decorator with arguments, which checks that
     all arguments are given before running action method, if
     not all arguments are given, it raises an ArgumentException.
+
     """
     return partial(wrap, all, args)
 
 
 def check_any(*args):
-    """check_any - decorator with arguments, which checks that
+    """Check that at least one arguments is given before running action.
+
+    check_any - decorator with arguments, which checks that
     at least one arguments is given before running action method,
     if no arguments were given, it raises an ArgumentException.
+
     """
     return partial(wrap, any, args)

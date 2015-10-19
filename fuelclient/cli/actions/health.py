@@ -22,8 +22,7 @@ from fuelclient.objects.environment import Environment
 
 
 class HealthCheckAction(Action):
-    """Run health check on environment
-    """
+    """Run health check on environment."""
     action_name = "health"
 
     _allowed_statuses = (
@@ -47,8 +46,10 @@ class HealthCheckAction(Action):
         )
 
     def check(self, params):
-        """To run some health checks:
-                fuel --env 1 health --check smoke,sanity
+        """Run health checks.
+
+        To run some health checks:
+            fuel --env 1 health --check smoke,sanity
         """
         env = Environment(params.env)
 
@@ -77,10 +78,12 @@ class HealthCheckAction(Action):
         )
 
     def list(self, params):
-        """To list all health check test sets:
-                fuel --env 1 health
-            or:
-                fuel --env 1 health --list
+        """List health check test sets.
+
+        To list all health check test sets:
+            fuel --env 1 health
+        or:
+            fuel --env 1 health --list
         """
         env = Environment(params.env)
         test_sets = env.get_testsets()

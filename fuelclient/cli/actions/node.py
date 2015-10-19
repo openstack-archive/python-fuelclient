@@ -28,8 +28,7 @@ from fuelclient.objects.node import NodeCollection
 
 
 class NodeAction(Action):
-    """List and assign available nodes to environments
-    """
+    """List and assign available nodes to environments."""
     action_name = "node"
     acceptable_keys = ("id", "status", "name", "cluster", "ip",
                        "mac", "roles", "pending_roles", "online", "group_id")
@@ -91,9 +90,11 @@ class NodeAction(Action):
 
     @check_all("node", "role", "env")
     def set(self, params):
-        """Assign some nodes to environment with with specific roles:
-                fuel --env 1 node set --node 1 --role controller
-                fuel --env 1 node set --node 2,3,4 --role compute,cinder
+        """Assign node to environment.
+
+        Assign some nodes to environment with with specific roles:
+            fuel --env 1 node set --node 1 --role controller
+            fuel --env 1 node set --node 2,3,4 --role compute,cinder
         """
         env = Environment(params.env)
         nodes = Node.get_by_ids(params.node)
@@ -108,14 +109,17 @@ class NodeAction(Action):
 
     @check_any("node", "env")
     def delete(self, params):
-        """Remove some nodes from environment:
-                fuel --env 1 node remove --node 2,3
+        """Delete node.
 
-           Remove nodes no matter to which environment they were assigned:
-                fuel node remove --node 2,3,6,7
+        Remove some nodes from environment:
+            fuel --env 1 node remove --node 2,3
 
-           Remove all nodes from some environment:
-                fuel --env 1 node remove --all
+        Remove nodes no matter to which environment they were assigned:
+            fuel node remove --node 2,3,6,7
+
+        Remove all nodes from some environment:
+            fuel --env 1 node remove --all
+
         """
         if params.env:
             env = Environment(params.env)
@@ -160,15 +164,17 @@ class NodeAction(Action):
     @check_all("node")
     @check_any("default", "download", "upload")
     def attributes(self, params):
-        """Download current or default disk, network,
-           configuration for some node:
-                fuel node --node-id 2 --disk --default
-                fuel node --node-id 2 --network --download \\
+        """Download or upload disk, network or node configuration.
+
+        Download current or default disk, network, configuration for some node:
+            fuel node --node-id 2 --disk --default
+            fuel node --node-id 2 --network --download \\
                 --dir path/to/directory
 
-           Upload disk, network, configuration for some node:
-                fuel node --node-id 2 --network --upload
-                fuel node --node-id 2 --disk --upload --dir path/to/directory
+        Upload disk, network, configuration for some node:
+            fuel node --node-id 2 --network --upload
+            fuel node --node-id 2 --disk --upload --dir path/to/directory
+
         """
         nodes = Node.get_by_ids(params.node)
         attribute_type = "interfaces" if params.network else "disks"
@@ -226,9 +232,11 @@ class NodeAction(Action):
 
     @check_all("node")
     def start(self, params):
-        """Deploy/Provision some node:
-                fuel node --node-id 2 --provision
-                fuel node --node-id 2 --deploy
+        """Start a node.
+
+        Deploy/Provision some node:
+            fuel node --node-id 2 --provision
+            fuel node --node-id 2 --deploy
         """
         node_collection = NodeCollection.init_with_ids(params.node)
         method_type = "deploy" if params.deploy else "provision"
@@ -248,13 +256,15 @@ class NodeAction(Action):
 
     @check_all("node")
     def execute_tasks(self, params):
-        """Execute deployment tasks
-                fuel node --node 2 --tasks hiera netconfig
-                fuel node --node 2 --skip hiera netconfig
-                fuel node --node 2 --skip rsync --end pre_deployment
-                fuel node --node 2 --end netconfig
-                fuel node --node 2 --start hiera --end neutron
-                fuel node --node 2 --start post_deployment
+        """Execute deployment tasks.
+
+        Examples:
+            fuel node --node 2 --tasks hiera netconfig
+            fuel node --node 2 --skip hiera netconfig
+            fuel node --node 2 --skip rsync --end pre_deployment
+            fuel node --node 2 --end netconfig
+            fuel node --node 2 --start hiera --end neutron
+            fuel node --node 2 --start post_deployment
         """
         node_collection = NodeCollection.init_with_ids(params.node)
         env_id_to_start = self.get_env_id(node_collection)
@@ -281,15 +291,18 @@ class NodeAction(Action):
             "Started tasks {0} for nodes {1}.".format(tasks, node_collection))
 
     def list(self, params):
-        """To list all available nodes:
-                fuel node
+        """List available nodes.
 
-            To filter them by environment:
-                fuel --env-id 1 node
+        To list all available nodes:
+            fuel node
 
-            It's Possible to manipulate nodes with their short mac addresses:
-                fuel node --node-id 80:ac
-                fuel node remove --node-id 80:ac,5d:a2
+        To filter them by environment:
+            fuel --env-id 1 node
+
+        It's Possible to manipulate nodes with their short mac
+        addresses:
+            fuel node --node-id 80:ac fuel node remove --node-id 80:ac,5d:a2
+
         """
         if params.node:
             node_collection = NodeCollection.init_with_ids(params.node)
@@ -308,12 +321,14 @@ class NodeAction(Action):
 
     @check_all("node")
     def delete_from_db(self, params):
-        """To delete nodes from fuel db:
-                fuel node --node-id 1 --delete-from-db
-                fuel node --node-id 1 2 --delete-from-db
-            (this works only for offline nodes)
-                fuel node --node-id 1 --delete-from-db --force
-            (this forces deletion of nodes regardless of their state)
+        """Delete nodes from fuel db.
+
+        To delete nodes from fuel db:
+            fuel node --node-id 1 --delete-from-db
+            fuel node --node-id 1 2 --delete-from-db
+        (this works only for offline nodes)
+            fuel node --node-id 1 --delete-from-db --force
+        (this forces deletion of nodes regardless of their state)
         """
         if not params.force:
             node_collection = NodeCollection.init_with_ids(params.node)
@@ -338,8 +353,11 @@ class NodeAction(Action):
 
     @check_all("node", "hostname")
     def set_hostname(self, params):
-        """To set node hostname:
-                fuel node --node-id 1 --hostname ctrl-01
+        """Set node hastname.
+
+        To set node hostname:
+            fuel node --node-id 1 --hostname ctrl-01
+
         """
         nodes = Node.get_by_ids(params.node)
 

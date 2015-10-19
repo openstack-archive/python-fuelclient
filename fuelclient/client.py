@@ -30,8 +30,8 @@ logger.addHandler(NullHandler())
 
 
 class Client(object):
-    """This class handles API requests
-    """
+
+    """This class handles API requests."""
 
     def __init__(self):
         conf = fuelclient_settings.get_settings()
@@ -209,8 +209,7 @@ class Client(object):
         return self.session.post(url, data=data_json)
 
     def post_request(self, api, data=None, ostf=False):
-        """Make POST request to specific API with some data
-        """
+        """Make POST request to specific API with some data."""
         resp = self.post_request_raw(api, data, ostf=ostf)
         resp.raise_for_status()
 

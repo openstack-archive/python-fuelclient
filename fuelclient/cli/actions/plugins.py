@@ -22,8 +22,7 @@ from fuelclient import utils
 
 
 class PluginAction(Action):
-    """List and modify currently available releases
-    """
+    """List and modify currently available releases."""
     action_name = "plugins"
 
     acceptable_keys = (
@@ -104,7 +103,9 @@ class PluginAction(Action):
             "Plugin {0} was successfully removed.".format(params.remove))
 
     def update(self, params):
-        """Update plugin from one minor version to another.
+        """Update plugin.
+
+        Update plugin from one minor version to another.
            For example if there is a plugin with version 2.0.0,
            plugin with version 2.0.1 can be used as update. But
            plugin with version 2.1.0, cannot be used to update
@@ -112,6 +113,7 @@ class PluginAction(Action):
            beginning from package_version 2.0.0
 
                fuel plugins --update plugin-name-2.0-2.0.1-0.noarch.rpm
+
         """
         plugin_path = params.update
         self.check_file(plugin_path)
@@ -121,7 +123,9 @@ class PluginAction(Action):
             "Plugin {0} was successfully updated.".format(plugin_path))
 
     def downgrade(self, params):
-        """Downgrade plugin from one minor version to another.
+        """Downgrade plugin.
+
+        Downgrade plugin from one minor version to another.
            For example if there is a plugin with version 2.0.1,
            plugin with version 2.0.0 can be used to perform downgrade.
            Plugin with version 1.0.0, cannot be used to perform downgrade
@@ -129,6 +133,7 @@ class PluginAction(Action):
            beginning from package_version 2.0.0
 
                fuel plugins --downgrade plugin-name-2.0-2.0.1-0.noarch.rpm
+
         """
         plugin_path = params.downgrade
         self.check_file(plugin_path)
@@ -138,7 +143,9 @@ class PluginAction(Action):
             "Plugin {0} was successfully downgraded.".format(plugin_path))
 
     def sync(self, params):
-        """Synchronise plugins on file system with plugins in
+        """Synchronise plugins.
+
+        Synchronise plugins on file system with plugins in
            API service, creates plugin if it is not exists,
            updates existent plugins
 

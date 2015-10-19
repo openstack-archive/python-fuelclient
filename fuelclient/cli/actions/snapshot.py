@@ -24,8 +24,7 @@ from fuelclient.objects.task import SnapshotTask
 
 
 class SnapshotAction(Action):
-    """Generate and download snapshot.
-    """
+    """Generate and download snapshot."""
     action_name = "snapshot"
 
     def __init__(self):
@@ -41,14 +40,16 @@ class SnapshotAction(Action):
         )
 
     def get_snapshot(self, params):
-        """To download diagnostic snapshot:
-                fuel snapshot
+        """Get diagnostic snapshot.
 
-            To download diagnostic snapshot to specific directory:
-                fuel snapshot --dir path/to/directory
+        To download diagnostic snapshot:
+            fuel snapshot
 
-            To specify config for snapshoting
-                fuel snapshot < conf.yaml
+        To download diagnostic snapshot to specific directory:
+            fuel snapshot --dir path/to/directory
+
+        To specify config for snapshoting:
+            fuel snapshot < conf.yaml
 
         """
         if sys.stdin.isatty():
@@ -69,12 +70,11 @@ class SnapshotAction(Action):
         )
 
     def get_snapshot_config(self, params):
-        """Download default config for snapshot
+        """Download default config for snapshot.
 
-                fuel snapshot --conf > dump_conf.yaml
-
-            To use json formatter
-                fuel snapshot --conf --json
+        Examples:
+            fuel snapshot --conf > dump_conf.yaml
+            fuel snapshot --conf --json
         """
         conf = SnapshotTask.get_default_config()
         self.serializer.write_to_file(sys.stdout, conf)

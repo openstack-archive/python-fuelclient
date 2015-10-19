@@ -19,8 +19,7 @@ from fuelclient.objects.notifications import Notifications
 
 
 class NotificationsAction(Action):
-    """List and create notifications
-    """
+    """List and create notifications."""
     action_name = "notifications"
 
     acceptable_keys = (
@@ -52,9 +51,11 @@ class NotificationsAction(Action):
         )
 
     def list(self, params):
-        """Print all available notifications:
-                fuel notifications
-                fuel notifications --list
+        """Print all available notifications.
+
+        Examples:
+            fuel notifications
+            fuel notifications --list
         """
         notifications = Notifications.get_all_data()
 
@@ -72,6 +73,8 @@ class NotificationsAction(Action):
 
     def mark_as_read(self, params):
         """Mark given notifications as read.
+
+        Examples:
             fuel notifications --mark-as-read 1 2
             fuel notifications -r 1 2
         """
@@ -84,7 +87,9 @@ class NotificationsAction(Action):
         )
 
     def send(self, params):
-        """Send notification:
+        """Send notification.
+
+        Example:
             fuel notifications --send "message" --topic done
         """
         message = params.send
@@ -97,8 +102,8 @@ class NotificationsAction(Action):
 
 
 class NotifyAction(NotificationsAction):
-    """Shortcut for quickly sending a notification.
-    """
+
+    """Shortcut for quickly sending a notification."""
 
     action_name = "notify"
 

@@ -23,8 +23,7 @@ from fuelclient.objects.network_group import NetworkGroupCollection
 
 
 class NetworkGroupAction(Action):
-    """Show or modify network groups
-    """
+    """Show or modify network groups."""
     action_name = "network-group"
     acceptable_keys = ("id", "name", "vlan_start", "cidr",
                        "gateway", "group_id")
@@ -61,13 +60,15 @@ class NetworkGroupAction(Action):
 
     @check_all('nodegroup', 'name', 'cidr')
     def create(self, params):
-        """Create a new network group
-               fuel network-group --create --node-group 1 --name "new network"
+        """Create a new network group.
+
+        Examples:
+            fuel network-group --create --node-group 1 --name "new network" \\
                 --release 2 --vlan 100 --cidr 10.0.0.0/24
 
-               fuel network-group --create --node-group 2 --name "new network"
-               --release 2 --vlan 100 --cidr 10.0.0.0/24 --gateway 10.0.0.1
-               --meta 'meta information in JSON format'
+            fuel network-group --create --node-group 2 --name "new network" \\
+                --release 2 --vlan 100 --cidr 10.0.0.0/24 --gateway 10.0.0.1 \\
+                --meta 'meta information in JSON format'
         """
         meta = self.serializer.deserialize(params.meta) if params.meta else {}
 
@@ -87,9 +88,11 @@ class NetworkGroupAction(Action):
 
     @check_all('network')
     def delete(self, params):
-        """Delete the specified network groups
-               fuel network-group --delete --network 1
-               fuel network-group --delete --network 2,3,4
+        """Delete the specified network groups.
+
+        Examples:
+        fuel network-group --delete --network 1
+        fuel network-group --delete --network 2,3,4
         """
         ngs = NetworkGroup.get_by_ids(params.network)
         for network_group in ngs:
@@ -103,8 +106,10 @@ class NetworkGroupAction(Action):
 
     @check_all('network')
     def set(self, params):
-        """Set parameters for the specified network group:
-            fuel network-group --set --network 1 --name new_name
+        """Set parameters for the specified network group.
+
+        Example:
+        fuel network-group --set --network 1 --name new_name
         """
         # Since network has set type and we cannot update multiple network
         # groups at once, we pick first network group id from set.
@@ -125,11 +130,13 @@ class NetworkGroupAction(Action):
             "Network group id={0} has been updated".format(ng_id))
 
     def list(self, params):
-        """To list all available network groups:
-                fuel network-group list
+        """List network groups.
 
-            To filter them by node group:
-                fuel network-group --node-group 1
+        To list all available network groups:
+            fuel network-group list
+
+        To filter them by node group:
+            fuel network-group --node-group 1
         """
         group_collection = NetworkGroupCollection.get_all()
         if params.nodegroup:

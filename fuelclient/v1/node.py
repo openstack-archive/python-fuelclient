@@ -69,12 +69,14 @@ class NodeClient(base_v1.BaseV1Client):
         return node.set(updated_attributes)
 
     def get_all_labels_for_nodes(self, node_ids=None):
-        """Get list of labels for specific nodes. If no node_ids then all
-        labels should be returned
+        """Get list of labels for specific nodes.
+
+        If no node_ids then all labels should be returned
 
         :param node_ids: List of node ids for filtering labels
         :type node_ids: list
         :returns: list -- filtered list of labels
+
         """
         labels = []
 
@@ -96,14 +98,17 @@ class NodeClient(base_v1.BaseV1Client):
         return labels
 
     def set_labels_for_nodes(self, labels=None, node_ids=None):
-        """Update nodes labels attribute with new data. If node_ids
-        are empty list then labels will be updated on all nodes
+        """Update nodes labels attribute with new data.
+
+        If node_ids are empty list then labels will be updated on all
+        nodes
 
         :param labels: List of string pairs `key=val` for labels
         :type labels: list
         :param node_ids: List of node ids where labels should be updated
         :type node_ids: list
         :return: list -- ids of nodes where labels were updated
+
         """
         data_to_return = []
         labels_to_update = {}
@@ -136,14 +141,17 @@ class NodeClient(base_v1.BaseV1Client):
         return data_to_return
 
     def delete_labels_for_nodes(self, labels=None, node_ids=None):
-        """Delete labels data from nodes labels. If node_ids are
-        empty list then labels will be deleted on all nodes
+        """Delete labels data from nodes labels.
+
+        If node_ids are empty list then labels will be deleted on all
+        nodes
 
         :param labels: List of string label keys
         :type labels: list
         :param node_ids: List of node ids where labels should be deleted
         :type node_ids: list
         :returns: list -- ids of nodes where labels were deleted
+
         """
         data_to_return = []
 

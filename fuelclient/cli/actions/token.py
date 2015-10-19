@@ -19,8 +19,7 @@ from fuelclient.client import APIClient
 
 
 class TokenAction(Action):
-    """Return a valid keystone auth token
-    """
+    """Return a valid keystone auth token."""
     action_name = "token"
 
     def __init__(self):
@@ -32,6 +31,5 @@ class TokenAction(Action):
         )
 
     def get_token(self, params):
-        """Print out a valid Keystone auth token
-        """
+        """Print out a valid Keystone auth token."""
         sys.stdout.write(APIClient.auth_token)

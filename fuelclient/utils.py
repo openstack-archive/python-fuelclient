@@ -61,10 +61,11 @@ def exec_cmd(cmd, cwd=None):
 
 
 def exec_cmd_iterator(cmd):
-    """Execute command with logging.
+    """Execute command.
+
+    Execute command with logging.
     :param cmd: shell command
-    :returns: generator where yeach item
-              is line from stdout
+    :returns: generator where yeach item is line from stdout.
     """
     child = subprocess.Popen(
         cmd, stdout=subprocess.PIPE,
@@ -101,7 +102,9 @@ def glob_and_parse_yaml(path):
 
 def major_plugin_version(version):
     """Retrieves major version.
-    "1.2.3" -> "1.2"
+
+    Example:
+        "1.2.3" -> "1.2"
 
     :param str version: version
     :returns: only major version
@@ -113,8 +116,10 @@ def major_plugin_version(version):
 
 
 def iterfiles(dir_path, file_pattern):
-    """Returns generator where each item is a path to file, that satisfies
-    file_patterns condtion
+    """Iterates over list of files.
+
+    Returns generator where each item is a path to file, that satisfies
+    file_patterns condition.
 
     :param dir_path: path to directory, e.g /etc/puppet/
     :param file_pattern: unix filepattern to match files

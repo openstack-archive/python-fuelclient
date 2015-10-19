@@ -19,8 +19,7 @@ from fuelclient.objects.fuelversion import FuelVersion
 
 
 class FuelVersionAction(Action):
-    """Show Fuel server's version
-    """
+    """Show Fuel server's version."""
 
     action_name = "fuel-version"
 
@@ -35,8 +34,10 @@ class FuelVersionAction(Action):
         )
 
     def version(self, params):
-        """To show fuel version data:
-                fuel fuel-version
+        """Show fuel version data.
+
+        Example:
+            fuel fuel-version
         """
         version = FuelVersion.get_all_data()
         print(self.serializer.serialize(version))

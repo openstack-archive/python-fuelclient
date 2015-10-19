@@ -26,8 +26,7 @@ from fuelclient import utils
 
 
 class ReleaseAction(Action):
-    """List and modify currently available releases
-    """
+    """List and modify currently available releases."""
     action_name = "release"
 
     def __init__(self):
@@ -56,11 +55,11 @@ class ReleaseAction(Action):
         )
 
     def list(self, params):
-        """Print all available releases:
-                fuel release --list
+        """Print releases.
 
-           Print release with specific id=1:
-                fuel release --rel 1
+        Examples:
+            fuel release --list
+            fuel release --rel 1
         """
         acceptable_keys = (
             "id",
@@ -86,8 +85,10 @@ class ReleaseAction(Action):
     @check_any("download", "upload")
     def network(self, params):
         """Modify release networks configuration.
-        fuel rel --rel 1 --network --download
-        fuel rel --rel 2 --network --upload
+
+        Examples:
+            fuel rel --rel 1 --network --download
+            fuel rel --rel 2 --network --upload
         """
         release = Release(params.release)
         dir_path = self.full_path_directory(
@@ -108,8 +109,11 @@ class ReleaseAction(Action):
     @check_any("download", "upload")
     def deployment_tasks(self, params):
         """Modify deployment_tasks for release.
-        fuel rel --rel 1 --deployment-tasks --download
-        fuel rel --rel 1 --deployment-tasks --upload
+
+        Examples:
+            fuel rel --rel 1 --deployment-tasks --download fuel
+            rel --rel 1 --deployment-tasks --upload
+
         """
         release = Release(params.release)
         dir_path = self.full_path_directory(
@@ -128,17 +132,19 @@ class ReleaseAction(Action):
 
     @check_all("dir")
     def sync_deployment_tasks(self, params):
-        """Upload tasks for different releases based on directories.
+        """Upload tasks.
+
+        Upload tasks for different releases based on directories.
         Unique identifier of the release should in the path, like:
 
             /etc/puppet/2014.2-6.0/
 
-        fuel rel --sync-deployment-tasks --dir /etc/puppet/2014.2-6.0/
-        fuel rel --sync-deployment-tasks --fp '*tasks.yaml'
+            fuel rel --sync-deployment-tasks --dir /etc/puppet/2014.2-6.0/
+            fuel rel --sync-deployment-tasks --fp '*tasks.yaml'
 
         In case no directory will be provided:
 
-        fuel rel --sync-deployment-tasks
+            fuel rel --sync-deployment-tasks
 
         Current directory will be used
         """

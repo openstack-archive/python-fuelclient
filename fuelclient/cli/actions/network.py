@@ -19,8 +19,7 @@ from fuelclient.objects.environment import Environment
 
 
 class NetworkAction(Action):
-    """Show or modify network settings of specific environments
-    """
+    """Show or modify network settings of specific environments."""
     action_name = "network"
 
     def __init__(self):
@@ -45,9 +44,13 @@ class NetworkAction(Action):
         )
 
     def upload(self, params):
-        """To upload network configuration from some
-           directory for some environment:
-                fuel --env 1 network --upload --dir path/to/directory
+        """Upload network configuration.
+
+        Upload network configuration from some directory for some
+        environment.
+
+        Example: fuel --env 1 network --upload --dir path/to/directory
+
         """
         env = Environment(params.env)
         network_data = env.read_network_data(
@@ -67,9 +70,13 @@ class NetworkAction(Action):
             )
 
     def verify(self, params):
-        """To verify network configuration from some directory
-           for some environment:
-                fuel --env 1 network --verify --dir path/to/directory
+        """Verify network configuration.
+
+        Verify network configuration from some directory for some
+        environment.
+
+        Example: fuel --env 1 network --verify --dir path/to/directory
+
         """
         env = Environment(params.env)
         response = env.verify_network()
@@ -79,9 +86,13 @@ class NetworkAction(Action):
         )
 
     def download(self, params):
-        """To download network configuration in this
-           directory for some environment:
-                fuel --env 1 network --download
+        """Download network configuration.
+
+        Download network configuration in this directory for some
+        environment.
+
+        Example: fuel --env 1 network --download
+
         """
         env = Environment(params.env)
         network_data = env.get_network_data()
@@ -97,8 +108,7 @@ class NetworkAction(Action):
 
 
 class NetworkTemplateAction(Action):
-    """Manipulate network templates for a specific environment
-    """
+    """Manipulate network templates for a specific environment."""
     action_name = 'network-template'
 
     def __init__(self):
@@ -121,9 +131,14 @@ class NetworkTemplateAction(Action):
             ("delete", self.delete))
 
     def upload(self, params):
-        """Uploads network template from filesystem path
-           for specified environment:
-               fuel --env 1 network-template --upload --dir path/to/directory
+        """Upload network template.
+
+        Upload network template from filesystem path
+        for specified environment.
+
+        Example:
+        fuel --env 1 network-template --upload --dir path/to/directory
+
         """
         env = Environment(params.env)
         network_template_data = env.read_network_template_data(
@@ -135,9 +150,13 @@ class NetworkTemplateAction(Action):
         print("Network template {0} has been uploaded.".format(full_path))
 
     def download(self, params):
-        """Downloads network template in current
-           directory for specified environment:
-               fuel --env 1 network-template --download
+        """Download network template.
+
+        Download network template in current directory for specified
+        environment.
+
+        Example: fuel --env 1 network-template download
+
         """
         env = Environment(params.env)
         template_data = env.get_network_template_data()
@@ -150,8 +169,11 @@ class NetworkTemplateAction(Action):
               " downloaded to {1}".format(env.id, network_template_file_path))
 
     def delete(self, params):
-        """Deletes network template for specified environment:
-            fuel --env 1 --network-template --delete
+        """Delete network template.
+
+        Delete network template for specified environment.
+
+        Example: fuel --env 1 --network-template --delete
         """
         env = Environment(params.env)
         env.delete_network_template_data()

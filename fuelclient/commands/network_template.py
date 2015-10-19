@@ -67,9 +67,14 @@ class NetworkTemplateUpload(NetworkTemplateMixin, base.BaseCommand):
 
 
 class NetworkTemplateDownload(NetworkTemplateMixin, base.BaseCommand):
-    """To download network configuration for environment to the specified
-    directory:
-        fuel2 network-template download --dir path/to/directory 1
+    """Download network configuration.
+
+    To download network configuration for environment to the specified
+    directory.
+
+    Example:
+    fuel2 network-template download --dir path/to/directory 1
+
     """
 
     def get_parser(self, prog_name):
