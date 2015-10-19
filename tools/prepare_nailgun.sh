@@ -121,7 +121,7 @@ obtain_nailgun() {
     err "Obtaining Nailgun with the revision $FUEL_COMMIT"
 
     if [[ "$FUEL_WEB_CLONE" == "yes" ]]; then
-        git clone $FUEL_WEB_REPO $FUEL_WEB_ROOT || \
+        git clone --depth 1 $FUEL_WEB_REPO $FUEL_WEB_ROOT || \
             { err "Failed to clone Nailgun"; exit 1; }
     fi
 
