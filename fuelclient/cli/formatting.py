@@ -74,8 +74,7 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
 
 
 def quote_and_join(words):
-    """quote_and_join - performs listing of objects and returns string.
-    """
+    """Perform listing of objects and return string."""
     words = list(words)
     if len(words) > 1:
         return '{0} and "{1}"'.format(
@@ -89,8 +88,10 @@ def quote_and_join(words):
 
 
 def get_bar_for_progress(full_width, progress):
-    """get_bar_for_progress - returns string with a width of 'full_width'
-    which illustrates specific progress value.
+    """Get bar for progress.
+
+    Return string with a width of 'full_width' which illustrates
+    specific progress value.
     """
     number_of_equal_signs = int(
         math.ceil(progress * float(full_width - 2) / 100)
@@ -104,7 +105,9 @@ def get_bar_for_progress(full_width, progress):
 
 def download_snapshot_with_progress_bar(
         url, auth_token, directory=os.path.curdir):
-    """downloads file from specific 'url' with progress bar and save it
+    """Download snapshot with progress bar.
+
+    Downloads file from specific 'url' with progress bar and save it
     to some 'directory'.
     """
     if not os.path.exists(directory):
@@ -138,7 +141,9 @@ def download_snapshot_with_progress_bar(
 
 
 def print_deploy_progress(deploy_task):
-    """Receives 'deploy_task' and depending on terminal availability
+    """Print deploy progress.
+
+    Receives 'deploy_task' and depending on terminal availability
     starts progress printing routines with or without curses.
     """
     try:

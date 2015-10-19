@@ -20,8 +20,7 @@ import sys
 
 
 def exit_with_error(message):
-    """exit_with_error - writes message to stderr and exits with exit code 1.
-    """
+    """Writes message to stderr and exits with exit code 1."""
     sys.stderr.write(message + "\n")
     exit(1)
 
@@ -45,35 +44,23 @@ class WrongEnvironmentError(FuelClientException):
 
 
 class ServerDataException(FuelClientException):
-    """ServerDataException - must be raised when
-    data returned from server cannot be processed by Fuel-Client methods.
-    """
+    """Data returned from server cannot be processed by Fuel-Client methods."""
 
 
 class DeployProgressError(FuelClientException):
-    """DeployProgressError - must be raised when
-    deployment process interrupted on server.
-    """
+    """Deployment process interrupted on server."""
 
 
 class ArgumentException(FuelClientException):
-    """ArgumentException - must be raised when
-    incorrect arguments inputted through argparse or some function.
-    """
+    """Incorrect arguments inputted through argparse or some function."""
 
 
 class ActionException(FuelClientException):
-    """ActionException - must be raised when
-    though arguments inputted to action are correct but they contradict
-    to logic in action.
-    """
+    """Inputted arguments to action contradict to logic in action."""
 
 
 class ParserException(FuelClientException):
-    """ParserException - must be raised when
-    some problem occurred in process of argument parsing,
-    in argparse extension or in Fuel-Client Parser submodule.
-    """
+    """Some problem occurred in process of argument parsing."""
 
 
 class ProfilingError(FuelClientException):
@@ -101,9 +88,7 @@ class InvalidFileException(FuelClientException):
 
 
 def exceptions_decorator(func):
-    """Handles HTTP errors and expected exceptions that may occur
-    in methods of APIClient class
-    """
+    """Handles exceptions that may occur in methods of APIClient class."""
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:

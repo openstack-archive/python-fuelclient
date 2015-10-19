@@ -18,7 +18,9 @@ import logging
 
 
 class NullHandler(logging.Handler):
-    """This handler does nothing. It's intended to be used to avoid the
+    """Null handler.
+
+    This handler does nothing. It's intended to be used to avoid the
     "No handlers could be found for logger XXX" one-off warning. This
     important for library code, which may contain code to log events.
     of the library does not configure logging, the one-off warning mig

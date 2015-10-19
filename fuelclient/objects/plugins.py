@@ -44,7 +44,9 @@ def raise_error_if_not_master():
 
 
 def master_only(f):
-    """Decorator for the method, which raises error, if method
+    """Decorator for preventing execution a method on non-master nodes.
+
+    Decorator for the method, which raises error, if method
     is called on the node which is not Fuel master
     """
     @six.wraps(f)
@@ -60,33 +62,27 @@ class BasePlugin(object):
 
     @abc.abstractmethod
     def install(cls, plugin_path, force=False):
-        """Installs plugin package
-        """
+        """Installs plugin package."""
 
     @abc.abstractmethod
     def update(cls, plugin_path):
-        """Updates the plugin
-        """
+        """Updates the plugin."""
 
     @abc.abstractmethod
     def remove(cls, plugin_name, plugin_version):
-        """Removes the plugin from file system
-        """
+        """Removes the plugin from file system."""
 
     @abc.abstractmethod
     def downgrade(cls, plugin_path):
-        """Downgrades the plugin
-        """
+        """Downgrades the plugin."""
 
     @abc.abstractmethod
     def name_from_file(cls, file_path):
-        """Retrieves name from plugin package
-        """
+        """Retrieves name from plugin package."""
 
     @abc.abstractmethod
     def version_from_file(cls, file_path):
-        """Retrieves version from plugin package
-        """
+        """Retrieves version from plugin package."""
 
 
 class PluginV1(BasePlugin):
@@ -94,8 +90,7 @@ class PluginV1(BasePlugin):
     metadata_config = 'metadata.yaml'
 
     def deprecated(f):
-        """Prints deprecation warning for old plugins
-        """
+        """Prints deprecation warning for old plugins."""
         @six.wraps(f)
         def print_message(*args, **kwargs):
             six.print_(
@@ -205,8 +200,9 @@ class PluginV2(BasePlugin):
 
     @classmethod
     def name_from_file(cls, file_path):
-        """Retrieves plugin name from RPM. RPM name contains
-        the version of the plugin, which should be removed.
+        """Retrieves plugin name from RPM.
+
+        RPM name contains the version of the plugin, which should be removed.
 
         :param str file_path: path to rpm file
         :returns: name of the plugin
@@ -235,6 +231,7 @@ class PluginV2(BasePlugin):
     @classmethod
     def _remove_major_plugin_version(cls, name):
         """Removes the version from plugin name.
+
         Here is an example: "name-1.0" -> "name"
 
         :param str name: plugin name
@@ -255,7 +252,9 @@ class Plugins(base.BaseObject):
 
     @classmethod
     def register(cls, name, version, force=False):
-        """Tries to find plugin on file system, creates
+        """Register plugin.
+
+        Tries to find plugin on file system, creates
         it in API service if it exists.
 
         :param str name: plugin name
@@ -281,9 +280,10 @@ class Plugins(base.BaseObject):
 
     @classmethod
     def sync(cls, plugin_ids=None):
-        """Checks all of the plugins on file systems,
-        and makes sure that they have consistent information
-        in API service.
+        """Checks all of the plugins on file systems.
+
+        Checks all of the plugins on file systems and makes sure that they
+        have consistent information in API service.
 
         :params plugin_ids: list of ids for plugins which should be synced
         :type plugin_ids: list
@@ -366,8 +366,9 @@ class Plugins(base.BaseObject):
 
     @classmethod
     def make_obj_by_name(cls, name, version):
-        """Finds appropriate plugin class version,
-        by plugin version and name.
+        """Find plugin class.
+
+        Find appropriate plugin class version, by plugin version and name.
 
         :param str name:
         :param str version:
@@ -390,8 +391,7 @@ class Plugins(base.BaseObject):
 
     @classmethod
     def make_obj_by_file(cls, file_path):
-        """Finds appropriate plugin class version,
-        by plugin file.
+        """Find appropriate plugin class version, by plugin file.
 
         :param str file_path: plugin path
         :returns: plugin class

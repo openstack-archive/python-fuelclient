@@ -19,8 +19,7 @@ from fuelclient.objects.environment import Environment
 
 
 class SettingsAction(Action):
-    """Show or modify environment settings
-    """
+    """Show or modify environment settings."""
     action_name = "settings"
 
     def __init__(self):
@@ -42,8 +41,10 @@ class SettingsAction(Action):
         )
 
     def upload(self, params):
-        """To upload settings for some environment from some directory:
-                fuel --env 1 settings --upload --dir path/to/directory
+        """Upload settings.
+
+        To upload settings for some environment from some directory:
+            fuel --env 1 settings --upload --dir path/to/directory
         """
         env = Environment(params.env)
         settings_data = env.read_settings_data(
@@ -54,8 +55,10 @@ class SettingsAction(Action):
         print("Settings configuration uploaded.")
 
     def default(self, params):
-        """To download default settings for some environment in some directory:
-                fuel --env 1 settings --default --dir path/to/directory
+        """Download default settings.
+
+        To download default settings for some environment in some directory:
+            fuel --env 1 settings --default --dir path/to/directory
         """
         env = Environment(params.env)
         default_data = env.get_default_settings_data()
@@ -69,8 +72,10 @@ class SettingsAction(Action):
         )
 
     def download(self, params):
-        """To download settings for some environment in this directory:
-                fuel --env 1 settings --download
+        """Download settings.
+
+        To download settings for some environment in this directory:
+            fuel --env 1 settings --download
         """
         env = Environment(params.env)
         settings_data = env.get_settings_data()
@@ -86,13 +91,14 @@ class SettingsAction(Action):
 
 
 class VmwareSettingsAction(SettingsAction):
-    """Show or modify environment vmware settings
-    """
+    """Show or modify environment vmware settings."""
     action_name = "vmware-settings"
 
     def upload(self, params):
-        """To upload vmware settings for some environment from some directory:
-                fuel --env 1 vmware-settings --upload --dir path/to/directory
+        """Upload vmware settings.
+
+        To upload vmware settings for some environment from some directory:
+            fuel --env 1 vmware-settings --upload --dir path/to/directory
         """
         env = Environment(params.env)
         vmware_settings_data = env.read_vmware_settings_data(
@@ -103,9 +109,12 @@ class VmwareSettingsAction(SettingsAction):
         print("Vmware settings configuration uploaded.")
 
     def default(self, params):
-        """To download default vmware settings for some environment
-        in some directory:
-                fuel --env 1 vmware-settings --default --dir path/to/directory
+        """Download default settings.
+
+        To download default vmware settings for some environment in
+        some directory:
+
+            fuel --env 1 vmware-settings --default --dir path/to/directory
         """
         env = Environment(params.env)
         vmware_default_data = env.get_default_vmware_settings_data()
@@ -119,8 +128,10 @@ class VmwareSettingsAction(SettingsAction):
         )
 
     def download(self, params):
-        """To download vmware settings for some environment in this directory:
-                fuel --env 1 vmware-settings --download
+        """Download settings.
+
+        To download vmware settings for some environment in this directory:
+            fuel --env 1 vmware-settings --download
         """
         env = Environment(params.env)
         settings_data = env.get_vmware_settings_data()

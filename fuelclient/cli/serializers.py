@@ -24,7 +24,9 @@ from fuelclient import consts
 
 
 class Serializer(object):
-    """Serializer class - contains all logic responsible for
+    """Serializer class.
+
+    Contains all logic responsible for
     printing to stdout, reading and writing files to file system.
     """
     serializers = {
@@ -109,7 +111,9 @@ class Serializer(object):
                 "Can't open file '{0}': {1}.".format(full_path, e.strerror))
 
     def write_to_file(self, file_obj, data):
-        """Writes to opened file or file like object
+        """Write to file.
+
+        Writes to opened file or file like object.
         :param file_obj: opened file
         :param data: any serializable object
         """

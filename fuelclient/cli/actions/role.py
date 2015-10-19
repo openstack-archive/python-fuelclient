@@ -23,8 +23,7 @@ from fuelclient.objects.role import Role
 
 
 class RoleAction(Action):
-    """List all roles for specific release
-    """
+    """List all roles for specific release."""
     action_name = "role"
 
     def __init__(self):
@@ -56,7 +55,8 @@ class RoleAction(Action):
     def list(self, params):
         """Print all available roles
 
-                fuel role --rel 1
+        Example:
+            fuel role --rel 1
         """
         roles = Role.get_all(params.release)
 
@@ -72,7 +72,9 @@ class RoleAction(Action):
 
     @check_all('role', 'release', 'file')
     def item(self, params):
-        """Save full role description to file
+        """Save full role description to file.
+
+        Example:
             fuel role --rel 1 --role controller --file some.yaml
         """
         role = Role.get_one(params.release, params.role)
@@ -83,7 +85,9 @@ class RoleAction(Action):
 
     @check_all('file', 'release')
     def create(self, params):
-        """Create a role from file description
+        """Create a role from file description.
+
+        Example:
             fuel role --rel 1 --create --file some.yaml
         """
         role = self.file_serializer.read_from_file(params.file)
@@ -95,8 +99,9 @@ class RoleAction(Action):
 
     @check_all('file', 'release')
     def update(self, params):
-        """Update a role from file description
-            fuel role --rel 1 --update --file some.yaml
+        """Update a role from file description.
+
+        Example: fuel role --rel 1 --update --file some.yaml
         """
         role = self.file_serializer.read_from_file(params.file)
         role = Role.update(params.release, role['name'], role)
@@ -106,8 +111,9 @@ class RoleAction(Action):
 
     @check_all('role', 'release')
     def delete(self, params):
-        """Delete role from fuel
-            fuel role --delete --role controller --rel 1
+        """Delete role from fuel.
+
+        Example: fuel role --delete --role controller --rel 1
         """
         Role.delete(params.release, params.role)
         self.file_serializer.print_to_output(

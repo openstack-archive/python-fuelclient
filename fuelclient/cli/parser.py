@@ -27,9 +27,10 @@ from fuelclient import profiler
 
 
 class Parser(object):
-    """Parser class - encapsulates argparse's ArgumentParser
-    and based on available actions, serializers and additional flags
-    populates it.
+    """Argument parser.
+
+    Encapsulate argparse's ArgumentParser and based on available
+    actions, serializers and additional flags populates it.
     """
     def __init__(self, argv):
         self.args = argv
@@ -226,7 +227,9 @@ class Parser(object):
         self.move_argument_after_action("--env",)
 
     def move_argument_before_action(self, flag, has_value=True):
-        """We need to move general argument before action, we use them
+        """Move argument before action.
+
+        We need to move general argument before action, we use them
         not directly in action but in APIClient.
         """
         for arg in self.args:

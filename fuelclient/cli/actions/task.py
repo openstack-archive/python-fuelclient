@@ -21,8 +21,7 @@ from fuelclient.objects.task import Task
 
 
 class TaskAction(Action):
-    """Show tasks
-    """
+    """Show tasks."""
     action_name = "task"
 
     def __init__(self):
@@ -42,11 +41,15 @@ class TaskAction(Action):
 
     @check_all("task")
     def delete(self, params):
-        """To delete some tasks:
-                fuel task --delete --task-id 1,2,3
+        """Delete a task.
 
-            To delete some tasks forcefully (without considering their state):
-                fuel task --delete -f --tid 1,6
+        To delete some tasks:
+
+            fuel task --delete --task-id 1,2,3
+
+        To delete some tasks forcefully (without considering their state):
+
+            fuel task --delete -f --tid 1,6
         """
         tasks = Task.get_by_ids(params.task)
         delete_response = map(
@@ -60,11 +63,15 @@ class TaskAction(Action):
         )
 
     def list(self, params):
-        """To display all tasks:
-                fuel task
+        """Print a list of tasks.
 
-            To display tasks with some ids:
-                fuel task --tid 1,2,3
+        To display all tasks:
+
+            fuel task
+
+        To display tasks with some ids:
+
+            fuel task --tid 1,2,3
         """
         acceptable_keys = ("id", "status", "name",
                            "cluster", "progress", "uuid")

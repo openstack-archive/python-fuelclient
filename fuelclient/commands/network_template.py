@@ -67,8 +67,12 @@ class NetworkTemplateUpload(NetworkTemplateMixin, base.BaseCommand):
 
 
 class NetworkTemplateDownload(NetworkTemplateMixin, base.BaseCommand):
-    """To download network configuration for environment to the specified
-    directory:
+    """Download network configuration.
+
+    To download network configuration for environment to the specified
+    directory.
+
+    Example:
         fuel2 network-template download --dir path/to/directory 1
     """
 

@@ -22,8 +22,7 @@ from fuelclient import utils
 
 
 class PluginAction(Action):
-    """List and modify currently available releases
-    """
+    """List and modify currently available releases."""
     action_name = "plugins"
 
     acceptable_keys = (
@@ -68,10 +67,11 @@ class PluginAction(Action):
         )
 
     def list(self, params):
-        """Print all available plugins
+        """Print all available plugins.
 
-                fuel plugins
-                fuel plugins --list
+        Examples:
+            fuel plugins
+            fuel plugins --list
         """
         plugins = Plugins.get_all_data()
         self.serializer.print_to_output(
@@ -79,9 +79,10 @@ class PluginAction(Action):
             format_table(plugins, acceptable_keys=self.acceptable_keys))
 
     def install(self, params):
-        """Install plugin archive and register in API service
+        """Install plugin archive and register in API service.
 
-               fuel plugins --install plugin-name-2.0-2.0.1-0.noarch.rpm
+        Example:
+            fuel plugins --install plugin-name-2.0-2.0.1-0.noarch.rpm
         """
         file_path = params.install
         self.check_file(file_path)
@@ -92,9 +93,10 @@ class PluginAction(Action):
                 params.install))
 
     def remove(self, params):
-        """Remove plugin from file system and from API service
+        """Remove plugin from file system and from API service.
 
-               fuel plugins --remove plugin-name==1.0.1
+        Example:
+            fuel plugins --remove plugin-name==1.0.1
         """
         name, version = self.parse_name_version(params.remove)
         results = Plugins.remove(name, version)
@@ -104,14 +106,17 @@ class PluginAction(Action):
             "Plugin {0} was successfully removed.".format(params.remove))
 
     def update(self, params):
-        """Update plugin from one minor version to another.
+        """Update plugin.
+
+        Update plugin from one minor version to another.
            For example if there is a plugin with version 2.0.0,
            plugin with version 2.0.1 can be used as update. But
            plugin with version 2.1.0, cannot be used to update
            plugin. Note that update is supported for plugins
            beginning from package_version 2.0.0
 
-               fuel plugins --update plugin-name-2.0-2.0.1-0.noarch.rpm
+        Example:
+            fuel plugins --update plugin-name-2.0-2.0.1-0.noarch.rpm
         """
         plugin_path = params.update
         self.check_file(plugin_path)
@@ -121,14 +126,17 @@ class PluginAction(Action):
             "Plugin {0} was successfully updated.".format(plugin_path))
 
     def downgrade(self, params):
-        """Downgrade plugin from one minor version to another.
+        """Downgrade plugin.
+
+        Downgrade plugin from one minor version to another.
            For example if there is a plugin with version 2.0.1,
            plugin with version 2.0.0 can be used to perform downgrade.
            Plugin with version 1.0.0, cannot be used to perform downgrade
            plugin. Note that downgrade is supported for plugins
            beginning from package_version 2.0.0
 
-               fuel plugins --downgrade plugin-name-2.0-2.0.1-0.noarch.rpm
+        Example:
+            fuel plugins --downgrade plugin-name-2.0-2.0.1-0.noarch.rpm
         """
         plugin_path = params.downgrade
         self.check_file(plugin_path)
@@ -138,21 +146,25 @@ class PluginAction(Action):
             "Plugin {0} was successfully downgraded.".format(plugin_path))
 
     def sync(self, params):
-        """Synchronise plugins on file system with plugins in
+        """Synchronise plugins.
+
+        Synchronise plugins on file system with plugins in
            API service, creates plugin if it is not exists,
            updates existent plugins
 
-               fuel plugins --sync
-               fuel plugins --sync --plugin-id=1,2
+        Examples:
+            fuel plugins --sync
+            fuel plugins --sync --plugin-id=1,2
         """
         Plugins.sync(plugin_ids=params.plugin)
         self.serializer.print_to_output(
             None, "Plugins were successfully synchronized.")
 
     def register(self, params):
-        """Register plugin in API service
+        """Register plugin in API service.
 
-               fuel plugins --register plugin-name==1.0.1
+        Example:
+            fuel plugins --register plugin-name==1.0.1
         """
         name, version = self.parse_name_version(params.register)
         result = Plugins.register(name, version, force=params.force)
@@ -161,9 +173,10 @@ class PluginAction(Action):
             "Plugin {0} was successfully registered.".format(params.register))
 
     def unregister(self, params):
-        """Deletes plugin from API service
+        """Deletes plugin from API service.
 
-               fuel plugins --unregister plugin-name==1.0.1
+        Example:
+            fuel plugins --unregister plugin-name==1.0.1
         """
         name, version = self.parse_name_version(params.unregister)
         result = Plugins.unregister(name, version)

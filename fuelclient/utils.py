@@ -61,10 +61,11 @@ def exec_cmd(cmd, cwd=None):
 
 
 def exec_cmd_iterator(cmd):
-    """Execute command with logging.
+    """Execute command.
+
+    Execute command with logging.
     :param cmd: shell command
-    :returns: generator where yeach item
-              is line from stdout
+    :returns: generator where yeach item is line from stdout.
     """
     child = subprocess.Popen(
         cmd, stdout=subprocess.PIPE,
@@ -78,7 +79,7 @@ def exec_cmd_iterator(cmd):
 
 
 def parse_yaml_file(path):
-    """Parses yaml
+    """Parse yaml
 
     :param str path: path to yaml file
     :returns: deserialized file
@@ -90,7 +91,7 @@ def parse_yaml_file(path):
 
 
 def glob_and_parse_yaml(path):
-    """Parses yaml files by mask.
+    """Parse yaml files by mask.
 
     :param str path: mask
     :returns: iterator
@@ -100,8 +101,10 @@ def glob_and_parse_yaml(path):
 
 
 def major_plugin_version(version):
-    """Retrieves major version.
-    "1.2.3" -> "1.2"
+    """Retrieve major version.
+
+    Example:
+        "1.2.3" -> "1.2"
 
     :param str version: version
     :returns: only major version
@@ -113,8 +116,10 @@ def major_plugin_version(version):
 
 
 def iterfiles(dir_path, file_pattern):
-    """Returns generator where each item is a path to file, that satisfies
-    file_patterns condtion
+    """Iterate over list of files.
+
+    Returns generator where each item is a path to file, that satisfies
+    file_patterns condition.
 
     :param dir_path: path to directory, e.g /etc/puppet/
     :param file_pattern: unix filepattern to match files
@@ -126,7 +131,7 @@ def iterfiles(dir_path, file_pattern):
 
 
 def file_exists(path):
-    """Checks if file exists
+    """Check if file exists
 
     :param str path: path to the file
     :returns: True if file is exist, Flase if is not
@@ -139,7 +144,6 @@ def parse_to_list_of_dicts(str_list):
 
     :param list: list of dicts and json string
     :returns" list of dictionaries
-
     """
     dict_list = []
     for json_str in str_list:
@@ -158,6 +162,5 @@ def str_to_unicode(string):
 
     :param str string: string to normalize
     :returns: normalized string
-
     """
     return string if six.PY3 else string.decode(sys.getfilesystemencoding())

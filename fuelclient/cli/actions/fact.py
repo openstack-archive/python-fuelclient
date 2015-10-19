@@ -56,12 +56,15 @@ class FactAction(Action):
         )
 
     def default(self, params):
-        """To get default {action_name} information for some environment:
-                fuel --env 1 {action_name} --default
+        """Get default action information.
 
-            It's possible to get default {action_name} information
-            just for some nodes:
-                fuel --env 1 {action_name} --default --node 1,2,3
+        To get default {action_name} information for some environment:
+            fuel --env 1 {action_name} --default
+
+        It's possible to get default {action_name} information just
+        for some nodes:
+
+            fuel --env 1 {action_name} --default node 1,2,3
         """
         env = Environment(params.env)
         dir_name = env.write_facts_to_dir(
@@ -78,8 +81,10 @@ class FactAction(Action):
         )
 
     def upload(self, params):
-        """To upload {action_name} information for some environment:
-                fuel --env 1 {action_name} --upload
+        """Upload action information.
+
+        To upload {action_name} information for some environment:
+            fuel --env 1 {action_name} --upload
         """
         env = Environment(params.env)
         facts = env.read_fact_info(
@@ -91,18 +96,23 @@ class FactAction(Action):
         print("{0} facts were uploaded.".format(self.action_name))
 
     def delete(self, params):
-        """Also {action_name} information can be left or
-           taken from specific directory:
-                fuel --env 1 {action_name} --upload \\
-                --dir path/to/some/directory
+        """Get action information.
+
+        Also {action_name} information can be left or taken from
+        specific directory.
+
+        Example:
+            fuel --env 1 {action_name} --upload dir path/to/some/directory
         """
         env = Environment(params.env)
         env.delete_facts(self.action_name)
         print("{0} facts deleted.".format(self.action_name))
 
     def download(self, params):
-        """To download {action_name} information for some environment:
-                fuel --env 1 {action_name} --download
+        """Download action information.
+
+        To download {action_name} information for some environment:
+            fuel --env 1 {action_name} --download
         """
         env = Environment(params.env)
         dir_name = env.write_facts_to_dir(
@@ -120,12 +130,10 @@ class FactAction(Action):
 
 
 class DeploymentAction(FactAction):
-    """Show computed deployment facts for orchestrator
-    """
+    """Show computed deployment facts for orchestrator."""
     action_name = "deployment"
 
 
 class ProvisioningAction(FactAction):
-    """Show computed provisioning facts for orchestrator
-    """
+    """Show computed provisioning facts for orchestrator."""
     action_name = "provisioning"

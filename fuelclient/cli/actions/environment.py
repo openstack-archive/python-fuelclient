@@ -22,8 +22,7 @@ from fuelclient.objects.environment import Environment
 
 
 class EnvironmentAction(Action):
-    """Create, list and modify currently existing environments(clusters)
-    """
+    """Create, list and modify currently existing environments(clusters)."""
     action_name = "environment"
 
     def __init__(self):
@@ -89,15 +88,18 @@ class EnvironmentAction(Action):
 
     @check_all("name", "release")
     def create(self, params):
-        """To create an environment with name MyEnv and release id=1 run:
-                fuel env create --name MyEnv --rel 1
+        """Create environment.
 
-            By default, it creates environment with ha_compact mode and
-            neutron with VLAN network segmentation as network provider
-            (WARNING: nova-network is deprecated since 6.1 release).
-            To specify other modes add optional arguments:
-                fuel env create --name MyEnv --rel 1 \\
-                --mode ha --network-mode neutron
+        To create an environment with name MyEnv and release id=1 run:
+            fuel env create --name MyEnv --rel 1
+
+        By default, it creates environment with ha_compact mode and
+        neutron with VLAN network segmentation as network provider
+        (WARNING: nova-network is deprecated since 6.1 release).
+        To specify other modes add optional arguments:
+
+            fuel env create --name MyEnv --rel 1 --mode ha \\
+                --network-mode neutron
         """
         if params.net == "nova":
             self.serializer.print_to_output(
@@ -137,8 +139,10 @@ class EnvironmentAction(Action):
 
     @check_all("env")
     def set(self, params):
-        """To change environment name, mode or network mode:
-                fuel --env 1 env set --name NewEnvName --mode ha_compact
+        """Change environment name, mode or network mode.
+
+        Example:
+            fuel --env 1 env set --name NewEnvName --mode ha_compact
         """
         acceptable_params = ('mode', 'name', 'pending_release_id')
 
@@ -168,8 +172,10 @@ class EnvironmentAction(Action):
 
     @check_all("env")
     def delete(self, params):
-        """To delete the environment:
-                fuel --env 1 env --force delete
+        """Delete the environment.
+
+        Example:
+            fuel --env 1 env --force delete
         """
         env = Environment(params.env, params=params)
 
@@ -189,8 +195,10 @@ class EnvironmentAction(Action):
         )
 
     def list(self, params):
-        """Print all available environments:
-                fuel env
+        """Print all available environments.
+
+        Example:
+            fuel env
         """
         acceptable_keys = ("id", "status", "name", "mode",
                            "release_id", "pending_release_id")
@@ -209,8 +217,10 @@ class EnvironmentAction(Action):
         )
 
     def update(self, params):
-        """Update environment to given OS release:
-                fuel env --env 1 --update --release 1
+        """Update environment.
+
+        Update environment to given OS release:
+            fuel env --env 1 --update --release 1
         """
         params.pending_release_id = params.release
         self.set(params)
@@ -229,9 +239,13 @@ class EnvironmentAction(Action):
     @check_all("env")
     @check_any("download", "upload")
     def deployment_tasks(self, params):
-        """Modify deployment_tasks for environment:
-                fuel env --env 1 --deployment-tasks --download
-                fuel env --env 1 --deployment-tasks --upload
+        """Modify deployment tasks.
+
+        Modify deployment_tasks for environment.
+
+        Example:
+            fuel env --env 1 --deployment-tasks --download
+            fuel env --env 1 --deployment-tasks --upload
         """
         cluster = Environment(params.env)
         dir_path = self.full_path_directory(
@@ -251,9 +265,11 @@ class EnvironmentAction(Action):
     @check_all("env")
     @check_any("download", "upload")
     def attributes(self, params):
-        """Modify attributes of the environment:
-                fuel env --env 1 --attributes --download
-                fuel env --env 1 --attributes --upload
+        """Modify attributes of the environment.
+
+        Examples:
+            fuel env --env 1 --attributes --download
+            fuel env --env 1 --attributes --upload
         """
         cluster = Environment(params.env)
         dir_path = self.full_path_directory(

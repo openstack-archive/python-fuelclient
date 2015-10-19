@@ -28,8 +28,7 @@ from fuelclient.objects.nodegroup import NodeGroupCollection
 
 
 class NodeGroupAction(Action):
-    """Show or modify node groups
-    """
+    """Show or modify node groups."""
     action_name = "nodegroup"
     acceptable_keys = ("id", "cluster", "name")
 
@@ -60,8 +59,10 @@ class NodeGroupAction(Action):
 
     @check_all("env", "name")
     def create(self, params):
-        """Create a new node group
-               fuel --env 1 nodegroup --create --name "group 1"
+        """Create a new node group.
+
+        Example:
+            fuel --env 1 nodegroup --create --name "group 1"
         """
         env_id = int(params.env)
         data = NodeGroup.create(params.name, env_id)
@@ -87,9 +88,11 @@ class NodeGroupAction(Action):
 
     @check_all("group")
     def delete(self, params):
-        """Delete the specified node groups
-               fuel nodegroup --delete --group 1
-               fuel nodegroup --delete --group 2,3,4
+        """Delete the specified node groups.
+
+        Examples:
+            fuel nodegroup --delete --group 1
+            fuel nodegroup --delete --group 2,3,4
         """
         ngs = NodeGroup.get_by_ids(params.group)
         for n in ngs:
@@ -106,9 +109,11 @@ class NodeGroupAction(Action):
 
     @check_all("node", "group")
     def assign(self, params):
-        """Assign nodes to specified node group:
-                fuel nodegroup --assign --node 1 --group 1
-                fuel nodegroup --assign --node 2,3,4 --group 1
+        """Assign nodes to specified node group.
+
+        Examples:
+            fuel nodegroup --assign --node 1 --group 1
+            fuel nodegroup --assign --node 2,3,4 --group 1
         """
         if len(params.group) > 1:
             raise ActionException(
@@ -119,11 +124,13 @@ class NodeGroupAction(Action):
         group.assign(params.node)
 
     def list(self, params):
-        """To list all available node groups:
-                fuel nodegroup
+        """List node groups.
 
-            To filter them by environment:
-                fuel --env-id 1 nodegroup
+        To list all available node groups:
+            fuel nodegroup
+
+        To filter them by environment:
+            fuel --env-id 1 nodegroup
         """
         group_collection = NodeGroupCollection.get_all()
         if params.env:

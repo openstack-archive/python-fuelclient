@@ -30,8 +30,8 @@ logger.addHandler(NullHandler())
 
 
 class Client(object):
-    """This class handles API requests
-    """
+
+    """This class handles API requests."""
 
     def __init__(self):
         conf = fuelclient_settings.get_settings()
@@ -89,7 +89,6 @@ class Client(object):
 
         TODO(romcheg): remove lazy initialization for session
                        when HTTP client is not a singleton.
-
         """
         if self._session is None:
             self._session = self._make_session()
@@ -176,7 +175,6 @@ class Client(object):
         :param api: API endpoint (path)
         :param ostf: is this a call to OSTF API
         :param params: params passed to GET request
-
         """
         url = (self.ostf_root if ostf else self.api_root) + api
         self.print_debug('GET {0}'.format(url))
@@ -199,7 +197,6 @@ class Client(object):
         :param api: API endpoint (path)
         :param data: data send in request, will be serialzied to JSON
         :param ostf: is this a call to OSTF API
-
         """
         url = (self.ostf_root if ostf else self.api_root) + api
         data_json = None if data is None else json.dumps(data)
@@ -209,8 +206,7 @@ class Client(object):
         return self.session.post(url, data=data_json)
 
     def post_request(self, api, data=None, ostf=False):
-        """Make POST request to specific API with some data
-        """
+        """Make POST request to specific API with some data."""
         resp = self.post_request_raw(api, data, ostf=ostf)
         resp.raise_for_status()
 
