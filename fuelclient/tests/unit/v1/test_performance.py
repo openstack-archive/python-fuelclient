@@ -27,7 +27,6 @@ import testtools
 
 from fuelclient import client
 from fuelclient import fuelclient_settings
-from fuelclient.objects import node
 from fuelclient import profiler
 from fuelclient.tests.unit.v1 import base
 from fuelclient.tests import utils
@@ -137,9 +136,8 @@ class ClientPerfTest(base.UnitTestCase):
 
         self._invoke_client('env', '--list')
 
-    @mock.patch.object(node, 'exit_with_error', new_callable=mock.MagicMock)
     @mock.patch('__builtin__.open', create=True)
-    def test_upload_node_settings(self, m_open, m_exit):
+    def test_upload_node_settings(self, m_open):
         node_configs = [json.dumps(utils.get_fake_network_config(3))
                         for i in six_moves.range(self.NUMBER_OF_NODES)]
 

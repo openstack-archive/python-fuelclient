@@ -15,7 +15,7 @@
 from operator import attrgetter
 import os
 
-from fuelclient.cli.error import exit_with_error
+from fuelclient.cli.error import InvalidDirectoryException
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.environment import Environment
 
@@ -105,7 +105,7 @@ class Node(BaseObject):
     def read_attribute(self, attributes_type, directory, serializer=None):
         attributes_directory = self.get_attributes_path(directory)
         if not os.path.exists(attributes_directory):
-            exit_with_error(
+            raise InvalidDirectoryException(
                 "Folder {0} doesn't contain node folder '{1}'"
                 .format(directory, "node_{0}".format(self.id))
             )
