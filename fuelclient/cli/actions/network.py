@@ -54,17 +54,8 @@ class NetworkAction(Action):
             directory=params.dir,
             serializer=self.serializer
         )
-        task_result = env.set_network_data(network_data)
-        if task_result['status'] == 'error':
-            print(
-                "Error uploading configuration: {0}".format(
-                    task_result['message']
-                )
-            )
-        else:
-            print(
-                "Network configuration uploaded."
-            )
+        env.set_network_data(network_data)
+        print("Network configuration uploaded.")
 
     def verify(self, params):
         """To verify network configuration from some directory

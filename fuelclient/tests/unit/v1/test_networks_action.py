@@ -37,9 +37,8 @@ NETWORK_CONFIG_OK_OUTPUT = {
 }
 
 NETWORK_CONFIG_ERROR_OUTPUT = {
-    'status': 'error',
     'message': 'Some error',
-    'progress': 100,
+    'errors': [],
 }
 
 
@@ -70,11 +69,13 @@ class TestNetworkActions(base.UnitTestCase):
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',
-            json=NETWORK_CONFIG_ERROR_OUTPUT)
-        with patch('sys.stdout') as fake_out:
-            self.execute(['fuel', 'network', '--env', '1', '--upload', 'smth'])
-            call_args = fake_out.write.call_args_list[0]
-            self.assertIn('Error uploading configuration', call_args[0][0])
-            self.assertIn(
-                NETWORK_CONFIG_ERROR_OUTPUT['message'], call_args[0][0]
-            )
+            status_code=400, json=NETWORK_CONFIG_ERROR_OUTPUT)
+
+        with patch("sys.stderr") as m_stderr:
+            self.assertRaises(
+                SystemExit, self.execute,
+                ['fuel', 'network', '--env', '1', '--upload', 'smth'])
+
+        self.assertIn("400 Client Error", m_stderr.write.call_args[0][0])
+        self.assertIn(NETWORK_CONFIG_ERROR_OUTPUT['message'],
+                      m_stderr.write.call_args[0][0])
