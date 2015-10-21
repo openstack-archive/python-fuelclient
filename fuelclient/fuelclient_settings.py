@@ -30,16 +30,16 @@ _SETTINGS = None
 class FuelClientSettings(object):
     """Represents a model of Fuel Clients settings
 
-    Default settigs file are distributed with the source code in
-    the <DIST_DIR>/fuelclient_settings.yaml. Those settings can be
-    overriden by /etc/fuel/client/config.yaml file.
+    Default settings are saved automatically to
+    $XDG_CONFIG_HOME/fuel/fuel_client.yaml. If $XDG_CONFIG_HOME is not
+    set, ~/.config/ directory is used by default.
 
-    User-specific settings may be stored in any YAML-formatted file
-    the path to which should be supplied via the FUELCLIENT_CUSTOM_SETTINGS
-    environment variable. Custom settins override the default ones.
+    Custom settings may be stored in any YAML-formatted file the path to
+    which should be supplied via the $FUELCLIENT_CUSTOM_SETTINGS environment
+    variable. Custom settins override default ones.
 
     Top level values may also be set as environment variables, e.g.
-    export SERVER_PORT=8080.
+    export SERVER_PORT=8080. These values have the highest priority.
 
     """
     def __init__(self):
@@ -63,13 +63,6 @@ class FuelClientSettings(object):
 
         self._add_file_if_exists(default_settings, settings_files)
         self._add_file_if_exists(user_settings, settings_files)
-
-        # NOTE(romcheg): this file is kept temporarily to
-        #                keep master branch stable.
-        #                As soon as puppet manifests utilize new config
-        #                generation, this line should be removed
-        self._add_file_if_exists('/etc/fuel/client/config.yaml',
-                                 settings_files)
 
         # Add a custom settings file specified by user
         self._add_file_if_exists(custom_settings, settings_files)
