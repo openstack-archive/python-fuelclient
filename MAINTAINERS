@@ -25,15 +25,17 @@ description:
   to read this as a configuration data.
 
 maintainers:
-- name:   Roman Prykhodchenko
-  email:  rprikhodchenko@mirantis.com
-  IRC:    romcheg
-- name:   Maciej Kwiek
-  email:  mkwiek@mirantis.com
-  IRC:    mkwiek
-- name:   Sylwester Brzeczkowski
-  email:  sbrzeczkowski@mirantis.com
-  IRC:    sylwesterB
-- name:   Ivan Kliuk
-  email:  ikliuk@mirantis.com
-  IRC:    IvanKliuk
+
+- ./:
+    - name:   Roman Prykhodchenko
+      email:  rprikhodchenko@mirantis.com
+      IRC:    romcheg
+    - name:   Maciej Kwiek
+      email:  mkwiek@mirantis.com
+      IRC:    mkwiek
+    - name:   Sylwester Brzeczkowski
+      email:  sbrzeczkowski@mirantis.com
+      IRC:    sylwesterB
+    - name:   Ivan Kliuk
+      email:  ikliuk@mirantis.com
+      IRC:    IvanKliuk
