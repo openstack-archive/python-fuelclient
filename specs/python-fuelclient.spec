@@ -66,6 +66,8 @@ cd %{_builddir}/%{name}-%{version} && %{__python2} setup.py build
 %install
 rm -rf $RPM_BUILD_ROOT
 cd %{_builddir}/%{name}-%{version} && %{__python2} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/%{_docdir}/fuel
+install -m 0644 fuelclient/fuel_client.yaml $RPM_BUILD_ROOT/%{_docdir}/fuel/fuel_client.yaml
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -74,3 +76,4 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %{python2_sitelib}/*
 %{_bindir}/*
+$RPM_BUILD_ROOT/%{_docdir}/fuel/fuel_client.yaml
