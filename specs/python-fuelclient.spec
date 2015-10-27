@@ -74,3 +74,4 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %{python2_sitelib}/*
 %{_bindir}/*
+%doc %{_builddir}/%{name}-%{version}/fuelclient/fuel_client.yaml
