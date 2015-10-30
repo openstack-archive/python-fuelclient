@@ -182,10 +182,12 @@ class PluginV2(BasePlugin):
     def install(cls, plugin_path, force=False):
         if force:
             utils.exec_cmd(
-                'yum -y install {0} || yum -y reinstall {0}'
+                'yum -y install --disablerepo=\'*\' {0} || '
+                'yum -y reinstall --disablerepo=\'*\' {0}'
                 .format(plugin_path))
         else:
-            utils.exec_cmd('yum -y install {0}'.format(plugin_path))
+            utils.exec_cmd('yum -y install --disablerepo=\'*\' {0}'
+                           .format(plugin_path))
 
     @classmethod
     @master_only
