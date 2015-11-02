@@ -59,7 +59,7 @@ class TestNetworkActions(base.UnitTestCase):
         mneutron_put = self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',
             json=NETWORK_CONFIG_OK_OUTPUT)
-        self.execute(['fuel', 'network', '--env', '1', '--upload', 'smth'])
+        self.execute(['fuel', 'network', '--env', '1', '--upload'])
         self.assertEqual(mneutron_put.call_count, 1)
         url = mneutron_put.request_history[0].url
         self.assertIn('clusters/1/network_configuration/neutron', url)
@@ -74,7 +74,7 @@ class TestNetworkActions(base.UnitTestCase):
         with patch("sys.stderr") as m_stderr:
             self.assertRaises(
                 SystemExit, self.execute,
-                ['fuel', 'network', '--env', '1', '--upload', 'smth'])
+                ['fuel', 'network', '--env', '1', '--upload'])
 
         self.assertIn("400 Client Error", m_stderr.write.call_args[0][0])
         self.assertIn(NETWORK_CONFIG_ERROR_OUTPUT['message'],
