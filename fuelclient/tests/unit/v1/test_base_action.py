@@ -17,6 +17,7 @@
 import json
 
 import mock
+from six import moves
 import yaml
 
 from fuelclient.cli.actions import base
@@ -95,3 +96,16 @@ class TestFuelVersion(base_tests.UnitTestCase):
                               ['fuel', '--fuel-version', '--json'])
         args, _ = mstdout.write.call_args_list[0]
         self.assertEqual(self.VERSION, json.loads(args[0]))
+
+
+class TestExtraArguments(base_tests.UnitTestCase):
+
+    def test_error_on_extra_arguments(self):
+        err_msg = 'unrecognized arguments: extraarg1 extraarg2\n'
+
+        with mock.patch('sys.stderr', new=moves.cStringIO()) as m_stderr:
+            self.assertRaises(
+                SystemExit, self.execute,
+                ['fuel', 'nodegroup', '--delete', 'extraarg1', 'extraarg2'])
+
+            self.assertIn(err_msg, m_stderr.getvalue())
