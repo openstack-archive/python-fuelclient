@@ -109,7 +109,7 @@ class TestNodeGroupActions(base.UnitTestCase):
         err_msg = '"--group" required!\n'
         self._check_required_message_for_commands(
             err_msg,
-            (['fuel', 'nodegroup', '--delete', '--default'],)
+            (['fuel', 'nodegroup', '--delete'],)
         )
 
     def test_assign_nodegroup_fails_w_multiple_groups(self):
