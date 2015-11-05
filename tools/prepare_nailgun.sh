@@ -112,6 +112,7 @@ SERVER_PORT: "${NAILGUN_PORT}"
 OS_USERNAME: "admin"
 OS_PASSWORD: "admin"
 OS_TENANT_NAME: "admin"
+OS_AUTH_URL: "http://127.0.0.1:8003/keystone/v2.0"
 EOL
 }
 

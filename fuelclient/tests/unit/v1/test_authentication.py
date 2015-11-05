@@ -28,7 +28,6 @@ class TestAuthentication(base.UnitTestCase):
     def setUp(self):
         super(TestAuthentication, self).setUp()
 
-        self.auth_required_mock.return_value = True
         self.m_request.get('/api/v1/nodes/', json={})
 
         self.useFixture(fixtures.MockPatchObject(fuelclient_settings,
