@@ -41,17 +41,31 @@ class UnitTestCase(oslo_base.BaseTestCase):
     def setUp(self):
         super(UnitTestCase, self).setUp()
 
-        self.auth_required_patcher = mock.patch('fuelclient.client.'
-                                                'Client.auth_required',
-                                                new_callable=mock.PropertyMock)
+        self.auth_token_patcher = mock.patch('fuelclient.client.'
+                                             'Client.auth_token',
+                                             new_callable=mock.PropertyMock)
 
-        self.auth_required_mock = self.auth_required_patcher.start()
-        self.auth_required_mock.return_value = False
+        self.auth_token_mock = self.auth_token_patcher.start()
+        self.auth_token_mock.return_value = ''
+
+        self.api_root_patcher = mock.patch('fuelclient.client.'
+                                           'Client.api_root',
+                                           new_callable=mock.PropertyMock)
+        self.api_root_mock = self.api_root_patcher.start()
+        self.api_root_mock.return_value = 'http://127.0.0.1:8003/api/v1/'
+
+        self.ostf_root_patcher = mock.patch('fuelclient.client.'
+                                            'Client.ostf_root',
+                                            new_callable=mock.PropertyMock)
+        self.ostf_root_mock = self.ostf_root_patcher.start()
+        self.ostf_root_mock.return_value = 'http://127.0.0.1:8003/ostf/'
 
         self.m_request = rm.Mocker()
         self.m_request.start()
 
-        self.addCleanup(self.auth_required_patcher.stop)
+        self.addCleanup(self.auth_token_patcher.stop)
+        self.addCleanup(self.api_root_patcher.stop)
+        self.addCleanup(self.ostf_root_patcher.stop)
         self.addCleanup(self.m_request.stop)
 
     def execute(self, command):
