@@ -36,8 +36,22 @@ class BaseLibTest(oslo_base.BaseTestCase):
         self.m_auth_required = self.auth_required_patch.start()
         self.m_auth_required.return_value = False
 
+        self.api_root_patch = patch.object(client.Client,
+                                           'api_root',
+                                           new_callable=mock.PropertyMock)
+        self.m_api_root = self.api_root_patch.start()
+        self.m_api_root.return_value = 'http://127.0.0.1:8003/api/v1/'
+
+        self.ostf_root_patch = patch.object(client.Client,
+                                            'ostf_root',
+                                            new_callable=mock.PropertyMock)
+        self.m_ostf_root = self.ostf_root_patch.start()
+        self.m_ostf_root.return_value = 'http://127.0.0.1:8003/ostf/'
+
         self.addCleanup(self.m_request.stop)
         self.addCleanup(self.auth_required_patch.stop)
+        self.addCleanup(self.api_root_patch.stop)
+        self.addCleanup(self.ostf_root_patch.stop)
 
     def get_object_uri(self, collection_path, object_id, attribute='/'):
         return urlparse.urljoin(collection_path, str(object_id) + attribute)
