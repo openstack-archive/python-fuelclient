@@ -107,11 +107,10 @@ EOL
     # Create appropriate Fuel Client config
     cat > $FUELCLIENT_CUSTOM_SETTINGS <<EOL
 # Connection settings
-SERVER_ADDRESS: "127.0.0.1"
-SERVER_PORT: "${NAILGUN_PORT}"
 OS_USERNAME: "admin"
 OS_PASSWORD: "admin"
 OS_TENANT_NAME: "admin"
+OS_AUTH_URL: "http://127.0.0.1:8003/keystone/v2.0"
 EOL
 }
 

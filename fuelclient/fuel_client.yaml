@@ -1,12 +1,11 @@
 # Connection settings
-SERVER_ADDRESS: "127.0.0.1"
-SERVER_PORT: "8000"
 OS_USERNAME:
 OS_PASSWORD:
 # There's a need to provide default value for
-# tenant name until fuel-library is updated.
-# After that, it will be removed.
+# tenant name and auth url until fuel-library
+# is updated. After that, it will be removed.
 OS_TENANT_NAME: "admin"
+OS_AUTH_URL: "http://127.0.0.1:8003/keystone/v2.0"
 HTTP_PROXY: null
 HTTP_TIMEOUT: 10
 
