@@ -41,13 +41,13 @@ class Client(object):
                                                     port=conf.LISTEN_PORT)
 
         self.keystone_base = urlparse.urljoin(self.root, "/keystone/v2.0")
-        self.api_root = urlparse.urljoin(self.root, "/api/v1/")
-        self.ostf_root = urlparse.urljoin(self.root, "/ostf/")
+        self._api_root = None
+        self._ostf_root = None
         self.user = conf.KEYSTONE_USER
         self.password = conf.KEYSTONE_PASS
         self.tenant = 'admin'
         self._keystone_client = None
-        self._auth_required = None
+        self._auth_required = True
         self._session = None
 
     def _make_common_headers(self):
@@ -120,6 +120,19 @@ class Client(object):
             self.initialize_keystone_client()
         return self._keystone_client
 
+    @property
+    def api_root(self):
+        if self._api_root is None:
+            self._api_root = self._get_endpoint_url(
+                endpoint_type='fuel') + '/v1'
+        return self._api_root
+
+    @property
+    def ostf_root(self):
+        if self._ostf_root is None:
+            self._ostf_root = self._get_endpoint_url(endpoint_type='ostf')
+        return self._ostf_root
+
     def update_own_password(self, new_pass):
         if self.auth_token:
             self.keystone_client.users.update_own_password(
@@ -134,6 +147,16 @@ class Client(object):
                 tenant_name=self.tenant)
             self._keystone_client.session.auth = self._keystone_client
             self._keystone_client.authenticate()
+
+    def _get_endpoint_url(self, endpoint_type):
+        url = self.keystone_base + '/tokens/%s/endpoints' % self.auth_token
+        resp = requests.request("GET",
+                                url,
+                                headers=self._make_common_headers())
+        body = json.loads(resp.text)
+        for endpoint in body.get('endpoints', []):
+            if endpoint['type'] == endpoint_type:
+                return endpoint['publicURL']
 
     def debug_mode(self, debug=False):
         self.debug = debug
