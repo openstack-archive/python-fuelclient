@@ -41,13 +41,12 @@ class Client(object):
                                                     port=conf.LISTEN_PORT)
 
         self.keystone_base = urlparse.urljoin(self.root, "/keystone/v2.0")
-        self.api_root = urlparse.urljoin(self.root, "/api/v1/")
-        self.ostf_root = urlparse.urljoin(self.root, "/ostf/")
+        self._api_root = None
+        self._ostf_root = None
         self.user = conf.KEYSTONE_USER
         self.password = conf.KEYSTONE_PASS
         self.tenant = 'admin'
         self._keystone_client = None
-        self._auth_required = None
         self._session = None
 
     def _make_common_headers(self):
@@ -98,21 +97,9 @@ class Client(object):
 
     @property
     def auth_token(self):
-        if self.auth_required:
-            if not self.keystone_client.auth_token:
-                self.keystone_client.authenticate()
-            return self.keystone_client.auth_token
-        return ''
-
-    @property
-    def auth_required(self):
-        if self._auth_required is None:
-            url = self.api_root + 'version'
-            resp = requests.get(url)
-            resp.raise_for_status()
-
-            self._auth_required = resp.json().get('auth_required', False)
-        return self._auth_required
+        if not self.keystone_client.auth_token:
+            self.keystone_client.authenticate()
+        return self.keystone_client.auth_token
 
     @property
     def keystone_client(self):
@@ -120,20 +107,46 @@ class Client(object):
             self.initialize_keystone_client()
         return self._keystone_client
 
+    @property
+    def api_root(self):
+        """Returns public URL of API endpoint"""
+
+        self._api_root = self._get_endpoint_url(
+            service_name='nailgun') + '/v1'
+        return self._api_root
+
+    @property
+    def ostf_root(self):
+        """Returns public URL of OSTF service"""
+
+        self._ostf_root = self._get_endpoint_url(service_name='ostf')
+        return self._ostf_root
+
     def update_own_password(self, new_pass):
         if self.auth_token:
             self.keystone_client.users.update_own_password(
                 self.password, new_pass)
 
     def initialize_keystone_client(self):
-        if self.auth_required:
-            self._keystone_client = auth_client.Client(
-                username=self.user,
-                password=self.password,
-                auth_url=self.keystone_base,
-                tenant_name=self.tenant)
-            self._keystone_client.session.auth = self._keystone_client
-            self._keystone_client.authenticate()
+        self._keystone_client = auth_client.Client(
+            username=self.user,
+            password=self.password,
+            auth_url=self.keystone_base,
+            tenant_name=self.tenant)
+        self._keystone_client.session.auth = self._keystone_client
+        self._keystone_client.authenticate()
+
+    def _get_endpoint_url(self, service_name):
+        services_list = self.keystone_client.services.list()
+        endpoints_list = self.keystone_client.endpoints.list()
+        service_id = None
+        for service in services_list:
+            if service.name == service_name:
+                service_id = service.id
+                break
+        for endpoint in endpoints_list:
+            if endpoint.service_id == service_id:
+                return endpoint.publicurl
 
     def debug_mode(self, debug=False):
         self.debug = debug
