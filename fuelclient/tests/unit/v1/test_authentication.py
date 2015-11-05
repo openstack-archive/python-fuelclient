@@ -28,7 +28,6 @@ class TestAuthentication(base.UnitTestCase):
     def setUp(self):
         super(TestAuthentication, self).setUp()
 
-        self.auth_required_mock.return_value = True
         self.m_request.get('/api/v1/nodes/', json={})
 
         self.useFixture(fixtures.MockPatchObject(fuelclient_settings,
@@ -40,10 +39,7 @@ class TestAuthentication(base.UnitTestCase):
         """Checks whether keystone was called properly."""
 
         conf = fuelclient_settings.get_settings()
-
-        expected_url = 'http://{}:{}{}'.format(conf.SERVER_ADDRESS,
-                                               conf.SERVER_PORT,
-                                               '/keystone/v2.0')
+        expected_url = conf.OS_AUTH_URL
         m_client.__init__assert_called_once_with(auth_url=expected_url,
                                                  username=username,
                                                  password=password,
