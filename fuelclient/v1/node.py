@@ -24,7 +24,8 @@ SplittedLabel = namedtuple('SplittedLabel', ['key', 'value', 'has_separator'])
 
 
 class NodeClient(base_v1.BaseV1Client):
-
+    """Node Client V1
+    """
     _entity_wrapper = objects.Node
     _updatable_attributes = ('hostname', 'labels', 'name')
 
@@ -50,14 +51,33 @@ class NodeClient(base_v1.BaseV1Client):
         return result
 
     def get_node_vms_conf(self, node_id):
+        """Get VM config for the specified node
+
+        :param int node_id:
+        :return dict: Response JSON
+        """
         node = self._entity_wrapper(node_id)
         return node.get_node_vms_conf()
 
     def node_vms_create(self, node_id, config):
+        """Create VMs for the node with specified configuration
+
+        :param int node_id:
+        :param dict config:
+        :return dict: Response JSON
+        """
         node = self._entity_wrapper(node_id)
         return node.node_vms_create(config)
 
     def update(self, node_id, **updated_attributes):
+        """Update node properties
+
+        :param int node_id:
+        :param dict updated_attributes: possible values: 'hostname', 'labels',
+        'name'
+        :return dict: Response JSON
+        :raises BadDataException:
+        """
         node = self._entity_wrapper(obj_id=node_id)
 
         for attr in updated_attributes:
@@ -203,4 +223,8 @@ class NodeClient(base_v1.BaseV1Client):
 
 
 def get_client():
+    """Get node client
+
+    :return NodeClient:
+    """
     return NodeClient()
