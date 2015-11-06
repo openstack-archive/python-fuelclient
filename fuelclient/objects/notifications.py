@@ -13,7 +13,6 @@
 #    under the License.
 
 from fuelclient.cli import error
-
 from fuelclient.objects import base
 
 
@@ -33,7 +32,7 @@ class Notifications(base.BaseObject):
             data = Notifications.get_all_data()
         else:
             try:
-                ids = map(int, ids)
+                ids = list(map(int, ids))
             except ValueError:
                 raise error.BadDataException(
                     "Numerical ids expected or the '*' symbol.")

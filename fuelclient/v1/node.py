@@ -24,18 +24,20 @@ SplittedLabel = namedtuple('SplittedLabel', ['key', 'value', 'has_separator'])
 
 
 class NodeClient(base_v1.BaseV1Client):
-
+    """Node Client V1.
+    """
     _entity_wrapper = objects.Node
     _updatable_attributes = ('hostname', 'labels', 'name')
 
     def get_all(self, environment_id=None, labels=None):
-        """Get nodes by specific environment or labels
+        """Get nodes by specific environment or labels.
 
         :param environment_id: Id of specific environment(cluster)
         :type environment_id: int
         :param labels: List of string labels for filtering nodes
         :type labels: list
-        :returns: list -- filtered list of nodes
+        :return: filtered List of nodes
+        :rtype: list
         """
         result = self._entity_wrapper.get_all_data()
 
@@ -50,14 +52,41 @@ class NodeClient(base_v1.BaseV1Client):
         return result
 
     def get_node_vms_conf(self, node_id):
+        """Get VM config for the specified node.
+
+        :param node_id: node id
+        :type node_id: int
+        :return: Response JSON
+        :rtype: dict
+        """
         node = self._entity_wrapper(node_id)
         return node.get_node_vms_conf()
 
     def node_vms_create(self, node_id, config):
+        """Create VMs for the node with specified configuration.
+
+        :param node_id: node id
+        :type node_id: int
+        :param config: configuration
+        :type config: dict
+        :return: Response JSON
+        :rtype: dict
+        """
         node = self._entity_wrapper(node_id)
         return node.node_vms_create(config)
 
     def update(self, node_id, **updated_attributes):
+        """Update node properties.
+
+        :param node_id: node id
+        :type node_id: int
+        :param updated_attributes: possible values: 'hostname', 'labels',
+        'name'
+        :type: updated_attributes dict
+        :return: Response JSON
+        :rtype: dict
+        :raises BadDataException:
+        """
         node = self._entity_wrapper(obj_id=node_id)
 
         for attr in updated_attributes:
@@ -70,11 +99,12 @@ class NodeClient(base_v1.BaseV1Client):
 
     def get_all_labels_for_nodes(self, node_ids=None):
         """Get list of labels for specific nodes. If no node_ids then all
-        labels should be returned
+        labels should be returned.
 
         :param node_ids: List of node ids for filtering labels
         :type node_ids: list
-        :returns: list -- filtered list of labels
+        :return: filtered list of labels
+        :rtype: list
         """
         labels = []
 
@@ -97,13 +127,14 @@ class NodeClient(base_v1.BaseV1Client):
 
     def set_labels_for_nodes(self, labels=None, node_ids=None):
         """Update nodes labels attribute with new data. If node_ids
-        are empty list then labels will be updated on all nodes
+        are empty list then labels will be updated on all nodes.
 
         :param labels: List of string pairs `key=val` for labels
         :type labels: list
         :param node_ids: List of node ids where labels should be updated
         :type node_ids: list
-        :return: list -- ids of nodes where labels were updated
+        :return: ids of nodes where labels were updated
+        :rtype: list
         """
         data_to_return = []
         labels_to_update = {}
@@ -137,13 +168,14 @@ class NodeClient(base_v1.BaseV1Client):
 
     def delete_labels_for_nodes(self, labels=None, node_ids=None):
         """Delete labels data from nodes labels. If node_ids are
-        empty list then labels will be deleted on all nodes
+        empty list then labels will be deleted on all nodes.
 
         :param labels: List of string label keys
         :type labels: list
         :param node_ids: List of node ids where labels should be deleted
         :type node_ids: list
-        :returns: list -- ids of nodes where labels were deleted
+        :return: ids of nodes where labels were deleted
+        :rtype: list
         """
         data_to_return = []
 
@@ -203,4 +235,9 @@ class NodeClient(base_v1.BaseV1Client):
 
 
 def get_client():
+    """Get node client.
+
+    :return: node client
+    :rtype: NodeClient
+    """
     return NodeClient()
