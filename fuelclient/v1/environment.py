@@ -18,13 +18,22 @@ from fuelclient.v1 import base_v1
 
 
 class EnvironmentClient(base_v1.BaseV1Client):
+    """Environment Client V1
+    """
 
     _entity_wrapper = objects.Environment
 
     _updatable_attributes = ('name',)
 
     def create(self, name, release_id, net_segment_type):
+        """Create environment
 
+        :param str name:
+        :param str release_id:
+        :param str net_segment_type:
+        :return dictionary:
+        :raises BadDataException:
+        """
         supported_nst = ('gre', 'vlan', 'tun')
 
         if net_segment_type not in supported_nst:
@@ -37,6 +46,13 @@ class EnvironmentClient(base_v1.BaseV1Client):
         return env.data
 
     def update(self, environment_id, **kwargs):
+        """Update environment properties
+
+        :param int environment_id:
+        :param str name:
+        :return object:
+        :raises BadDataException:
+        """
         allowed_changes = {}
         extra_args = {}
 
@@ -56,6 +72,12 @@ class EnvironmentClient(base_v1.BaseV1Client):
         return env.data
 
     def upgrade(self, environment_id, release_id):
+        """Upgrade environment to the given release_id
+
+        :param int environment_id:
+        :param str release_id:
+        :return dict: Response JSON
+        """
         env = self._entity_wrapper(obj_id=environment_id)
 
         update = {'pending_release_id': release_id}
@@ -64,27 +86,61 @@ class EnvironmentClient(base_v1.BaseV1Client):
         return env.update_env()
 
     def delete_by_id(self, environment_id):
+        """Delete environment by id
+
+        :param int environment_id:
+        """
         env_obj = self._entity_wrapper(obj_id=environment_id)
         env_obj.delete()
 
     def add_nodes(self, environment_id, nodes, roles):
-        env = self._entity_wrapper(obj_id=environment_id)
-        nodes = [objects.Node(obj_id=n_id) for n_id in nodes]
+        """Add nodes to environment
 
-        env.assign(nodes, roles)
+        :param int environment_id:
+        :param iterable nodes:
+        :param iterable roles:
+        """
+        env = self._entity_wrapper(obj_id=environment_id)
+        env.assign(objects.Node.get_by_ids(nodes), roles)
+
+    def remove_nodes(self, environment_id, nodes):
+        """Remove nodes from the environment
+
+        :type nodes: list
+        :param int environment_id:
+        :param iterable nodes:
+        """
+        env = self._entity_wrapper(obj_id=environment_id)
+        env.unassign(objects.Node.get_by_ids(nodes))
 
     def deploy_changes(self, environment_id):
+        """Deploy changes
+
+        :param int environment_id:
+        :return int:
+        """
         env = self._entity_wrapper(obj_id=environment_id)
         deploy_task = env.deploy_changes()
 
         return deploy_task.id
 
     def spawn_vms(self, environment_id):
+        """Spawn VMs assigned to environment
+
+        :param int environment_id:
+        :return dict: Response JSON
+        """
         env = self._entity_wrapper(obj_id=environment_id)
         return env.spawn_vms()
 
     def upload_network_template(self, environment_id,
                                 file_path=None):
+        """Upload network template for the given environment
+
+        :param int environment_id:
+        :param str file_path:
+        :return str:
+        """
         env = self._entity_wrapper(environment_id)
         network_template_data = env.read_network_template_data_from_file(
             file_path=file_path)
@@ -94,6 +150,12 @@ class EnvironmentClient(base_v1.BaseV1Client):
         return file_path
 
     def download_network_template(self, environment_id, directory=None):
+        """Download network template for the given environment
+
+        :param int environment_id:
+        :param str directory:
+        :return str:
+        """
         env = self._entity_wrapper(environment_id)
         template_data = env.get_network_template_data()
         file_path = env.write_network_template_data(
@@ -103,9 +165,18 @@ class EnvironmentClient(base_v1.BaseV1Client):
         return file_path
 
     def delete_network_template(self, environment_id):
+        """Delete network template for the given environment
+
+        :param int environment_id:
+        :return:
+        """
         env = self._entity_wrapper(environment_id)
         env.delete_network_template_data()
 
 
 def get_client():
+    """Get Environment client
+
+    :return EnvironmentClient:
+    """
     return EnvironmentClient()

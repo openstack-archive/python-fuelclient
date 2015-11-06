@@ -222,6 +222,38 @@ class EnvAddNodes(EnvMixIn, base.BaseCommand):
                                          r=parsed_args.roles))
 
 
+class EnvRemoveNodes(EnvMixIn, base.BaseCommand):
+    """Remove nodes from the environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvRemoveNodes, self).get_parser(prog_name)
+
+        parser.add_argument('-e',
+                            '--env',
+                            type=int,
+                            required=True,
+                            help='Id of the environment to remove nodes from')
+
+        parser.add_argument('-n',
+                            '--nodes',
+                            type=int,
+                            nargs='+',
+                            required=True,
+                            help='Ids of the nodes to remove.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        env_id = parsed_args.env
+
+        self.client.remove_nodes(environment_id=env_id,
+                                 nodes=parsed_args.nodes)
+
+        msg = 'Nodes {n} were removed from the environment {e}\n'
+        self.app.stdout.write(msg.format(n=parsed_args.nodes,
+                                         e=parsed_args.env))
+
+
 class EnvDeploy(EnvMixIn, base.BaseCommand):
     """Deploys changes on the specified environment."""
 
