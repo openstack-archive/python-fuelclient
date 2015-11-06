@@ -15,6 +15,7 @@
 from operator import attrgetter
 import os
 import shutil
+import six
 
 from fuelclient.cli.error import ActionException
 from fuelclient.cli.error import InvalidDirectoryException
@@ -99,17 +100,17 @@ class Environment(BaseObject):
     def unassign(self, nodes):
         return self.connection.post_request(
             "clusters/{0}/unassignment/".format(self.id),
-            [{"id": n} for n in nodes]
+            [{"id": node.id} for node in nodes]
         )
 
     def get_all_nodes(self):
         from fuelclient.objects.node import Node
-        return sorted(map(
+        return sorted(six.moves.map(
             Node.init_with_data,
             self.connection.get_request(
                 "nodes/?cluster_id={0}".format(self.id)
             )
-        ), key=attrgetter)
+        ), key=attrgetter('id'))
 
     def unassign_all(self):
         nodes = self.get_all_nodes()
@@ -315,7 +316,7 @@ class Environment(BaseObject):
             fact_type
         )
         if nodes is not None:
-            default_url += "/?nodes=" + ",".join(map(str, nodes))
+            default_url += "/?nodes=" + ",".join(six.moves.map(str, nodes))
         return default_url
 
     def _get_fact_url(self, fact_type, nodes=None):
@@ -324,7 +325,7 @@ class Environment(BaseObject):
             fact_type
         )
         if nodes is not None:
-            fact_url += "/?nodes=" + ",".join(map(str, nodes))
+            fact_url += "/?nodes=" + ",".join(six.moves.map(str, nodes))
         return fact_url
 
     def get_default_facts(self, fact_type, nodes=None):
@@ -385,7 +386,7 @@ class Environment(BaseObject):
         self._check_dir(directory)
         dir_name = self._get_fact_dir_name(fact_type, directory=directory)
         self._check_dir(dir_name)
-        return map(
+        return six.moves.map(
             lambda f: (serializer or self.serializer).read_from_file(f),
             [os.path.join(dir_name, json_file)
              for json_file in listdir_without_extensions(dir_name)]
@@ -394,7 +395,7 @@ class Environment(BaseObject):
     def read_provisioning_info(self, fact_type,
                                directory=os.path.curdir, serializer=None):
         dir_name = self._get_fact_dir_name(fact_type, directory=directory)
-        node_facts = map(
+        node_facts = six.moves.map(
             lambda f: (serializer or self.serializer).read_from_file(f),
             [os.path.join(dir_name, fact_file)
              for fact_file in listdir_without_extensions(dir_name)
@@ -423,7 +424,7 @@ class Environment(BaseObject):
 
     def run_test_sets(self, test_sets_to_run):
         self._test_sets_to_run = test_sets_to_run
-        tests_data = map(
+        tests_data = six.moves.map(
             lambda testset: {
                 "testset": testset,
                 "metadata": {
@@ -466,7 +467,7 @@ class Environment(BaseObject):
         return "clusters/{0}/{1}/?nodes={2}".format(
             self.id,
             method_type,
-            ','.join(map(lambda n: str(n.id), nodes)))
+            ','.join(six.moves.map(lambda n: str(n.id), nodes)))
 
     def install_selected_nodes(self, method_type, nodes):
         return Task.init_with_data(

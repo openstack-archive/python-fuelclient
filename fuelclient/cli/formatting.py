@@ -68,7 +68,7 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
         (row_template.format(*header),
          u'-|-'.join(column_widths[column_index] * u'-'
                      for column_index in range(number_of_columns)),
-         u'\n'.join(row_template.format(*map(six.text_type, x))
+         u'\n'.join(row_template.format(*six.moves.map(six.text_type, x))
                     for x in rows))
     )
 
@@ -218,12 +218,12 @@ def print_health_check(env):
     tests_states = [{"status": "not finished"}]
     finished_tests = set()
     test_counter, total_tests_count = 1, None
-    while not all(map(
+    while not all(six.moves.map(
             lambda t: t["status"] == "finished",
             tests_states
     )):
         tests_states = env.get_state_of_tests()
-        all_tests = list(chain(*map(
+        all_tests = list(chain(*six.moves.map(
             itemgetter("tests"),
             filter(
                 env.is_in_running_test_sets,
@@ -240,7 +240,7 @@ def print_health_check(env):
             all_finished_tests
         )
         finished_tests.update(
-            map(
+            six.moves.map(
                 itemgetter("name"),
                 new_finished_tests
             )
