@@ -34,7 +34,8 @@ class TestPluginsCommand(test_engine.BaseCLITest):
 
     def test_plugins_sync_specified_plugins(self):
         ids = [1, 2]
-        args = 'plugins sync {ids}'.format(ids=' '.join(map(str, ids)))
+        args = 'plugins sync {ids}'.format(
+            ids=' '.join(map(str, ids)))
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('plugins', mock.ANY)
