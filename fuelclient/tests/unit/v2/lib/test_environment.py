@@ -192,9 +192,30 @@ class TestEnvFacade(test_api.BaseLibTest):
 
         self.assertTrue(matcher.called)
 
-        for assignment in matcher.last_request.json():
-            # Check whether all assignments are expected
-            self.assertIn(assignment, expected_body)
+        self.assertItemsEqual(
+            expected_body,
+            matcher.last_request.json()
+        )
+
+    def test_env_remove_nodes(self):
+        nodes = [25, 26]
+        env_id = 42
+
+        expected_body = [{'id': n} for n in nodes]
+
+        expected_uri = self.get_object_uri(self.res_uri,
+                                           env_id, '/unassignment/')
+
+        matcher = self.m_request.post(expected_uri, json={})
+
+        self.client.remove_nodes(env_id, nodes)
+
+        self.assertTrue(matcher.called)
+
+        self.assertItemsEqual(
+            expected_body,
+            matcher.last_request.json()
+        )
 
     def test_env_spawn_vms(self):
         env_id = 10
