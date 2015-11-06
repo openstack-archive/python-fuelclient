@@ -26,4 +26,3 @@ OpenStack process. A good reference for it can be found here:
   https://wiki.openstack.org/wiki/How_To_Contribute
 
   http://docs.openstack.org/infra/manual/developers.html
-

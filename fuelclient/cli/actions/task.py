@@ -49,10 +49,7 @@ class TaskAction(Action):
                 fuel task --delete -f --tid 1,6
         """
         tasks = Task.get_by_ids(params.task)
-        delete_response = map(
-            lambda task: task.delete(force=params.force),
-            tasks
-        )
+        delete_response = [task.delete(force=params.force) for task in tasks]
         self.serializer.print_to_output(
             delete_response,
             "Tasks with id's {0} deleted."
