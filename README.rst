@@ -27,3 +27,23 @@ OpenStack process. A good reference for it can be found here:
 
   http://docs.openstack.org/infra/manual/developers.html
 
+
+----------------
+Test suite notes
+----------------
+
+Install [TOX](https://tox.readthedocs.org/en/latest/) in global environment.
+
+"""
+$ pip install tox
+"""
+
+Install and configure PostgreSQL for the Nailgun service:
+
+"""
+postgres=#
+CREATE USER nailgun;
+ALTER ROLE nailgun UNENCRYPTED PASSWORD 'nailgun';
+CREATE DATABASE nailgun;
+GRANT ALL ON DATABASE nailgun TO nailgun;
+"""
