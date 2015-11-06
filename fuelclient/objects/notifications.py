@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import six
 
 from fuelclient.cli import error
 
@@ -33,7 +34,7 @@ class Notifications(base.BaseObject):
             data = Notifications.get_all_data()
         else:
             try:
-                ids = map(int, ids)
+                ids = six.moves.map(int, ids)
             except ValueError:
                 raise error.BadDataException(
                     "Numerical ids expected or the '*' symbol.")

@@ -13,6 +13,7 @@
 #    under the License.
 
 from operator import attrgetter
+import six
 
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects import NodeCollection
@@ -56,15 +57,15 @@ class NodeGroupCollection(object):
 
     @classmethod
     def init_with_ids(cls, ids):
-        return cls(map(NodeGroup, ids))
+        return cls(six.moves.map(NodeGroup, ids))
 
     @classmethod
     def init_with_data(cls, data):
-        return cls(map(NodeGroup.init_with_data, data))
+        return cls(six.moves.map(NodeGroup.init_with_data, data))
 
     def __str__(self):
         return "node groups [{0}]".format(
-            ", ".join(map(lambda n: str(n.id), self.collection))
+            ", ".join(six.moves.map(lambda n: str(n.id), self.collection))
         )
 
     def __iter__(self):
@@ -72,7 +73,7 @@ class NodeGroupCollection(object):
 
     @property
     def data(self):
-        return map(attrgetter("data"), self.collection)
+        return six.moves.map(attrgetter("data"), self.collection)
 
     @classmethod
     def get_all(cls):
