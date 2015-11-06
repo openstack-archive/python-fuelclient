@@ -15,6 +15,8 @@
 from operator import methodcaller
 from time import sleep
 
+import six
+
 from fuelclient.cli.error import DeployProgressError
 from fuelclient.objects.base import BaseObject
 
@@ -70,7 +72,7 @@ class DeployTask(Task):
     @property
     def is_finished(self):
         return super(DeployTask, self).is_finished and all(
-            map(
+            six.moves.map(
                 methodcaller("is_finished"),
                 self.not_finished_nodes
             )

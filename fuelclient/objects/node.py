@@ -15,6 +15,8 @@
 from operator import attrgetter
 import os
 
+import six
+
 from fuelclient.cli.error import InvalidDirectoryException
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.environment import Environment
@@ -149,15 +151,15 @@ class NodeCollection(object):
 
     @classmethod
     def init_with_ids(cls, ids):
-        return cls(map(Node, ids))
+        return cls(six.moves.map(Node, ids))
 
     @classmethod
     def init_with_data(cls, data):
-        return cls(map(Node.init_with_data, data))
+        return cls(six.moves.map(Node.init_with_data, data))
 
     def __str__(self):
         return "nodes [{0}]".format(
-            ", ".join(map(lambda n: str(n.id), self.collection))
+            ", ".join(six.moves.map(lambda n: str(n.id), self.collection))
         )
 
     def __iter__(self):
@@ -165,7 +167,7 @@ class NodeCollection(object):
 
     @property
     def data(self):
-        return map(attrgetter("data"), self.collection)
+        return six.moves.map(attrgetter("data"), self.collection)
 
     @classmethod
     def get_all(cls):
@@ -179,7 +181,7 @@ class NodeCollection(object):
     def delete_by_ids(cls, ids):
         url = '{0}?ids={1}'.format(
             cls.class_api_path,
-            ','.join(map(str, ids))
+            ','.join(six.moves.map(str, ids))
         )
 
         return BaseObject.connection.delete_request(url)

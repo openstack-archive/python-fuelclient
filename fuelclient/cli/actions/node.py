@@ -15,6 +15,8 @@
 from itertools import groupby
 from operator import attrgetter
 
+import six
+
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
 from fuelclient.cli.actions.base import check_any
@@ -97,7 +99,7 @@ class NodeAction(Action):
         """
         env = Environment(params.env)
         nodes = Node.get_by_ids(params.node)
-        roles = map(str.lower, params.role)
+        roles = list(six.moves.map(str.lower, params.role))
         env.assign(nodes, roles)
         self.serializer.print_to_output(
             {},
@@ -117,10 +119,11 @@ class NodeAction(Action):
            Remove all nodes from some environment:
                 fuel --env 1 node remove --all
         """
+        nodes = params.node and Node.get_by_ids(params.node)
         if params.env:
             env = Environment(params.env)
             if params.node:
-                env.unassign(params.node)
+                env.unassign(nodes)
                 self.serializer.print_to_output(
                     {},
                     "Nodes with ids {0} were removed "
@@ -139,22 +142,23 @@ class NodeAction(Action):
                     "All nodes from environment with id {0} were removed."
                     .format(params.env))
         else:
-            nodes = map(Node, params.node)
-            for env_id, _nodes in groupby(nodes, attrgetter("env_id")):
-                list_of_nodes = [n.id for n in _nodes]
+            key = attrgetter("env_id")
+            for env_id, env_nodes in groupby(sorted(nodes, key=key), key):
+                env_nodes = list(env_nodes)   # tee is slower solution
+                nodes_ids = [n.id for n in env_nodes]
                 if env_id:
-                    Environment(env_id).unassign(list_of_nodes)
+                    Environment(env_id).unassign(env_nodes)
                     self.serializer.print_to_output(
                         {},
                         "Nodes with ids {0} were removed "
                         "from environment with id {1}."
-                        .format(list_of_nodes, env_id)
+                        .format(nodes_ids, env_id)
                     )
                 else:
                     self.serializer.print_to_output(
                         {},
                         "Nodes with ids {0} aren't added to "
-                        "any environment.".format(list_of_nodes)
+                        "any environment.".format(nodes_ids)
                     )
 
     @check_all("node")

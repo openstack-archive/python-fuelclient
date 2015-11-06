@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import six
 
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
@@ -49,14 +50,14 @@ class TaskAction(Action):
                 fuel task --delete -f --tid 1,6
         """
         tasks = Task.get_by_ids(params.task)
-        delete_response = map(
+        delete_response = list(six.moves.map(
             lambda task: task.delete(force=params.force),
             tasks
-        )
+        ))
         self.serializer.print_to_output(
             delete_response,
             "Tasks with id's {0} deleted."
-            .format(', '.join(map(str, params.task)))
+            .format(', '.join(six.moves.map(str, params.task)))
         )
 
     def list(self, params):
@@ -69,7 +70,7 @@ class TaskAction(Action):
         acceptable_keys = ("id", "status", "name",
                            "cluster", "progress", "uuid")
         if params.task:
-            tasks_data = map(
+            tasks_data = six.moves.map(
                 Task.get_fresh_data,
                 Task.get_by_ids(params.task)
             )

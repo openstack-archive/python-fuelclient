@@ -107,7 +107,7 @@ def major_plugin_version(version):
     :returns: only major version
     """
     version_tuple = StrictVersion(version).version
-    major = '.'.join(map(str, version_tuple[:2]))
+    major = '.'.join(six.moves.map(str, version_tuple[:2]))
 
     return major
 

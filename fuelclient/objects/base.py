@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from fuelclient.cli.serializers import Serializer
 from fuelclient.client import APIClient
 
@@ -42,7 +44,7 @@ class BaseObject(object):
 
     @classmethod
     def get_by_ids(cls, ids):
-        return map(cls, ids)
+        return six.moves.map(cls, ids)
 
     def update(self):
         self._data = self.connection.get_request(
@@ -65,4 +67,4 @@ class BaseObject(object):
 
     @classmethod
     def get_all(cls):
-        return map(cls.init_with_data, cls.get_all_data())
+        return six.moves.map(cls.init_with_data, cls.get_all_data())

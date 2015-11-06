@@ -14,6 +14,8 @@
 
 from operator import attrgetter
 
+import six
+
 from fuelclient.objects.base import BaseObject
 
 
@@ -80,16 +82,16 @@ class NetworkGroupCollection(object):
 
     @classmethod
     def init_with_ids(cls, ids):
-        return cls(map(NetworkGroup, ids))
+        return cls(six.moves.map(NetworkGroup, ids))
 
     @classmethod
     def init_with_data(cls, data):
-        return cls(map(NetworkGroup.init_with_data, data))
+        return cls(six.moves.map(NetworkGroup.init_with_data, data))
 
     def __str__(self):
         return "{0} [{1}]".format(
             self.__class__.__name__,
-            ", ".join(map(lambda n: str(n.id), self.collection))
+            ", ".join(six.moves.map(lambda n: str(n.id), self.collection))
         )
 
     def __iter__(self):
@@ -97,7 +99,7 @@ class NetworkGroupCollection(object):
 
     @property
     def data(self):
-        return map(attrgetter("data"), self.collection)
+        return six.moves.map(attrgetter("data"), self.collection)
 
     @classmethod
     def get_all(cls):
