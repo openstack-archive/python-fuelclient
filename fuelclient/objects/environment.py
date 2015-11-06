@@ -99,7 +99,7 @@ class Environment(BaseObject):
     def unassign(self, nodes):
         return self.connection.post_request(
             "clusters/{0}/unassignment/".format(self.id),
-            [{"id": n} for n in nodes]
+            [{"id": node.id} for node in nodes]
         )
 
     def get_all_nodes(self):

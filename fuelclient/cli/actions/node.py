@@ -14,6 +14,7 @@
 
 from itertools import groupby
 from operator import attrgetter
+import six
 
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
@@ -117,10 +118,11 @@ class NodeAction(Action):
            Remove all nodes from some environment:
                 fuel --env 1 node remove --all
         """
+        nodes = six.moves.map(Node, params.node)
         if params.env:
             env = Environment(params.env)
             if params.node:
-                env.unassign(params.node)
+                env.unassign(nodes)
                 self.serializer.print_to_output(
                     {},
                     "Nodes with ids {0} were removed "
@@ -139,7 +141,6 @@ class NodeAction(Action):
                     "All nodes from environment with id {0} were removed."
                     .format(params.env))
         else:
-            nodes = map(Node, params.node)
             for env_id, _nodes in groupby(nodes, attrgetter("env_id")):
                 list_of_nodes = [n.id for n in _nodes]
                 if env_id:
