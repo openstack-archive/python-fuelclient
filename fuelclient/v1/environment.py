@@ -80,6 +80,12 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
         env.assign(nodes, roles)
 
+    def remove_nodes(self, environment_id, nodes):
+        env = self._entity_wrapper(obj_id=environment_id)
+        nodes = [objects.Node(obj_id=n_id) for n_id in nodes]
+
+        env.unassign(nodes)
+
     def deploy_changes(self, environment_id):
         env = self._entity_wrapper(obj_id=environment_id)
         deploy_task = env.deploy_changes()
