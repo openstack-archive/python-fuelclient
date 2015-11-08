@@ -33,5 +33,4 @@ def get_fake_env(name=None, status=None, release_id=None,
             'fuel_version': fuel_version or '5.1',
             'pending_release_id': pending_release,
             'id': env_id or 1,
-            'changes': [],
-            'mode': 'multinode'}
+            'changes': []}
