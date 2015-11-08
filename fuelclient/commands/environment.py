@@ -28,7 +28,6 @@ class EnvList(EnvMixIn, base.BaseListCommand):
     columns = ("id",
                "status",
                "name",
-               "mode",
                "release_id",
                "net_provider")
 
@@ -39,7 +38,6 @@ class EnvShow(EnvMixIn, base.BaseShowCommand):
                "status",
                "fuel_version",
                "name",
-               "mode",
                "release_id",
                "pending_release_id",
                "is_customized",

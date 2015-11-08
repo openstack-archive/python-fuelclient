@@ -28,9 +28,9 @@ class TestHandlers(base.BaseTestCase):
                      "[--list | --set | --delete | --create | --update]",
                      "optional arguments:", "--help", "--list", "--set",
                      "--delete", "--rel", "--env-create",
-                     "--create", "--name", "--env-name", "--mode", "--net",
+                     "--create", "--name", "--env-name", "--net",
                      "--network-mode", "--nst", "--net-segment-type",
-                     "--deployment-mode", "--update", "--env-update"]
+                     "--update", "--env-update"]
         self.check_all_in_msg("env --help", help_msgs)
         # no clusters
         self.check_for_rows_in_table("env")
@@ -44,32 +44,16 @@ class TestHandlers(base.BaseTestCase):
         expected_stdout = \
             [(
                 "env --create --name=TestEnv --release={0}".format(release_id),
-                "Environment 'TestEnv' with id=1, mode=ha_compact and "
+                "Environment 'TestEnv' with id=1 and "
                 "network-mode=neutron was created!\n"
             ), (
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
                  "the environment: name=NewEnv\n")
-            ), (
-                "--env-id=1 env set --mode=ha",
-                ("Following attributes are changed for "
-                 "the environment: mode=ha\n")
             )]
 
         for cmd, msg in expected_stdout:
             self.check_for_stdout(cmd, msg)
-
-    def test_env_action_errors(self):
-        release_id = self.get_first_deployable_release_id()
-        cases = [
-            ("env --create --name=TestEnv --release={0} --mode=multinode"
-             .format(release_id),
-             "400 Client Error: Bad Request (Cannot deploy in multinode "
-             "mode in current release. Need to be one of: ha_compact)"
-             )
-        ]
-        for cmd, err in cases:
-            self.check_for_stderr(cmd, err, check_errors=False)
 
     def test_node_action(self):
         help_msg = ["fuel node [-h] [--env ENV]",
@@ -180,7 +164,7 @@ class TestHandlers(base.BaseTestCase):
         self.check_for_stdout(
             "env create --name=NewEnv --release={0} --nst=tun"
             .format(release_id),
-            "Environment 'NewEnv' with id=1, mode=ha_compact and "
+            "Environment 'NewEnv' with id=1 and "
             "network-mode=neutron was created!\n")
 
     def test_destroy_multiple_nodes(self):

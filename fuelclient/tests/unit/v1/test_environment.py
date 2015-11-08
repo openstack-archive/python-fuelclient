@@ -45,7 +45,6 @@ class TestEnvironment(base.UnitTestCase):
         cluster_data = {
             'id': cluster_id,
             'name': 'test',
-            'mode': 'ha_compact',
             'net_provider': 'neutron'
         }
         self.m_request.post('/api/v1/clusters/', json=cluster_data)
@@ -66,7 +65,6 @@ class TestEnvironment(base.UnitTestCase):
         cluster_data = {
             'id': cluster_id,
             'name': 'test',
-            'mode': 'ha_compact',
             'net_provider': 'neutron'
         }
         self.m_request.post('/api/v1/clusters/', json=cluster_data)
@@ -82,44 +80,6 @@ class TestEnvironment(base.UnitTestCase):
         self.assertIn("WARNING: GRE network segmentation type is "
                       "deprecated since 7.0 release.",
                       m_stdout.getvalue())
-
-    def test_create_env_with_mode_set(self):
-        cluster_id = 1
-        cluster_data = {
-            'id': cluster_id,
-            'name': 'test',
-            'mode': 'ha_compact',
-            'net_provider': 'neutron'
-        }
-        m_post = self.m_request.post('/api/v1/clusters/', json=cluster_data)
-        self.m_request.get('/api/v1/clusters/{0}/'.format(cluster_id),
-                           json=cluster_data)
-
-        self.execute('fuel env create'
-                     ' --name test --rel 1 --mode ha'.split())
-        self.assertEqual('ha_compact', m_post.last_request.json()['mode'])
-
-    def test_multimode_warning(self):
-        cluster_id = 1
-        cluster_data = {
-            'id': cluster_id,
-            'name': 'test',
-            'mode': 'multinode',
-            'net_provider': 'neutron'
-        }
-        m_post = self.m_request.post('/api/v1/clusters/', json=cluster_data)
-        self.m_request.get('/api/v1/clusters/{0}/'.format(cluster_id),
-                           json=cluster_data)
-
-        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
-            self.execute('fuel env create'
-                         ' --name test --rel 1 --mode multinode'.split())
-
-        self.assertIn('WARNING: \'multinode\' mode is '
-                      'deprecated since 6.1 release.',
-                      m_stdout.getvalue())
-
-        self.assertEqual('multinode', m_post.last_request.json()['mode'])
 
 
 class TestEnvironmentOstf(base.UnitTestCase):

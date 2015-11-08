@@ -35,8 +35,7 @@ class Environment(BaseObject):
     network_template_path = 'clusters/{0}/network_configuration/template'
 
     @classmethod
-    def create(cls, name, release_id, net, net_segment_type,
-               mode='ha_compact'):
+    def create(cls, name, release_id, net, net_segment_type):
         data = {
             "nodes": [],
             "tasks": [],
@@ -44,9 +43,6 @@ class Environment(BaseObject):
             "release_id": release_id,
             "net_segment_type": net_segment_type,
         }
-
-        if mode:
-            data['mode'] = cls._get_mode(mode)
 
         if net.lower() == "nova":
             data["net_provider"] = "nova_network"
@@ -60,18 +56,7 @@ class Environment(BaseObject):
         super(Environment, self).__init__(*args, **kwargs)
         self._testruns_ids = []
 
-    @staticmethod
-    def _get_mode(mode):
-        mode = mode.lower()
-        if mode in ('ha_compact', 'ha'):
-            return 'ha_compact'
-        return 'multinode'
-
     def set(self, data):
-        mode = data.get('mode')
-        if mode:
-            data["mode"] = self._get_mode(mode)
-
         return self.connection.put_request(
             "clusters/{0}/".format(self.id),
             data
