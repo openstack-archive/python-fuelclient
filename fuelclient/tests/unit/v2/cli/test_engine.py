@@ -94,25 +94,25 @@ class BaseCLITest(oslo_base.BaseTestCase):
 
     @mock.patch('cliff.formatters.table.TableFormatter.emit_list')
     def test_lister_sorting(self, m_emit_list):
-        cmd = 'env list -s status net_provider'
+        cmd = 'env list -s status net_segment_type'
 
         raw_data = [{'id': 43,
                      'status': 'STATUS 2',
                      'name': 'Test env 2',
                      'release_id': 2,
-                     'net_provider': 'nova'},
+                     'net_segment_type': 'tun'},
 
                     {'id': 42,
                      'status': 'STATUS 1',
                      'name': 'Test env 1',
                      'release_id': 2,
-                     'net_provider': 'nova'},
+                     'net_segment_type': 'tun'},
 
                     {'id': 44,
                      'status': 'STATUS 2',
                      'name': 'Test env 3',
                      'release_id': 2,
-                     'net_provider': 'neutron'}]
+                     'net_segment_type': 'gre'}]
 
         expected_order = [1, 2, 0]
         expected_data = [[raw_data[i][prop] for prop in env.EnvList.columns]

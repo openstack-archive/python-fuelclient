@@ -50,7 +50,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
         self.m_client.get_by_id.assert_called_once_with(42)
 
     def test_env_create(self):
-        args = 'env create -r 1 -n neutron -nst gre env42'
+        args = 'env create -r 1 -nst gre env42'
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
@@ -58,21 +58,10 @@ class TestEnvCommand(test_engine.BaseCLITest):
         m_client = self.m_client
         m_client.create.assert_called_once_with(name='env42',
                                                 release_id=1,
-                                                network_provider='neutron',
                                                 net_segment_type='gre')
 
-    def test_nova_net_deprecation_warning(self):
-        args = 'env create -r 1 -n nova env42'
-
-        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
-            self.exec_command(args)
-            self.assertIn(
-                'WARNING: nova-network is deprecated since 6.1 release',
-                m_stdout.getvalue()
-            )
-
     def test_neutron_gre_deprecation_warning(self):
-        args = 'env create -r 1 -n neutron -nst gre env42'
+        args = 'env create -r 1 -nst gre env42'
 
         with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.exec_command(args)
