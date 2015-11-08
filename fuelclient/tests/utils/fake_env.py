@@ -16,8 +16,7 @@
 
 
 def get_fake_env(name=None, status=None, release_id=None,
-                 fuel_version=None, pending_release=None, env_id=None,
-                 net_provider=None):
+                 fuel_version=None, pending_release=None, env_id=None):
     """Create a random fake environment
 
     Returns the serialized and parametrized representation of a dumped Fuel
@@ -28,9 +27,8 @@ def get_fake_env(name=None, status=None, release_id=None,
             'is_customized': False,
             'release_id': release_id or 2,
             'name': name or 'fake_env',
-            'net_provider': net_provider or 'neutron',
-            'net_segment_type': 'gre',
-            'fuel_version': fuel_version or '5.1',
+            'net_segment_type': 'vlan',
+            'fuel_version': fuel_version or '8.0',
             'pending_release_id': pending_release,
             'id': env_id or 1,
             'changes': []}

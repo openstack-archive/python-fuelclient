@@ -20,8 +20,8 @@ import requests_mock as rm
 from fuelclient.tests.unit.v1 import base
 
 
-API_INPUT = {'config': 'nova_network'}
-API_OUTPUT = 'config: nova_network\n'
+API_INPUT = {'config': 'nova_neutron'}
+API_OUTPUT = 'config: nova_neutron\n'
 
 
 @patch('fuelclient.cli.serializers.open', create=True)
