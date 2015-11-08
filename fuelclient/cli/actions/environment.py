@@ -35,10 +35,10 @@ class EnvironmentAction(Action):
                     "List all available environments"
                 ),
                 Args.get_set_arg(
-                    "Set environment parameters (e.g name, deployment mode)"
+                    "Set environment parameters e.g., its name"
                 ),
                 Args.get_delete_arg(
-                    "Delete environment with specific env or name"
+                    "Delete environment with a specific id or name"
                 ),
                 Args.get_create_arg(
                     "Create a new environment with "
@@ -56,9 +56,6 @@ class EnvironmentAction(Action):
             ),
             Args.get_name_arg(
                 "Environment name"
-            ),
-            Args.get_mode_arg(
-                "Set deployment mode for specific environment"
             ),
             Args.get_net_arg(
                 "Set network mode for specific environment"
@@ -92,12 +89,12 @@ class EnvironmentAction(Action):
         """To create an environment with name MyEnv and release id=1 run:
                 fuel env create --name MyEnv --rel 1
 
-            By default, it creates environment with ha_compact mode and
-            neutron with VLAN network segmentation as network provider
+            By default, it creates environment setting neutron with VLAN
+            network segmentation as network provider
             (WARNING: nova-network is deprecated since 6.1 release).
             To specify other modes add optional arguments:
                 fuel env create --name MyEnv --rel 1 \\
-                --mode ha --network-mode neutron
+                --network-mode neutron
         """
         if params.net == "nova":
             self.serializer.print_to_output(
@@ -112,35 +109,28 @@ class EnvironmentAction(Action):
                 "since 7.0 release."
             )
 
-        if params.mode == 'multinode':
-            self.serializer.print_to_output(
-                {},
-                "WARNING: 'multinode' mode is deprecated since 6.1 release."
-            )
-
         env = Environment.create(
             params.name,
             params.release,
             params.net,
             params.nst,
-            params.mode,
         )
 
         data = env.get_fresh_data()
 
         self.serializer.print_to_output(
             data,
-            u"Environment '{name}' with id={id}, mode={mode}"
+            u"Environment '{name}' with id={id}"
             u" and network-mode={net_provider} was created!"
             .format(**data)
         )
 
     @check_all("env")
     def set(self, params):
-        """To change environment name, mode or network mode:
-                fuel --env 1 env set --name NewEnvName --mode ha_compact
+        """To change environment name or network mode:
+                fuel --env 1 env set --name NewEnvName
         """
-        acceptable_params = ('mode', 'name', 'pending_release_id')
+        acceptable_params = ('name', 'pending_release_id')
 
         env = Environment(params.env, params=params)
 
@@ -192,7 +182,7 @@ class EnvironmentAction(Action):
         """Print all available environments:
                 fuel env
         """
-        acceptable_keys = ("id", "status", "name", "mode",
+        acceptable_keys = ("id", "status", "name",
                            "release_id", "pending_release_id")
         data = Environment.get_all_data()
         if params.env:

@@ -99,21 +99,18 @@ class BaseCLITest(oslo_base.BaseTestCase):
         raw_data = [{'id': 43,
                      'status': 'STATUS 2',
                      'name': 'Test env 2',
-                     'mode': 'ha_compact',
                      'release_id': 2,
                      'net_provider': 'nova'},
 
                     {'id': 42,
                      'status': 'STATUS 1',
                      'name': 'Test env 1',
-                     'mode': 'ha_compact',
                      'release_id': 2,
                      'net_provider': 'nova'},
 
                     {'id': 44,
                      'status': 'STATUS 2',
                      'name': 'Test env 3',
-                     'mode': 'ha_compact',
                      'release_id': 2,
                      'net_provider': 'neutron'}]
 
