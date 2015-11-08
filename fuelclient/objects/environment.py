@@ -35,7 +35,7 @@ class Environment(BaseObject):
     network_template_path = 'clusters/{0}/network_configuration/template'
 
     @classmethod
-    def create(cls, name, release_id, net, net_segment_type):
+    def create(cls, name, release_id, net_segment_type):
         data = {
             "nodes": [],
             "tasks": [],
@@ -43,11 +43,6 @@ class Environment(BaseObject):
             "release_id": release_id,
             "net_segment_type": net_segment_type,
         }
-
-        if net.lower() == "nova":
-            data["net_provider"] = "nova_network"
-        else:
-            data["net_provider"] = "neutron"
 
         data = cls.connection.post_request("clusters/", data)
         return cls.init_with_data(data)
@@ -236,7 +231,7 @@ class Environment(BaseObject):
 
     @property
     def network_url(self):
-        return "clusters/{id}/network_configuration/{net_provider}".format(
+        return "clusters/{id}/network_configuration/neutron".format(
             **self.data
         )
 
