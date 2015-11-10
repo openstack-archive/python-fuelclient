@@ -296,6 +296,15 @@ def get_name_arg(help_msg):
     return get_str_arg("name", flags=("--env-name",), help=help_msg)
 
 
+def get_net_arg(help_msg):
+    return get_arg("net",
+                   flags=("-n", "--network-mode"),
+                   action="store",
+                   choices=("nova", "neutron"),
+                   help_=help_msg,
+                   default="neutron")
+
+
 def get_graph_endpoint():
     return get_arg(
         'end',

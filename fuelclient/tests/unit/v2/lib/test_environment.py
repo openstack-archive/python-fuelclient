@@ -69,11 +69,13 @@ class TestEnvFacade(test_api.BaseLibTest):
         env_name = self.fake_env['name']
         release_id = self.fake_env['release_id']
         nst = self.fake_env['net_segment_type']
+        net = self.fake_env['net_provider']
 
         matcher = self.m_request.post(self.res_uri, json=self.fake_env)
 
         self.client.create(name=env_name,
                            release_id=release_id,
+                           network_provider=net,
                            net_segment_type=nst)
 
         req_data = matcher.last_request.json()
@@ -83,26 +85,39 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.assertEqual(release_id, req_data['release_id'])
         self.assertEqual(env_name, req_data['name'])
         self.assertEqual(nst, req_data['net_segment_type'])
+        self.assertEqual(net, req_data['net_provider'])
 
-    def test_env_create_bad_nst_neutron(self):
+    def test_env_create_no_nst_neutron(self):
         node_name = 'test_node'
         release_id = 20
-        nst = 'bad'
+        net = 'neutron'
 
         self.assertRaises(error.BadDataException,
                           self.client.create,
-                          node_name, release_id, nst)
+                          node_name, release_id, net)
+
+    def test_env_create_nst_nova(self):
+        node_name = 'test_node'
+        release_id = 20
+        net = 'nova'
+        nst = 'gre'
+
+        self.assertRaises(error.BadDataException,
+                          self.client.create,
+                          node_name, release_id, net, net_segment_type=nst)
 
     def test_env_create_neutron_tun(self):
         env = utils.get_fake_env()
         env_name = env['name']
         release_id = env['release_id']
         nst = env['net_segment_type'] = 'tun'
+        net = env['net_provider']
 
         matcher = self.m_request.post(self.res_uri, json=env)
 
         self.client.create(name=env_name,
                            release_id=release_id,
+                           network_provider=net,
                            net_segment_type=nst)
 
         req_data = matcher.last_request.json()
@@ -110,6 +125,7 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.assertEqual(release_id, req_data['release_id'])
         self.assertEqual(env_name, req_data['name'])
         self.assertEqual(nst, req_data['net_segment_type'])
+        self.assertEqual(net, req_data['net_provider'])
 
     @mock.patch.object(task_object.DeployTask, 'init_with_data')
     def test_env_deploy(self, m_init):

@@ -28,8 +28,9 @@ class TestHandlers(base.BaseTestCase):
                      "[--list | --set | --delete | --create | --update]",
                      "optional arguments:", "--help", "--list", "--set",
                      "--delete", "--rel", "--env-create",
-                     "--create", "--name", "--env-name", "--nst",
-                     "--net-segment-type", "--update", "--env-update"]
+                     "--create", "--name", "--env-name", "--net",
+                     "--network-mode", "--nst", "--net-segment-type",
+                     "--update", "--env-update"]
         self.check_all_in_msg("env --help", help_msgs)
         # no clusters
         self.check_for_rows_in_table("env")
@@ -43,7 +44,8 @@ class TestHandlers(base.BaseTestCase):
         expected_stdout = \
             [(
                 "env --create --name=TestEnv --release={0}".format(release_id),
-                "Environment 'TestEnv' with id=1 and was created!\n"
+                "Environment 'TestEnv' with id=1 and "
+                "network-mode=neutron was created!\n"
             ), (
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
@@ -162,7 +164,8 @@ class TestHandlers(base.BaseTestCase):
         self.check_for_stdout(
             "env create --name=NewEnv --release={0} --nst=tun"
             .format(release_id),
-            "Environment 'NewEnv' with id=1 and was created!\n")
+            "Environment 'NewEnv' with id=1 and "
+            "network-mode=neutron was created!\n")
 
     def test_destroy_multiple_nodes(self):
         self.load_data_to_nailgun_server()

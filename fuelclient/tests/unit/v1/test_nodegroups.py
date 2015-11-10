@@ -25,7 +25,7 @@ class TestNodeGroupActions(base.UnitTestCase):
     def setUp(self):
         super(TestNodeGroupActions, self).setUp()
 
-        self.env = fake_env.get_fake_env()
+        self.env = fake_env.get_fake_env(net_provider='neutron')
         self.req_base_path = '/api/v1/nodegroups/'
         self.ng = fake_network_group.get_fake_network_group()
 
@@ -41,8 +41,9 @@ class TestNodeGroupActions(base.UnitTestCase):
                 self.env['id']
             )
 
-        self.m_request.get('/api/v1/clusters/{0[id]}/'.format(self.env),
-                           json={'id': self.env['id']})
+        self.m_request.get('/api/v1/clusters/{0}/'.format(self.env['id']),
+                           json={'id': self.env['id'],
+                                 'net_provider': self.env['net_provider']})
         mpost = self.m_request.post(self.req_base_path,
                                     json={'id': self.ng['id'],
                                           'name': self.ng['name']})

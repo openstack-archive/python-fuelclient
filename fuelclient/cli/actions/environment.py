@@ -57,6 +57,9 @@ class EnvironmentAction(Action):
             Args.get_name_arg(
                 "Environment name"
             ),
+            Args.get_net_arg(
+                "Set network mode for specific environment"
+            ),
             Args.get_nst_arg(
                 "Set network segment type"
             ),
@@ -88,11 +91,18 @@ class EnvironmentAction(Action):
 
             By default, it creates environment setting neutron with VLAN
             network segmentation as network provider
+            (WARNING: nova-network is deprecated since 6.1 release).
             To specify other modes add optional arguments:
-                fuel env create --name MyEnv --rel 1 --net-segment-type vlan
+                fuel env create --name MyEnv --rel 1 \\
+                --network-mode neutron
         """
+        if params.net == "nova":
+            self.serializer.print_to_output(
+                {},
+                "WARNING: nova-network is deprecated since 6.1 release."
+            )
 
-        if params.nst == 'gre':
+        if params.net == "neutron" and params.nst == 'gre':
             self.serializer.print_to_output(
                 {},
                 "WARNING: GRE network segmentation type is deprecated "
@@ -102,6 +112,7 @@ class EnvironmentAction(Action):
         env = Environment.create(
             params.name,
             params.release,
+            params.net,
             params.nst,
         )
 
@@ -109,13 +120,14 @@ class EnvironmentAction(Action):
 
         self.serializer.print_to_output(
             data,
-            u"Environment '{name}' with id={id} was created!"
+            u"Environment '{name}' with id={id}"
+            u" and network-mode={net_provider} was created!"
             .format(**data)
         )
 
     @check_all("env")
     def set(self, params):
-        """To change environment name:
+        """To change environment name or network mode:
                 fuel --env 1 env set --name NewEnvName
         """
         acceptable_params = ('name', 'pending_release_id')
