@@ -28,8 +28,7 @@ class EnvList(EnvMixIn, base.BaseListCommand):
     columns = ("id",
                "status",
                "name",
-               "release_id",
-               "net_segment_type")
+               "release_id")
 
 
 class EnvShow(EnvMixIn, base.BaseShowCommand):
@@ -41,8 +40,7 @@ class EnvShow(EnvMixIn, base.BaseShowCommand):
                "release_id",
                "pending_release_id",
                "is_customized",
-               "changes",
-               "net_segment_type")
+               "changes")
 
 
 class EnvCreate(EnvMixIn, base.BaseShowCommand):

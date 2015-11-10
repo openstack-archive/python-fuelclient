@@ -68,7 +68,7 @@ class TestEnvFacade(test_api.BaseLibTest):
     def test_env_create(self, m_init):
         env_name = self.fake_env['name']
         release_id = self.fake_env['release_id']
-        nst = self.fake_env['net_segment_type']
+        nst = 'vlan'
 
         matcher = self.m_request.post(self.res_uri, json=self.fake_env)
 
