@@ -15,6 +15,8 @@
 from collections import namedtuple
 import copy
 
+import six
+
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
@@ -28,26 +30,45 @@ class NodeClient(base_v1.BaseV1Client):
     _entity_wrapper = objects.Node
     _updatable_attributes = ('hostname', 'labels', 'name')
 
-    def get_all(self, environment_id=None, labels=None):
-        """Get nodes by specific environment or labels
+    def get_all(self, **kwargs):
+        """Get nodes by specific environment, labels, group_id, roles,
+        status, online status etc.
 
-        :param environment_id: Id of specific environment(cluster)
-        :type environment_id: int
-        :param labels: List of string labels for filtering nodes
-        :type labels: list
-        :returns: list -- filtered list of nodes
+        :param kwargs: filter nodes by specified arguments
+        :type kwargs: dict
+        :returns: list - filtered list of nodes
         """
-        result = self._entity_wrapper.get_all_data()
 
-        if environment_id is not None:
-            result = [item for item in result
-                      if item['cluster'] == environment_id]
+        params_map = {
+            'environment_id': 'cluster_id',
+            'group_id': 'group_id',
+            'roles': 'roles',
+            'status': 'status'
+        }
 
+        params = {}
+        for cmd_param_name, filter_param_name in six.iteritems(params_map):
+            value = kwargs.get(cmd_param_name)
+            if value:
+                params[filter_param_name] = value
+
+        if kwargs.get('nogroup'):
+            params['group_id'] = ''
+
+        online = kwargs.get('online')
+        offline = kwargs.get('offline')
+        if online != offline:
+            params['online'] = online
+
+        node_collection = objects.NodeCollection(
+            self._entity_wrapper.get_all_data(params))
+
+        labels = kwargs.get('labels')
         if labels:
-            result = [item for item in result
-                      if self._check_label(labels, item)]
+            node_collection = [node for node in node_collection
+                               if self._check_label(labels, node)]
 
-        return result
+        return node_collection
 
     def get_node_vms_conf(self, node_id):
         node = self._entity_wrapper(node_id)
