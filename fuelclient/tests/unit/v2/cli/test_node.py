@@ -38,8 +38,75 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
-        self.m_client.get_all.assert_called_once_with(
-            environment_id=None, labels=None)
+        ns = self.create_namespace()
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_with_group_id(self):
+        args = 'node list --group 1'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(group=1)
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_without_group(self):
+        args = 'node list --no-group'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(group='')
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_with_one_role(self):
+        args = 'node list --role controller'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(role=['controller'])
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_with_several_roles(self):
+        args = 'node list --role controller cinder'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(role=[u'controller', u'cinder'])
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_with_status(self):
+        args = 'node list --status discover'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(status='discover')
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_with_online(self):
+        args = 'node list --online'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(online=True)
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_with_offline(self):
+        args = 'node list --offline'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(online=False)
+        self.m_client.get_all.assert_called_once_with(ns)
+
+    def test_node_list_with_envid_groupid_role_status_and_online(self):
+        args = ('node list --env 2 --group 1 --role controller cinder '
+                '--status discover --offline')
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        ns = self.create_namespace(
+            group=1, env=2, role=['controller', 'cinder'], status='discover',
+            online=False)
+        self.m_client.get_all.assert_called_once_with(ns)
 
     def test_node_list_with_env(self):
         env_id = 42
@@ -48,8 +115,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
-        self.m_client.get_all.assert_called_once_with(
-            environment_id=env_id, labels=None)
+        ns = self.create_namespace(env=42)
+        self.m_client.get_all.assert_called_once_with(ns)
 
     def test_node_list_with_labels(self):
         labels = ['key_1=val_1', 'key_2=val_2', 'key3']
@@ -59,8 +126,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
-        self.m_client.get_all.assert_called_once_with(
-            environment_id=None, labels=labels)
+        ns = self.create_namespace(labels=labels)
+        self.m_client.get_all.assert_called_once_with(ns)
 
     def test_node_list_with_env_and_labels(self):
         env_id = 42
@@ -71,10 +138,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.exec_command(args)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
-        self.m_client.get_all.assert_called_once_with(
-            environment_id=env_id, labels=labels)
-        self.assertIsInstance(
-            self.m_client.get_all.call_args[1].get('labels')[0], six.text_type)
+        ns = self.create_namespace(labels=labels, env=env_id)
+        self.m_client.get_all.assert_called_once_with(ns)
 
     def test_node_show(self):
         node_id = 42

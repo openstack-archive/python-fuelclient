@@ -16,14 +16,14 @@
 
 import mock
 from mock import patch
-from oslotest import base as oslo_base
 import requests_mock as rm
 from six.moves.urllib import parse as urlparse
 
 from fuelclient import client
+from fuelclient.tests.unit.v2.base_test_case import BaseTestCase
 
 
-class BaseLibTest(oslo_base.BaseTestCase):
+class BaseLibTest(BaseTestCase):
     def setUp(self):
         super(BaseLibTest, self).setUp()
 
