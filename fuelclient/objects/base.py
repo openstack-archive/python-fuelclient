@@ -61,7 +61,15 @@ class BaseObject(object):
 
     @classmethod
     def get_all_data(cls):
-        return cls.connection.get_request(cls.class_api_path)
+        return cls._get_data()
+
+    @classmethod
+    def _get_data(cls, params=None):
+        return cls.connection.get_request(cls.class_api_path, params=params)
+
+    @classmethod
+    def get_data(cls, params=None):
+        return map(cls.init_with_data, cls._get_data(params))
 
     @classmethod
     def get_all(cls):

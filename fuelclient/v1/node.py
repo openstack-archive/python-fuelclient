@@ -28,24 +28,57 @@ class NodeClient(base_v1.BaseV1Client):
     _entity_wrapper = objects.Node
     _updatable_attributes = ('hostname', 'labels', 'name')
 
-    def get_all(self, environment_id=None, labels=None):
-        """Get nodes by specific environment or labels
+    def get_all(self, environment_id=None, labels=None,
+                group_id=None, roles=None, status=None, online=False,
+                offline=False):
+        """Get nodes by specific environment, labels, group_id, roles, status
+        or online status.
 
         :param environment_id: Id of specific environment(cluster)
         :type environment_id: int
         :param labels: List of string labels for filtering nodes
         :type labels: list
+        :param group_id: id of specific node group
+        :type group_id: int
+        :param roles: filter by roles assigned to a node
+        :type roles: list
+        :param status: filter by node status
+        :type status: string
+        :param online: filter by online status
+        :type online: bool
+        :param offline: filter by offline status
+        :type offline: bool
         :returns: list -- filtered list of nodes
-        """
-        result = self._entity_wrapper.get_all_data()
 
-        if environment_id is not None:
-            result = [item for item in result
-                      if item['cluster'] == environment_id]
+        """
+
+        params = {}
+
+        if environment_id:
+            if environment_id == 'None':
+                environment_id = ''
+            params['cluster_id'] = environment_id
+
+        if group_id:
+            if group_id == 'None':
+                group_id = ''
+            params['group_id'] = group_id
+
+        if roles:
+            params['roles'] = roles
+        if status:
+            params['status'] = status
+        if online != offline:
+            params['online'] = str(online or offline).lower()
+
+        node_collection = objects.NodeCollection(
+            self._entity_wrapper.get_data(params))
+
+        result = node_collection.data
 
         if labels:
-            result = [item for item in result
-                      if self._check_label(labels, item)]
+            result = [node for node in result
+                      if self._check_label(labels, node)]
 
         return result
 
