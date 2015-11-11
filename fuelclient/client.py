@@ -178,6 +178,7 @@ class Client(object):
         :param params: params passed to GET request
 
         """
+
         url = (self.ostf_root if ostf else self.api_root) + api
         self.print_debug('GET {0}'.format(url))
 
