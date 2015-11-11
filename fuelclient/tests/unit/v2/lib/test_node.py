@@ -16,6 +16,8 @@
 
 import mock
 
+from argparse import Namespace
+
 import fuelclient
 from fuelclient.cli import error
 from fuelclient.objects import base as base_object
@@ -36,9 +38,21 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         self.client = fuelclient.get_client('node', self.version)
 
+    def create_namespace(self, columns=[], env=None, formatter='table',
+                         group=None, labels=None, max_width=0, nogroup=False,
+                         noindent=False, offline=None, online=None,
+                         quote_mode='nonnumeric', role=None,
+                         sort_columns=['id'], status=None):
+        return Namespace(
+            columns=columns, env=env, formatter=formatter, group=group,
+            labels=labels, max_width=max_width, nogroup=nogroup,
+            noindent=noindent, offline=offline, online=online,
+            quote_mode=quote_mode, role=role, sort_columns=sort_columns,
+            status=status)
+
     def test_node_list(self):
         matcher = self.m_request.get(self.res_uri, json=self.fake_nodes)
-        self.client.get_all()
+        self.client.get_all(self.create_namespace())
 
         self.assertTrue(matcher.called)
 
@@ -55,7 +69,7 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         matcher_get = self.m_request.get(self.res_uri, json=fake_nodes)
 
-        data = self.client.get_all(labels=labels)
+        data = self.client.get_all(self.create_namespace(labels=labels))
 
         self.assertTrue(matcher_get.called)
         self.assertEqual(len(data), 2)
