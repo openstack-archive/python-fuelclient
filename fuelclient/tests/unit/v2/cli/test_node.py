@@ -39,7 +39,74 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=None, labels=None)
+            environment_id=None, group_id=None, labels=None, offline=False,
+            online=False, roles=None, status=None, nogroup=False)
+
+    def test_node_list_with_group_id(self):
+        args = 'node list --group 1'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, group_id=1, labels=None, offline=False,
+            online=False, roles=None, status=None, nogroup=False)
+
+    def test_node_list_with_one_role(self):
+        args = 'node list --role controller'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, group_id=None, labels=None, offline=False,
+            online=False, roles=[u'controller'], status=None, nogroup=False)
+
+    def test_node_list_with_several_roles(self):
+        args = 'node list --role controller cinder'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, group_id=None, labels=None,
+            offline=False, online=False, roles=[u'controller', u'cinder'],
+            status=None, nogroup=False)
+
+    def test_node_list_with_status(self):
+        args = 'node list --status discover'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, group_id=None, labels=None, offline=False,
+            online=False, roles=None, status='discover', nogroup=False)
+
+    def test_node_list_with_online(self):
+        args = 'node list --online'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, group_id=None, labels=None, offline=False,
+            online=True, roles=None, status=None, nogroup=False)
+
+    def test_node_list_with_offline(self):
+        args = 'node list --offline'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, group_id=None, labels=None, offline=True,
+            online=False, roles=None, status=None, nogroup=False)
+
+    def test_node_list_with_envid_groupid_role_status_and_online(self):
+        args = ('node list --env 2 --group 1 --role controller cinder '
+                '--status discover --offline')
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=2, group_id=1, labels=None,
+            offline=True, online=False, roles=['controller', 'cinder'],
+            status='discover', nogroup=False)
 
     def test_node_list_with_env(self):
         env_id = 42
@@ -49,7 +116,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=env_id, labels=None)
+            environment_id=env_id, group_id=None, labels=None, offline=False,
+            online=False, roles=None, status=None, nogroup=False)
 
     def test_node_list_with_labels(self):
         labels = ['key_1=val_1', 'key_2=val_2', 'key3']
@@ -60,7 +128,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=None, labels=labels)
+            environment_id=None, group_id=None, labels=labels, offline=False,
+            online=False, roles=None, status=None, nogroup=False)
 
     def test_node_list_with_env_and_labels(self):
         env_id = 42
@@ -72,7 +141,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=env_id, labels=labels)
+            environment_id=env_id, group_id=None, labels=labels, offline=False,
+            online=False, roles=None, status=None, nogroup=False)
         self.assertIsInstance(
             self.m_client.get_all.call_args[1].get('labels')[0], six.text_type)
 
