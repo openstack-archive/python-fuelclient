@@ -38,7 +38,7 @@ class TestNodeFacade(test_api.BaseLibTest):
 
     def test_node_list(self):
         matcher = self.m_request.get(self.res_uri, json=self.fake_nodes)
-        self.client.get_all()
+        self.client.get_all(self.create_namespace())
 
         self.assertTrue(matcher.called)
 
@@ -55,7 +55,7 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         matcher_get = self.m_request.get(self.res_uri, json=fake_nodes)
 
-        data = self.client.get_all(labels=labels)
+        data = self.client.get_all(self.create_namespace(labels=labels))
 
         self.assertTrue(matcher_get.called)
         self.assertEqual(len(data), 2)

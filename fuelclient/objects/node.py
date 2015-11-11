@@ -169,7 +169,11 @@ class NodeCollection(object):
 
     @classmethod
     def get_all(cls):
-        return cls(Node.get_all())
+        return cls(Node.get_all_data())
+
+    @classmethod
+    def get_filtered(cls, params={}):
+        return cls(Node.get_all_data(params))
 
     @classmethod
     def update(cls, data):
@@ -183,7 +187,3 @@ class NodeCollection(object):
         )
 
         return BaseObject.connection.delete_request(url)
-
-    def filter_by_env_id(self, env_id):
-        predicate = lambda node: node.data['cluster'] == env_id
-        self.collection = filter(predicate, self.collection)

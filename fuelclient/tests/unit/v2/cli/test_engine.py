@@ -18,15 +18,15 @@ import shlex
 import sys
 
 import mock
-from oslotest import base as oslo_base
 
 import fuelclient
 from fuelclient.cli import error
 from fuelclient.commands import environment as env
 from fuelclient import main as main_mod
+from fuelclient.tests.unit.v2.base_test_case import BaseTestCase
 
 
-class BaseCLITest(oslo_base.BaseTestCase):
+class BaseCLITest(BaseTestCase):
     """Base class for testing the new CLI
 
     It mocks the whole API layer in order to be sure the
