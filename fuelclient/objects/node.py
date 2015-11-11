@@ -14,6 +14,7 @@
 
 from operator import attrgetter
 import os
+import six
 
 from fuelclient.cli.error import InvalidDirectoryException
 from fuelclient.objects.base import BaseObject
@@ -185,5 +186,22 @@ class NodeCollection(object):
         return BaseObject.connection.delete_request(url)
 
     def filter_by_env_id(self, env_id):
-        predicate = lambda node: node.data['cluster'] == env_id
-        self.collection = filter(predicate, self.collection)
+        self.collection = six.moves.filter(
+            lambda node: node.data['cluster'] == env_id, self.collection)
+
+    def filter_by_group_id(self, group_id):
+        self.collection = six.moves.filter(
+            lambda node: node.data['group_id'] == group_id, self.collection)
+
+    def filter_by_roles(self, roles):
+        self.collection = six.moves.filter(
+            lambda node: any(i in node.data['roles'] for i in roles),
+            self.collection)
+
+    def filter_by_status(self, status):
+        self.collection = six.moves.filter(
+            lambda node: node.data['status'] == status, self.collection)
+
+    def filter_by_online_status(self, online):
+        self.collection = six.moves.filter(
+            lambda node: node.data['online'] == online, self.collection)

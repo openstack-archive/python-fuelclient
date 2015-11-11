@@ -38,6 +38,12 @@ class NodeAction(Action):
         super(NodeAction, self).__init__()
         self.args = [
             Args.get_env_arg(),
+            Args.get_node_filter_group_id_arg(),
+            Args.get_node_filter_status_arg(),
+            group(
+                Args.get_node_filter_online_arg(),
+                Args.get_node_filter_offline_arg(),
+            ),
             group(
                 Args.get_list_arg("List all nodes."),
                 Args.get_set_arg("Set role for specific node."),
@@ -64,7 +70,8 @@ class NodeAction(Action):
             Args.get_node_arg("Node id."),
             Args.get_force_arg("Bypassing parameter validation."),
             Args.get_all_arg("Select all nodes."),
-            Args.get_role_arg("Role to assign for node."),
+            Args.get_role_arg(
+                "Role to assign for node or filter nodes by specified role."),
             group(
                 Args.get_skip_tasks(),
                 Args.get_tasks()
@@ -285,7 +292,22 @@ class NodeAction(Action):
                 fuel node
 
             To filter them by environment:
-                fuel --env-id 1 node
+                fuel node --env-id 1
+
+            To filter them by group id:
+                fuel node --group-id 1
+
+            To filter them by roles:
+                fuel node --role controller,cinder
+
+            To filter them by status:
+                fuel node --status discover
+
+            To filter them by online status:
+                fuel node --online
+
+            To filter them by offline status:
+                fuel node --offline
 
             It's Possible to manipulate nodes with their short mac addresses:
                 fuel node --node-id 80:ac
@@ -297,6 +319,14 @@ class NodeAction(Action):
             node_collection = NodeCollection.get_all()
         if params.env:
             node_collection.filter_by_env_id(int(params.env))
+        if params.group:
+            node_collection.filter_by_group_id(int(params.group))
+        if params.role:
+            node_collection.filter_by_roles(params.role)
+        if params.status:
+            node_collection.filter_by_status(params.status)
+        if params.online != params.offline:
+            node_collection.filter_by_online_status(params.online)
         self.serializer.print_to_output(
             node_collection.data,
             format_table(
