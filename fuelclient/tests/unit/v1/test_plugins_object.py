@@ -113,7 +113,8 @@ class TestPluginV2(base.UnitTestCase):
     def test_install(self, exec_mock, master_only_mock):
         self.plugin.install(self.path)
 
-        exec_mock.assert_called_once_with('yum -y install /tmp/plugin/path')
+        exec_mock.assert_called_once_with(
+            'yum -y install --disablerepo=\'*\' /tmp/plugin/path')
         master_only_mock.assert_called_once_with()
 
     @patch('fuelclient.objects.plugins.utils.exec_cmd')
@@ -121,8 +122,8 @@ class TestPluginV2(base.UnitTestCase):
         self.plugin.install(self.path, force=True)
 
         exec_mock.assert_called_once_with(
-            'yum -y install /tmp/plugin/path'
-            ' || yum -y reinstall /tmp/plugin/path')
+            'yum -y install --disablerepo=\'*\' /tmp/plugin/path'
+            ' || yum -y reinstall --disablerepo=\'*\' /tmp/plugin/path')
         master_only_mock.assert_called_once_with()
 
     @patch('fuelclient.objects.plugins.utils.exec_cmd')
