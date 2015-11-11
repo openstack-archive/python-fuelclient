@@ -47,6 +47,37 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             help='Show only nodes that are in the specified environment')
 
         parser.add_argument(
+            '-g',
+            '--group',
+            type=int,
+            help='Show only nodes that are in the specified group')
+
+        parser.add_argument(
+            '-r',
+            '--role',
+            type=utils.str_to_unicode,
+            nargs='+',
+            help='Show only nodes with specified roles')
+
+        parser.add_argument(
+            '-S',
+            '--status',
+            type=utils.str_to_unicode,
+            help='Show only nodes with specified status')
+
+        parser.add_argument(
+            '--online',
+            type=bool,
+            default=False,
+            help='Show only online nodes')
+
+        parser.add_argument(
+            '--offline',
+            type=bool,
+            default=False,
+            help='Show only offline nodes')
+
+        parser.add_argument(
             '-l',
             '--labels',
             type=utils.str_to_unicode,
@@ -57,7 +88,10 @@ class NodeList(NodeMixIn, base.BaseListCommand):
 
     def take_action(self, parsed_args):
         data = self.client.get_all(
-            environment_id=parsed_args.env, labels=parsed_args.labels)
+            environment_id=parsed_args.env, labels=parsed_args.labels,
+            group_id=parsed_args.group, roles=parsed_args.role,
+            status=parsed_args.status, online=parsed_args.online,
+            offline=parsed_args.offline)
         data = data_utils.get_display_data_multi(self.columns, data)
 
         return (self.columns, data)

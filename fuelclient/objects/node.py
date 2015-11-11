@@ -187,3 +187,19 @@ class NodeCollection(object):
     def filter_by_env_id(self, env_id):
         predicate = lambda node: node.data['cluster'] == env_id
         self.collection = filter(predicate, self.collection)
+
+    def filter_by_group_id(self, group_id):
+        predicate = lambda node: node.data['group_id'] == group_id
+        self.collection = filter(predicate, self.collection)
+
+    def filter_by_roles(self, roles):
+        predicate = lambda node: any(i in node.data['roles'] for i in roles)
+        self.collection = filter(predicate, self.collection)
+
+    def filter_by_status(self, status):
+        predicate = lambda node: node.data['status'] == status
+        self.collection = filter(predicate, self.collection)
+
+    def filter_by_online_status(self, online):
+        predicate = lambda node: node.data['online'] == online
+        self.collection = filter(predicate, self.collection)

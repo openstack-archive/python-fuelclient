@@ -39,7 +39,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=None, labels=None)
+            environment_id=None, group_id=None, labels=None, offline=False,
+            online=False, roles=None, status=None)
 
     def test_node_list_with_env(self):
         env_id = 42
@@ -49,7 +50,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=env_id, labels=None)
+            environment_id=env_id, group_id=None, labels=None, offline=False,
+            online=False, roles=None, status=None)
 
     def test_node_list_with_labels(self):
         labels = ['key_1=val_1', 'key_2=val_2', 'key3']
@@ -60,7 +62,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=None, labels=labels)
+            environment_id=None, group_id=None, labels=labels, offline=False,
+            online=False, roles=None, status=None)
 
     def test_node_list_with_env_and_labels(self):
         env_id = 42
@@ -72,7 +75,8 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.get_all.assert_called_once_with(
-            environment_id=env_id, labels=labels)
+            environment_id=env_id, group_id=None, labels=labels, offline=False,
+            online=False, roles=None, status=None)
         self.assertIsInstance(
             self.m_client.get_all.call_args[1].get('labels')[0], six.text_type)
 
