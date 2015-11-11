@@ -163,9 +163,12 @@ def get_arg(name, flags=None, aliases=None, help_=None, **kwargs):
 
 
 def get_boolean_arg(name, **kwargs):
+    default = False
+    if 'default' in kwargs:
+        default = kwargs['default']
     kwargs.update({
         "action": "store_true",
-        "default": False
+        "default": default
     })
     return get_arg(name, **kwargs)
 
@@ -177,6 +180,42 @@ def get_env_arg(required=False):
         help="environment id",
         required=required
     )
+
+
+def get_node_filter_group_id_arg(required=False):
+    return get_int_arg(
+        "group",
+        flags=("-g",),
+        help="Filter nodes by group id",
+        required=required)
+
+
+def get_node_filter_status_arg(required=False):
+    return get_str_arg(
+        "status",
+        flags=("-S",),
+        help="Filter nodes by status",
+        required=required)
+
+
+def get_node_filter_online_arg(required=False):
+    arg = get_boolean_arg(
+        "online", default=None, help="List online nodes only")
+    return arg
+
+
+def get_node_filter_offline_arg(required=False):
+    arg = get_boolean_arg(
+        "offline", default=None, help="List offline nodes only")
+    return arg
+
+
+def get_node_filter_no_group_arg(required=False):
+    return get_boolean_arg(
+        "nogroup",
+        default=False,
+        flags=("--no-group", ),
+        help="List nodes without a group")
 
 
 def get_new_password_arg(help_msg):
