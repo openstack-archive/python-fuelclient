@@ -15,6 +15,7 @@
 import abc
 import os
 import shutil
+import subprocess
 import sys
 import tarfile
 
@@ -27,10 +28,22 @@ from fuelclient.cli import error
 from fuelclient.objects import base
 from fuelclient import utils
 
-
+IS_MASTER = None
+FUEL_PACKAGE = 'fuel'
 PLUGINS_PATH = '/var/www/nailgun/plugins/'
 METADATA_MASK = '/var/www/nailgun/plugins/*/metadata.yaml'
-VERSIONS_PATH = '/etc/fuel/version.yaml'
+
+
+def find_exec(program, ):
+    """Tries to find an executable in PATHs.
+
+    :param str program: Name of executable to find
+    """
+    for path in os.environ['PATH'].split(os.pathsep):
+        path = path.strip('"')
+        candidate = os.path.join(path, program)
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
 
 
 def raise_error_if_not_master():
@@ -38,7 +51,22 @@ def raise_error_if_not_master():
 
     :raises: error.WrongEnvironmentError
     """
-    if not os.path.exists(VERSIONS_PATH):
+    global IS_MASTER
+    if IS_MASTER is None:
+        IS_MASTER = False
+        rpm_exec = find_exec('rpm')
+        if not rpm_exec:
+            raise error.WrongEnvironmentError(
+                'Command "rpm" not found.')
+        command = [rpm_exec, '-q', FUEL_PACKAGE]
+        p = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        p.communicate()
+        if p.poll() == 0:
+            IS_MASTER = True
+    if not IS_MASTER:
         raise error.WrongEnvironmentError(
             'Action can be performed from Fuel master node only.')
 
