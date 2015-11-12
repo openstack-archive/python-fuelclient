@@ -80,6 +80,7 @@ class TestFuelVersion(base_tests.UnitTestCase):
             self.assertRaises(SystemExit,
                               self.execute,
                               ['fuel', '--fuel-version', '--yaml'])
+
         args, _ = mstdout.write.call_args_list[0]
         regex = ('No JSON object could be decoded'
                  '|Expecting value: line 1 column 1')
