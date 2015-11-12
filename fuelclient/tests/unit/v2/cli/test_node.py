@@ -62,6 +62,19 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_client.get_all.assert_called_once_with(
             environment_id=None, labels=labels)
 
+    def test_node_list_with_labels_expression(self):
+        labels = ['\"(key_1=val_1 and key_2=val_2) or key3\"']
+        args = 'node list --labels {labels}'.format(
+            labels=' '.join(labels))
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None,
+            labels=["(key_1=val_1 and key_2=val_2) or key3"]
+        )
+
     def test_node_list_with_env_and_labels(self):
         env_id = 42
         labels = ['key_1=val_1', 'key_2=val_2', 'key3']
