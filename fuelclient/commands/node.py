@@ -51,7 +51,12 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             '--labels',
             type=utils.str_to_unicode,
             nargs='+',
-            help='Show only nodes that have specific labels')
+            help='Show only nodes that have specific labels '
+                 'or matches the labels expression like '
+                 '\"(lab1=val1 and lab2) or not lab3=bad\". '
+                 'If expression use no parenthesises or other '
+                 'reserved shell symbols quoting is not required.'
+        )
 
         return parser
 

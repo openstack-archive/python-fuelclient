@@ -62,6 +62,31 @@ class TestNodeFacade(test_api.BaseLibTest):
         self.assertEqual(data[0]['name'], 'node_1')
         self.assertEqual(data[1]['name'], 'node_3')
 
+    def test_node_list_with_labels_expression(self):
+        labels = [
+            '(not key1=val10 and (key1=val1 or key3=val3 or key4="val 4"))'
+        ]
+        fake_nodes = [
+            utils.get_fake_node(
+                node_name='node_1', labels={'key1': 'val1'}),
+            utils.get_fake_node(
+                node_name='node_2', labels={'key2': 'val2'}),
+            utils.get_fake_node(
+                node_name='node_3', labels={'key1': 'val2', 'key3': 'val3'}),
+            utils.get_fake_node(
+                node_name='node_4', labels={'key1': 'val2', 'key4': 'val 4'})
+        ]
+
+        matcher_get = self.m_request.get(self.res_uri, json=fake_nodes)
+
+        data = self.client.get_all(labels=labels)
+
+        self.assertTrue(matcher_get.called)
+        self.assertEqual(len(data), 3)
+        self.assertEqual(data[0]['name'], 'node_1')
+        self.assertEqual(data[1]['name'], 'node_3')
+        self.assertEqual(data[2]['name'], 'node_4')
+
     def test_node_show(self):
         node_id = 42
         expected_uri = self.get_object_uri(self.res_uri, node_id)
