@@ -14,10 +14,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from mock import ANY
 from mock import MagicMock
 from mock import patch
 
 from fuelclient.cli import error
+from fuelclient.objects import plugins
+from fuelclient.objects.plugins import FUEL_PACKAGE
+from fuelclient.objects.plugins import raise_error_if_not_master
 from fuelclient.objects.plugins import Plugins
 from fuelclient.objects.plugins import PluginV1
 from fuelclient.objects.plugins import PluginV2
@@ -410,3 +414,48 @@ class TestPluginsObject(base.UnitTestCase):
         self.assertEqual(self.plugin.get_plugin('name2', '1.0.0'),
                          {'name': 'name2', 'version': '1.0.0'})
         get_mock.assert_called_once_with()
+
+    @patch('fuelclient.objects.plugins.os.access', return_value=True)
+    @patch('fuelclient.objects.plugins.os.path.isfile', return_value=True)
+    @patch('fuelclient.objects.plugins.subprocess.Popen')
+    def test_raise_error_if_not_master(self, mpop, misfile, maccess):
+        setattr(plugins, 'IS_MASTER', None)
+        process =  MagicMock()
+        mpop.return_value = process
+        process.poll.return_value = 0
+        self.assertIsNone(raise_error_if_not_master())
+        mpop.assert_called_once_with(
+            ['rpm', '-q', FUEL_PACKAGE],
+            stdout=ANY, stderr=ANY)
+        process.poll.assert_called_once_with()
+        process.communicate.assert_called_once_with()
+
+    @patch('fuelclient.objects.plugins.os.access', return_value=True)
+    @patch('fuelclient.objects.plugins.os.path.isfile', return_value=True)
+    @patch('fuelclient.objects.plugins.subprocess.Popen')
+    def test_raise_error_if_not_master_fuel_not_installed(
+            self, mpop, misfile, maccess):
+        setattr(plugins, 'IS_MASTER', None)
+        process =  MagicMock()
+        mpop.return_value = process
+        process.poll.return_value = 1
+        self.assertRaises(error.WrongEnvironmentError,
+                          raise_error_if_not_master)
+
+    @patch('fuelclient.objects.plugins.os.path.isfile', return_value=False)
+    @patch('fuelclient.objects.plugins.subprocess.Popen')
+    def test_raise_error_if_not_master_no_rpm(self, mpop, misfile):
+        setattr(plugins, 'IS_MASTER', None)
+        self.assertRaises(error.WrongEnvironmentError,
+                          raise_error_if_not_master)
+        mpop.assert_not_called()
+
+    @patch('fuelclient.objects.plugins.os.access', return_value=False)
+    @patch('fuelclient.objects.plugins.os.path.isfile', return_value=True)
+    @patch('fuelclient.objects.plugins.subprocess.Popen')
+    def test_raise_error_if_not_master_rpm_not_exec(self, mpop,
+                                                    misfile, maccess):
+        setattr(plugins, 'IS_MASTER', None)
+        self.assertRaises(error.WrongEnvironmentError,
+                          raise_error_if_not_master)
+        mpop.assert_not_called()
