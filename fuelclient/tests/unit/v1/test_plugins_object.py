@@ -14,10 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fixtures
+import mock
 from mock import MagicMock
 from mock import patch
 
 from fuelclient.cli import error
+from fuelclient.objects import plugins
 from fuelclient.objects.plugins import Plugins
 from fuelclient.objects.plugins import PluginV1
 from fuelclient.objects.plugins import PluginV2
@@ -410,3 +413,56 @@ class TestPluginsObject(base.UnitTestCase):
         self.assertEqual(self.plugin.get_plugin('name2', '1.0.0'),
                          {'name': 'name2', 'version': '1.0.0'})
         get_mock.assert_called_once_with()
+
+    @patch('fuelclient.objects.plugins.utils.find_exec')
+    @patch('fuelclient.objects.plugins.subprocess.Popen')
+    def test_raise_error_if_not_master(self, mpop, mfe):
+        plugins.IS_MASTER = None
+        process = MagicMock()
+        mfe.return_value = '/bin/rpm'
+        mpop.return_value = process
+        process.poll.return_value = 0
+        self.assertIsNone(plugins.raise_error_if_not_master())
+        mpop.assert_called_once_with(
+            ['/bin/rpm', '-q', plugins.FUEL_PACKAGE],
+            stdout=mock.ANY, stderr=mock.ANY)
+        process.poll.assert_called_once_with()
+        process.communicate.assert_called_once_with()
+
+    @patch('fuelclient.objects.plugins.utils.find_exec')
+    @patch('fuelclient.objects.plugins.subprocess.Popen')
+    def test_raise_error_if_not_master_fuel_not_installed(self, mpop, mfe):
+        plugins.IS_MASTER = None
+        process = MagicMock()
+        mpop.return_value = process
+        process.poll.return_value = 1
+        self.assertRaises(error.WrongEnvironmentError,
+                          plugins.raise_error_if_not_master)
+
+    @patch('fuelclient.objects.plugins.utils.find_exec')
+    def test_raise_error_if_not_master_rpm_not_found(self, mfe):
+        plugins.IS_MASTER = None
+        mfe.return_value = None
+        self.assertRaises(error.WrongEnvironmentError,
+                          plugins.raise_error_if_not_master)
+
+    @patch('fuelclient.objects.plugins.os.access')
+    @patch('fuelclient.objects.plugins.os.path.isfile')
+    def test_find_exec(self, misf, macc):
+        misf.side_effect = [False, True, True]
+        macc.side_effect = [False, True]
+        # The combination will be like:
+        # 1) /foo/program does not exist
+        # 2) /bar/program does exist but isn't executable
+        # 3) /baz/program does exist and is executable
+        # So the function is to search 'program' in paths /foo, /bar, /baz
+        # and return /baz/program
+        self.useFixture(fixtures.EnvironmentVariable('PATH', '/foo:/bar:/baz'))
+        self.assertEqual('/baz/program', plugins.utils.find_exec('program'))
+
+    @patch('fuelclient.objects.plugins.os.access')
+    @patch('fuelclient.objects.plugins.os.path.isfile')
+    def test_find_exec_not_found(self, misf, macc):
+        misf.return_value = False
+        self.useFixture(fixtures.EnvironmentVariable('PATH', '/foo'))
+        self.assertIsNone(plugins.utils.find_exec('program'))

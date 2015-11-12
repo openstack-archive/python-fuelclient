@@ -161,3 +161,15 @@ def str_to_unicode(string):
 
     """
     return string if six.PY3 else string.decode(sys.getfilesystemencoding())
+
+
+def find_exec(program):
+    """Tries to find an executable in PATHs.
+
+    :param str program: Name of executable to find
+    """
+    for path in os.getenv('PATH').split(os.pathsep):
+        path = path.strip('"')
+        candidate = os.path.join(path, program)
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
