@@ -16,6 +16,7 @@ from collections import namedtuple
 import copy
 
 from fuelclient.cli import error
+from fuelclient.common.labels_filter import LabelsFilter
 from fuelclient import objects
 from fuelclient.v1 import base_v1
 
@@ -163,18 +164,13 @@ class NodeClient(base_v1.BaseV1Client):
         return data_to_return
 
     def _check_label(self, labels, item):
-        checking_list = []
-
-        for label in labels:
-            key, val, has_separator = self._split_label(label)
-            if key in item.get('labels'):
-                if not has_separator:
-                    checking_val = True
-                else:
-                    checking_val = item['labels'][key] == val
-                checking_list.append(checking_val)
-
-        return any(checking_list)
+        # Expression parsed consume labels as space-delimited string.
+        # The only backward-incompatible case is the labels
+        # named as reserved words "and" "or" and "not".
+        # Quotation is required for this kind of labels.
+        expression = " ".join(labels)
+        labels_filter = LabelsFilter(expression)
+        return labels_filter.match(item.get('labels'))
 
     @classmethod
     def _labels_after_delete(cls, labels, labels_to_delete):
