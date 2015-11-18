@@ -415,6 +415,10 @@ def get_delete_arg(help_msg):
     return get_boolean_arg("delete", help=help_msg)
 
 
+def get_execute_arg(help_msg):
+    return get_boolean_arg("execute", help=help_msg)
+
+
 def get_assign_arg(help_msg):
     return get_boolean_arg("assign", help=help_msg)
 
@@ -474,15 +478,20 @@ def get_tred_arg(help_msg):
     return get_boolean_arg("tred", help=help_msg)
 
 
-def get_node_arg(help_msg):
+def get_node_arg(help_msg, multiple=True):
     default_kwargs = {
-        "action": NodeAction,
         "flags": ("--node-id",),
-        "nargs": '+',
-        "type": lambda v: v.split(","),
-        "default": None,
         "help": help_msg
     }
+
+    if multiple:
+        default_kwargs.update({
+            "action": NodeAction,
+            "nargs": '+',
+            "type": lambda v: v.split(","),
+            "default": None,
+        })
+
     return get_arg("node", **default_kwargs)
 
 
@@ -492,6 +501,12 @@ def get_task_arg(help_msg):
         flags=("--task-id", "--tid"),
         help=help_msg
     )
+
+
+def get_config_id_arg(help_msg):
+    return get_int_arg(
+        'config-id',
+        help=help_msg)
 
 
 def get_plugin_install_arg(help_msg):
