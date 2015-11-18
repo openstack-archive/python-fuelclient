@@ -415,6 +415,10 @@ def get_delete_arg(help_msg):
     return get_boolean_arg("delete", help=help_msg)
 
 
+def get_execute_arg(help_msg):
+    return get_boolean_arg("execute", help=help_msg)
+
+
 def get_assign_arg(help_msg):
     return get_boolean_arg("assign", help=help_msg)
 
@@ -492,6 +496,11 @@ def get_task_arg(help_msg):
         flags=("--task-id", "--tid"),
         help=help_msg
     )
+
+
+def get_os_config_arg(help_msg):
+    return get_int_arg(
+        'config_id', flags=('--config-id',), help=help_msg)
 
 
 def get_plugin_install_arg(help_msg):
