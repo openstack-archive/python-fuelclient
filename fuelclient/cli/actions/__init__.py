@@ -32,6 +32,7 @@ from fuelclient.cli.actions.node import NodeAction
 from fuelclient.cli.actions.nodegroup import NodeGroupAction
 from fuelclient.cli.actions.notifications import NotificationsAction
 from fuelclient.cli.actions.notifications import NotifyAction
+from fuelclient.cli.actions.openstack_config import OpenstackConfigAction
 from fuelclient.cli.actions.release import ReleaseAction
 from fuelclient.cli.actions.role import RoleAction
 from fuelclient.cli.actions.settings import SettingsAction
@@ -68,6 +69,7 @@ actions_tuple = (
     GraphAction,
     FuelVersionAction,
     NetworkGroupAction,
+    OpenstackConfigAction,
 )
 
 actions = dict(

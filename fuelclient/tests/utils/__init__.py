@@ -24,6 +24,8 @@ from fuelclient.tests.utils.fake_fuel_version import get_fake_fuel_version
 from fuelclient.tests.utils.fake_task import get_fake_task
 from fuelclient.tests.utils.fake_node_group import get_fake_node_group
 from fuelclient.tests.utils.fake_node_group import get_fake_node_groups
+from fuelclient.tests.utils.fake_openstack_config  \
+    import get_fake_openstack_config
 
 
 __all__ = (get_fake_env,
@@ -35,4 +37,5 @@ __all__ = (get_fake_env,
            get_fake_task,
            random_string,
            get_fake_node_group,
-           get_fake_node_groups)
+           get_fake_node_groups,
+           get_fake_openstack_config)
