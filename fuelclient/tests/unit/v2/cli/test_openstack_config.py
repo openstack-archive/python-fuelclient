@@ -1,0 +1,85 @@
+#    Copyright 2015 Mirantis, Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+import mock
+
+from fuelclient.tests.unit.v2.cli import test_engine
+
+
+class TestOpenstackConfig(test_engine.BaseCLITest):
+
+    CLUSTER_ID = 42
+    NODE_ID = 64
+
+    def _test_config_list(self, cmd_line, expected_kwargs):
+        self.m_get_client.reset_mock()
+        self.m_client.get_filtered.reset_mock()
+        self.exec_command('openstack-config list {0}'.format(cmd_line))
+        self.m_get_client.assert_called_once_with('openstack-config',
+                                                  mock.ANY)
+        self.m_client.get_filtered.assert_called_once_with(
+            **expected_kwargs)
+
+    def test_config_list_for_node(self):
+        self._test_config_list(
+            cmd_line='--env {0} --node {1}'.format(self.CLUSTER_ID,
+                                                   self.NODE_ID),
+            expected_kwargs={'cluster_id': self.CLUSTER_ID,
+                             'node_id': self.NODE_ID, 'node_role': None,
+                             'is_active': True}
+        )
+
+    def test_config_list_for_role(self):
+        self._test_config_list(
+            cmd_line='--env {0} --role compute'.format(self.CLUSTER_ID),
+            expected_kwargs={'cluster_id': self.CLUSTER_ID, 'node_id': None,
+                             'node_role': 'compute', 'is_active': True}
+        )
+
+    def test_config_list_for_cluster(self):
+        self._test_config_list(
+            cmd_line='--env {0}'.format(self.CLUSTER_ID),
+            expected_kwargs={'cluster_id': self.CLUSTER_ID, 'node_id': None,
+                             'node_role': None, 'is_active': True}
+        )
+
+    def test_config_upload(self):
+        self.m_client.upload.return_value = 'config.yaml'
+
+        cmd = 'openstack-config upload --env {0} --node {1} --file ' \
+              'config.yaml'.format(self.CLUSTER_ID, self.NODE_ID)
+        self.exec_command(cmd)
+
+        self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
+        self.m_client.upload.assert_called_once_with(
+            path='config.yaml', cluster_id=self.CLUSTER_ID,
+            node_id=self.NODE_ID, node_role=None)
+
+    def test_config_download(self):
+        self.m_client.download.return_value = 'config.yaml'
+
+        cmd = 'openstack-config download 1 --file config.yaml'
+        self.exec_command(cmd)
+
+        self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
+        self.m_client.download.assert_called_once_with(1, 'config.yaml')
+
+    def test_config_execute(self):
+        cmd = 'openstack-config execute --env {0} --node {1}' \
+              ''.format(self.CLUSTER_ID, self.NODE_ID)
+        self.exec_command(cmd)
+
+        self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
+        self.m_client.execute.assert_called_once_with(
+            cluster_id=self.CLUSTER_ID, node_id=self.NODE_ID, node_role=None)
