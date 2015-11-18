@@ -69,10 +69,11 @@ class OpenstackConfigAction(Action):
         if 'deleted' in params:
             filters['is_active'] = int(not params.deleted)
 
-        for key in ('node_id', 'node_role'):
-            param = getattr(params, key, None)
-            if param:
-                filters[key] = param
+        if 'node' in params:
+            filters['node_id'] = params.node
+
+        if 'role' in params:
+            filters['node_role'] = params.role
 
         configs = OpenstackConfig.get_filtered_data(**filters)
 

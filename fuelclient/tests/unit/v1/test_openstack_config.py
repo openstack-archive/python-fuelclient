@@ -63,6 +63,22 @@ class TestOpenstackConfigActions(base.UnitTestCase):
         self.execute(['fuel', 'openstack-config', '--env', '84', '--list'])
         self.assertTrue(m_get.called)
 
+    def test_config_list_w_filters(self):
+        m_get = self.m_request.get(
+            '/api/v1/openstack-config/?cluster_id=84&node_role=controller',
+            json=[utils.get_fake_openstack_config(id=1, cluster_id=32)])
+        self.execute(['fuel', 'openstack-config', '--env', '84',
+                      '--role', 'controller', '--list'])
+        self.assertTrue(m_get.called)
+
+        m_get = self.m_request.get(
+            '/api/v1/openstack-config/?cluster_id=84&node_id=42', json=[
+                utils.get_fake_openstack_config(id=1, cluster_id=32),
+            ])
+        self.execute(['fuel', 'openstack-config', '--env', '84',
+                      '--node', '42', '--list'])
+        self.assertTrue(m_get.called)
+
     def test_config_delete(self):
         m_del = self.m_request.delete(
             '/api/v1/openstack-config/42/', json={})
