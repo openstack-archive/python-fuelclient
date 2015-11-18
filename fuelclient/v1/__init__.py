@@ -16,6 +16,7 @@ from fuelclient.v1 import environment
 from fuelclient.v1 import fuelversion
 from fuelclient.v1 import network_group
 from fuelclient.v1 import node
+from fuelclient.v1 import openstack_config
 from fuelclient.v1 import task
 from fuelclient.v1 import plugins
 
@@ -24,5 +25,6 @@ __all__ = ('environment',
            'fuelversion',
            'network_group',
            'node',
+           'openstack_config',
            'plugins',
            'task',)
