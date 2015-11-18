@@ -19,6 +19,7 @@ import shutil
 from fuelclient.cli.error import ActionException
 from fuelclient.cli.error import InvalidDirectoryException
 from fuelclient.cli.error import ServerDataException
+from fuelclient.cli import error
 from fuelclient.cli.serializers import listdir_without_extensions
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.task import DeployTask
@@ -208,6 +209,22 @@ class Environment(BaseObject):
         """Used by 'fuel2' command line utility."""
         return (serializer or self.serializer).\
             read_from_file(file_path)
+
+    def read_data_from_file(self, path, serializer=None):
+        if not os.path.exists(path):
+            raise error.InvalidFileException(
+                "File '{0}' doesn't exist.".format(path))
+
+        if not serializer:
+            serializer = self.serializer
+
+        return serializer.read_from_full_path(path)
+
+    def write_data_to_file(self, path, data, serializer=None):
+        if not serializer:
+            serializer = self.serializer
+
+        return serializer.write_to_full_path(path, data)
 
     @property
     def status(self):
