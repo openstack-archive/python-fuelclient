@@ -88,14 +88,17 @@ class Serializer(object):
 
     def write_to_path(self, path, data):
         full_path = self.prepare_path(path)
+        return self.write_to_full_path(full_path, data)
+
+    def write_to_full_path(self, path, data):
         try:
-            with open(full_path, "w") as file_to_write:
+            with open(path, "w") as file_to_write:
                 self.write_to_file(file_to_write, data)
         except IOError as e:
             raise error.InvalidFileException(
                 "Can't write to file '{0}': {1}.".format(
-                    full_path, e.strerror))
-        return full_path
+                    path, e.strerror))
+        return path
 
     def read_from_file(self, path):
         return self.read_from_full_path(self.prepare_path(path))
