@@ -284,6 +284,10 @@ def get_role_arg(help_msg):
     return get_set_type_arg("role", flags=("-r",), help=help_msg)
 
 
+def get_single_role_arg(help_msg):
+    return get_str_arg("role", flags=('--role', ), help=help_msg)
+
+
 def get_check_arg(help_msg):
     return get_set_type_arg("check", help=help_msg)
 
@@ -415,6 +419,10 @@ def get_delete_arg(help_msg):
     return get_boolean_arg("delete", help=help_msg)
 
 
+def get_execute_arg(help_msg):
+    return get_boolean_arg("execute", help=help_msg)
+
+
 def get_assign_arg(help_msg):
     return get_boolean_arg("assign", help=help_msg)
 
@@ -486,12 +494,27 @@ def get_node_arg(help_msg):
     return get_arg("node", **default_kwargs)
 
 
+def get_single_node_arg(help_msg):
+    return get_int_arg('node', flags=('--node-id',), help=help_msg)
+
+
 def get_task_arg(help_msg):
     return get_array_arg(
         'task',
         flags=("--task-id", "--tid"),
         help=help_msg
     )
+
+
+def get_config_id_arg(help_msg):
+    return get_int_arg(
+        'config-id',
+        help=help_msg)
+
+
+def get_deleted_arg(help_msg):
+    return get_boolean_arg(
+        'deleted', help=help_msg)
 
 
 def get_plugin_install_arg(help_msg):
