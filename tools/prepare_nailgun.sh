@@ -17,6 +17,7 @@
 set -eu
 
 NAILGUN_CONFIG=$ARTIFACTS/test.yaml
+NAILGUN_ROOT=$FUEL_WEB_ROOT/nailgun
 
 err() {
     printf "%s\n" "$1" >&2
