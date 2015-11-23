@@ -25,7 +25,7 @@ class NodeGroup(BaseObject):
 
     @property
     def env_id(self):
-        return self.get_fresh_data()["cluster"]
+        return self.get_fresh_data()["cluster_id"]
 
     @property
     def name(self):
@@ -79,5 +79,5 @@ class NodeGroupCollection(object):
         return cls(NodeGroup.get_all())
 
     def filter_by_env_id(self, env_id):
-        predicate = lambda group: group.data['cluster'] == env_id
+        predicate = lambda group: group.data['cluster_id'] == env_id
         self.collection = filter(predicate, self.collection)
