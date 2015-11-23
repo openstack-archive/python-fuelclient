@@ -31,7 +31,7 @@ class NodeGroupAction(Action):
     """Show or modify node groups
     """
     action_name = "nodegroup"
-    acceptable_keys = ("id", "cluster", "name")
+    acceptable_keys = ("id", "cluster_id", "name")
 
     def __init__(self):
         super(NodeGroupAction, self).__init__()
