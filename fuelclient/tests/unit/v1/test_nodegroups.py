@@ -16,8 +16,7 @@ import mock
 from six import StringIO
 
 from fuelclient.tests.unit.v1 import base
-from fuelclient.tests.utils import fake_env
-from fuelclient.tests.utils import fake_network_group
+from fuelclient.tests import utils
 
 
 class TestNodeGroupActions(base.UnitTestCase):
@@ -25,12 +24,13 @@ class TestNodeGroupActions(base.UnitTestCase):
     def setUp(self):
         super(TestNodeGroupActions, self).setUp()
 
-        self.env = fake_env.get_fake_env()
+        self.env = utils.get_fake_env()
         self.req_base_path = '/api/v1/nodegroups/'
-        self.ng = fake_network_group.get_fake_network_group()
+        self.ng = utils.get_fake_node_group()
+        self.ngs = utils.get_fake_node_groups()
 
     def test_list_nodegroups(self):
-        mget = self.m_request.get(self.req_base_path, json=[])
+        mget = self.m_request.get(self.req_base_path, json=self.ngs)
         self.execute(['fuel', 'nodegroup', '--list'])
 
         self.assertTrue(mget.called)
