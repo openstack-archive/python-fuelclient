@@ -45,7 +45,8 @@ class CliExectutionResult(object):
 
 
 class BaseTestCase(oslo_base.BaseTestCase):
-    nailgun_root = os.environ.get('NAILGUN_ROOT', '/tmp/fuel_web/nailgun')
+    nailgun_root = os.path.join(os.getenv('FUEL_WEB_ROOT', '/tmp/fuel_web/'),
+                                'nailgun')
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
