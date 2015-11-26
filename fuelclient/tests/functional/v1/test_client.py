@@ -43,7 +43,7 @@ class TestHandlers(base.BaseTestCase):
         expected_stdout = \
             [(
                 "env --create --name=TestEnv --release={0}".format(release_id),
-                "Environment 'TestEnv' with id=1 and was created!\n"
+                "Environment 'TestEnv' with id=1 was created!\n"
             ), (
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
@@ -162,7 +162,7 @@ class TestHandlers(base.BaseTestCase):
         self.check_for_stdout(
             "env create --name=NewEnv --release={0} --nst=tun"
             .format(release_id),
-            "Environment 'NewEnv' with id=1 and was created!\n")
+            "Environment 'NewEnv' with id=1 was created!\n")
 
     def test_destroy_multiple_nodes(self):
         self.load_data_to_nailgun_server()
