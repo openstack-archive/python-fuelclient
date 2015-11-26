@@ -43,7 +43,7 @@ class TestHandlers(base.BaseTestCase):
         expected_stdout = \
             [(
                 "env --create --name=TestEnv --release={0}".format(release_id),
-                "Environment 'TestEnv' with id=1 and was created!\n"
+                "Environment 'TestEnv' with id=1 was created!\n"
             ), (
                 "--env-id=1 env set --name=NewEnv",
                 ("Following attributes are changed for "
@@ -69,7 +69,7 @@ class TestHandlers(base.BaseTestCase):
             self.check_if_required("node {0}".format(action))
 
         self.load_data_to_nailgun_server()
-        self.check_number_of_rows_in_table("node --node 9f:b7,9d:24,ab:aa", 3)
+        self.check_number_of_rows_in_table("node --node 9f:b6,9d:24,ab:aa", 3)
 
     def test_selected_node_provision(self):
         self.load_data_to_nailgun_server()
@@ -162,7 +162,7 @@ class TestHandlers(base.BaseTestCase):
         self.check_for_stdout(
             "env create --name=NewEnv --release={0} --nst=tun"
             .format(release_id),
-            "Environment 'NewEnv' with id=1 and was created!\n")
+            "Environment 'NewEnv' with id=1 was created!\n")
 
     def test_destroy_multiple_nodes(self):
         self.load_data_to_nailgun_server()
@@ -396,8 +396,15 @@ class TestDownloadUploadNodeAttributes(base.BaseTestCase):
 
     def test_upload_download_interfaces(self):
         self.load_data_to_nailgun_server()
+
+        release_id = self.get_first_deployable_release_id()
+        env_create = "env create --name=test --release={0}".format(release_id)
+        add_node = "--env-id=1 node set --node 1 --role=controller"
+
         cmd = "node --node-id 1 --network"
-        self.run_cli_commands((self.download_command(cmd),
+        self.run_cli_commands((env_create,
+                              add_node,
+                              self.download_command(cmd),
                               self.upload_command(cmd)))
 
     def test_upload_download_disks(self):
@@ -436,7 +443,7 @@ class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
 
     def test_net_upload(self):
         self.check_for_stderr(
-            "net --upload --dir /foo/bar/baz --env 1 network",
+            "network --upload --dir /foo/bar/baz --env 1",
             "Directory '/foo/bar/baz' doesn't exist.\n",
             check_errors=False
         )
