@@ -1,0 +1,5 @@
+python-fuelclient (8.0.0-1) experimental; urgency=low
+
+  * Initial release.
+
+ -- bgaifullin <bgaifullin@mirantis.com>  Fri, 02 Dec 2015 12:46:26 +0300
