@@ -1,0 +1,33 @@
+Source: python-fuelclient
+Section: Utilities
+Priority: extra
+Maintainer: Mirantis Product <product@mirantis.com>
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               openstack-pkg-tools (>= 23~),
+               python-all,
+               python-pbr (>= 0.8),
+               python-setuptools
+Standards-Version: 3.9.6
+Homepage: mirantis.com
+
+Package: python-fuelclient
+Architecture: all
+Depends: python-cliff (>= 1.7.0),
+    python-keystoneclient,
+    python-oslo.config,
+    python-oslo.i18n,
+    python-oslo.serialization,
+    python-oslo.utils,
+    python-pbr (>= 0.8),
+    python-requests,
+    python-six,
+    python-stevedore,
+    python-tz,
+    python-yaml,
+    ${python:Depends}
+Description: Library and CLI for working with Fuel Rest-API
+ Fuel client provides a CLI tool and a Python API wrapper
+ for interacting with the Fuel Master Node.
+ Fuel client performs many of the same functions as the Fuel UI
+ plus does some advanced, specialized configuration tasks.
