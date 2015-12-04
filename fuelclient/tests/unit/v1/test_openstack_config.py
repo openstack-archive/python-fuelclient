@@ -52,7 +52,16 @@ class TestOpenstackConfigActions(base.UnitTestCase):
             with mock.patch('fuelclient.objects.openstack_config.os'):
                 self.execute(['fuel', 'openstack-config', '--env', '1',
                               '--upload', '--file', 'config.yaml'])
-        self.assertTrue(m_post.called)
+                self.assertTrue(m_post.called)
+
+                self.assertRaises(
+                    SystemExit,
+                    self.execute, ['fuel', 'openstack-config', '--env', '1',
+                                   '--upload'])
+                self.assertRaises(
+                    SystemExit,
+                    self.execute, ['fuel', 'openstack-config', '--upload',
+                                   '--file', 'config.yaml'])
 
     def test_config_list(self):
         m_get = self.m_request.get(

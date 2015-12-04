@@ -66,6 +66,14 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
             path='config.yaml', cluster_id=self.CLUSTER_ID,
             node_id=self.NODE_ID, node_role=None)
 
+        cmd = 'openstack-config upload --env {0} ' \
+              '--node {1}'.format(self.CLUSTER_ID, self.NODE_ID)
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+
+        cmd = 'openstack-config upload  --node {1} ' \
+              '--file config.yaml'.format(self.CLUSTER_ID, self.NODE_ID)
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+
     def test_config_download(self):
         self.m_client.download.return_value = 'config.yaml'
 

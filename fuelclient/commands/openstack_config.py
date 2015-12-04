@@ -30,7 +30,7 @@ class OpenstackConfigMixin(object):
     @staticmethod
     def add_file_arg(parser):
         parser.add_argument(
-            '-f', '--file',
+            '-f', '--file', required=True,
             type=str, help='YAML file that contains openstack configuration.')
 
     @staticmethod

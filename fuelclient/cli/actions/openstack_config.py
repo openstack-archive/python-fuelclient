@@ -96,7 +96,7 @@ class OpenstackConfigAction(Action):
         OpenstackConfig.write_file(params.file, {
             'configuration': data['configuration']})
 
-    @check_all('env')
+    @check_all('env', 'file')
     def upload(self, params):
         """Upload new configuration from file:
             fuel openstack-config --upload --env 1 --file config.yaml
