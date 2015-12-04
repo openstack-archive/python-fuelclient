@@ -66,6 +66,21 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
             path='config.yaml', cluster_id=self.CLUSTER_ID,
             node_id=self.NODE_ID, node_role=None)
 
+    @mock.patch('sys.stderr')
+    def test_config_upload_fail(self, mocked_stderr):
+        cmd = 'openstack-config upload --env {0} ' \
+              '--node {1}'.format(self.CLUSTER_ID, self.NODE_ID)
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+        self.assertIn('-f/--file',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+        mocked_stderr.reset_mock()
+
+        cmd = 'openstack-config upload  --node {1} ' \
+              '--file config.yaml'.format(self.CLUSTER_ID, self.NODE_ID)
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+        self.assertIn('-e/--env',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+
     def test_config_download(self):
         self.m_client.download.return_value = 'config.yaml'
 
@@ -74,6 +89,15 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
         self.m_client.download.assert_called_once_with(1, 'config.yaml')
+
+    @mock.patch('sys.stderr')
+    def test_config_download_fail(self, mocked_stderr):
+        cmd = 'openstack-config download 1'
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+        self.assertIn('-f/--file',
+                      mocked_stderr.write.call_args_list[-1][0][0])
 
     def test_config_execute(self):
         cmd = 'openstack-config execute --env {0} --node {1}' \
