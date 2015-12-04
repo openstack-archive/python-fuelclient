@@ -42,6 +42,23 @@ class TestOpenstackConfigActions(base.UnitTestCase):
         self.assertEqual(self.config['configuration'],
                          content['configuration'])
 
+    @mock.patch('sys.stderr')
+    def test_config_download_fail(self, mocked_stderr):
+        self.assertRaises(
+            SystemExit,
+            self.execute, ['fuel', 'openstack-config', '--download',
+                           '--config-id', '1'])
+        mocked_stderr.write.assert_called_once_with(
+            '"--config-id" and "--file" required!\n')
+        mocked_stderr.reset_mock()
+
+        self.assertRaises(
+            SystemExit,
+            self.execute, ['fuel', 'openstack-config', '--download',
+                           '--file', 'config.yaml'])
+        mocked_stderr.write.assert_called_once_with(
+            '"--config-id" and "--file" required!\n')
+
     def test_config_upload(self):
         m_post = self.m_request.post(
             '/api/v1/openstack-config/', json=self.config)
@@ -52,7 +69,24 @@ class TestOpenstackConfigActions(base.UnitTestCase):
             with mock.patch('fuelclient.objects.openstack_config.os'):
                 self.execute(['fuel', 'openstack-config', '--env', '1',
                               '--upload', '--file', 'config.yaml'])
-        self.assertTrue(m_post.called)
+                self.assertTrue(m_post.called)
+
+    @mock.patch('sys.stderr')
+    def test_config_upload_fail(self, mocked_stderr):
+        self.assertRaises(
+            SystemExit,
+            self.execute, ['fuel', 'openstack-config', '--env', '1',
+                           '--upload'])
+        mocked_stderr.write.assert_called_once_with(
+            '"--env" and "--file" required!\n')
+        mocked_stderr.reset_mock()
+
+        self.assertRaises(
+            SystemExit,
+            self.execute, ['fuel', 'openstack-config', '--upload',
+                           '--file', 'config.yaml'])
+        mocked_stderr.write.assert_called_once_with(
+            '"--env" and "--file" required!\n')
 
     def test_config_list(self):
         m_get = self.m_request.get(
