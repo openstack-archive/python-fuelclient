@@ -85,7 +85,7 @@ class OpenstackConfigAction(Action):
             )
         )
 
-    @check_all('config-id')
+    @check_all('config-id', 'file')
     def download(self, params):
         """Download an existing configuration to file:
             fuel openstack-config --download --config-id 1 --file config.yaml
@@ -96,7 +96,7 @@ class OpenstackConfigAction(Action):
         OpenstackConfig.write_file(params.file, {
             'configuration': data['configuration']})
 
-    @check_all('env')
+    @check_all('env', 'file')
     def upload(self, params):
         """Upload new configuration from file:
             fuel openstack-config --upload --env 1 --file config.yaml
