@@ -57,6 +57,13 @@ class TestSerializers(base.UnitTestCase):
             deserialized = Serializer(format).deserialize(serialized)
             self.assertEqual(self.DATA, deserialized)
 
+    def test_deserialize_fail(self):
+
+        broken_data = '{foo: bar: buzz:}'
+        for format in ('json', 'yaml'):
+            self.assertRaises(error.BadDataException,
+                              Serializer(format).deserialize, broken_data)
+
     def test_write_to_path_invalid_file_exception(self):
         serializer = Serializer('json')
         mo = mock.mock_open()
