@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import functools
 import glob
 import io
 import json
@@ -173,3 +174,23 @@ def find_exec(program):
         candidate = os.path.join(path, program)
         if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
             return candidate
+
+
+def safe_deserialize(loader):
+    """Wrapper for deserializers.
+
+    Exceptions are raising during deserialization will be transformed
+    into BadDataException
+
+    :param loader: deserializer function
+    :return: wrapped loader
+    """
+    @functools.wraps(loader)
+    def wrapper(data):
+        try:
+            return loader(data)
+        except (ValueError, TypeError, yaml.error.YAMLError) as e:
+            raise error.BadDataException('{0}: {1}'
+                                         ''.format(e.__class__.__name__,
+                                                   six.text_type(e)))
+    return wrapper

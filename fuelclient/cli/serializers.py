@@ -21,6 +21,7 @@ import yaml
 
 from fuelclient.cli import error
 from fuelclient import consts
+from fuelclient import utils
 
 
 class Serializer(object):
@@ -30,11 +31,11 @@ class Serializer(object):
     serializers = {
         "json": {
             "w": lambda d: json.dumps(d, indent=4),
-            "r": lambda d: json.loads(d)
+            "r": utils.safe_deserialize(json.loads)
         },
         "yaml": {
             "w": lambda d: yaml.safe_dump(d, default_flow_style=False),
-            "r": lambda d: yaml.load(d)
+            "r": utils.safe_deserialize(yaml.load)
         }
     }
 
