@@ -23,6 +23,17 @@ from fuelclient.cli import error
 from fuelclient import consts
 
 
+def _safe_deserialize(loader):
+    def wrapper(data):
+        try:
+            return loader(data)
+        except (ValueError, TypeError, yaml.error.YAMLError) as e:
+            raise error.BadDataException('{0}: {1}'
+                                         ''.format(e.__class__.__name__,
+                                                   six.text_type(e)))
+    return wrapper
+
+
 class Serializer(object):
     """Serializer class - contains all logic responsible for
     printing to stdout, reading and writing files to file system.
@@ -30,11 +41,11 @@ class Serializer(object):
     serializers = {
         "json": {
             "w": lambda d: json.dumps(d, indent=4),
-            "r": lambda d: json.loads(d)
+            "r": _safe_deserialize(json.loads)
         },
         "yaml": {
             "w": lambda d: yaml.safe_dump(d, default_flow_style=False),
-            "r": lambda d: yaml.load(d)
+            "r": _safe_deserialize(yaml.load)
         }
     }
 
