@@ -13,10 +13,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-import yaml
-
 from mock import patch
+
+import six
+import yaml
 
 from fuelclient.tests.unit.v1 import base
 
@@ -50,11 +50,12 @@ class TestNetworkActions(base.UnitTestCase):
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         self.m_request.get('/api/v1/clusters/1/network_configuration/neutron',
                            json=yaml.load(FILE_INPUT))
+        output = mopen().__enter__.return_value = six.StringIO()
         self.execute(['fuel', 'network', '--env', '1', '--download'])
-        mopen().__enter__().write.assert_called_once_with(FILE_INPUT)
+        self.assertEqual(FILE_INPUT, output.getvalue())
 
     def test_network_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = FILE_INPUT
+        mopen().__enter__.return_value = six.StringIO(FILE_INPUT)
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         mneutron_put = self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',
@@ -65,7 +66,7 @@ class TestNetworkActions(base.UnitTestCase):
         self.assertIn('clusters/1/network_configuration/neutron', url)
 
     def test_network_upload_with_error(self, mos, mopen):
-        mopen().__enter__().read.return_value = FILE_INPUT
+        mopen().__enter__.return_value = six.StringIO(FILE_INPUT)
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',

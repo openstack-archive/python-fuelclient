@@ -16,6 +16,8 @@
 
 from mock import patch
 
+import six
+
 from fuelclient.tests.unit.v1 import base
 
 
@@ -34,15 +36,16 @@ class TestClusterAttributesActions(base.UnitTestCase):
         get = self.m_request.get('/api/v1/clusters/1/attributes',
                                  json=self._input)
 
+        output = six.StringIO()
+        mopen().__enter__.return_value = output
         self.execute(
             ['fuel', 'env', '--env', '1', '--attributes', '--download'])
 
         self.assertTrue(get.called)
-
-        mopen().__enter__().write.assert_called_once_with(self._output)
+        self.assertEqual(self._output, output.getvalue())
 
     def test_attributes_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = self._output
+        mopen().__enter__.return_value = six.StringIO(self._output)
         put = self.m_request.put('/api/v1/clusters/1/attributes', json={})
 
         self.execute(

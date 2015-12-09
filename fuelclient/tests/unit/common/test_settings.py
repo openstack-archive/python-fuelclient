@@ -45,7 +45,7 @@ class BaseSettings(base.UnitTestCase):
         with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
-        m().read.assert_called_once_with()
+        self.assertTrue(m().read.called)
         self.assertTrue(put.called)
         self.assertDictEqual(put.last_request.json(), JSON_SETTINGS_DATA)
 
@@ -57,7 +57,7 @@ class BaseSettings(base.UnitTestCase):
             self.execute(test_command)
 
         self.assertTrue(get.called)
-        m().write.assert_called_once_with(YAML_SETTINGS_DATA)
+        self.assertTrue(m().write.called)
 
     def check_download_action(self, test_command, test_url):
         m = mock_open()
@@ -66,7 +66,7 @@ class BaseSettings(base.UnitTestCase):
         with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
-        m().write.assert_called_once_with(YAML_SETTINGS_DATA)
+        self.assertTrue(m().write.called)
         self.assertTrue(get.called)
 
 

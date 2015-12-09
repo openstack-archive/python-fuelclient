@@ -15,7 +15,9 @@
 #    under the License.
 
 from mock import patch
+
 import requests_mock as rm
+import six
 
 from fuelclient.tests.unit.v1 import base
 
@@ -30,11 +32,12 @@ class TestReleaseNetworkActions(base.UnitTestCase):
 
     def test_release_network_download(self, mos, mopen):
         self.m_request.get(rm.ANY, json=API_INPUT)
+        output = mopen().__enter__.return_value = six.StringIO()
         self.execute(['fuel', 'rel', '--rel', '1', '--network', '--download'])
-        mopen().__enter__().write.assert_called_once_with(API_OUTPUT)
+        self.assertEqual(API_OUTPUT, output.getvalue())
 
     def test_release_network_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = API_OUTPUT
+        mopen().__enter__.return_value = six.StringIO(API_OUTPUT)
         put = self.m_request.put('/api/v1/releases/1/networks', json={})
         self.execute(['fuel', 'rel', '--rel', '1', '--network', '--upload'])
 

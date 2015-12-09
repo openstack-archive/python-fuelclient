@@ -30,11 +30,17 @@ class Serializer(object):
     serializers = {
         "json": {
             "w": lambda d: json.dumps(d, indent=4),
-            "r": lambda d: json.loads(d)
+            "wf": lambda d, fp: json.dump(d, fp, indent=4),
+            "r": lambda d: json.loads(d),
+            "rf": lambda d: json.load(d)
         },
         "yaml": {
             "w": lambda d: yaml.safe_dump(d, default_flow_style=False),
-            "r": lambda d: yaml.load(d)
+            "wf": lambda d, fp: yaml.safe_dump(
+                d, stream=fp, default_flow_style=False
+            ),
+            "r": lambda d: yaml.safe_load(d),
+            "rf": lambda d: yaml.safe_load(d)
         }
     }
 
@@ -106,7 +112,7 @@ class Serializer(object):
     def read_from_full_path(self, full_path):
         try:
             with open(full_path, "r") as file_to_read:
-                return self.serializer["r"](file_to_read.read())
+                return self.serializer["rf"](file_to_read)
         except IOError as e:
             raise error.InvalidFileException(
                 "Can't open file '{0}': {1}.".format(full_path, e.strerror))
@@ -116,8 +122,7 @@ class Serializer(object):
         :param file_obj: opened file
         :param data: any serializable object
         """
-        serialized = self.serializer["w"](data)
-        file_obj.write(serialized)
+        self.serializer["wf"](data, file_obj)
 
 
 class FileFormatBasedSerializer(Serializer):
@@ -132,13 +137,13 @@ class FileFormatBasedSerializer(Serializer):
     def write_to_file(self, full_path, data):
         serializer = self.get_serializer(full_path)
         with open(full_path, "w+") as f:
-            f.write(serializer["w"](data))
+            serializer["wf"](data, f)
         return full_path
 
     def read_from_file(self, full_path):
         serializer = self.get_serializer(full_path)
         with open(full_path, "r") as f:
-            return serializer["r"](f.read())
+            return serializer["rf"](f)
 
 
 def listdir_without_extensions(dir_path):

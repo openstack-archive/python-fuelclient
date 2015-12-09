@@ -13,6 +13,8 @@
 #    under the License.
 
 import mock
+
+import six
 import yaml
 
 from fuelclient.tests.unit.v1 import base
@@ -29,16 +31,15 @@ class TestOpenstackConfigActions(base.UnitTestCase):
     def test_config_download(self):
         m_get = self.m_request.get(
             '/api/v1/openstack-config/42/', json=self.config)
-        m_open = mock.mock_open()
-        with mock.patch('fuelclient.cli.serializers.open',
-                        m_open, create=True):
+        output = six.StringIO()
+        with mock.patch('fuelclient.cli.serializers.open') as m_open:
+            m_open().__enter__.return_value = output
             self.execute(['fuel', 'openstack-config',
                           '--config-id', '42', '--download',
                           '--file', 'config.yaml'])
 
         self.assertTrue(m_get.called)
-        content = m_open().write.mock_calls[0][1][0]
-        content = yaml.safe_load(content)
+        content = yaml.safe_load(output.getvalue())
         self.assertEqual(self.config['configuration'],
                          content['configuration'])
 

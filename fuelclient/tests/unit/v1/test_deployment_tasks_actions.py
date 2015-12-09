@@ -18,6 +18,7 @@ import os
 
 from mock import patch
 import requests_mock as rm
+import six
 
 from fuelclient.tests.unit.v1 import base
 
@@ -35,12 +36,13 @@ class TestReleaseDeploymentTasksActions(base.UnitTestCase):
 
     def test_release_tasks_download(self, mos, mopen):
         self.m_request.get(rm.ANY, json=API_INPUT)
+        output = mopen().__enter__.return_value = six.StringIO()
         self.execute(
             ['fuel', 'rel', '--rel', '1', '--deployment-tasks', '--download'])
-        mopen().__enter__().write.assert_called_once_with(API_OUTPUT)
+        self.assertEqual(API_OUTPUT, output.getvalue())
 
     def test_release_tasks_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = API_OUTPUT
+        mopen().__enter__.return_value = six.StringIO(API_OUTPUT)
         put = self.m_request.put('/api/v1/releases/1/deployment_tasks',
                                  json=API_OUTPUT)
 
@@ -57,12 +59,13 @@ class TestClusterDeploymentTasksActions(base.UnitTestCase):
 
     def test_cluster_tasks_download(self, mos, mopen):
         self.m_request.get(rm.ANY, json=API_INPUT)
+        output = mopen().__enter__.return_value = six.StringIO()
         self.execute(
             ['fuel', 'env', '--env', '1', '--deployment-tasks', '--download'])
-        mopen().__enter__().write.assert_called_once_with(API_OUTPUT)
+        self.assertEqual(API_OUTPUT, output.getvalue())
 
     def test_cluster_tasks_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = API_OUTPUT
+        mopen().__enter__.return_value = six.StringIO(API_OUTPUT)
         put = self.m_request.put('/api/v1/clusters/1/deployment_tasks',
                                  json=API_OUTPUT)
 
@@ -83,7 +86,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
                                  json={})
 
         mfiles.return_value = ['/etc/puppet/2014.2-6.0/tasks.yaml']
-        mopen().__enter__().read.return_value = API_OUTPUT
+        mopen().__enter__.return_value = six.StringIO(API_OUTPUT)
         file_pattern = '*tests*'
         self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks', '--fp', file_pattern])
@@ -102,7 +105,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
 
         mos.path.realpath.return_value = real_path = '/etc/puppet'
         mfiles.return_value = [real_path + '/2014.2-6.0/tasks.yaml']
-        mopen().__enter__().read.return_value = API_OUTPUT
+        mopen().__enter__.return_value = six.StringIO(API_OUTPUT)
         self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks', '--dir', real_path])
         mfiles.assert_called_once_with(real_path, '*tasks.yaml')
@@ -114,7 +117,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
 
         mfiles.return_value = ['/etc/puppet/2014.2-6.0/tasks.yaml',
                                '/etc/puppet/2014.3-6.1/tasks.yaml']
-        mopen().__enter__().read.return_value = API_OUTPUT
+        mopen().__enter__.return_value = six.StringIO(API_OUTPUT)
 
         self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks'])
@@ -126,8 +129,7 @@ class TestSyncDeploymentTasks(base.UnitTestCase):
         put = self.m_request.put(rm.ANY, json={})
         mfiles.return_value = ['/etc/puppet/2014.2-6.0/tasks.yaml',
                                '/etc/puppet/2014.3-6.1/tasks.yaml']
-        mopen().__enter__().read.return_value = API_OUTPUT
-
+        mopen().__enter__.side_effect = lambda: six.StringIO(API_OUTPUT)
         self.execute(
             ['fuel', 'rel', '--sync-deployment-tasks'])
 

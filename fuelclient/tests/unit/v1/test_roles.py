@@ -13,6 +13,8 @@
 #    under the License.
 
 from mock import patch
+
+import six
 import yaml
 
 from fuelclient.cli.serializers import Serializer
@@ -45,9 +47,10 @@ class TestRoleActions(base.UnitTestCase):
             self.release_id)
         get_request = self.m_request.get(url, json=API_OUT)
 
+        output = mopen().__enter__.return_value = six.StringIO()
         self.execute(cmd.split())
 
-        mopen().__enter__().write.assert_called_once_with(API_IN)
+        self.assertEqual(API_IN, output.getvalue())
         self.assertTrue(get_request.called)
         self.assertIn(url, get_request.last_request.url)
 
@@ -56,7 +59,7 @@ class TestRoleActions(base.UnitTestCase):
         url = '/api/v1/releases/{0}/roles/'.format(self.release_id)
         cmd = 'fuel role --create --file myfile.yaml --rel {0}'.format(
             self.release_id)
-        mopen().__enter__().read.return_value = API_IN
+        mopen().__enter__.return_value = six.StringIO(API_IN)
         post_request = self.m_request.post(url, json=API_OUT)
 
         self.execute(cmd.split())
@@ -71,7 +74,7 @@ class TestRoleActions(base.UnitTestCase):
         url = '/api/v1/releases/{0}/roles/my_role/'.format(self.release_id)
         cmd = 'fuel role --update --file myfile.yaml --rel {0}'.format(
             self.release_id)
-        mopen().__enter__().read.return_value = API_IN
+        mopen().__enter__.return_value = six.StringIO(API_IN)
         put_request = self.m_request.put(url, json=API_OUT)
 
         self.execute(cmd.split())

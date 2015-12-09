@@ -14,6 +14,8 @@
 #    under the License.
 
 import mock
+
+import six
 import yaml
 
 from oslo_serialization import jsonutils as json
@@ -55,14 +57,13 @@ class TestNetworkTemplateFacade(test_api.BaseLibTest):
         expected_body = json.loads(common_net_template.JSON_TEMPLATE)
         matcher = self.m_request.get(self.res_uri, json=expected_body)
 
-        m_open = mock.mock_open()
-        with mock.patch('fuelclient.cli.serializers.open',
-                        m_open, create=True):
+        output = six.StringIO()
+        with mock.patch('fuelclient.cli.serializers.open') as m_open:
+            m_open().__enter__.return_value = output
             self.client.download_network_template(self.env_id)
 
         self.assertTrue(matcher.called)
-
-        written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
+        written_yaml = yaml.safe_load(output.getvalue())
         expected_yaml = yaml.safe_load(common_net_template.YAML_TEMPLATE)
         self.assertEqual(written_yaml, expected_yaml)
 

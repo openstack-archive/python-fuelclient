@@ -121,7 +121,7 @@ class TestNetworkTemplate(base.UnitTestCase):
 
         self.assertTrue(mput.called)
         self.assertEqual(mput.last_request.json(), json.loads(JSON_TEMPLATE))
-        m_open().read.assert_called_once_with()
+        self.assertTrue(m_open().read.called)
 
     def test_download_action(self):
         mget = self.m_request.get(self.req_path, text=JSON_TEMPLATE)
@@ -130,14 +130,14 @@ class TestNetworkTemplate(base.UnitTestCase):
             'fuel', 'network-template', '--env', str(self.env_id),
             '--download']
 
-        m_open = mock.mock_open()
-        with mock.patch('fuelclient.cli.serializers.open', m_open,
-                        create=True):
+        output = six.StringIO()
+        with mock.patch('fuelclient.cli.serializers.open') as m_open:
+            m_open().__enter__.return_value = output
             self.execute(test_command)
 
         self.assertTrue(mget.called)
 
-        written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
+        written_yaml = yaml.safe_load(output.getvalue())
         expected_yaml = yaml.safe_load(YAML_TEMPLATE)
         self.assertEqual(written_yaml, expected_yaml)
 
