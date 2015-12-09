@@ -19,7 +19,6 @@ from mock import patch
 from fuelclient.tests.unit.v1 import base
 
 
-@patch('fuelclient.cli.serializers.open', create=True)
 @patch('fuelclient.cli.actions.base.os')
 class TestClusterAttributesActions(base.UnitTestCase):
 
@@ -30,23 +29,26 @@ class TestClusterAttributesActions(base.UnitTestCase):
 
     _output = 'editable:\n  test: foo\n'
 
-    def test_attributes_download(self, mos, mopen):
+    def test_attributes_download(self, mos):
         get = self.m_request.get('/api/v1/clusters/1/attributes',
                                  json=self._input)
 
-        self.execute(
-            ['fuel', 'env', '--env', '1', '--attributes', '--download'])
+        m_open = self.mock_open('')
+        with patch('fuelclient.cli.serializers.open', new=m_open):
+            self.execute(
+                ['fuel', 'env', '--env', '1', '--attributes', '--download']
+            )
 
         self.assertTrue(get.called)
+        self.assertEqual(self._output, m_open().getvalue())
 
-        mopen().__enter__().write.assert_called_once_with(self._output)
-
-    def test_attributes_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = self._output
+    def test_attributes_upload(self, mos):
         put = self.m_request.put('/api/v1/clusters/1/attributes', json={})
-
-        self.execute(
-            ['fuel', 'env', '--env', '1', '--attributes', '--upload'])
+        m_open = self.mock_open(self._output)
+        with patch('fuelclient.cli.serializers.open', new=m_open):
+            self.execute(
+                ['fuel', 'env', '--env', '1', '--attributes', '--upload']
+            )
 
         self.assertTrue(put.called)
         self.assertEqual(put.last_request.json(), self._input)

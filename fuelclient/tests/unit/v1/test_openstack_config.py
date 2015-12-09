@@ -13,6 +13,7 @@
 #    under the License.
 
 import mock
+
 import yaml
 
 from fuelclient.tests.unit.v1 import base
@@ -29,16 +30,14 @@ class TestOpenstackConfigActions(base.UnitTestCase):
     def test_config_download(self):
         m_get = self.m_request.get(
             '/api/v1/openstack-config/42/', json=self.config)
-        m_open = mock.mock_open()
-        with mock.patch('fuelclient.cli.serializers.open',
-                        m_open, create=True):
+        m_open = self.mock_open('')
+        with mock.patch('fuelclient.cli.serializers.open', new=m_open):
             self.execute(['fuel', 'openstack-config',
                           '--config-id', '42', '--download',
                           '--file', 'config.yaml'])
 
         self.assertTrue(m_get.called)
-        content = m_open().write.mock_calls[0][1][0]
-        content = yaml.safe_load(content)
+        content = yaml.safe_load(m_open().getvalue())
         self.assertEqual(self.config['configuration'],
                          content['configuration'])
 
@@ -62,14 +61,18 @@ class TestOpenstackConfigActions(base.UnitTestCase):
     def test_config_upload(self):
         m_post = self.m_request.post(
             '/api/v1/openstack-config/', json=self.config)
-        m_open = mock.mock_open(read_data=yaml.safe_dump(
-            {'configuration': self.config['configuration']}))
-        with mock.patch('fuelclient.cli.serializers.open',
-                        m_open, create=True):
+        m_open = self.mock_open(yaml.safe_dump(
+            {'configuration': self.config['configuration']})
+        )
+        with mock.patch('fuelclient.cli.serializers.open', new=m_open):
             with mock.patch('fuelclient.objects.openstack_config.os'):
                 self.execute(['fuel', 'openstack-config', '--env', '1',
                               '--upload', '--file', 'config.yaml'])
-                self.assertTrue(m_post.called)
+        self.assertTrue(m_post.called)
+        self.assertEqual(
+            m_post.last_request.json(),
+            {'cluster_id': 1, 'configuration': self.config['configuration']}
+        )
 
     @mock.patch('sys.stderr')
     def test_config_upload_fail(self, mocked_stderr):

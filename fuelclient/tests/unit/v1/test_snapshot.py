@@ -13,8 +13,8 @@
 #    under the License.
 
 import mock
-from mock import call
 from mock import patch
+import sys
 
 from fuelclient.tests.unit.v1 import base
 
@@ -22,13 +22,13 @@ from fuelclient.tests.unit.v1 import base
 class TestSnapshot(base.UnitTestCase):
 
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.get_default_config')
-    @patch('sys.stdout')
-    def test_get_default_config(self, mstdout, mconf):
+    def test_get_default_config(self, mconf):
 
         mconf.return_value = {'key': 'value'}
-
-        self.execute(['fuel', 'snapshot', '--conf'])
-        self.assertEqual(mstdout.write.call_args_list, [call('key: value\n')])
+        m_stdout = self.mock_open('')()
+        with patch.object(sys, 'stdout', new=m_stdout):
+            self.execute(['fuel', 'snapshot', '--conf'])
+        self.assertEqual('key: value\n', m_stdout.getvalue())
 
     @patch('fuelclient.cli.actions.snapshot.APIClient',
            mock.Mock(auth_token='token123'))

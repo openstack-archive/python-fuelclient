@@ -24,18 +24,56 @@ from fuelclient import consts
 from fuelclient import utils
 
 
+def _json_deserialize(input_data):
+    """Wrapper for json de-serializer.
+
+    Allows to de-serialize from stream and string.
+
+    :param input_data: the text or file-like object with data to parse
+    """
+    if isinstance(input_data, six.string_types):
+        return json.loads(input_data)
+    return json.load(input_data)
+
+
+def _json_serialize(data, stream=None):
+    """Wrapper for json serializer.
+
+    Allows to serialize into stream and string.
+    Configures addtional serialization options.
+
+    :param data: the data to serialize
+    :param stream: optional parameter, the file-like object to write output
+                   if parameter is omitted, the serialized data will return
+    """
+    if stream is not None:
+        return json.dump(data, stream, indent=4)
+    return json.dumps(data, indent=4)
+
+
+def _yaml_serialize(data, stream=None):
+    """Wrapper for yaml serializer.
+
+    Configures additional serialization options.
+
+    :param data: the data to serialize
+    :param stream: optional parameter, the file-like object to write output
+    """
+    return yaml.safe_dump(data, stream, default_flow_style=False)
+
+
 class Serializer(object):
     """Serializer class - contains all logic responsible for
     printing to stdout, reading and writing files to file system.
     """
     serializers = {
         "json": {
-            "w": lambda d: json.dumps(d, indent=4),
-            "r": utils.safe_deserialize(json.loads)
+            "w": _json_serialize,
+            "r": utils.safe_deserialize(_json_deserialize),
         },
         "yaml": {
-            "w": lambda d: yaml.safe_dump(d, default_flow_style=False),
-            "r": utils.safe_deserialize(yaml.load)
+            "w": _yaml_serialize,
+            "r": utils.safe_deserialize(yaml.safe_load),
         }
     }
 
@@ -107,7 +145,7 @@ class Serializer(object):
     def read_from_full_path(self, full_path):
         try:
             with open(full_path, "r") as file_to_read:
-                return self.serializer["r"](file_to_read.read())
+                return self.serializer["r"](file_to_read)
         except IOError as e:
             raise error.InvalidFileException(
                 "Can't open file '{0}': {1}.".format(full_path, e.strerror))
@@ -117,8 +155,7 @@ class Serializer(object):
         :param file_obj: opened file
         :param data: any serializable object
         """
-        serialized = self.serializer["w"](data)
-        file_obj.write(serialized)
+        self.serializer["w"](data, stream=file_obj)
 
 
 class FileFormatBasedSerializer(Serializer):
@@ -133,13 +170,13 @@ class FileFormatBasedSerializer(Serializer):
     def write_to_file(self, full_path, data):
         serializer = self.get_serializer(full_path)
         with open(full_path, "w+") as f:
-            f.write(serializer["w"](data))
+            serializer["w"](data, stream=f)
         return full_path
 
     def read_from_file(self, full_path):
         serializer = self.get_serializer(full_path)
         with open(full_path, "r") as f:
-            return serializer["r"](f.read())
+            return serializer["r"](f)
 
 
 def listdir_without_extensions(dir_path):

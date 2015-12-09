@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from mock import mock_open
 from mock import patch
 
 from fuelclient.tests.unit.v1 import base
@@ -39,35 +38,34 @@ JSON_SETTINGS_DATA = {
 class BaseSettings(base.UnitTestCase):
 
     def check_upload_action(self, test_command, test_url):
-        m = mock_open(read_data=YAML_SETTINGS_DATA)
+        m_open = self.mock_open(YAML_SETTINGS_DATA)
         put = self.m_request.put(test_url, json={})
 
-        with patch('six.moves.builtins.open', m, create=True):
+        with patch('six.moves.builtins.open', new=m_open):
             self.execute(test_command)
 
-        m().read.assert_called_once_with()
         self.assertTrue(put.called)
         self.assertDictEqual(put.last_request.json(), JSON_SETTINGS_DATA)
 
     def check_default_action(self, test_command, test_url):
-        m = mock_open()
         get = self.m_request.get(test_url, json=JSON_SETTINGS_DATA)
 
-        with patch('six.moves.builtins.open', m, create=True):
+        m_open = self.mock_open('')
+        with patch('six.moves.builtins.open', new=m_open):
             self.execute(test_command)
 
         self.assertTrue(get.called)
-        m().write.assert_called_once_with(YAML_SETTINGS_DATA)
+        self.assertYamlEqual(YAML_SETTINGS_DATA, m_open().getvalue())
 
     def check_download_action(self, test_command, test_url):
-        m = mock_open()
         get = self.m_request.get(test_url, json=JSON_SETTINGS_DATA)
+        m_open = self.mock_open('')
 
-        with patch('six.moves.builtins.open', m, create=True):
+        with patch('six.moves.builtins.open', new=m_open):
             self.execute(test_command)
 
-        m().write.assert_called_once_with(YAML_SETTINGS_DATA)
         self.assertTrue(get.called)
+        self.assertYamlEqual(YAML_SETTINGS_DATA, m_open().getvalue())
 
 
 class TestSettings(BaseSettings):
