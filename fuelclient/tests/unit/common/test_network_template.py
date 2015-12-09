@@ -121,7 +121,7 @@ class TestNetworkTemplate(base.UnitTestCase):
 
         self.assertTrue(mput.called)
         self.assertEqual(mput.last_request.json(), json.loads(JSON_TEMPLATE))
-        m_open().read.assert_called_once_with()
+        self.assertTrue(m_open().read.call_count)
 
     def test_download_action(self):
         mget = self.m_request.get(self.req_path, text=JSON_TEMPLATE)

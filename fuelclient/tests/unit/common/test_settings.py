@@ -45,7 +45,7 @@ class BaseSettings(base.UnitTestCase):
         with patch('six.moves.builtins.open', m, create=True):
             self.execute(test_command)
 
-        m().read.assert_called_once_with()
+        self.assertTrue(m().read.call_count)
         self.assertTrue(put.called)
         self.assertDictEqual(put.last_request.json(), JSON_SETTINGS_DATA)
 
