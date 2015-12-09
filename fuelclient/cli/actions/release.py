@@ -158,7 +158,7 @@ class ReleaseAction(Action):
             data = serialized_tasks.get(rel['version'])
             if data:
                 release.update_deployment_tasks(data)
-                print("Deployment tasks syncronized for release"
+                print("Deployment tasks synchronized for release"
                       " {0} of version {1}".format(rel['name'],
                                                    rel['version']))
             else:
