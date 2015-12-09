@@ -186,9 +186,9 @@ def safe_deserialize(loader):
     :return: wrapped loader
     """
     @functools.wraps(loader)
-    def wrapper(data):
+    def wrapper(*args, **kwargs):
         try:
-            return loader(data)
+            return loader(*args, **kwargs)
         except (ValueError, TypeError, yaml.error.YAMLError) as e:
             raise error.BadDataException('{0}: {1}'
                                          ''.format(e.__class__.__name__,

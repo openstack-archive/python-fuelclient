@@ -17,7 +17,6 @@
 import json
 import mock
 import six
-import yaml
 
 from fuelclient.tests.unit.v1 import base
 
@@ -121,7 +120,6 @@ class TestNetworkTemplate(base.UnitTestCase):
 
         self.assertTrue(mput.called)
         self.assertEqual(mput.last_request.json(), json.loads(JSON_TEMPLATE))
-        m_open().read.assert_called_once_with()
 
     def test_download_action(self):
         mget = self.m_request.get(self.req_path, text=JSON_TEMPLATE)
@@ -130,16 +128,13 @@ class TestNetworkTemplate(base.UnitTestCase):
             'fuel', 'network-template', '--env', str(self.env_id),
             '--download']
 
-        m_open = mock.mock_open()
-        with mock.patch('fuelclient.cli.serializers.open', m_open,
-                        create=True):
+        m_open = self.mock_open('')
+        with mock.patch('fuelclient.cli.serializers.open', new=m_open):
             self.execute(test_command)
 
         self.assertTrue(mget.called)
 
-        written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
-        expected_yaml = yaml.safe_load(YAML_TEMPLATE)
-        self.assertEqual(written_yaml, expected_yaml)
+        self.assertYamlEqual(YAML_TEMPLATE, m_open().getvalue())
 
     def test_delete_action(self):
         mdelete = self.m_request.delete(self.req_path, json={})

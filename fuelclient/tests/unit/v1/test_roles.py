@@ -13,6 +13,7 @@
 #    under the License.
 
 from mock import patch
+
 import yaml
 
 from fuelclient.cli.serializers import Serializer
@@ -38,43 +39,42 @@ class TestRoleActions(base.UnitTestCase):
         self.assertTrue(get_request.called)
         self.assertIn(url, get_request.last_request.url)
 
-    @patch('fuelclient.cli.serializers.open', create=True)
-    def test_get_role(self, mopen):
+    def test_get_role(self):
         url = '/api/v1/releases/{0}/roles/my_role/'.format(self.release_id)
         cmd = 'fuel role --role my_role --file myfile.yaml --rel {0}'.format(
             self.release_id)
         get_request = self.m_request.get(url, json=API_OUT)
 
-        self.execute(cmd.split())
+        m_open = self.mock_open('')
+        with patch('fuelclient.cli.serializers.open', new=m_open):
+            self.execute(cmd.split())
 
-        mopen().__enter__().write.assert_called_once_with(API_IN)
+        self.assertEqual(API_IN, m_open().getvalue())
         self.assertTrue(get_request.called)
         self.assertIn(url, get_request.last_request.url)
 
-    @patch('fuelclient.cli.serializers.open', create=True)
-    def test_create_role(self, mopen):
+    def test_create_role(self):
         url = '/api/v1/releases/{0}/roles/'.format(self.release_id)
         cmd = 'fuel role --create --file myfile.yaml --rel {0}'.format(
             self.release_id)
-        mopen().__enter__().read.return_value = API_IN
         post_request = self.m_request.post(url, json=API_OUT)
-
-        self.execute(cmd.split())
+        m_open = self.mock_open(API_IN)
+        with patch('fuelclient.cli.serializers.open', new=m_open):
+            self.execute(cmd.split())
 
         self.assertTrue(post_request.called)
         self.assertIn(url, post_request.last_request.url)
         self.assertEqual(
             API_OUT, post_request.last_request.json())
 
-    @patch('fuelclient.cli.serializers.open', create=True)
-    def test_update_role(self, mopen):
+    def test_update_role(self):
         url = '/api/v1/releases/{0}/roles/my_role/'.format(self.release_id)
         cmd = 'fuel role --update --file myfile.yaml --rel {0}'.format(
             self.release_id)
-        mopen().__enter__().read.return_value = API_IN
         put_request = self.m_request.put(url, json=API_OUT)
-
-        self.execute(cmd.split())
+        m_open = self.mock_open(API_IN)
+        with patch('fuelclient.cli.serializers.open', new=m_open):
+            self.execute(cmd.split())
 
         self.assertTrue(put_request.called)
         self.assertIn(url, put_request.last_request.url)

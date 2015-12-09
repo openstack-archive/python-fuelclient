@@ -15,6 +15,7 @@
 #    under the License.
 
 from mock import patch
+
 import requests_mock as rm
 
 from fuelclient.tests.unit.v1 import base
@@ -24,19 +25,25 @@ API_INPUT = {'config': 'neutron'}
 API_OUTPUT = 'config: neutron\n'
 
 
-@patch('fuelclient.cli.serializers.open', create=True)
 @patch('fuelclient.cli.actions.base.os')
 class TestReleaseNetworkActions(base.UnitTestCase):
 
-    def test_release_network_download(self, mos, mopen):
+    def test_release_network_download(self, mos):
         self.m_request.get(rm.ANY, json=API_INPUT)
-        self.execute(['fuel', 'rel', '--rel', '1', '--network', '--download'])
-        mopen().__enter__().write.assert_called_once_with(API_OUTPUT)
+        m_open = self.mock_open('')
+        with patch('fuelclient.cli.serializers.open', new=m_open):
+            self.execute(
+                ['fuel', 'rel', '--rel', '1', '--network', '--download']
+            )
+        self.assertEqual(API_OUTPUT, m_open().getvalue())
 
-    def test_release_network_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = API_OUTPUT
+    def test_release_network_upload(self, mos):
         put = self.m_request.put('/api/v1/releases/1/networks', json={})
-        self.execute(['fuel', 'rel', '--rel', '1', '--network', '--upload'])
+        m_open = self.mock_open(API_OUTPUT)
+        with patch('fuelclient.cli.serializers.open', new=m_open):
+            self.execute(
+                ['fuel', 'rel', '--rel', '1', '--network', '--upload']
+            )
 
         self.assertTrue(put.called)
         self.assertEqual(put.last_request.json(), API_INPUT)

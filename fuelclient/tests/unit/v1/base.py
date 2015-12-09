@@ -13,9 +13,11 @@
 #    under the License.
 
 import mock
+
 from oslotest import base as oslo_base
 import requests_mock as rm
 import six
+import yaml
 
 from fuelclient.cli import parser
 
@@ -70,3 +72,12 @@ class UnitTestCase(oslo_base.BaseTestCase):
         fileobj = FakeFile(text)
         setattr(fileobj, 'name', filename)
         return mock.MagicMock(return_value=fileobj)
+
+    def assertYamlEqual(self, expected, actual):
+        """Tests two serialized yamls are equal.
+        :param expected: the expected content
+        :param actual: the actual content
+        """
+        actual_yaml = yaml.safe_load(actual)
+        expected_yaml = yaml.safe_load(expected)
+        self.assertEqual(expected_yaml, actual_yaml)
