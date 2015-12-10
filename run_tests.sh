@@ -15,4 +15,4 @@
 #    under the License.
 
 # THIS FILE WILL BE REMOVED AS SOON AS FUEL-CI IS UPDATED.
-tox
+FUEL_WEB_ROOT=/tmp/fuel-web TEST_NAILGUN_DB=nailgun tox
