@@ -17,6 +17,7 @@ import json
 from keystoneclient.exceptions import Unauthorized
 import requests
 import sys
+import textwrap
 
 
 def exit_with_error(message):
@@ -118,15 +119,17 @@ def exceptions_decorator(func):
         except requests.HTTPError as exc:
             exit_with_error("{0} ({1})".format(exc, get_error_body(exc)))
         except requests.ConnectionError:
-            exit_with_error("""
-            Can't connect to Nailgun server!
-            Please check connection settings in your configuration file.""")
+            message = """
+                Can't connect to Nailgun server!
+                Please check connection settings in your configuration file."""
+            exit_with_error(textwrap.dedent(message).strip())
         except Unauthorized:
-            exit_with_error("""
-            Unauthorized: need authentication!
-            Please provide user and password via client
-             fuel --user=user --password=pass [action]
-            or modify your credentials in your configuration file.""")
+            message = """
+                Unauthorized: need authentication!
+                Please provide user and password via client
+                fuel --user=user --password=pass [action]
+                or modify your credentials in your configuration file."""
+            exit_with_error(textwrap.dedent(message).strip())
         except FuelClientException as exc:
             exit_with_error(exc.message)
 
