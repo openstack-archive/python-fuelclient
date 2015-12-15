@@ -55,16 +55,14 @@ class OpenstackConfigAction(Action):
             ('execute', self.execute)
         )
 
+    @check_all('env')
     def list(self, params):
         """List all available configurations:
             fuel openstack-config --list --env 1
             fuel openstack-config --list --env 1 --node 1
             fuel openstack-config --list --env 1 --deleted
         """
-        filters = {}
-
-        if 'env' in params:
-            filters['cluster_id'] = params.env
+        filters = {'cluster_id': params.env}
 
         if 'deleted' in params:
             filters['is_active'] = int(not params.deleted)
