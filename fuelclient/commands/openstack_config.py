@@ -21,10 +21,10 @@ class OpenstackConfigMixin(object):
     entity_name = 'openstack-config'
 
     @staticmethod
-    def add_env_arg(parser, required=False):
+    def add_env_arg(parser):
         parser.add_argument(
             '-e', '--env',
-            type=int, required=required,
+            type=int, required=True,
             help='Environment ID.')
 
     @staticmethod
@@ -116,7 +116,7 @@ class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseCommand):
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigUpload, self).get_parser(prog_name)
 
-        self.add_env_arg(parser, required=True)
+        self.add_env_arg(parser)
         self.add_node_id_arg(parser)
         self.add_node_role_arg(parser)
         self.add_file_arg(parser)
@@ -140,7 +140,7 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigExecute, self).get_parser(prog_name)
 
-        self.add_env_arg(parser, required=True)
+        self.add_env_arg(parser)
         self.add_node_id_arg(parser)
         self.add_node_role_arg(parser)
 

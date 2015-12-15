@@ -54,6 +54,13 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
                              'node_role': None, 'is_active': True}
         )
 
+    @mock.patch('sys.stderr')
+    def test_config_list_for_cluster_fail(self, mocked_stderr):
+        self.assertRaises(SystemExit,
+                          self.exec_command, 'openstack-config list')
+        self.assertIn('-e/--env ',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+
     def test_config_upload(self):
         self.m_client.upload.return_value = 'config.yaml'
 
@@ -93,8 +100,6 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
     @mock.patch('sys.stderr')
     def test_config_download_fail(self, mocked_stderr):
         cmd = 'openstack-config download 1'
-        self.assertRaises(SystemExit, self.exec_command, cmd)
-
         self.assertRaises(SystemExit, self.exec_command, cmd)
         self.assertIn('-f/--file',
                       mocked_stderr.write.call_args_list[-1][0][0])

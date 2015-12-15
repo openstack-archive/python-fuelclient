@@ -113,6 +113,14 @@ class TestOpenstackConfigActions(base.UnitTestCase):
                       '--node', '42', '--list'])
         self.assertTrue(m_get.called)
 
+    @mock.patch('sys.stderr')
+    def test_config_list_fail(self, m_stderr):
+        self.assertRaises(
+            SystemExit,
+            self.execute, ['fuel', 'openstack-config', '--list'])
+        m_stderr.write.assert_called_once_with(
+            '"--env" required!\n')
+
     def test_config_delete(self):
         m_del = self.m_request.delete(
             '/api/v1/openstack-config/42/', json={})
