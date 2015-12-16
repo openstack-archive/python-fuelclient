@@ -111,4 +111,15 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
         self.m_client.execute.assert_called_once_with(
-            cluster_id=self.CLUSTER_ID, node_id=self.NODE_ID, node_role=None)
+            cluster_id=self.CLUSTER_ID, node_id=self.NODE_ID, node_role=None,
+            force=False)
+
+    def test_config_force_execute(self):
+        cmd = 'openstack-config execute --env {0} --node {1} --force' \
+              ''.format(self.CLUSTER_ID, self.NODE_ID)
+        self.exec_command(cmd)
+
+        self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
+        self.m_client.execute.assert_called_once_with(
+            cluster_id=self.CLUSTER_ID, node_id=self.NODE_ID, node_role=None,
+            force=True)

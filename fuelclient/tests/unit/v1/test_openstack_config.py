@@ -134,6 +134,14 @@ class TestOpenstackConfigActions(base.UnitTestCase):
         self.execute(['fuel', 'openstack-config', '--env', '42', '--execute'])
         self.assertTrue(m_put.called)
 
+    def test_config_force_execute(self):
+        m_put = self.m_request.put('/api/v1/openstack-config/execute/',
+                                   json={'status': 'ready'})
+        self.execute(['fuel', 'openstack-config', '--env', '42', '--execute',
+                      '--force'])
+        self.assertTrue(m_put.called)
+
+
     def test_config_execute_fail(self):
         message = 'Some error'
         m_put = self.m_request.put(
