@@ -36,6 +36,7 @@ class OpenstackConfigAction(Action):
             Args.get_single_role_arg("Node role"),
             Args.get_config_id_arg("Openstack config ID"),
             Args.get_deleted_arg("Get deleted configurations"),
+            Args.get_force_arg("Force configuration update"),
             group(
                 Args.get_list_arg("List openstack configurations"),
                 Args.get_download_arg(
@@ -131,12 +132,14 @@ class OpenstackConfigAction(Action):
             fuel openstack-config --execute --env 1
             fuel openstack-config --execute --env 1 --node 1
             fuel openstack-config --execute --env 1 --role controller
+            fuel openstack-config --execute --env 1 --force
         """
         node_id = getattr(params, 'node', None)
         node_role = getattr(params, 'role', None)
+        force = getattr(params, 'force', False)
         task_result = OpenstackConfig.execute(
             cluster_id=params.env, node_id=node_id,
-            node_role=node_role)
+            node_role=node_role, force=force)
         if task_result['status'] == 'error':
             print(
                 'Error applying openstack configuration: {0}.'.format(
