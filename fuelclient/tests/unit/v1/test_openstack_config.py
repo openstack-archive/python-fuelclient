@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import mock
 import yaml
 
@@ -133,6 +134,17 @@ class TestOpenstackConfigActions(base.UnitTestCase):
                                    json={'status': 'ready'})
         self.execute(['fuel', 'openstack-config', '--env', '42', '--execute'])
         self.assertTrue(m_put.called)
+        self.assertEqual({"cluster_id": 42, "force": False},
+                         json.loads(m_put.last_request.text))
+
+    def test_config_force_execute(self):
+        m_put = self.m_request.put('/api/v1/openstack-config/execute/',
+                                   json={'status': 'ready'})
+        self.execute(['fuel', 'openstack-config', '--env', '42', '--execute',
+                      '--force'])
+        self.assertTrue(m_put.called)
+        self.assertEqual({"cluster_id": 42, "force": True},
+                         json.loads(m_put.last_request.text))
 
     def test_config_execute_fail(self):
         message = 'Some error'
