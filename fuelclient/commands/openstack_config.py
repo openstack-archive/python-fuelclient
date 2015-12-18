@@ -61,6 +61,13 @@ class OpenstackConfigMixin(object):
             type=bool, default=False, help='Show deleted configurations.'
         )
 
+    @staticmethod
+    def add_force_arg(parser):
+        parser.add_argument(
+            '-f', '--force',
+            action='store_true', help='Force configuration update.'
+        )
+
 
 class OpenstackConfigList(OpenstackConfigMixin, base.BaseCommand):
     """List all openstack configurations.
@@ -143,12 +150,14 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
         self.add_env_arg(parser)
         self.add_node_id_arg(parser)
         self.add_node_role_arg(parser)
+        self.add_force_arg(parser)
 
         return parser
 
     def take_action(self, args):
         self.client.execute(
-            cluster_id=args.env, node_id=args.node, node_role=args.role)
+            cluster_id=args.env, node_id=args.node, node_role=args.role,
+            force=args.force)
 
         msg = "OpenStack configuration execution started.\n"
         self.app.stdout.write(msg)
