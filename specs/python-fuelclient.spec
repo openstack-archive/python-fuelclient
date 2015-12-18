@@ -29,6 +29,7 @@ Requires: python-argparse
 
 Conflicts: python-requests == 2.8.0
 
+Requires: perl
 Requires: python-cliff >= 1.14.0
 Requires: python-pbr >= 1.6
 Requires: python-keystoneclient >= 1.6.0
@@ -36,6 +37,8 @@ Requires: PyYAML >= 3.1.0
 Requires: python-requests >= 2.5.2
 Requires: python-six >= 1.9.0
 
+
+Requires: bash-completion
 
 %description
 Summary: Console utility for working with fuel rest api
@@ -49,6 +52,10 @@ cd %{_builddir}/%{name}-%{version} && %{__python2} setup.py build
 %install
 rm -rf $RPM_BUILD_ROOT
 cd %{_builddir}/%{name}-%{version} && %{__python2} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT
+
+%post
+# FIXME(mkwiek): fix fuelclient to generate usable autocomplete bash
+fuel2 complete | perl -pe "s/-(?=.*=')/_/g" | perl -pe 's;(?<=cmds_\$\{)proposed;proposed//-/_;g' | sed -e "s/local cur prev words/local -a words/g" > %{_datadir}/bash-completion/completions/fuel2
 
 %clean
 rm -rf $RPM_BUILD_ROOT
