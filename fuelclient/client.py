@@ -38,7 +38,7 @@ class Client(object):
 
         self.debug = False
         self.root = "http://{server}:{port}".format(server=conf.SERVER_ADDRESS,
-                                                    port=conf.LISTEN_PORT)
+                                                    port=conf.SERVER_PORT)
 
         self.keystone_base = urlparse.urljoin(self.root, "/keystone/v2.0")
         self.api_root = urlparse.urljoin(self.root, "/api/v1/")

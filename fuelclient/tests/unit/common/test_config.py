@@ -26,6 +26,13 @@ from fuelclient.tests.unit.v1 import base
 
 class TestSettings(base.UnitTestCase):
 
+    def setUp(self):
+        super(TestSettings, self).setUp()
+
+        self.useFixture(fixtures.MockPatchObject(fuelclient_settings,
+                                                 '_SETTINGS',
+                                                 None))
+
     @mock.patch('os.makedirs')
     @mock.patch('shutil.copy')
     @mock.patch('os.chmod')
@@ -41,7 +48,6 @@ class TestSettings(base.UnitTestCase):
         conf_home = os.path.expanduser('~/.config/')
         conf_dir = os.path.dirname(expected_path)
 
-        fuelclient_settings._SETTINGS = None
         m_exists.return_value = False
         f_confdir = fixtures.EnvironmentVariable('XDG_CONFIG_HOME', conf_home)
         f_settings = fixtures.EnvironmentVariable('FUELCLIENT_CUSTOM_SETTINGS')
@@ -58,7 +64,6 @@ class TestSettings(base.UnitTestCase):
     @mock.patch('os.makedirs')
     @mock.patch('os.path.exists')
     def test_config_generation_write_error(self, m_exists, m_makedirs):
-        fuelclient_settings._SETTINGS = None
         m_exists.return_value = False
         m_makedirs.side_effect = OSError('[Errno 13] Permission denied')
 
@@ -67,3 +72,23 @@ class TestSettings(base.UnitTestCase):
 
         self.assertRaises(error.SettingsException,
                           fuelclient_settings.get_settings)
+
+    @mock.patch('six.print_')
+    def test_deprecated_option_produces_warning(self, m_print):
+        expected_waring = ('DEPRECATION WARNING: LISTEN_PORT parameter was '
+                           'deprecated and will not be supported in the next '
+                           'version of python-fuelclient. Please replace this '
+                           'parameter with SERVER_PORT')
+
+        m = mock.mock_open(read_data='LISTEN_PORT: 9000')
+        with mock.patch('fuelclient.fuelclient_settings.open', m):
+            fuelclient_settings.get_settings()
+
+        m_print.assert_called_once_with(expected_waring)
+
+    def test_fallback_to_deprecated_option(self):
+        m = mock.mock_open(read_data='LISTEN_PORT: 9000')
+        with mock.patch('fuelclient.fuelclient_settings.open', m):
+            settings = fuelclient_settings.get_settings()
+
+        self.assertEqual(9000, settings.LISTEN_PORT)
