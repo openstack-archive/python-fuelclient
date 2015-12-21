@@ -26,6 +26,12 @@ from fuelclient.cli import error
 
 _SETTINGS = None
 
+# Format: old parameter: new parameter or None
+DEPRECATION_TABLE = {'LISTEN_PORT': 'SERVER_PORT'}
+
+# Format: parameter: fallback parameter
+FALLBACK_TABLE = {'SERVER_PORT': 'LISTEN_PORT'}
+
 
 class FuelClientSettings(object):
     """Represents a model of Fuel Clients settings
@@ -78,6 +84,7 @@ class FuelClientSettings(object):
                 raise error.SettingsException(msg)
 
         self._update_from_env()
+        self._check_deprecated()
 
     def _add_file_if_exists(self, path_to_file, file_list):
         if path_to_file and os.access(path_to_file, os.R_OK):
@@ -93,6 +100,26 @@ class FuelClientSettings(object):
         for k in self.config:
             if k in os.environ:
                 self.config[k] = os.environ[k]
+
+    def _check_deprecated(self):
+        """Looks for deprecated options and prints warnings if finds any."""
+
+        dep_msg = ('DEPRECATION WARNING: {old} parameter was deprecated and '
+                   'will not be supported in the next version of '
+                   'python-fuelclient.{repl}')
+        repl_msg = ' Please replace this parameter with {0}'
+
+        dep_opts = [opt for opt in self.config if opt in DEPRECATION_TABLE]
+
+        for opt in dep_opts:
+           replace = ''
+
+           if DEPRECATION_TABLE.get(opt) is not None:
+               replace = repl_msg.format(DEPRECATION_TABLE.get(opt))
+
+           msg = dep_msg.format(old=opt, repl=replace)
+
+           six.print_(msg)
 
     def populate_default_settings(self, source, destination):
         """Puts default configuration file to a user's home directory."""
@@ -114,7 +141,14 @@ class FuelClientSettings(object):
         return yaml.dump(self.config)
 
     def __getattr__(self, name):
-        return self.config.get(name, None)
+        if name in self.config:
+            return self.config[name]
+
+        if name in FALLBACK_TABLE:
+            return self.config[FALLBACK_TABLE[name]]
+
+        raise error.BadConfiguration('Value for {1} option is not '
+                                     'configured'.format(name))
 
     def __repr__(self):
         return '<settings object>'

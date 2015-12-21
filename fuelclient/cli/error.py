@@ -104,6 +104,10 @@ class EnvironmentException(Exception):
     pass
 
 
+class BadConfiguration(FuelClientException):
+    pass
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of APIClient class
