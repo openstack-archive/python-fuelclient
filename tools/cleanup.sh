@@ -17,7 +17,7 @@
 set -eu
 
 NAILGUN_CONFIG=$ARTIFACTS/test.yaml
-NAILGUN_ROOT=$FUEL_WEB_ROOT/nailgun
+
 
 # Sends SIGING to the running instance of Nailgun, if it exists
 kill_server() {
