@@ -33,11 +33,15 @@ class OpenstackConfigClient(base_v1.BaseV1Client):
 
         return path
 
-    def execute(self, **kwargs):
-        return self._entity_wrapper.execute(**kwargs)
+    def execute(self, config_id, cluster_id, node_id, node_role, force=False):
+        return self._entity_wrapper.execute(
+            config_id=config_id, cluster_id=cluster_id, node_id=node_id,
+            node_role=node_role, force=force)
 
-    def get_filtered(self, **kwargs):
-        return self._entity_wrapper.get_filtered_data(**kwargs)
+    def get_filtered(self, cluster_id, node_id, node_role, is_active=True):
+        return self._entity_wrapper.get_filtered_data(
+            cluster_id=cluster_id, node_id=node_id, node_role=node_role,
+            is_active=is_active)
 
 
 def get_client():
