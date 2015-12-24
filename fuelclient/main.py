@@ -71,7 +71,7 @@ class FuelClient(app.App):
 def main(argv=sys.argv[1:]):
     fuelclient_app = FuelClient(
         description='Command line interface and Python API wrapper for Fuel.',
-        version='8.0.0',
+        version='9.0.0',
         command_manager=CommandManager('fuelclient', convert_underscores=True)
     )
     return fuelclient_app.run(argv)
