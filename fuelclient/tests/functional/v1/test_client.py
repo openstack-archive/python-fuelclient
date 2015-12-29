@@ -181,7 +181,7 @@ class TestHandlers(base.BaseTestCase):
         actions = (
             "node", "stop", "deployment", "reset", "task", "network",
             "settings", "provisioning", "environment", "deploy-changes",
-            "role", "release", "snapshot", "health"
+            "role", "release", "snapshot", "health", "vip"
         )
         for action in actions:
             self.check_all_in_msg("{0} -h".format(action), ("Examples",))
