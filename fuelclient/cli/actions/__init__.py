@@ -1,4 +1,4 @@
-#    Copyright 2014 Mirantis, Inc.
+#    Copyright 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -42,34 +42,36 @@ from fuelclient.cli.actions.task import TaskAction
 from fuelclient.cli.actions.user import UserAction
 from fuelclient.cli.actions.plugins import PluginAction
 from fuelclient.cli.actions.fuelversion import FuelVersionAction
+from fuelclient.cli.actions.vip import VIPAction
 
 actions_tuple = (
-    ReleaseAction,
-    RoleAction,
-    EnvironmentAction,
     DeployChangesAction,
-    NodeAction,
     DeploymentAction,
-    ProvisioningAction,
-    StopAction,
-    ResetAction,
-    SettingsAction,
-    VmwareSettingsAction,
-    NetworkAction,
-    NetworkTemplateAction,
-    TaskAction,
-    SnapshotAction,
+    EnvironmentAction,
+    FuelVersionAction,
+    GraphAction,
     HealthCheckAction,
-    UserAction,
-    PluginAction,
+    NetworkAction,
+    NetworkGroupAction,
+    NetworkTemplateAction,
+    NodeAction,
     NodeGroupAction,
     NotificationsAction,
     NotifyAction,
-    TokenAction,
-    GraphAction,
-    FuelVersionAction,
-    NetworkGroupAction,
     OpenstackConfigAction,
+    PluginAction,
+    ProvisioningAction,
+    ReleaseAction,
+    ResetAction,
+    RoleAction,
+    SettingsAction,
+    SnapshotAction,
+    StopAction,
+    TaskAction,
+    TokenAction,
+    UserAction,
+    VIPAction,
+    VmwareSettingsAction,
 )
 
 actions = dict(
