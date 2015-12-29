@@ -16,9 +16,7 @@ from operator import attrgetter
 import os
 import shutil
 
-from fuelclient.cli.error import ActionException
-from fuelclient.cli.error import InvalidDirectoryException
-from fuelclient.cli.error import ServerDataException
+from fuelclient.cli import error
 from fuelclient.cli.serializers import listdir_without_extensions
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.task import DeployTask
@@ -94,7 +92,7 @@ class Environment(BaseObject):
     def unassign_all(self):
         nodes = self.get_all_nodes()
         if not nodes:
-            raise ActionException(
+            raise error.ActionException(
                 "Environment with id={0} doesn't have nodes to remove."
                 .format(self.id)
             )
@@ -181,12 +179,17 @@ class Environment(BaseObject):
         return (serializer or self.serializer).read_from_file(
             settings_file_path)
 
+    def _check_file_path(self, file_path):
+        if not os.path.exists(file_path):
+            raise error.InvalidFileException(
+                "File '{0}' doesn't exist.".format(file_path))
+
     def _check_dir(self, directory):
         if not os.path.exists(directory):
-            raise InvalidDirectoryException(
+            raise error.InvalidDirectoryException(
                 "Directory '{0}' doesn't exist.".format(directory))
         if not os.path.isdir(directory):
-            raise InvalidDirectoryException(
+            raise error.InvalidDirectoryException(
                 "Error: '{0}' is not a directory.".format(directory))
 
     def read_vmware_settings_data(self, directory=os.curdir, serializer=None):
@@ -311,7 +314,7 @@ class Environment(BaseObject):
         facts = self.connection.get_request(
             self._get_fact_default_url(fact_type, nodes=nodes))
         if not facts:
-            raise ServerDataException(
+            raise error.ServerDataException(
                 "There is no {0} info for this "
                 "environment!".format(fact_type)
             )
@@ -321,7 +324,7 @@ class Environment(BaseObject):
         facts = self.connection.get_request(
             self._get_fact_url(fact_type, nodes=nodes))
         if not facts:
-            raise ServerDataException(
+            raise error.ServerDataException(
                 "There is no {0} info for this "
                 "environment!".format(fact_type)
             )
@@ -513,3 +516,112 @@ class Environment(BaseObject):
     def spawn_vms(self):
         url = 'clusters/{0}/spawn_vms/'.format(self.id)
         return self.connection.put_request(url, {})
+
+    def _get_ip_addrs_url(self, vips=True, ip_addr_id=None):
+        """Generate ip address management url.
+
+        :param vips: manage vip properties of ip address
+        :type vips: bool
+        :param ip_addr_id: ip address identifier
+        :type ip_addr_id: int
+        :return: url
+        :rtype: str
+        """
+        ip_addr_url = "clusters/{0}/network_configuration/ips/".format(self.id)
+        if ip_addr_id:
+            ip_addr_url += '{0}/'.format(ip_addr_id)
+        if vips:
+            ip_addr_url += 'vips/'
+
+        return ip_addr_url
+
+    def get_default_vips_data_path(self):
+        """Get path where VIPs data is located.
+        :return: path
+        :rtype: str
+        """
+        return os.path.join(
+            os.path.abspath(os.curdir),
+            "vips_{0}".format(self.id)
+        )
+
+    def get_vips_data(self, ip_addr_id=None, network=None,
+                      network_role=None):
+        """Get one or multiple vip data records.
+
+        :param ip_addr_id: ip addr id could be specified to download single vip
+                            if no ip_addr_id specified multiple entities is
+                            returned respecting network and network_role
+                            filters
+        :type ip_addr_id: int
+        :param network: network id could be specified to filter vips
+        :type network: int
+        :param network_role: network role could be specified to filter vips
+        :type network_role: string
+        :return: response JSON
+        :rtype: list of dict
+        """
+        params = {}
+        if network:
+            params['network'] = network
+        if network_role:
+            params['network-role'] = network_role
+
+        result = self.connection.get_request(
+            self._get_ip_addrs_url(True, ip_addr_id=ip_addr_id),
+            params=params
+        )
+        if ip_addr_id is not None:  # single vip is returned
+            # wrapping with list is required to respect case when administrator
+            # downloading vip address info to change it and upload
+            # back. Uploading works only with lists of records.
+            result = [result]
+        return result
+
+    def write_vips_data_to_file(self, vips_data, serializer=None,
+                                file_path=None):
+        """Write VIP data to the given path.
+
+        :param vips_data: vip data
+        :type vips_data: list of dict
+        :param serializer: serializer
+        :param file_path: path
+        :type file_path: str
+        :return: path to resulting file
+        :rtype: str
+        """
+        serializer = serializer or self.serializer
+
+        if file_path:
+            return serializer.write_to_full_path(
+                file_path,
+                vips_data
+            )
+        else:
+            return serializer.write_to_path(
+                self.get_default_vips_data_path(),
+                vips_data
+            )
+
+    def read_vips_data_from_file(self, file_path=None, serializer=None):
+        """Read VIPs data from given path.
+
+        :param file_path: path
+        :type file_path: str
+        :param serializer: serializer object
+        :type serializer: object
+        :return: data
+        :rtype: list|object
+        """
+        self._check_file_path(file_path)
+        return (serializer or self.serializer).read_from_file(file_path)
+
+    def set_vips_data(self, data):
+        """Sending VIPs data to the Nailgun API.
+
+        :param data: VIPs data
+        :type data: list of dict
+        :return: request result
+        :rtype: object
+        """
+        return self.connection.put_request(self._get_ip_addrs_url(), data)
