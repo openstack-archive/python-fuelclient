@@ -631,3 +631,34 @@ def get_notify_topic_arg(help_msg):
         ),
         help=help_msg
     )
+
+
+def get_vip_arg(help_msg):
+    return get_boolean_arg(
+        "vip",
+        flags=("--vip",), help=help_msg
+    )
+
+
+def get_ip_arg(help_msg):
+    return get_int_arg(
+        "ip",
+        flags=("--ip",),
+        help=help_msg
+    )
+
+
+def get_network_id_arg(help_msg):
+    return get_int_arg("network", flags=("--network",), help=help_msg)
+
+
+def get_network_role_arg(help_msg):
+    return get_str_arg(
+        "network-role",
+        flags=("--network-role",),
+        help=help_msg
+    )
+
+
+def get_upload_file_arg(help_msg):
+    return get_str_arg("upload", flags=("-u",), help=help_msg)
