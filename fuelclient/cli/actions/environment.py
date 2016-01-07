@@ -70,6 +70,8 @@ class EnvironmentAction(Action):
             ),
             Args.get_dir_arg(
                 "Select directory to which download release attributes"),
+            Args.get_extension_arg(
+                "Enable extensions for given env"),
         ]
         self.flag_func_map = (
             ("deployment-tasks", self.deployment_tasks),
@@ -78,6 +80,7 @@ class EnvironmentAction(Action):
             ("set", self.set),
             ("delete", self.delete),
             ("update", self.update),
+            ("extensions", self.extensions),
             (None, self.list)
         )
 
@@ -248,3 +251,13 @@ class EnvironmentAction(Action):
             cluster.update_attributes(attributes)
             print("Attributes of cluster {0} "
                   "uploaded from {1}.yaml".format(cluster.id, full_path))
+
+    @check_all("env", "extensions")
+    def extensions(self, params):
+        """Enable/disable extensions for environment:
+            fuel env --env 1 --extensions ext1 ext2
+        """
+        cluster = Environment(params.env)
+        if params.extensions:
+            resp = cluster.set_extensions(params.extensions)
+            print("Successfully set extensions for cluster:", resp)
