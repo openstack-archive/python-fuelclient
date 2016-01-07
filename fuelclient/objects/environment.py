@@ -32,6 +32,7 @@ class Environment(BaseObject):
     deployment_tasks_path = 'clusters/{0}/deployment_tasks'
     deployment_tasks_graph_path = 'clusters/{0}/deploy_tasks/graph.gv'
     attributes_path = 'clusters/{0}/attributes'
+    extensions_path = 'clusters/{0}/extensions'
     network_template_path = 'clusters/{0}/network_configuration/template'
 
     @classmethod
@@ -513,3 +514,7 @@ class Environment(BaseObject):
     def spawn_vms(self):
         url = 'clusters/{0}/spawn_vms/'.format(self.id)
         return self.connection.put_request(url, {})
+
+    def set_extensions(self, extensions):
+        url = self.extensions_path.format(self.id)
+        return self.connection.put_request(url, extensions)
