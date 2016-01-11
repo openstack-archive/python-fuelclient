@@ -40,7 +40,7 @@ class TestAuthentication(base.UnitTestCase):
         self.assertEqual(args['tenant_name'], tenant_name)
         pr = urllib.parse.urlparse(args['auth_url'])
         self.assertEqual(conf.SERVER_ADDRESS, pr.hostname)
-        self.assertEqual(int(conf.LISTEN_PORT), int(pr.port))
+        self.assertEqual(int(conf.SERVER_PORT), int(pr.port))
         self.assertEqual('/keystone/v2.0', pr.path)
 
     @patch('fuelclient.client.auth_client')
