@@ -19,7 +19,6 @@ from cliff import app
 from cliff.commandmanager import CommandManager
 
 from fuelclient.actions import fuel_version
-from fuelclient.cli.error import exceptions_decorator
 
 
 LOG = logging.getLogger(__name__)
@@ -67,7 +66,6 @@ class FuelClient(app.App):
             logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 
-@exceptions_decorator
 def main(argv=sys.argv[1:]):
     fuelclient_app = FuelClient(
         description='Command line interface and Python API wrapper for Fuel.',

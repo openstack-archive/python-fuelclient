@@ -21,7 +21,6 @@ import mock
 from oslotest import base as oslo_base
 
 import fuelclient
-from fuelclient.cli import error
 from fuelclient.commands import environment as env
 from fuelclient import main as main_mod
 
@@ -71,19 +70,6 @@ class BaseCLITest(oslo_base.BaseTestCase):
         args = ['help']
         self.exec_command(*args)
         m_run_command.assert_called_once_with(args)
-
-    @mock.patch.object(sys, 'stderr')
-    @mock.patch('cliff.app.App.run_subcommand')
-    def test_exec_command_error_handle(self, m_run, m_stderr):
-        error_msg = 'Test error'
-        expected_output = error_msg + '\n'
-
-        m_run.side_effect = error.FuelClientException(error_msg)
-
-        self.assertRaises(SystemExit,
-                          self.exec_command,
-                          'some command --fail True')
-        m_stderr.write.assert_called_once_with(expected_output)
 
     @mock.patch('cliff.commandmanager.CommandManager.find_command')
     def test_command_interactive(self, m_find_command):
