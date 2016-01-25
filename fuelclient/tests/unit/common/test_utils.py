@@ -23,6 +23,7 @@ import mock
 import requests
 
 from fuelclient.cli import error
+from fuelclient import client
 from fuelclient.common import data_utils
 from fuelclient.tests.unit.v1 import base
 from fuelclient import utils
@@ -242,3 +243,14 @@ class TestUtils(base.UnitTestCase):
         result = utils.str_to_unicode(test_data)
         self.assertIsInstance(result, six.text_type)
         self.assertEqual(result, expected_data)
+
+    def test_HTTP_error_message(self):
+        text = 'message text'
+
+        self.m_request.post('/api/v1/address',
+                            json={'message': text},
+                            status_code=403)
+
+        with self.assertRaisesRegexp(error.HTTPError,
+                                     '403.*{}'.format(text)):
+            client.Client().post_request('address')
