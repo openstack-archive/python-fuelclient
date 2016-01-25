@@ -16,6 +16,7 @@
 
 import mock
 from mock import patch
+
 from oslotest import base as oslo_base
 import requests_mock as rm
 from six.moves.urllib import parse as urlparse
