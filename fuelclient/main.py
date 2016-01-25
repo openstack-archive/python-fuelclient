@@ -67,7 +67,6 @@ class FuelClient(app.App):
             logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 
-@exceptions_decorator
 def main(argv=sys.argv[1:]):
     fuelclient_app = FuelClient(
         description='Command line interface and Python API wrapper for Fuel.',
