@@ -19,6 +19,7 @@ import requests
 from keystoneclient.v2_0 import client as auth_client
 from six.moves.urllib import parse as urlparse
 
+from fuelclient.cli import error
 from fuelclient import fuelclient_settings
 from fuelclient.logs import NullHandler
 
@@ -109,7 +110,7 @@ class Client(object):
         if self._auth_required is None:
             url = self.api_root + 'version'
             resp = requests.get(url)
-            resp.raise_for_status()
+            self._raise_for_status_with_info(resp)
 
             self._auth_required = resp.json().get('auth_required', False)
         return self._auth_required
@@ -150,7 +151,7 @@ class Client(object):
         self.print_debug('DELETE {0}'.format(url))
 
         resp = self.session.delete(url)
-        resp.raise_for_status()
+        self._raise_for_status_with_info(resp)
 
         if resp.status_code == 204:
             return {}
@@ -166,7 +167,7 @@ class Client(object):
         self.print_debug('PUT {0} data={1}'.format(url, data_json))
 
         resp = self.session.put(url, data=data_json)
-        resp.raise_for_status()
+        self._raise_for_status_with_info(resp)
 
         return resp.json()
 
@@ -189,7 +190,7 @@ class Client(object):
         params = params or {}
 
         resp = self.get_request_raw(api, ostf, params)
-        resp.raise_for_status()
+        self._raise_for_status_with_info(resp)
 
         return resp.json()
 
@@ -212,12 +213,18 @@ class Client(object):
         """Make POST request to specific API with some data
         """
         resp = self.post_request_raw(api, data, ostf=ostf)
-        resp.raise_for_status()
+        self._raise_for_status_with_info(resp)
 
         return resp.json()
 
     def get_fuel_version(self):
         return self.get_request("version")
+
+    def _raise_for_status_with_info(self, response):
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            raise error.HTTPError(error.get_full_error_message(e))
 
 # This line is single point of instantiation for 'Client' class,
 # which intended to implement Singleton design pattern.

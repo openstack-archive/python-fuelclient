@@ -14,16 +14,18 @@
 
 from functools import wraps
 import json
+import os
+import sys
+
 from keystoneclient.exceptions import Unauthorized
 import requests
-import sys
 import textwrap
 
 
 def exit_with_error(message):
     """exit_with_error - writes message to stderr and exits with exit code 1.
     """
-    sys.stderr.write(message + "\n")
+    sys.stderr.write("{}{}".format(message, os.linesep))
     exit(1)
 
 
@@ -101,6 +103,10 @@ class InvalidFileException(FuelClientException):
     pass
 
 
+class HTTPError(FuelClientException):
+    pass
+
+
 class EnvironmentException(Exception):
     pass
 
@@ -116,8 +122,8 @@ def exceptions_decorator(func):
 
         # when server returns to us bad request check that
         # and print meaningful reason
-        except requests.HTTPError as exc:
-            exit_with_error("{0} ({1})".format(exc, get_error_body(exc)))
+        except HTTPError as exc:
+            exit_with_error(exc)
         except requests.ConnectionError:
             message = """
                 Can't connect to Nailgun server!
@@ -143,3 +149,7 @@ def get_error_body(error):
         error_body = error.response.text
 
     return error_body
+
+
+def get_full_error_message(error):
+    return "{} ({})".format(error, get_error_body(error))
