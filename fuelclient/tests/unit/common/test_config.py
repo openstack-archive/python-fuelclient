@@ -92,3 +92,26 @@ class TestSettings(base.UnitTestCase):
             settings = fuelclient_settings.get_settings()
 
         self.assertEqual(9000, settings.LISTEN_PORT)
+
+    def test_update_from_cli_params(self):
+        test_config_text = ('SERVER_ADDRESS: "127.0.0.1"\n'
+                            'SERVER_PORT: "8000"\n'
+                            'OS_USERNAME: "admin"\n'
+                            'OS_PASSWORD:\n'
+                            'OS_TENANT_NAME:\n')
+
+        test_parsed_args = mock.Mock(os_password='test_password',
+                                     server_port="3000",
+                                     os_username=None)
+        del test_parsed_args.server_address
+        del test_parsed_args.os_tenant_name
+
+        m = mock.mock_open(read_data=test_config_text)
+        with mock.patch('fuelclient.fuelclient_settings.open', m):
+            settings = fuelclient_settings.get_settings()
+
+        settings.update_from_command_line_options(test_parsed_args)
+
+        self.assertEqual('3000', settings.SERVER_PORT)
+        self.assertEqual('test_password', settings.OS_PASSWORD)
+        self.assertEqual('admin', settings.OS_USERNAME)
