@@ -23,7 +23,9 @@ from fuelclient.cli.error import exceptions_decorator
 from fuelclient.cli.error import ParserException
 from fuelclient.cli.serializers import Serializer
 from fuelclient import consts
+from fuelclient import fuelclient_settings
 from fuelclient import profiler
+from fuelclient import utils
 
 
 class Parser(object):
@@ -96,8 +98,8 @@ class Parser(object):
         self.generate_actions()
         self.add_version_args()
         self.add_debug_arg()
-        self.add_keystone_credentials_args()
         self.add_serializers_args()
+        utils.add_os_cli_parameters(self.parser)
 
     def generate_actions(self):
         for action, action_object in actions.items():
@@ -129,7 +131,12 @@ class Parser(object):
         if len(self.args) < 2:
             self.parser.print_help()
             sys.exit(0)
+
         parsed_params = self.parser.parse_args(self.args[1:])
+
+        settings = fuelclient_settings.get_settings()
+        settings.update_from_command_line_options(parsed_params)
+
         if parsed_params.action not in actions:
             self.parser.print_help()
             sys.exit(0)
@@ -167,32 +174,6 @@ class Parser(object):
             action="store_true",
             help="prints details of all HTTP request",
             default=False
-        )
-
-    def add_keystone_credentials_args(self):
-        self.credential_flags.append('--user')
-        self.credential_flags.append('--password')
-        self.credential_flags.append('--tenant')
-        self.parser.add_argument(
-            "--user",
-            dest="user",
-            type=str,
-            help="credentials for keystone authentication user",
-            default=None
-        )
-        self.parser.add_argument(
-            "--password",
-            dest="password",
-            type=str,
-            help="credentials for keystone authentication password",
-            default=None
-        )
-        self.parser.add_argument(
-            "--tenant",
-            dest="tenant",
-            type=str,
-            help="credentials for keystone authentication tenant",
-            default="admin"
         )
 
     def add_version_args(self):
