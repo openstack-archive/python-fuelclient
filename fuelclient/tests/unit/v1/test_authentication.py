@@ -14,87 +14,92 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from mock import Mock
-from mock import patch
-from six.moves import urllib
+import fixtures
+import mock
 
 from fuelclient import fuelclient_settings
 from fuelclient.tests.unit.v1 import base
 
 
+@mock.patch('keystoneclient.v2_0.client.Client',
+            return_value=mock.Mock(auth_token=''))
 class TestAuthentication(base.UnitTestCase):
 
     def setUp(self):
         super(TestAuthentication, self).setUp()
+
         self.auth_required_mock.return_value = True
-
-    def validate_credentials_response(self,
-                                      args,
-                                      username=None,
-                                      password=None,
-                                      tenant_name=None):
-        conf = fuelclient_settings.get_settings()
-
-        self.assertEqual(args['username'], username)
-        self.assertEqual(args['password'], password)
-        self.assertEqual(args['tenant_name'], tenant_name)
-        pr = urllib.parse.urlparse(args['auth_url'])
-        self.assertEqual(conf.SERVER_ADDRESS, pr.hostname)
-        self.assertEqual(int(conf.SERVER_PORT), int(pr.port))
-        self.assertEqual('/keystone/v2.0', pr.path)
-
-    @patch('fuelclient.client.auth_client')
-    def test_credentials(self, mkeystone_cli):
         self.m_request.get('/api/v1/nodes/', json={})
 
-        mkeystone_cli.return_value = Mock(auth_token='')
-        self.execute(
-            ['fuel', '--user=a', '--password=b', 'node'])
-        self.validate_credentials_response(
-            mkeystone_cli.Client.call_args[1],
-            username='a',
-            password='b',
-            tenant_name='admin'
-        )
-        self.execute(
-            ['fuel', '--user=a', '--password', 'b', 'node'])
-        self.validate_credentials_response(
-            mkeystone_cli.Client.call_args[1],
-            username='a',
-            password='b',
-            tenant_name='admin'
-        )
-        self.execute(
-            ['fuel', '--user=a', '--password=b', '--tenant=t', 'node'])
-        self.validate_credentials_response(
-            mkeystone_cli.Client.call_args[1],
-            username='a',
-            password='b',
-            tenant_name='t'
-        )
-        self.execute(
-            ['fuel', '--user', 'a', '--password', 'b', '--tenant', 't',
-             'node'])
-        self.validate_credentials_response(
-            mkeystone_cli.Client.call_args[1],
-            username='a',
-            password='b',
-            tenant_name='t'
-        )
-        self.execute(
-            ['fuel', 'node', '--user=a', '--password=b', '--tenant=t'])
-        self.validate_credentials_response(
-            mkeystone_cli.Client.call_args[1],
-            username='a',
-            password='b',
-            tenant_name='t'
-        )
-        self.execute(
-            ['fuel', 'node', '--user', 'a', '--password', 'b',
-             '--tenant', 't'])
-        self.validate_credentials_response(
-            mkeystone_cli.Client.call_args[1],
-            username='a',
-            password='b',
-            tenant_name='t'
-        )
+        self.useFixture(fixtures.MockPatchObject(fuelclient_settings,
+                                                 '_SETTINGS',
+                                                 None))
+
+    def validate_credentials_response(self, m_client, username=None,
+                                      password=None, tenant_name=None):
+        """Checks whether keystone was called properly."""
+
+        conf = fuelclient_settings.get_settings()
+
+        expected_url = 'http://{}:{}{}'.format(conf.SERVER_ADDRESS,
+                                               conf.SERVER_PORT,
+                                               '/keystone/v2.0')
+        m_client.__init__assert_called_once_with(auth_url=expected_url,
+                                                 username=username,
+                                                 password=password,
+                                                 tenant_name=tenant_name)
+
+    def test_credentials_settings(self, mkeystone_cli):
+        self.useFixture(fixtures.EnvironmentVariable('OS_USERNAME'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_PASSWORD'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_TENANT_NAME'))
+
+        conf = fuelclient_settings.get_settings()
+        conf.config['OS_USERNAME'] = 'test_user'
+        conf.config['OS_PASSWORD'] = 'test_password'
+        conf.config['OS_TENANT_NAME'] = 'test_tenant_name'
+
+        self.execute(['fuel', 'node'])
+        self.validate_credentials_response(mkeystone_cli,
+                                           username='test_user',
+                                           password='test_password',
+                                           tenant_name='test_tenant_name')
+
+    def test_credentials_cli(self, mkeystone_cli):
+        self.useFixture(fixtures.EnvironmentVariable('OS_USERNAME'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_PASSWORD'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_TENANT_NAME'))
+
+        self.execute(['fuel', '--os-username=a', '--os-tenant-name=admin',
+                      '--os-password=b', 'node'])
+        self.validate_credentials_response(mkeystone_cli,
+                                           username='a',
+                                           password='b',
+                                           tenant_name='admin')
+
+    def test_authentication_env_variables(self, mkeystone_cli):
+        self.useFixture(fixtures.EnvironmentVariable('OS_USERNAME', 'name'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_PASSWORD', 'pass'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_TENANT_NAME', 'ten'))
+
+        self.execute(['fuel', 'node'])
+        self.validate_credentials_response(mkeystone_cli,
+                                           username='name',
+                                           password='pass',
+                                           tenant_name='ten')
+
+    def test_credentials_override(self, mkeystone_cli):
+        self.useFixture(fixtures.EnvironmentVariable('OS_USERNAME'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_PASSWORD', 'var_p'))
+        self.useFixture(fixtures.EnvironmentVariable('OS_TENANT_NAME', 'va_t'))
+
+        conf = fuelclient_settings.get_settings()
+        conf.config['OS_USERNAME'] = 'conf_user'
+        conf.config['OS_PASSWORD'] = 'conf_password'
+        conf.config['OS_TENANT_NAME'] = 'conf_tenant_name'
+
+        self.execute(['fuel', '--os-tenant-name=cli_tenant', 'node'])
+        self.validate_credentials_response(mkeystone_cli,
+                                           username='conf_user',
+                                           password='var_p',
+                                           tenant_name='cli_tenant')

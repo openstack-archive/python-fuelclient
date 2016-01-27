@@ -1,8 +1,12 @@
 # Connection settings
 SERVER_ADDRESS: "127.0.0.1"
 SERVER_PORT: "8000"
-KEYSTONE_USER:
-KEYSTONE_PASS:
+OS_USERNAME:
+OS_PASSWORD:
+# There's a need to provide default value for
+# tenant name until fuel-library is updated.
+# After that, it will be removed.
+OS_TENANT_NAME: "admin"
 HTTP_PROXY: null
 HTTP_TIMEOUT: 10
 

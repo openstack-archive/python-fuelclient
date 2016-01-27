@@ -48,12 +48,6 @@ class Action(object):
         """Entry point for all actions subclasses
         """
         APIClient.debug_mode(debug=params.debug)
-        if getattr(params, 'user') and getattr(params, 'password'):
-            APIClient.user = params.user
-            APIClient.password = params.password
-            # tenant is set by default to 'admin' in parser.add_argument
-            APIClient.tenant = params.tenant
-            APIClient.initialize_keystone_client()
 
         self.serializer = Serializer.from_params(params)
         if self.flag_func_map is not None:

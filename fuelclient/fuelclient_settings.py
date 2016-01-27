@@ -27,10 +27,12 @@ from fuelclient.cli import error
 _SETTINGS = None
 
 # Format: old parameter: new parameter or None
-DEPRECATION_TABLE = {'LISTEN_PORT': 'SERVER_PORT'}
+DEPRECATION_TABLE = {'LISTEN_PORT': 'SERVER_PORT',
+                     'KEYSTONE_USER': 'OS_USERNAME',
+                     'KEYSTONE_PASS': 'OS_PASSWORD'}
 
 # Format: parameter: fallback parameter
-FALLBACK_TABLE = {'SERVER_PORT': 'LISTEN_PORT'}
+FALLBACK_TABLE = {DEPRECATION_TABLE[p]: p for p in DEPRECATION_TABLE}
 
 
 class FuelClientSettings(object):
@@ -101,25 +103,33 @@ class FuelClientSettings(object):
             if k in os.environ:
                 self.config[k] = os.environ[k]
 
-    def _check_deprecated(self):
-        """Looks for deprecated options and prints warnings if finds any."""
+    def _print_deprecation_warning(self, old_option, new_option=None):
+        """Print deprecation warning for an option."""
 
-        dep_msg = ('DEPRECATION WARNING: {old} parameter was deprecated and '
+        dep_tpl = ('DEPRECATION WARNING: {old} parameter was deprecated and '
                    'will not be supported in the next version of '
                    'python-fuelclient.{repl}')
-        repl_msg = ' Please replace this parameter with {0}'
+        repl_tpl = ' Please replace this parameter with {0}'
+
+        replace_mgs = '' if new_option is None else repl_tpl.format(new_option)
+        depr_msg = dep_tpl.format(old=old_option, repl=replace_mgs)
+
+        six.print_(depr_msg)
+
+    def _check_deprecated(self):
+        """Looks for deprecated options in user's configuration."""
 
         dep_opts = [opt for opt in self.config if opt in DEPRECATION_TABLE]
 
         for opt in dep_opts:
-            replace = ''
 
-            if DEPRECATION_TABLE.get(opt) is not None:
-                replace = repl_msg.format(DEPRECATION_TABLE.get(opt))
+            new_opt = DEPRECATION_TABLE.get(opt)
 
-            msg = dep_msg.format(old=opt, repl=replace)
+            # Clean up new option if it was not set by a user
+            if new_opt in self.config and self.config[new_opt] is None:
+                del self.config[new_opt]
 
-            six.print_(msg)
+            self._print_deprecation_warning(opt, new_opt)
 
     def populate_default_settings(self, source, destination):
         """Puts default configuration file to a user's home directory."""
@@ -136,6 +146,17 @@ class FuelClientSettings(object):
             msg = ('Could not save settings to {0}. Please make sure the '
                    'directory is writable')
             raise error.SettingsException(msg.format(dst_dir))
+
+    def update_from_command_line_options(self, options):
+        """Update parameters from valid command line options."""
+
+        for param in self.config:
+            opt_name = param.lower()
+
+            if hasattr(options, opt_name) \
+               and getattr(options, opt_name) is not None:
+
+                self.config[param] = getattr(options, opt_name)
 
     def dump(self):
         return yaml.dump(self.config)
