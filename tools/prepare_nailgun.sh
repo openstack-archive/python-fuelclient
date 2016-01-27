@@ -109,8 +109,9 @@ EOL
 # Connection settings
 SERVER_ADDRESS: "127.0.0.1"
 SERVER_PORT: "${NAILGUN_PORT}"
-KEYSTONE_USER: "admin"
-KEYSTONE_PASS: "admin"
+OS_USERNAME: "admin"
+OS_PASSWORD: "admin"
+OS_TENANT_NAME: "admin"
 EOL
 }
 

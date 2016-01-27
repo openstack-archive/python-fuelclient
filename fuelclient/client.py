@@ -44,9 +44,6 @@ class Client(object):
         self.keystone_base = urlparse.urljoin(self.root, "/keystone/v2.0")
         self.api_root = urlparse.urljoin(self.root, "/api/v1/")
         self.ostf_root = urlparse.urljoin(self.root, "/ostf/")
-        self.user = conf.KEYSTONE_USER
-        self.password = conf.KEYSTONE_PASS
-        self.tenant = 'admin'
         self._keystone_client = None
         self._auth_required = None
         self._session = None
@@ -122,17 +119,22 @@ class Client(object):
         return self._keystone_client
 
     def update_own_password(self, new_pass):
+        conf = fuelclient_settings.get_settings()
+
         if self.auth_token:
-            self.keystone_client.users.update_own_password(
-                self.password, new_pass)
+            self.keystone_client.users.update_own_password(conf.OS_PASSWORD,
+                                                           new_pass)
 
     def initialize_keystone_client(self):
+        conf = fuelclient_settings.get_settings()
+
         if self.auth_required:
             self._keystone_client = auth_client.Client(
-                username=self.user,
-                password=self.password,
                 auth_url=self.keystone_base,
-                tenant_name=self.tenant)
+                username=conf.OS_USERNAME,
+                password=conf.OS_PASSWORD,
+                tenant_name=conf.OS_TENANT_NAME)
+
             self._keystone_client.session.auth = self._keystone_client
             self._keystone_client.authenticate()
 
