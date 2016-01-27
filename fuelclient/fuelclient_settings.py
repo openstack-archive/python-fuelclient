@@ -137,6 +137,9 @@ class FuelClientSettings(object):
                    'directory is writable')
             raise error.SettingsException(msg.format(dst_dir))
 
+    def update_from_command_line_options(self, options):
+        pass
+
     def dump(self):
         return yaml.dump(self.config)
 

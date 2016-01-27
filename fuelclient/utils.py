@@ -194,3 +194,31 @@ def safe_deserialize(loader):
                                          ''.format(e.__class__.__name__,
                                                    six.text_type(e)))
     return wrapper
+
+
+def add_os_cli_parameters(parser):
+    parser.add_argument(
+        '--os-auth-url', metavar='<auth-url>',
+        help='Authentication URL, defaults to env[OS_AUTH_URL].')
+
+    project_name_group = parser.add_mutually_exclusive_group()
+    project_name_group.add_argument(
+        '--os-tenant-name', metavar='<auth-tenant-name>',
+        help='Authentication tenant name, defaults to '
+             'env[OS_TENANT_NAME].')
+
+    project_name_group.add_argument(
+        '--os-project-name',
+        metavar='<auth-project-name>',
+        help='Another way to specify tenant name. '
+             'This option is mutually exclusive with '
+             ' --os-tenant-name. '
+             'Defaults to env[OS_PROJECT_NAME].')
+
+    parser.add_argument(
+        '--os-username', metavar='<auth-username>',
+        help='Authentication username, defaults to env[OS_USERNAME].')
+
+    parser.add_argument(
+        '--os-password', metavar='<auth-password>',
+        help='Authentication password, defaults to env[OS_PASSWORD].')
