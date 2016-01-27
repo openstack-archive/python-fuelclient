@@ -19,6 +19,8 @@ from cliff import app
 from cliff.commandmanager import CommandManager
 
 from fuelclient.actions import fuel_version
+from fuelclient import fuelclient_settings
+from fuelclient import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -34,6 +36,7 @@ class FuelClient(app.App):
 
     def build_option_parser(self, description, version, argparse_kwargs=None):
         """Overrides default options for backwards compatibility."""
+
         p_inst = super(FuelClient, self)
         parser = p_inst.build_option_parser(description=description,
                                             version=version,
@@ -45,6 +48,8 @@ class FuelClient(app.App):
             help=("show Fuel server's version number and exit. "
                   "WARNING: deprecated since 7.0 release. "
                   "Please use fuel-version command instead"))
+
+        utils.add_os_cli_parameters(parser)
 
         return parser
 
@@ -64,6 +69,14 @@ class FuelClient(app.App):
         for logger_name in ('requests.packages.urllib3.connectionpool',
                             'urllib3.connectionpool'):
             logging.getLogger(logger_name).setLevel(logging.WARNING)
+
+    def run(self, argv):
+        options, _ = self.parser.parse_known_args(argv)
+
+        settings = fuelclient_settings.get_settings()
+        settings.update_from_command_line_options(options)
+
+        return super(FuelClient, self).run(argv)
 
 
 def main(argv=sys.argv[1:]):

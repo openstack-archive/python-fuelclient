@@ -27,10 +27,12 @@ from fuelclient.cli import error
 _SETTINGS = None
 
 # Format: old parameter: new parameter or None
-DEPRECATION_TABLE = {'LISTEN_PORT': 'SERVER_PORT'}
+DEPRECATION_TABLE = {'LISTEN_PORT': 'SERVER_PORT',
+                     'KEYSTONE_USER': 'OS_USERNAME',
+                     'KEYSTONE_PASS': 'OS_PASSWORD'}
 
 # Format: parameter: fallback parameter
-FALLBACK_TABLE = {'SERVER_PORT': 'LISTEN_PORT'}
+FALLBACK_TABLE = {DEPRECATION_TABLE[p]: p for p in DEPRECATION_TABLE}
 
 
 class FuelClientSettings(object):
@@ -136,6 +138,17 @@ class FuelClientSettings(object):
             msg = ('Could not save settings to {0}. Please make sure the '
                    'directory is writable')
             raise error.SettingsException(msg.format(dst_dir))
+
+    def update_from_command_line_options(self, options):
+        """Update parameters from valid command line options."""
+
+        for param in self.config:
+            opt_name = param.lower()
+
+            if hasattr(options, opt_name) \
+               and getattr(options, opt_name) is not None:
+
+                self.config[param] = getattr(options, opt_name)
 
     def dump(self):
         return yaml.dump(self.config)
