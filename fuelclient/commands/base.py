@@ -17,6 +17,7 @@ import abc
 from cliff import command
 from cliff import lister
 from cliff import show
+import requests
 import six
 
 import fuelclient
@@ -38,6 +39,23 @@ class BaseCommand(command.Command):
     def entity_name(self):
         """Name of the Fuel entity."""
         pass
+
+    def run(self, parsed_args):
+        try:
+            return super(BaseCommand, self).run(parsed_args)
+        except requests.HTTPError as exc:
+            try:
+                data = exc.response.json()
+            # (asaprykin): except ValueError is a workaround for response with
+            # invalid Content-Type header
+            except ValueError:
+                pass
+            else:
+                message = data.get('message')
+                if message:
+                    self.app.stderr.write(message + '\n')
+                    return 1
+            raise exc
 
 
 @six.add_metaclass(abc.ABCMeta)
