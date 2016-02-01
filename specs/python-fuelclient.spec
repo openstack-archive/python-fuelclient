@@ -65,7 +65,3 @@ rm -rf $RPM_BUILD_ROOT
 %{python2_sitelib}/*
 %{_bindir}/*
 %doc fuelclient/fuel_client.yaml
-
-%changelog
-* Thu Nov 19 2015 Aleksandr Mogylchenko <amogylchenko@mirantis.com> 8.0.0-1
-- make spec compatible with CentOS 7
