@@ -62,11 +62,17 @@ class SnapshotAction(Action):
             "Generating dump..."
         )
         snapshot_task.wait()
-        download_snapshot_with_progress_bar(
-            snapshot_task.connection.root + snapshot_task.data["message"],
-            auth_token=APIClient.auth_token,
-            directory=params.dir
-        )
+
+        if snapshot_task.status == 'ready':
+            download_snapshot_with_progress_bar(
+                snapshot_task.connection.root + snapshot_task.data["message"],
+                auth_token=APIClient.auth_token,
+                directory=params.dir
+            )
+        # check case when status of the task is 'error'
+        else:
+            print("Snapshot generating task ended with error. "
+                  "Task message: {0}".format(snapshot_task.data["message"]))
 
     def get_snapshot_config(self, params):
         """Download default config for snapshot
