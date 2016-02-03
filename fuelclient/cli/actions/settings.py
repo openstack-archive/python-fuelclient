@@ -33,7 +33,8 @@ class SettingsAction(Action):
                 Args.get_upload_arg("Save current changes in configuration."),
                 required=True
             ),
-            Args.get_dir_arg("Directory with configuration data.")
+            Args.get_dir_arg("Directory with configuration data."),
+            Args.get_force_arg("Force settings upload.")
         )
         self.flag_func_map = (
             ("upload", self.upload),
@@ -50,7 +51,7 @@ class SettingsAction(Action):
             directory=params.dir,
             serializer=self.serializer
         )
-        env.set_settings_data(settings_data)
+        env.set_settings_data(settings_data, params.force)
         print("Settings configuration uploaded.")
 
     def default(self, params):

@@ -217,7 +217,7 @@ class Environment(BaseObject):
 
     @property
     def settings_url(self):
-        return "clusters/{0}/attributes".format(self.id)
+        return self.attributes_path.format(self.id)
 
     @property
     def default_settings_url(self):
@@ -267,9 +267,10 @@ class Environment(BaseObject):
         return self.connection.put_request(
             self.network_url, data)
 
-    def set_settings_data(self, data):
+    def set_settings_data(self, data, force=False):
+        params = {'force': 1} if force else None
         return self.connection.put_request(
-            self.settings_url, data)
+            self.settings_url, data, params=params)
 
     def set_vmware_settings_data(self, data):
         return self.connection.put_request(
@@ -494,12 +495,12 @@ class Environment(BaseObject):
         return self.connection.put_request(url, data)
 
     def get_attributes(self):
-        url = self.attributes_path.format(self.id)
-        return self.connection.get_request(url)
+        return self.connection.get_request(self.settings_url)
 
-    def update_attributes(self, data):
-        url = self.attributes_path.format(self.id)
-        return self.connection.put_request(url, data)
+    def update_attributes(self, data, force=False):
+        params = {'force': 1} if force else None
+        return self.connection.put_request(
+            self.settings_url, data, params=params)
 
     def get_deployment_tasks_graph(self, tasks, parents_for=None, remove=None):
         url = self.deployment_tasks_graph_path.format(self.id)

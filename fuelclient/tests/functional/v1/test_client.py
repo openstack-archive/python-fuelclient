@@ -518,3 +518,39 @@ class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
             "Directory '/foo/bar/baz' doesn't exist.\n",
             check_errors=False
         )
+
+
+class TestUploadSettings(base.BaseTestCase):
+
+    create_env = "env create --name=test --release={0}"
+    add_node = "--env-id=1 node set --node 1 --role=controller"
+    deploy_changes = "deploy-changes --env 1"
+    cmd = "settings --env 1"
+    cmd_force = "settings --env 1 --force"
+
+    def setUp(self):
+        super(TestUploadSettings, self).setUp()
+        self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
+        self.create_env = self.create_env.format(release_id)
+        self.run_cli_commands((
+            self.create_env,
+            self.add_node,
+            self.download_command(self.cmd)
+        ))
+
+    def test_upload_settings_before_deployment(self):
+        msg_success = "Settings configuration uploaded.\n"
+        self.check_for_stdout(self.upload_command(self.cmd),
+                              msg_success)
+
+    def test_upload_settings_after_deployment(self):
+        msg_success = "Settings configuration uploaded.\n"
+        msg_error = "couldn't be changed after or during deployment.)\n"
+
+        self.run_cli_command(self.deploy_changes)
+        self.check_for_stderr(self.upload_command(self.cmd),
+                              msg_error,
+                              check_errors=False)
+        self.check_for_stdout(self.upload_command(self.cmd_force),
+                              msg_success)
