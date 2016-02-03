@@ -78,6 +78,12 @@ class TestSettings(BaseSettings):
                 'fuel', 'settings', '--env', '1', '--upload'],
             test_url='/api/v1/clusters/1/attributes')
 
+    def test_upload_force_action(self):
+        self.check_upload_action(
+            test_command=[
+                'fuel', 'settings', '--env', '1', '--upload', '--force'],
+            test_url='/api/v1/clusters/1/attributes?force=1')
+
     def test_default_action(self):
         self.check_default_action(
             test_command=[

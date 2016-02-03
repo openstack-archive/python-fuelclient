@@ -15,6 +15,7 @@
 from operator import attrgetter
 import os
 import shutil
+from six.moves.urllib.parse import urlunparse
 
 from fuelclient.cli import error
 from fuelclient.cli.serializers import listdir_without_extensions
@@ -210,7 +211,7 @@ class Environment(BaseObject):
 
     @property
     def settings_url(self):
-        return "clusters/{0}/attributes".format(self.id)
+        return self.attributes_path.format(self.id)
 
     @property
     def default_settings_url(self):
@@ -260,9 +261,10 @@ class Environment(BaseObject):
         return self.connection.put_request(
             self.network_url, data)
 
-    def set_settings_data(self, data):
-        return self.connection.put_request(
-            self.settings_url, data)
+    def set_settings_data(self, data, force=False):
+        url = urlunparse((None, None, self.settings_url,
+                          None, 'force=1' if force else '', None))
+        return self.connection.put_request(url, data)
 
     def set_vmware_settings_data(self, data):
         return self.connection.put_request(
@@ -487,11 +489,11 @@ class Environment(BaseObject):
         return self.connection.put_request(url, data)
 
     def get_attributes(self):
-        url = self.attributes_path.format(self.id)
-        return self.connection.get_request(url)
+        return self.connection.get_request(self.settings_url)
 
-    def update_attributes(self, data):
-        url = self.attributes_path.format(self.id)
+    def update_attributes(self, data, force=False):
+        url = urlunparse((None, None, self.settings_url,
+                          None, 'force=1' if force else '', None))
         return self.connection.put_request(url, data)
 
     def get_deployment_tasks_graph(self, tasks, parents_for=None, remove=None):
