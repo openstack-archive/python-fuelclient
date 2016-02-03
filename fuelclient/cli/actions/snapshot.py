@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import print_function
+
 import sys
 
 import yaml
@@ -62,11 +64,17 @@ class SnapshotAction(Action):
             "Generating dump..."
         )
         snapshot_task.wait()
-        download_snapshot_with_progress_bar(
-            snapshot_task.connection.root + snapshot_task.data["message"],
-            auth_token=APIClient.auth_token,
-            directory=params.dir
-        )
+
+        if snapshot_task.status == 'ready':
+            download_snapshot_with_progress_bar(
+                snapshot_task.connection.root + snapshot_task.data["message"],
+                auth_token=APIClient.auth_token,
+                directory=params.dir
+            )
+        elif snapshot_task.status == 'error':
+            print("Snapshot generating task ended with error. "
+                  "Task message: {0}".format(snapshot_task.data["message"]),
+                  file=sys.stderr)
 
     def get_snapshot_config(self, params):
         """Download default config for snapshot
