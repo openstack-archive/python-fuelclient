@@ -265,9 +265,9 @@ class Environment(BaseObject):
         return self.connection.put_request(
             self.network_url, data)
 
-    def set_settings_data(self, data):
+    def set_settings_data(self, data, force=False):
         return self.connection.put_request(
-            self.settings_url, data)
+            self.settings_url + ('/?force=1' if force else ''), data)
 
     def set_vmware_settings_data(self, data):
         return self.connection.put_request(
@@ -495,8 +495,10 @@ class Environment(BaseObject):
         url = self.attributes_path.format(self.id)
         return self.connection.get_request(url)
 
-    def update_attributes(self, data):
+    def update_attributes(self, data, force=False):
         url = self.attributes_path.format(self.id)
+        if force:
+            url += '/?force=1'
         return self.connection.put_request(url, data)
 
     def get_deployment_tasks_graph(self, tasks, parents_for=None, remove=None):
