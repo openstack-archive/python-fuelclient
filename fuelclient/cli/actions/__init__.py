@@ -17,6 +17,7 @@ which implement command line interface logic
 All action classes must be added to action_tuple to be used by parser
 """
 from fuelclient.cli.actions.deploy import DeployChangesAction
+from fuelclient.cli.actions.deploy import RedeployChangesAction
 from fuelclient.cli.actions.environment import EnvironmentAction
 from fuelclient.cli.actions.fact import DeploymentAction
 from fuelclient.cli.actions.fact import ProvisioningAction
@@ -61,6 +62,7 @@ actions_tuple = (
     OpenstackConfigAction,
     PluginAction,
     ProvisioningAction,
+    RedeployChangesAction,
     ReleaseAction,
     ResetAction,
     RoleAction,
