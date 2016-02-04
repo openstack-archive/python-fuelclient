@@ -16,31 +16,50 @@
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.formatting import print_deploy_progress
+from fuelclient.objects.environment import Environment
 
 
-class DeployChangesAction(Action):
+class ChangesAction(Action):
+
+    action_name = None
+    actions_func_map = {}
+
+    def __init__(self):
+        super(ChangesAction, self).__init__()
+        self.args = (
+            Args.get_env_arg(required=True),
+        )
+        self.flag_func_map = (
+            (None, self.deploy_changes),
+        )
+
+    def deploy_changes(self, params):
+        """To apply all changes to some environment:
+            fuel --env 1 {action_name}
+        """
+        env = Environment(params.env)
+        deploy_task = getattr(env, self.actions_func_map[self.action_name])()
+        self.serializer.print_to_output(
+            deploy_task.data,
+            deploy_task,
+            print_method=print_deploy_progress)
+
+
+class DeployChangesAction(ChangesAction):
     """Deploy changes to environments
     """
     action_name = "deploy-changes"
 
     def __init__(self):
         super(DeployChangesAction, self).__init__()
-        self.args = (
-            Args.get_env_arg(required=True),
-        )
+        self.actions_func_map[self.action_name] = 'deploy_changes'
 
-        self.flag_func_map = (
-            (None, self.deploy_changes),
-        )
 
-    def deploy_changes(self, params):
-        """To deploy all applied changes to some environment:
-            fuel --env 1 deploy-changes
-        """
-        from fuelclient.objects.environment import Environment
-        env = Environment(params.env)
-        deploy_task = env.deploy_changes()
-        self.serializer.print_to_output(
-            deploy_task.data,
-            deploy_task,
-            print_method=print_deploy_progress)
+class RedeployChangesAction(ChangesAction):
+    """Redeploy changes to environment which is in the operational state
+    """
+    action_name = "redeploy-changes"
+
+    def __init__(self):
+        super(RedeployChangesAction, self).__init__()
+        self.actions_func_map[self.action_name] = 'redeploy_changes'

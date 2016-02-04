@@ -100,6 +100,13 @@ class Environment(BaseObject):
         )
         return DeployTask.init_with_data(deploy_data)
 
+    def redeploy_changes(self):
+        deploy_data = self.connection.put_request(
+            "clusters/{0}/changes/redeploy".format(self.id),
+            {}
+        )
+        return DeployTask.init_with_data(deploy_data)
+
     def get_network_data_path(self, directory=os.curdir):
         return os.path.join(
             os.path.abspath(directory),

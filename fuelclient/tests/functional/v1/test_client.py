@@ -417,13 +417,30 @@ class TestDownloadUploadNodeAttributes(base.BaseTestCase):
 
 class TestDeployChanges(base.BaseTestCase):
 
-    def test_deploy_changes_no_failure(self):
+    create_env = "env create --name=test --release={0}"
+    add_node = "--env-id=1 node set --node 1 --role=controller"
+    deploy_changes = "deploy-changes --env 1"
+    redeploy_changes = "redeploy-changes --env 1"
+
+    def setUp(self):
+        super(TestDeployChanges, self).setUp()
         self.load_data_to_nailgun_server()
         release_id = self.get_first_deployable_release_id()
-        env_create = "env create --name=test --release={0}".format(release_id)
-        add_node = "--env-id=1 node set --node 1 --role=controller"
-        deploy_changes = "deploy-changes --env 1"
-        self.run_cli_commands((env_create, add_node, deploy_changes))
+        self.create_env = self.create_env.format(release_id)
+        self.run_cli_commands((self.create_env, self.add_node))
+
+    def test_deploy_changes(self):
+        self.run_cli_commands((self.deploy_changes,))
+
+    def test_no_changes_to_deploy(self):
+        self.run_cli_commands((self.deploy_changes,))
+        self.check_for_stderr(self.deploy_changes,
+                              "(No changes to deploy)\n",
+                              check_errors=False)
+
+    def test_redeploy_changes(self):
+        self.run_cli_commands((self.deploy_changes,
+                               self.redeploy_changes))
 
 
 class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
