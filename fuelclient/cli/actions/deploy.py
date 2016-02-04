@@ -27,6 +27,7 @@ class DeployChangesAction(Action):
         super(DeployChangesAction, self).__init__()
         self.args = (
             Args.get_env_arg(required=True),
+            Args.get_force_arg("Deploy changes forcefully."),
         )
 
         self.flag_func_map = (
@@ -39,7 +40,7 @@ class DeployChangesAction(Action):
         """
         from fuelclient.objects.environment import Environment
         env = Environment(params.env)
-        deploy_task = env.deploy_changes()
+        deploy_task = env.deploy_changes(force=params.force)
         self.serializer.print_to_output(
             deploy_task.data,
             deploy_task,
