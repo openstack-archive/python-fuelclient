@@ -93,9 +93,10 @@ class Environment(BaseObject):
             [{"id": n.id} for n in nodes]
         )
 
-    def deploy_changes(self):
+    def deploy_changes(self, force=False):
+        redeploy = "/redeploy" if force else ""
         deploy_data = self.connection.put_request(
-            "clusters/{0}/changes".format(self.id),
+            "clusters/{0}/changes{1}".format(self.id, redeploy),
             {}
         )
         return DeployTask.init_with_data(deploy_data)
