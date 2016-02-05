@@ -1,0 +1,14 @@
+Code-Review+1: Maciej Kwiek <mkwiek@mirantis.com>
+Code-Review+1: Valentin Kaplov <vkaplov@mirantis.com>
+Code-Review+2: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Code-Review+1: Sylwester Brzeczkowski <sbrzeczkowski@mirantis.com>
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Code-Review+1: Bulat Gaifullin <bgaifullin@mirantis.com>
+Code-Review+2: Roman Prykhodchenko <me@romcheg.me>
+Workflow+1: Roman Prykhodchenko <me@romcheg.me>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 05 Feb 2016 15:09:01 +0000
+Reviewed-on: https://review.openstack.org/275677
+Project: openstack/python-fuelclient
+Branch: refs/heads/master
