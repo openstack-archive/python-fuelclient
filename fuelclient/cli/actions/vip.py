@@ -59,6 +59,7 @@ class VIPAction(Action):
                 fuel --env 1 vip --download --file vip.yaml
             where --file param is optional
         """
+
         env = Environment(params.env)
         vips_data = env.get_vips_data(
             ip_addr_id=params.ip,
