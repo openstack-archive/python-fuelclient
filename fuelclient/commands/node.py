@@ -60,6 +60,11 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             environment_id=parsed_args.env, labels=parsed_args.labels)
         data = data_utils.get_display_data_multi(self.columns, data)
 
+        scolumn_ids = [self.columns.index(col)
+                       for col in parsed_args.sort_columns]
+
+        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
+
         return (self.columns, data)
 
 
