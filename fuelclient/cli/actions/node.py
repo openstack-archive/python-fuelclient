@@ -42,6 +42,7 @@ class NodeAction(Action):
                 Args.get_list_arg("List all nodes."),
                 Args.get_set_arg("Set role for specific node."),
                 Args.get_delete_arg("Delete specific node from environment."),
+                Args.get_attributes_arg("Node attributes."),
                 Args.get_network_arg("Node network configuration."),
                 Args.get_disk_arg("Node disk configuration."),
                 Args.get_deploy_arg("Deploy specific nodes."),
@@ -88,6 +89,7 @@ class NodeAction(Action):
             ("skip", self.execute_tasks),
             ("end", self.execute_tasks),
             ("start", self.execute_tasks),
+            ("attributes", self.node_attributes),
             (None, self.list)
         )
 
@@ -375,3 +377,36 @@ class NodeAction(Action):
             "Hostname for node with id {0} has been changed to {1}."
             .format(node.id, params.hostname)
         )
+
+    @check_all("node")
+    @check_any("upload", "download")
+    def node_attributes(self, params):
+        """Download node attributes for specified node:
+            fuel node --node-id 1 --attributes --download [--dir download-dir]
+
+        Upload node attributes for spcified node
+            fuel node --node-id 1 --attributes --upload [--dir upload-dir]
+
+        """
+        node = self._get_one_node(params)
+        if params.upload:
+            data = node.read_attribute(
+                'attributes', params.dir, serializer=self.serializer)
+            node.update_node_attributes(data)
+            self.serializer.print_to_output(
+                {},
+                "Attributes for node {0} were uploaded."
+                .format(node.id))
+        elif params.download:
+            attributes = node.get_node_attributes()
+            file_path = node.write_attribute(
+                'attributes', attributes,
+                params.dir, serializer=self.serializer)
+            self.serializer.print_to_output(
+                {},
+                "Attributes for node {0} were written to {1}"
+                .format(node.id, file_path))
+
+        else:
+            raise error.ArgumentException(
+                "--upload or --download action should be specified.")
