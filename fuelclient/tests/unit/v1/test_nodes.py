@@ -15,10 +15,15 @@
 #    under the License.
 
 import mock
+import yaml
 
 from fuelclient.cli.actions import node
 from fuelclient.cli import error
 from fuelclient.tests.unit.v1 import base
+
+NODE_ATTRIBUTES_DATA = {
+    'test_attribute': 'value'
+}
 
 
 class TestNodeSetAction(base.UnitTestCase):
@@ -83,3 +88,43 @@ class TestNodeSetAction(base.UnitTestCase):
             "Hostname for node with id {0} has been changed to {1}.".format(
                 self.node_id, new_hostname)
         )
+
+
+class TestNodeActions(base.UnitTestCase):
+    def setUp(self):
+        super(TestNodeActions, self).setUp()
+        self.node_id = 1
+
+    def test_attributes_download(self):
+        mget = self.m_request.get(
+            '/api/v1/nodes/{0}/attributes/'.format(self.node_id),
+            json=NODE_ATTRIBUTES_DATA)
+
+        cmd = ['fuel', 'node', '--node', '1', '--attributes', '--download']
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.cli.serializers.open', m_open,
+                        create=True):
+            self.execute(cmd)
+
+        self.assertTrue(mget.called)
+        self.assertTrue(m_open.call_args[0][0].endswith(
+            'node_{0}/attributes.yaml'.format(self.node_id)))
+        written_yaml = yaml.safe_load(m_open().write.call_args[0][0])
+        self.assertEqual(written_yaml, NODE_ATTRIBUTES_DATA)
+
+    def test_attributes_upload(self):
+        mput = self.m_request.put(
+            '/api/v1/nodes/{0}/attributes/'.format(self.node_id),
+            json=NODE_ATTRIBUTES_DATA)
+
+        cmd = ['fuel', 'node', '--node', '1', '--attributes', '--upload']
+        m_open = mock.mock_open(read_data=yaml.safe_dump(NODE_ATTRIBUTES_DATA))
+        with mock.patch('fuelclient.cli.serializers.open', m_open,
+                        create=True):
+            self.execute(cmd)
+
+        self.assertTrue(mput.called)
+        self.assertTrue(m_open.call_args[0][0].endswith(
+            'node_{0}/attributes.yaml'.format(self.node_id)))
+        self.assertEqual(mput.last_request.json(), NODE_ATTRIBUTES_DATA)
+        m_open().read.assert_called_once_with()
