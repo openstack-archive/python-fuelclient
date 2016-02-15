@@ -24,6 +24,7 @@ class Node(BaseObject):
 
     class_api_path = "nodes/"
     instance_api_path = "nodes/{0}/"
+    attributes_api_path = "nodes/{0}/attributes/"
 
     attributes_urls = {
         "interfaces": ("interfaces", "default_assignment"),
@@ -72,6 +73,17 @@ class Node(BaseObject):
     def get_default_attribute(self, attributes_type):
         return self.connection.get_request(
             self.get_attribute_default_url(attributes_type)
+        )
+
+    def get_node_attributes(self):
+        return self.connection.get_request(
+            self.attributes_api_path.format(self.id)
+        )
+
+    def update_node_attributes(self, data):
+        return self.connection.put_request(
+            self.attributes_api_path.format(self.id),
+            data
         )
 
     def get_attribute(self, attributes_type):
