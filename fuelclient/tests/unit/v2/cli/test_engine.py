@@ -108,18 +108,3 @@ class BaseCLITest(oslo_base.BaseTestCase):
                                             expected_data,
                                             mock.ANY,
                                             mock.ANY)
-
-    @mock.patch('fuelclient.fuelclient_settings.'
-                'FuelClientSettings.update_from_command_line_options')
-    def test_settings_override_called(self, m_update):
-        cmd = ('--os-password tpass --os-username tname --os-tenant-name tten '
-               'node list')
-
-        self.exec_command(cmd)
-
-        m_update.assert_called_once_with(mock.ANY)
-        passed_settings = m_update.call_args[0][0]
-
-        self.assertEqual('tname', passed_settings.os_username)
-        self.assertEqual('tpass', passed_settings.os_password)
-        self.assertEqual('tten', passed_settings.os_tenant_name)
