@@ -270,3 +270,19 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.delete_labels_for_nodes.assert_called_once_with(
             labels=labels_expected, node_ids=node_ids)
+
+    def test_node_attributes_download(self):
+        args = 'node attributes-download 42'
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.download_attributes.assert_called_once_with(42, None)
+
+    def test_node_attributes_upload(self):
+        args = 'node attributes-upload 42'
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.upload_attributes.assert_called_once_with(42, None)
