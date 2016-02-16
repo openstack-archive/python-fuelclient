@@ -120,7 +120,7 @@ def iterfiles(dir_path, file_pattern):
     :param dir_path: path to directory, e.g /etc/puppet/
     :param file_pattern: unix filepattern to match files
     """
-    for root, dirs, file_names in os.walk(dir_path):
+    for root, dirs, file_names in os.walk(dir_path, followlinks=True):
         for file_name in file_names:
             if fnmatch(file_name, file_pattern):
                 yield os.path.join(root, file_name)
