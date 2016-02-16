@@ -263,3 +263,44 @@ class NodeLabelDelete(NodeMixIn, base.BaseCommand):
         msg = "Labels have been deleted on nodes: {0} \n".format(
             ','.join(data))
         self.app.stdout.write(msg)
+
+
+class NodeAttributesDownload(NodeMixIn, base.BaseCommand):
+    """Download node attributes."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeAttributesDownload, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'id', type=int, help='Node ID')
+        parser.add_argument(
+            '--dir', type=str, help='Directory to save attributes')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        file_path = self.client.download_attributes(
+            parsed_args.id, parsed_args.dir)
+        self.app.stdout.write(
+            "Attributes for node {0} were written to {1}"
+            .format(parsed_args.id, file_path))
+
+
+class NodeAttributesUpload(NodeMixIn, base.BaseCommand):
+    """Upload node attributes."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeAttributesUpload, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'id', type=int, help='Node ID')
+        parser.add_argument(
+            '--dir', type=str, help='Directory to read attributes from')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.client.upload_attributes(parsed_args.id, parsed_args.dir)
+        self.app.stdout.write(
+            "Attributes for node {0} were uploaded."
+            .format(parsed_args.id))
