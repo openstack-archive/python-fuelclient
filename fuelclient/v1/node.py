@@ -162,6 +162,17 @@ class NodeClient(base_v1.BaseV1Client):
 
         return data_to_return
 
+    def download_attributes(self, node_id, directory=None):
+        node = self._entity_wrapper(node_id)
+        attributes = node.get_node_attributes()
+        return node.write_attribute(
+            'attributes', attributes, directory=directory)
+
+    def upload_attributes(self, node_id, directory=None):
+        node = self._entity_wrapper(node_id)
+        attributes = node.read_attribute('attributes', directory=directory)
+        node.update_node_attributes(attributes)
+
     def _check_label(self, labels, item):
         checking_list = []
 
