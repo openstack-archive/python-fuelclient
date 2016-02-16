@@ -15,6 +15,7 @@
 #    under the License.
 
 import mock
+import yaml
 
 import fuelclient
 from fuelclient.cli import error
@@ -334,3 +335,45 @@ class TestNodeFacade(test_api.BaseLibTest):
         node_id = 42
         self.assertRaises(error.BadDataException,
                           self.client.update, node_id, status=42)
+
+    def test_node_attributes_download(self):
+        node_id = 42
+        expected_uri = self.get_object_uri(
+            self.res_uri, node_id, '/attributes/')
+        fake_attributes = {
+            'attribute_name': 'attribute_value'
+        }
+
+        m_get = self.m_request.get(expected_uri, json=fake_attributes)
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.cli.serializers.open',
+                        m_open, create=True):
+            self.client.download_attributes(node_id)
+
+        self.assertTrue(m_get.called)
+        self.assertTrue(m_open.call_args[0][0].endswith(
+            'node_{0}/attributes.yaml'.format(node_id)))
+        written_yaml = yaml.safe_load(m_open().write.call_args[0][0])
+        self.assertEqual(written_yaml, fake_attributes)
+
+    def test_node_attribute_upload(self):
+        node_id = 42
+        expected_uri = self.get_object_uri(
+            self.res_uri, node_id, '/attributes/')
+        fake_attributes = {
+            'attribute_name': 'attribute_value'
+        }
+
+        m_put = self.m_request.put(expected_uri, json=fake_attributes)
+
+        m_open = mock.mock_open(read_data=yaml.safe_dump(fake_attributes))
+        with mock.patch('fuelclient.cli.serializers.open',
+                        m_open, create=True):
+            self.client.upload_attributes(node_id)
+
+        self.assertTrue(m_put.called)
+        self.assertTrue(m_open.call_args[0][0].endswith(
+            'node_{0}/attributes.yaml'.format(node_id)))
+        self.assertEqual(m_put.last_request.json(), fake_attributes)
+        m_open().read.assert_called_once_with()
