@@ -129,18 +129,20 @@ class ReleaseAction(Action):
     @check_all("dir")
     def sync_deployment_tasks(self, params):
         """Upload tasks for different releases based on directories.
-        Unique identifier of the release should in the path, like:
+        The string identifier for the release(s) to update is expected to be
+        found in the path (see `fuel release`), like:
 
-            /etc/puppet/2014.2-6.0/
+            /etc/puppet/<release>/
+            /etc/puppet/liberty-9.0
 
-        fuel rel --sync-deployment-tasks --dir /etc/puppet/2014.2-6.0/
+        fuel rel --sync-deployment-tasks --dir /etc/puppet/liberty-9.0/
         fuel rel --sync-deployment-tasks --fp '*tasks.yaml'
 
-        In case no directory will be provided:
+        In case no directory was provided:
 
         fuel rel --sync-deployment-tasks
 
-        Current directory will be used
+        The current directory will be used
         """
         all_rels = Release.get_all_data()
         real_path = os.path.realpath(params.dir)
@@ -162,5 +164,9 @@ class ReleaseAction(Action):
                       " {0} of version {1}".format(rel['name'],
                                                    rel['version']))
             else:
-                print("No tasks found for release {0} "
-                      "of version {1}".format(rel['name'], rel['version']))
+                print("No tasks were synchronized for release {0} "
+                      "of version {1}.(Hint: nothing matched "
+                      "{2}/{1}/{3})".format(rel['name'],
+                                            rel['version'],
+                                            real_path,
+                                            params.filepattern))
