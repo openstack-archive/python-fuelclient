@@ -17,6 +17,7 @@
 import os
 import pkg_resources
 import shutil
+import sys
 
 import six
 import yaml
@@ -114,8 +115,8 @@ class FuelClientSettings(object):
         deprecation = deprecation_tpl.format(old_option)
         replace = '' if new_option is None else replace_tpl.format(new_option)
 
-        six.print_(deprecation, end='')
-        six.print_(replace)
+        six.print_(deprecation, end='', file=sys.stderr)
+        six.print_(replace, file=sys.stderr)
 
     def _check_deprecated(self):
         """Looks for deprecated options in user's configuration."""
@@ -134,7 +135,9 @@ class FuelClientSettings(object):
                 six.print_('WARNING: configuration contains both {old} and '
                            '{new} options set. Since {old} was deprecated, '
                            'only the value of {new} '
-                           'will be used.'.format(old=opt, new=new_opt))
+                           'will be used.'.format(old=opt, new=new_opt),
+                           file=sys.stderr
+                           )
 
             self._print_deprecation_warning(opt, new_opt)
 
