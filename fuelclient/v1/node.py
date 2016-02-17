@@ -29,7 +29,7 @@ SplittedLabel = namedtuple('SplittedLabel', ['key', 'value', 'has_separator'])
 class NodeClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.Node
-    _updatable_attributes = ('hostname', 'labels')
+    _updatable_attributes = ('hostname', 'labels', 'name')
 
     def get_all(self, environment_id=None, labels=None):
         """Get nodes by specific environment or labels
