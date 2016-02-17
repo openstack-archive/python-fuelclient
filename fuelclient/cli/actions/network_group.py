@@ -12,6 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sys
+
+import six
+
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
 import fuelclient.cli.arguments as Args
@@ -113,7 +117,7 @@ class NetworkGroupAction(Action):
         if len(params.network) > 1:
             msg = ("Warning: Only first network with id={0}"
                    " will be updated.".format(ng_id))
-            self.serializer.print_to_output({}, msg)
+            six.print_(msg, file=sys.stderr)
 
         ng = NetworkGroup(ng_id)
 

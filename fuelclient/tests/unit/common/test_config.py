@@ -15,6 +15,7 @@
 #    under the License.
 
 import os
+import sys
 
 import fixtures
 import mock
@@ -78,9 +79,11 @@ class TestSettings(base.UnitTestCase):
         expected_warings = [mock.call('DEPRECATION WARNING: LISTEN_PORT '
                                       'parameter was deprecated and will not '
                                       'be supported in the next version of '
-                                      'python-fuelclient.', end=''),
+                                      'python-fuelclient.', end='',
+                                      file=sys.stderr),
                             mock.call(' Please replace this '
-                                      'parameter with SERVER_PORT')]
+                                      'parameter with SERVER_PORT',
+                                      file=sys.stderr)]
 
         m = mock.mock_open(read_data='LISTEN_PORT: 9000')
         with mock.patch('fuelclient.fuelclient_settings.open', m):
@@ -99,7 +102,7 @@ class TestSettings(base.UnitTestCase):
         with mock.patch('fuelclient.fuelclient_settings.open', m):
             fuelclient_settings.get_settings()
 
-        m_print.assert_has_calls([mock.call(expected_waring)])
+        m_print.assert_has_calls([mock.call(expected_waring, file=sys.stderr)])
 
     @mock.patch('six.print_')
     def test_set_deprecated_option_overwrites_unset_new_option(self, m_print):

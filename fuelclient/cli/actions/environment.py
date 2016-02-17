@@ -11,6 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import sys
+
+import six
 
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
@@ -93,11 +96,9 @@ class EnvironmentAction(Action):
         """
 
         if params.nst == 'gre':
-            self.serializer.print_to_output(
-                {},
+            six.print_(
                 "WARNING: GRE network segmentation type is deprecated "
-                "since 7.0 release."
-            )
+                "since 7.0 release.", file=sys.stderr)
 
         env = Environment.create(
             params.name,
