@@ -37,7 +37,6 @@ ENV_OUTPUT = {
     "net_provider": "neutron",
     "mode": "ha_compact",
     "components": [],
-    "pending_release_id": None,
     "changes": [
         {"node_id": None, "name": "attributes"},
         {"node_id": None, "name": "networks"},

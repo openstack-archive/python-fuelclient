@@ -25,11 +25,11 @@ class TestHandlers(base.BaseTestCase):
     def test_env_action(self):
         # check env help
         help_msgs = ["usage: fuel environment [-h]",
-                     "[--list | --set | --delete | --create | --update]",
+                     "[--list | --set | --delete | --create]",
                      "optional arguments:", "--help", "--list", "--set",
                      "--delete", "--rel", "--env-create",
                      "--create", "--name", "--env-name", "--nst",
-                     "--net-segment-type", "--update", "--env-update"]
+                     "--net-segment-type"]
         self.check_all_in_msg("env --help", help_msgs)
         # no clusters
         self.check_for_rows_in_table("env")
