@@ -17,6 +17,7 @@
 import os
 import pkg_resources
 import shutil
+import warnings
 
 import six
 import yaml
@@ -105,17 +106,19 @@ class FuelClientSettings(object):
 
     def _print_deprecation_warning(self, old_option, new_option=None):
         """Print deprecation warning for an option."""
+        warnings.simplefilter("module", category=DeprecationWarning)
 
         deprecation_tpl = ('DEPRECATION WARNING: {} parameter was '
                            'deprecated and will not be supported in the next '
                            'version of python-fuelclient.')
         replace_tpl = ' Please replace this parameter with {}'
 
-        deprecation = deprecation_tpl.format(old_option)
-        replace = '' if new_option is None else replace_tpl.format(new_option)
+        message = "{deprecation:s}{change:s}".format(
+            deprecation=deprecation_tpl.format(old_option),
+            change='' if new_option is None else replace_tpl.format(new_option)
+        )
 
-        six.print_(deprecation, end='')
-        six.print_(replace)
+        warnings.warn(message, DeprecationWarning)
 
     def _check_deprecated(self):
         """Looks for deprecated options in user's configuration."""
@@ -131,10 +134,13 @@ class FuelClientSettings(object):
             if self.config.get(new_opt) is None:
                 self.config.pop(new_opt, None)
             else:
-                six.print_('WARNING: configuration contains both {old} and '
-                           '{new} options set. Since {old} was deprecated, '
-                           'only the value of {new} '
-                           'will be used.'.format(old=opt, new=new_opt))
+                warnings.warn(
+                    'WARNING: configuration contains both {old} and '
+                    '{new} options set. Since {old} was deprecated, '
+                    'only the value of {new} '
+                    'will be used.'.format(old=opt, new=new_opt),
+                    SyntaxWarning
+                )
 
             self._print_deprecation_warning(opt, new_opt)
 
