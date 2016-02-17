@@ -50,7 +50,7 @@ class TestEnvironment(base.UnitTestCase):
         self.m_request.get('/api/v1/clusters/{0}/'.format(cluster_id),
                            json=cluster_data)
 
-        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
+        with mock.patch('sys.stderr', new=moves.cStringIO()) as m_stderr:
             self.execute(
                 'fuel env create --name test --rel 1 --nst gre'
                 .split()
@@ -58,7 +58,7 @@ class TestEnvironment(base.UnitTestCase):
 
         self.assertIn("WARNING: GRE network segmentation type is "
                       "deprecated since 7.0 release.",
-                      m_stdout.getvalue())
+                      m_stderr.getvalue())
 
 
 class TestEnvironmentOstf(base.UnitTestCase):
