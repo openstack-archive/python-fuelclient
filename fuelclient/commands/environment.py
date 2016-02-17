@@ -79,7 +79,7 @@ class EnvCreate(EnvMixIn, base.BaseShowCommand):
 
     def take_action(self, parsed_args):
         if parsed_args.nst == 'gre':
-            self.app.stdout.write('WARNING: GRE network segmentation type is '
+            self.app.stderr.write('WARNING: GRE network segmentation type is '
                                   'deprecated since 7.0 release')
 
         new_env = self.client.create(name=parsed_args.name,
