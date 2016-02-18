@@ -256,3 +256,14 @@ def print_health_check(env):
             )
             test_counter += 1
         sleep(1)
+
+
+def format_numa_topology(topology):
+    acceptable_keys = ('numa_nodes', 'supported_hugepages', 'distances')
+    rows = []
+    for key in acceptable_keys:
+        rows.append({
+            'key': key,
+            'value': topology.get(key, {})
+        })
+    return format_table(rows, acceptable_keys=('key', 'value'))
