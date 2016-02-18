@@ -61,6 +61,11 @@ class Node(BaseObject):
     def labels(self):
         return self.get_fresh_data().get('labels', {})
 
+    @property
+    def numa_topology(self):
+        data = self.get_fresh_data()
+        return data['meta'].get('numa_topology')
+
     def get_attribute_default_url(self, attributes_type):
         url_path, default_url_path = self.attributes_urls[attributes_type]
         return "nodes/{0}/{1}/{2}".format(self.id, url_path, default_url_path)

@@ -51,6 +51,7 @@ class NodeAction(Action):
                     "Delete specific nodes only from fuel db.\n"
                     "User should still delete node from cobbler"),
                 Args.get_provision_arg("Provision specific nodes."),
+                Args.get_numa_topology_arg("Show NUMA topology.")
             ),
             group(
                 Args.get_default_arg(
@@ -88,6 +89,7 @@ class NodeAction(Action):
             ("skip", self.execute_tasks),
             ("end", self.execute_tasks),
             ("start", self.execute_tasks),
+            ('numa-topology', self.show_numa_topology),
             (None, self.list)
         )
 
@@ -375,3 +377,19 @@ class NodeAction(Action):
             "Hostname for node with id {0} has been changed to {1}."
             .format(node.id, params.hostname)
         )
+
+    @check_all('node')
+    def show_numa_topology(self, params):
+        """To show node NUMA topology:
+                fuel node --node-id 1 --numa-topology
+
+        """
+        node = self._get_one_node(params)
+        numa_topology = node.numa_topology
+        if numa_topology:
+            print(self.serializer.serialize(numa_topology))
+        else:
+            self.serializer.print_to_output(
+                {},
+                "NUMA topology for node {0} is not found".format(
+                    node.id))
