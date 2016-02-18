@@ -14,6 +14,7 @@
 
 import six
 
+from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 from fuelclient import utils
@@ -86,7 +87,26 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                'group_id',
                # TODO(romcheg): network_data mostly never fits the screen
                # 'network_data',
-               'manufacturer')
+               'manufacturer',
+               'numa_nodes',
+               'supported_hugepages',
+               'distances')
+
+    numa_fields = (
+        'numa_nodes',
+        'supported_hugepages',
+        'distances')
+
+    def take_action(self, parsed_args):
+        data = self.client.get_by_id(parsed_args.id)
+
+        numa_topology = data['meta'].get('numa_topology', {})
+        for key in self.numa_fields:
+            data[key] = numa_topology.get(key)
+
+        data = data_utils.get_display_data_single(self.columns, data)
+        return self.columns, data
+
 
 
 class NodeUpdate(NodeMixIn, base.BaseShowCommand):

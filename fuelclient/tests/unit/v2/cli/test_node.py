@@ -16,6 +16,7 @@
 
 import mock
 import six
+from six import moves
 
 from fuelclient import main as main_mod
 from fuelclient.tests.unit.v2.cli import test_engine
@@ -31,7 +32,10 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_client.get_all.return_value = [fake_node.get_fake_node()
                                               for i in range(10)]
-        self.m_client.get_by_id.return_value = fake_node.get_fake_node()
+        node_1 = fake_node.get_fake_node()
+        self.m_client.get_by_id.return_value = node_1
+        self.m_client.get_numa_topology.return_value = \
+            node_1['meta']['numa_topology']
 
     def test_node_list(self):
         args = 'node list'
