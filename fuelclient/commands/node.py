@@ -65,6 +65,11 @@ class NodeList(NodeMixIn, base.BaseListCommand):
 
 class NodeShow(NodeMixIn, base.BaseShowCommand):
     """Show info about node with given id."""
+    numa_fields = (
+        'numa_nodes',
+        'supported_hugepages',
+        'distances')
+
     columns = ('id',
                'name',
                'status',
@@ -87,6 +92,17 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                # TODO(romcheg): network_data mostly never fits the screen
                # 'network_data',
                'manufacturer')
+    columns += numa_fields
+
+    def take_action(self, parsed_args):
+        data = self.client.get_by_id(parsed_args.id)
+
+        numa_topology = data['meta'].get('numa_topology', {})
+        for key in self.numa_fields:
+            data[key] = numa_topology.get(key)
+
+        data = data_utils.get_display_data_single(self.columns, data)
+        return self.columns, data
 
 
 class NodeUpdate(NodeMixIn, base.BaseShowCommand):
