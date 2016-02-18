@@ -57,7 +57,8 @@ class TestHandlers(base.BaseTestCase):
         help_msg = ["fuel node [-h] [--env ENV]",
                     "[--list | --set | --delete | --network | --disk |"
                     " --deploy | --hostname HOSTNAME | --name NAME |"
-                    " --delete-from-db | --provision]", "-h", "--help", " -s",
+                    " --delete-from-db | --provision | --numa-topology]",
+                    "-h", "--help", " -s",
                     "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",
                     "--role", "--net", "--hostname", "--name"]

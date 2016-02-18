@@ -15,10 +15,13 @@
 #    under the License.
 
 import mock
+from six import moves
 
 from fuelclient.cli.actions import node
 from fuelclient.cli import error
+from fuelclient.cli import serializers
 from fuelclient.tests.unit.v1 import base
+from fuelclient.tests import utils
 
 
 class TestNodeSetAction(base.UnitTestCase):
@@ -83,3 +86,43 @@ class TestNodeSetAction(base.UnitTestCase):
             "Hostname for node with id {0} has been changed to {1}.".format(
                 self.node_id, new_hostname)
         )
+
+
+class TestNodeActions(base.UnitTestCase):
+    def setUp(self):
+        super(TestNodeActions, self).setUp()
+        self.node_id = 1
+
+    def test_show_numa_topology(self):
+        fake_node = utils.get_fake_node()
+        m_get = self.m_request.get('/api/v1/nodes/{0}/'.format(self.node_id),
+                                   json=fake_node)
+        cmd = ['fuel', 'node', '--node-id',
+               str(self.node_id), '--numa-topology']
+
+        with mock.patch('sys.stdout', new=moves.StringIO()) as m_stdout:
+            self.execute(cmd)
+
+        serializer = serializers.Serializer()
+        self.assertTrue(m_get.called)
+        self.assertIn(
+            serializer.serialize(fake_node['meta']['numa_topology']),
+            m_stdout.getvalue())
+
+    def test_show_numa_topology_empty(self):
+        fake_node = utils.get_fake_node()
+        del fake_node['meta']['numa_topology']
+
+        m_get = self.m_request.get('/api/v1/nodes/{0}/'.format(self.node_id),
+                                   json=fake_node)
+        cmd = ['fuel', 'node', '--node-id',
+               str(self.node_id), '--numa-topology']
+
+        with mock.patch('sys.stdout', new=moves.StringIO()) as m_stdout:
+            self.execute(cmd)
+
+        self.assertTrue(m_get.called)
+        self.assertIn(
+            "NUMA topology for node {0} is not found".format(self.node_id),
+            m_stdout.getvalue())
+
