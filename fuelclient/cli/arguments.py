@@ -671,3 +671,11 @@ def get_upload_file_arg(help_msg):
         flags=("-u", "--upload",),
         help=help_msg
     )
+
+
+def get_numa_topology_arg(help_msg):
+    return get_boolean_arg(
+        'numa-topology',
+        flags=('--numa-topology',),
+        help=help_msg
+    )
