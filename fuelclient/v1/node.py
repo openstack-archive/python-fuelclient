@@ -201,6 +201,10 @@ class NodeClient(base_v1.BaseV1Client):
         value = None if value == '' else value
         return SplittedLabel(name, value, bool(separator))
 
+    def get_numa_topology(self, node_id):
+        node = self._entity_wrapper(node_id)
+        return node.numa_topology
+
 
 def get_client():
     return NodeClient()

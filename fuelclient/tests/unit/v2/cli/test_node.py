@@ -16,6 +16,7 @@
 
 import mock
 import six
+from six import moves
 
 from fuelclient import main as main_mod
 from fuelclient.tests.unit.v2.cli import test_engine
@@ -31,7 +32,10 @@ class TestNodeCommand(test_engine.BaseCLITest):
 
         self.m_client.get_all.return_value = [fake_node.get_fake_node()
                                               for i in range(10)]
-        self.m_client.get_by_id.return_value = fake_node.get_fake_node()
+        node_1 = fake_node.get_fake_node()
+        self.m_client.get_by_id.return_value = node_1
+        self.m_client.get_numa_topology.return_value = \
+            node_1['meta']['numa_topology']
 
     def test_node_list(self):
         args = 'node list'
@@ -270,3 +274,26 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.delete_labels_for_nodes.assert_called_once_with(
             labels=labels_expected, node_ids=node_ids)
+
+    def test_node_show_topology(self):
+        fake_node_obj = fake_node.get_fake_node()
+        self.m_client.get_numa_topology.return_value = \
+            fake_node_obj['meta']['numa_topology']
+
+        args = 'node show-numa-topology 42'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_numa_topology.assert_called_once_with(42)
+
+    def test_node_show_topology_empty(self):
+        self.m_client.get_numa_topology.return_value = None
+
+        args = 'node show-numa-topology 42'
+        with mock.patch('sys.stderr', new=moves.cStringIO()) as m_stdout:
+            self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_numa_topology.assert_called_once_with(42)
+        msg = "NUMA topology for node 42 is not found"
+        self.assertIn(msg, m_stdout.getvalue())

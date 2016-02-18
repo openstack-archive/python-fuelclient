@@ -14,6 +14,7 @@
 
 import six
 
+from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 from fuelclient import utils
@@ -263,3 +264,19 @@ class NodeLabelDelete(NodeMixIn, base.BaseCommand):
         msg = "Labels have been deleted on nodes: {0} \n".format(
             ','.join(data))
         self.app.stdout.write(msg)
+
+
+class NodeShowTopology(NodeMixIn, base.BaseShowCommand):
+    """Show NUMA topology for the specified node."""
+
+    columns = ('numa_nodes', 'supported_hugepages', 'distances')
+
+    def take_action(self, parsed_args):
+        topology = self.client.get_numa_topology(parsed_args.id)
+        if not topology:
+            msg = "NUMA topology for node {0} is not found".format(
+                parsed_args.id)
+            raise error.ServerDataException(msg)
+
+        return self.columns, data_utils.get_display_data_single(
+            self.columns, topology)
