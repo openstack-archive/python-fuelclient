@@ -270,3 +270,10 @@ class TestNodeCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.delete_labels_for_nodes.assert_called_once_with(
             labels=labels_expected, node_ids=node_ids)
+
+    def test_node_show_topology(self):
+        args = 'node show-numa-topology 42'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_numa_topology.assert_called_once_with(42)

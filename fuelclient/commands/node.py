@@ -14,6 +14,7 @@
 
 import six
 
+from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 from fuelclient import utils
@@ -263,3 +264,18 @@ class NodeLabelDelete(NodeMixIn, base.BaseCommand):
         msg = "Labels have been deleted on nodes: {0} \n".format(
             ','.join(data))
         self.app.stdout.write(msg)
+
+
+class NodeShowTopology(NodeMixIn, base.BaseCommand):
+    """Show NUMA topology for the specified node."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeShowTopology, self).get_parser(prog_name)
+        parser.add_argument('id', type=int,
+                            help='Id of the node.')
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.get_numa_topology(parsed_args.id)
+        serializer = Serializer.from_params(parsed_args)
+        self.app.stdout.write(serializer.serialize(data))

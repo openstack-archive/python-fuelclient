@@ -334,3 +334,13 @@ class TestNodeFacade(test_api.BaseLibTest):
         node_id = 42
         self.assertRaises(error.BadDataException,
                           self.client.update, node_id, status=42)
+
+    def test_node_get_numa_topology(self):
+        node_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, node_id)
+        m_get = self.m_request.get(expected_uri, json=self.fake_node)
+
+        data = self.client.get_numa_topology(node_id)
+
+        self.assertTrue(m_get.called)
+        self.assertEqual(data, self.fake_node['meta']['numa_topology'])
