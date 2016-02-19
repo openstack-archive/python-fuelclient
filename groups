@@ -1,5 +1,6 @@
+61bc46d043652f3b423d7dd5ac81d9da7cbdc9dc	Project Bootstrappers
 4e5a8f6ee4758af8a2d13886789891487d1458f4	python-fuelclient-core
-global:Change-Owner	Change Owner
-0b7e07aac3c371e6c58971bc8fb2374050c4fc63	fuel-stable-core
 87fd32797f81799ad4ee167d7194d3987af3c29b	fuel-ci
+0b7e07aac3c371e6c58971bc8fb2374050c4fc63	fuel-stable-core
+global:Change-Owner	Change Owner
 4809c4b1c9413f91b36b9a7a92ebad479374a9a4	python-fuelclient-release
