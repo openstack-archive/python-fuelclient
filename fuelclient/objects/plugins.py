@@ -13,6 +13,7 @@
 #    under the License.
 
 import abc
+import json
 import os
 import shutil
 import subprocess
@@ -279,7 +280,7 @@ class Plugins(base.BaseObject):
 
         :param str name: plugin name
         :param str version: plugin version
-        :param str force: if True updates meta information
+        :param bool force: if True updates meta information
                           about the plugin even it does not
                           support updates
         """
@@ -330,8 +331,10 @@ class Plugins(base.BaseObject):
     def install(cls, plugin_path, force=False):
         """Installs the package, and creates data in API service
 
-        :param str name: plugin name
-        :param str version: plugin version
+        :param str plugin_path: Name of plugin file
+        :param bool force: Updates existent plugin even if it is not updatable
+        :return: Plugins information
+        :rtype: dict
         """
         plugin = cls.make_obj_by_file(plugin_path)
 
@@ -340,7 +343,6 @@ class Plugins(base.BaseObject):
 
         plugin.install(plugin_path, force=force)
         response = cls.register(name, version, force=force)
-        cls.sync(plugin_ids=[response['id']])
 
         return response
 
@@ -450,7 +452,8 @@ class Plugins(base.BaseObject):
 
         if resp_raw.status_code == 409 and force:
             # Replace plugin information
-            url = cls.class_instance_path.format(id=resp['id'])
+            url = cls.class_instance_path\
+                .format(id=json.loads(resp['message'])['id'])
             resp = cls.connection.put_request(url, metadata)
         else:
             resp_raw.raise_for_status()
