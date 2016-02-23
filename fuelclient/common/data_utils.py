@@ -32,15 +32,7 @@ def get_display_data_single(fields, data):
             raise KeyError('{f} is not found in the supplied '
                            'data.'.format(f=field))
 
-        val = data.get(field)
-
-        if not val and val not in (0, None, False, ''):
-            val = '-'
-
-        if isinstance(val, list):
-            val = ', '.join(str(item) for item in val)
-
-        result.append(val)
+        result.append(data.get(field))
 
     return result
 
