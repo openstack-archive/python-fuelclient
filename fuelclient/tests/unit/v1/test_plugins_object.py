@@ -220,10 +220,9 @@ class TestPluginsObject(base.UnitTestCase):
         get_mock.assert_called_once_with(self.name, self.version)
         del_mock.assert_called_once_with('plugins/123')
 
-    @patch.object(Plugins, 'sync')
     @patch.object(Plugins, 'register')
     @patch.object(Plugins, 'make_obj_by_file')
-    def test_install(self, make_obj_by_file_mock, register_mock, sync_mock):
+    def test_install(self, make_obj_by_file_mock, register_mock):
         plugin_obj = self.mock_make_obj_by_file(make_obj_by_file_mock)
         register_mock.return_value = {'id': 1}
         self.plugin.install(self.path)
@@ -231,7 +230,6 @@ class TestPluginsObject(base.UnitTestCase):
         plugin_obj.install.assert_called_once_with(self.path, force=False)
         register_mock.assert_called_once_with(
             'retrieved_name', 'retrieved_version', force=False)
-        sync_mock.assert_called_once_with(plugin_ids=[1])
 
     @patch.object(Plugins, 'unregister')
     @patch.object(Plugins, 'make_obj_by_name')
@@ -352,7 +350,7 @@ class TestPluginsObject(base.UnitTestCase):
     @patch.object(Plugins.connection, 'post_request_raw',
                   return_value=MagicMock(
                       status_code=409,
-                      **{'json.return_value': {'id': 99}}))
+                      **{'json.return_value': {'message': '{"id": 99}'}}))
     @patch.object(Plugins.connection, 'put_request', return_value='put_return')
     def test_update_or_create_updates_with_force(
             self, put_mock, post_mock, get_for_update_mock):
