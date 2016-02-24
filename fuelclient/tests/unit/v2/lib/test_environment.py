@@ -122,22 +122,6 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.assertTrue(matcher.called)
 
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
-    def test_env_upgrade(self, m_init):
-        env_id = 42
-        release_id = 10
-
-        node_uri = self.get_object_uri(self.res_uri, env_id)
-        update_uri = self.get_object_uri(self.res_uri, env_id, '/update/')
-
-        put_matcher = self.m_request.put(node_uri, json=self.fake_env)
-        update_matcher = self.m_request.put(update_uri, json={})
-
-        self.client.upgrade(env_id, release_id)
-
-        self.assertTrue(put_matcher.called)
-        self.assertTrue(update_matcher.called)
-
-    @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_update(self, m_init):
         env_id = 42
         expected_uri = self.get_object_uri(self.res_uri, env_id)

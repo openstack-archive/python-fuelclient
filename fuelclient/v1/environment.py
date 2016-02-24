@@ -55,14 +55,6 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
         return env.data
 
-    def upgrade(self, environment_id, release_id):
-        env = self._entity_wrapper(obj_id=environment_id)
-
-        update = {'pending_release_id': release_id}
-        env.set(update)
-
-        return env.update_env()
-
     def delete_by_id(self, environment_id):
         env_obj = self._entity_wrapper(obj_id=environment_id)
         env_obj.delete()

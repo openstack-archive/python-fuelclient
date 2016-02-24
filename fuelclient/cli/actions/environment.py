@@ -47,9 +47,6 @@ class EnvironmentAction(Action):
                     "Create a new environment with "
                     "specific release id and name"
                 ),
-                Args.get_update_arg(
-                    "Update OS to specified release id for given env"
-                )
             ),
             Args.get_release_arg(
                 "Release id"
@@ -80,7 +77,6 @@ class EnvironmentAction(Action):
             ("create", self.create),
             ("set", self.set),
             ("delete", self.delete),
-            ("update", self.update),
             (None, self.list)
         )
 
@@ -119,7 +115,7 @@ class EnvironmentAction(Action):
         """To change environment name:
                 fuel --env 1 env set --name NewEnvName
         """
-        acceptable_params = ('name', 'pending_release_id')
+        acceptable_params = ('name', )
 
         env = Environment(params.env, params=params)
 
@@ -171,8 +167,7 @@ class EnvironmentAction(Action):
         """Print all available environments:
                 fuel env
         """
-        acceptable_keys = ("id", "status", "name",
-                           "release_id", "pending_release_id")
+        acceptable_keys = ("id", "status", "name", "release_id", )
         data = Environment.get_all_data()
         if params.env:
             data = filter(
@@ -185,24 +180,6 @@ class EnvironmentAction(Action):
                 data,
                 acceptable_keys=acceptable_keys
             )
-        )
-
-    def update(self, params):
-        """Update environment to given OS release:
-                fuel env --env 1 --update --release 1
-        """
-        params.pending_release_id = params.release
-        self.set(params)
-
-        env = Environment(params.env, params=params)
-        update_task = env.update_env()
-
-        msg = ("Update process for environment has been started. "
-               "Update task id is {0}".format(update_task.id))
-
-        self.serializer.print_to_output(
-            {},
-            msg
         )
 
     @check_all("env")

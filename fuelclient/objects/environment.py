@@ -55,14 +55,6 @@ class Environment(BaseObject):
             data
         )
 
-    def update_env(self):
-        return Task.init_with_data(
-            self.connection.put_request(
-                "clusters/{0}/update/".format(self.id),
-                {}
-            )
-        )
-
     def delete(self):
         return self.connection.delete_request(
             "clusters/{0}/".format(self.id)

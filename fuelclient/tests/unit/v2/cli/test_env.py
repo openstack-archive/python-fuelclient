@@ -116,13 +116,6 @@ class TestEnvCommand(test_engine.BaseCLITest):
         self.m_client.update.assert_called_once_with(environment_id=42,
                                                      name='test_name')
 
-    def test_env_upgrade(self):
-        args = 'env upgrade 10 15'
-        self.exec_command(args)
-
-        self.m_get_client.assert_called_once_with('environment', mock.ANY)
-        self.m_client.upgrade.assert_called_once_with(10, 15)
-
     def test_env_spawn_vms(self):
         env_id = 10
         args = 'env spawn-vms {0}'.format(env_id)
