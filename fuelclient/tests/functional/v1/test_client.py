@@ -55,8 +55,9 @@ class TestHandlers(base.BaseTestCase):
 
     def test_node_action(self):
         help_msg = ["fuel node [-h] [--env ENV]",
-                    "[--list | --set | --delete | --network | --disk |"
-                    " --deploy | --hostname HOSTNAME | --name NAME |"
+                    "[--list | --set | --delete | --attributes |"
+                    " --network | --disk | --deploy |"
+                    " --hostname HOSTNAME | --name NAME |"
                     " --delete-from-db | --provision]", "-h", "--help", " -s",
                     "--default", " -d", "--download", " -u",
                     "--upload", "--dir", "--node", "--node-id", " -r",

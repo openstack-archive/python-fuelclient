@@ -15,10 +15,16 @@
 #    under the License.
 
 import mock
+import yaml
 
 from fuelclient.cli.actions import node
 from fuelclient.cli import error
+from fuelclient.cli import serializers
 from fuelclient.tests.unit.v1 import base
+
+NODE_ATTRIBUTES_DATA = {
+    'test_attribute': 'value'
+}
 
 
 class TestNodeSetAction(base.UnitTestCase):
@@ -83,3 +89,51 @@ class TestNodeSetAction(base.UnitTestCase):
             "Hostname for node with id {0} has been changed to {1}.".format(
                 self.node_id, new_hostname)
         )
+
+
+class TestNodeActions(base.UnitTestCase):
+    def setUp(self):
+        super(TestNodeActions, self).setUp()
+        self.node_id = 1
+
+    @mock.patch('fuelclient.objects.node.os.mkdir', mock.Mock())
+    def test_attributes_download(self):
+        mget = self.m_request.get(
+            '/api/v1/nodes/{0}/attributes/'.format(self.node_id),
+            json=NODE_ATTRIBUTES_DATA)
+
+        cmd = ['fuel', 'node', '--node', '1', '--attributes',
+               '--dir', '/fake/dir/', '--download']
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.cli.serializers.open', m_open,
+                        create=True):
+            self.execute(cmd)
+
+        self.assertTrue(mget.called)
+        m_open.assert_called_once_with(
+            '/fake/dir/node_{0}/attributes.yaml'.format(self.node_id),
+            mock.ANY)
+        serializer = serializers.Serializer()
+        m_open().write.assert_called_once_with(
+            serializer.serialize(NODE_ATTRIBUTES_DATA))
+
+    @mock.patch('fuelclient.objects.node.os.path.exists',
+                mock.Mock(return_value=True))
+    def test_attributes_upload(self):
+        mput = self.m_request.put(
+            '/api/v1/nodes/{0}/attributes/'.format(self.node_id),
+            json=NODE_ATTRIBUTES_DATA)
+
+        cmd = ['fuel', 'node', '--node', '1', '--attributes',
+               '--dir', '/fake/dir', '--upload']
+        m_open = mock.mock_open(read_data=yaml.safe_dump(NODE_ATTRIBUTES_DATA))
+        with mock.patch('fuelclient.cli.serializers.open', m_open,
+                        create=True):
+            self.execute(cmd)
+
+        self.assertTrue(mput.called)
+        m_open.assert_called_once_with(
+            '/fake/dir/node_{0}/attributes.yaml'.format(self.node_id),
+            mock.ANY)
+        self.assertEqual(mput.last_request.json(), NODE_ATTRIBUTES_DATA)
+        m_open().read.assert_called_once_with()
