@@ -193,31 +193,17 @@ class TestUtils(base.UnitTestCase):
                          error_body.decode('utf-8'))
 
     def test_get_display_data_single(self):
-        test_data = {'a': 1, 'b': 2, 'c': 3}
-        fields = ('b', 'c')
-
-        result = data_utils.get_display_data_single(fields, test_data)
-        self.assertEqual([2, 3], result)
-
-    def test_get_display_data_single_empty_val(self):
-        test_data = {'a': 1, 'b': {}, 'c': []}
+        test_data = {'a': 1, 'b': [], 'c': [1, 2, 3], 'd': 4}
         fields = ('a', 'b', 'c')
 
         result = data_utils.get_display_data_single(fields, test_data)
-        self.assertEqual([1, '-', '-'], result)
-
-    def test_get_display_data_single_list_val(self):
-        test_data = {'a': 1, 'b': ['2'], 'c': ['3', '4']}
-        fields = ('a', 'b', 'c')
-
-        result = data_utils.get_display_data_single(fields, test_data)
-        self.assertEqual([1, '2', '3, 4'], result)
+        self.assertEqual([1, [], [1, 2, 3]], result)
 
     def test_get_display_data_bad_key(self):
         test_data = {'a': 1, 'b': 2, 'c': 3}
         fields = ('b', 'bad_key')
 
-        self.assertRaises(KeyError,
+        self.assertRaises(error.BadDataException,
                           data_utils.get_display_data_single,
                           fields, test_data)
 

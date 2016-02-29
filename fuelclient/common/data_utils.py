@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from fuelclient.cli import error
+
 
 def get_display_data_single(fields, data):
     """Performs slicing of data by set of given fields
@@ -25,24 +27,11 @@ def get_display_data_single(fields, data):
                    supplied attributes.
 
     """
-    result = []
-
-    for field in fields:
-        if field not in data:
-            raise KeyError('{f} is not found in the supplied '
-                           'data.'.format(f=field))
-
-        val = data.get(field)
-
-        if not val and val not in (0, None, False, ''):
-            val = '-'
-
-        if isinstance(val, list):
-            val = ', '.join(str(item) for item in val)
-
-        result.append(val)
-
-    return result
+    try:
+        return [data[field] for field in fields]
+    except KeyError as e:
+        raise error.BadDataException('{} is not found in the supplied '
+                                     'data.'.format(e.args[0]))
 
 
 def get_display_data_multi(fields, data):
