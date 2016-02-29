@@ -15,9 +15,11 @@
 #    under the License.
 
 import mock
+import yaml
 
 import fuelclient
 from fuelclient.cli import error
+from fuelclient.cli import serializers
 from fuelclient.objects import base as base_object
 from fuelclient.tests.unit.v2.lib import test_api
 from fuelclient.tests import utils
@@ -334,3 +336,49 @@ class TestNodeFacade(test_api.BaseLibTest):
         node_id = 42
         self.assertRaises(error.BadDataException,
                           self.client.update, node_id, status=42)
+
+    @mock.patch('fuelclient.objects.node.os.mkdir', mock.Mock())
+    def test_node_attributes_download(self):
+        node_id = 42
+        expected_uri = self.get_object_uri(
+            self.res_uri, node_id, '/attributes/')
+        fake_attributes = {
+            'attribute_name': 'attribute_value'
+        }
+
+        m_get = self.m_request.get(expected_uri, json=fake_attributes)
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.cli.serializers.open',
+                        m_open, create=True):
+            self.client.download_attributes(node_id, directory='/fake/dir')
+
+        self.assertTrue(m_get.called)
+        m_open.assert_called_once_with(
+            '/fake/dir/node_{0}/attributes.yaml'.format(node_id), mock.ANY)
+        serializer = serializers.Serializer()
+        m_open().write.assert_called_once_with(
+            serializer.serialize(fake_attributes))
+
+    @mock.patch('fuelclient.objects.node.os.path.exists',
+                mock.Mock(return_value=True))
+    def test_node_attribute_upload(self):
+        node_id = 42
+        expected_uri = self.get_object_uri(
+            self.res_uri, node_id, '/attributes/')
+        fake_attributes = {
+            'attribute_name': 'attribute_value'
+        }
+
+        m_put = self.m_request.put(expected_uri, json=fake_attributes)
+
+        m_open = mock.mock_open(read_data=yaml.safe_dump(fake_attributes))
+        with mock.patch('fuelclient.cli.serializers.open',
+                        m_open, create=True):
+            self.client.upload_attributes(node_id, directory='/fake/dir')
+
+        self.assertTrue(m_put.called)
+        m_open.assert_called_once_with(
+            '/fake/dir/node_{0}/attributes.yaml'.format(node_id), mock.ANY)
+        self.assertEqual(m_put.last_request.json(), fake_attributes)
+        m_open().read.assert_called_once_with()
