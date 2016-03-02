@@ -42,7 +42,7 @@ class TestUtils(base.UnitTestCase):
         expected_result = [os.path.join(directory, 'valid.yaml')]
         files = list(utils.iterfiles(directory, pattern))
 
-        mwalk.assert_called_once_with(directory)
+        mwalk.assert_called_once_with(directory, followlinks=True)
         self.assertEqual(expected_result, files)
 
     def make_process_mock(self, return_code=0):
