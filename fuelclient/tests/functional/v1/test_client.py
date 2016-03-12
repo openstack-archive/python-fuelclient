@@ -427,20 +427,28 @@ class TestDeployChanges(base.BaseTestCase):
         self.load_data_to_nailgun_server()
         release_id = self.get_first_deployable_release_id()
         self.create_env = self.create_env.format(release_id)
-        self.run_cli_commands((self.create_env, self.add_node))
+        self.run_cli_commands((
+            self.create_env,
+            self.add_node
+        ))
 
     def test_deploy_changes(self):
-        self.run_cli_commands((self.deploy_changes,))
+        self.check_all_in_msg(self.deploy_changes, [
+            "Deploying changes to environment with id=1\n",
+            "Finished deployment!\n"
+        ])
 
-    def test_no_changes_to_deploy(self):
-        self.run_cli_commands((self.deploy_changes,))
+    def test_redeploy_changes(self):
+        self.run_cli_command(self.deploy_changes)
+
         self.check_for_stderr(self.deploy_changes,
                               "(No changes to deploy)\n",
                               check_errors=False)
 
-    def test_redeploy_changes(self):
-        self.run_cli_commands((self.deploy_changes,
-                               self.redeploy_changes))
+        self.check_all_in_msg(self.redeploy_changes, [
+            "Deploying changes to environment with id=1",
+            "Finished deployment!\n"
+        ])
 
 
 class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
