@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
+import operator
 import os
 
 import six
@@ -54,15 +56,42 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             type=utils.str_to_unicode,
             nargs='+',
             help='Show only nodes that have specific labels')
+        parser.add_argument(
+            '--ansible-inventory',
+            action='store_true',
+            help='Generate an ansible inventory file (nodes grouped by role)')
 
         return parser
 
     def take_action(self, parsed_args):
         data = self.client.get_all(
             environment_id=parsed_args.env, labels=parsed_args.labels)
-        data = data_utils.get_display_data_multi(self.columns, data)
 
-        return (self.columns, data)
+        if parsed_args.ansible_inventory:
+            nodes_by_role = collections.defaultdict(list)
+
+            for node in data:
+                for role in node['roles']:
+                    nodes_by_role[role].append(node)
+
+            for role, nodes in sorted(nodes_by_role.items()):
+                self.app.stdout.write(u'[{role}]\n'.format(role=role))
+                self.app.stdout.write(
+                    u'\n'.join(
+                        u'{name} ansible_host={ip}'.format(name=node['name'],
+                                                           ip=node['ip'])
+                        for node in sorted(nodes_by_role[role],
+                                           key=operator.itemgetter('name'))
+                    )
+                )
+                self.app.stdout.write(u'\n\n')
+
+            # do not produce any other output, return value is still
+            # required by the caller method
+            return tuple(), tuple()
+        else:
+            data = data_utils.get_display_data_multi(self.columns, data)
+            return (self.columns, data)
 
 
 class NodeShow(NodeMixIn, base.BaseShowCommand):
