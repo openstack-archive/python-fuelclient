@@ -14,4 +14,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import namedtuple
+
+
+def Enum(*values, **kwargs):
+    names = kwargs.get('names')
+    if names:
+        return namedtuple('Enum', names)(*values)
+    return namedtuple('Enum', values)(*values)
+
+
 SERIALIZATION_FORMAT_FLAG = 'serialization_format'
+
+TASK_STATUSES = Enum(
+    'error',
+    'pending',
+    'ready',
+    'running'
+)
