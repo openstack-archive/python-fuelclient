@@ -12,24 +12,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
-from oslotest import base as oslo_base
-
+from fuelclient import consts
 from fuelclient.objects import Release
 
+from oslotest import base as oslo_base
 
 logging.basicConfig(stream=sys.stderr)
 log = logging.getLogger("CliTest.ExecutionLog")
 log.setLevel(logging.DEBUG)
 
 
-class CliExectutionResult(object):
+class CliExecutionResult(object):
     def __init__(self, process_handle, out, err):
         self.return_code = process_handle.returncode
         self.stdout = out
@@ -45,6 +48,8 @@ class CliExectutionResult(object):
 
 
 class BaseTestCase(oslo_base.BaseTestCase):
+
+    handler = ''
     nailgun_root = os.environ.get('NAILGUN_ROOT', '/tmp/fuel_web/nailgun')
 
     def setUp(self):
@@ -91,7 +96,7 @@ class BaseTestCase(oslo_base.BaseTestCase):
     def run_cli_command(self, command_line,
                         check_errors=True, env=os.environ.copy()):
 
-        command_args = [" ".join(('fuel', command_line))]
+        command_args = [" ".join((self.handler, command_line))]
         process_handle = subprocess.Popen(
             command_args,
             stdout=subprocess.PIPE,
@@ -100,7 +105,7 @@ class BaseTestCase(oslo_base.BaseTestCase):
             env=env
         )
         out, err = process_handle.communicate()
-        result = CliExectutionResult(process_handle, out, err)
+        result = CliExecutionResult(process_handle, out, err)
         log.debug("command_args: '%s',stdout: '%s', stderr: '%s'",
                   command_args[0], out, err)
         if check_errors:
@@ -129,6 +134,12 @@ class BaseTestCase(oslo_base.BaseTestCase):
         call = self.run_cli_command(command, check_errors=check_errors)
         self.assertEqual(call.stdout, msg)
 
+    def check_for_stdout_by_regexp(self, command, pattern, check_errors=True):
+        call = self.run_cli_command(command, check_errors=check_errors)
+        result = re.search(pattern, call.stdout)
+        self.assertIsNotNone(result)
+        return result
+
     def check_for_stderr(self, command, msg, check_errors=True):
         call = self.run_cli_command(command, check_errors=check_errors)
         self.assertIn(msg, call.stderr)
@@ -147,3 +158,59 @@ class BaseTestCase(oslo_base.BaseTestCase):
     def check_number_of_rows_in_table(self, command, number_of_rows):
         output = self.run_cli_command(command)
         self.assertEqual(len(output.stdout.split("\n")), number_of_rows + 3)
+
+    def _get_task_info(self, task_id):
+        """Get info about task with given ID.
+
+        :param task_id: Task ID
+        :type task_id: str or int
+        :return: Task info
+        :rtype: dict
+        """
+        return {}
+
+    def wait_task_ready(self, task_id, timeout=60, interval=3):
+        """Wait for changing task status to 'ready'.
+
+        :param task_id: Task ID
+        :type task_id: str or int
+        :param timeout: Max time of waiting, in seconds
+        :type timeout: int
+        :param interval: Interval of getting task info, in seconds
+        :type interval: int
+        """
+        wait_until_in_statuses = (consts.TASK_STATUSES.running,
+                                  consts.TASK_STATUSES.pending)
+        timer = time.time()
+        while True:
+            task = self._get_task_info(task_id)
+            status = task.get('status', '')
+            if status not in wait_until_in_statuses:
+                self.assertEqual(status, consts.TASK_STATUSES.ready)
+                break
+
+            if time.time() - timer > timeout:
+                raise Exception(
+                    "Task '{0}' seems to be hanged".format(task['name'])
+                )
+            time.sleep(interval)
+
+
+class CLIv1TestCase(BaseTestCase):
+
+    handler = 'fuel'
+
+    def _get_task_info(self, task_id):
+        command = "task --task {0} --json".format(str(task_id))
+        call = self.run_cli_command(command)
+        return json.loads(call.stdout)[0]
+
+
+class CLIv2TestCase(BaseTestCase):
+
+    handler = 'fuel2'
+
+    def _get_task_info(self, task_id):
+        command = "task show -f json {0}".format(str(task_id))
+        call = self.run_cli_command(command)
+        return json.loads(call.stdout)

@@ -201,14 +201,35 @@ class EnvDeploy(EnvMixIn, base.BaseCommand):
 
         parser.add_argument('id',
                             type=int,
-                            help='Id of the nailgun entity to be processed.')
+                            help='Id of the environment to be deployed.')
 
         return parser
 
     def take_action(self, parsed_args):
         task_id = self.client.deploy_changes(parsed_args.id)
 
-        msg = 'Deploy task with id {t} for the environment {e} '\
+        msg = 'Deployment task with id {t} for the environment {e} '\
+              'has been started.\n'.format(t=task_id, e=parsed_args.id)
+
+        self.app.stdout.write(msg)
+
+
+class EnvRedeploy(EnvMixIn, base.BaseCommand):
+    """Redeploys changes on the specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvRedeploy, self).get_parser(prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the environment to be redeployed.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        task_id = self.client.redeploy_changes(parsed_args.id)
+
+        msg = 'Deployment task with id {t} for the environment {e} '\
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
 
         self.app.stdout.write(msg)
