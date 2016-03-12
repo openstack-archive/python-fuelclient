@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import io
+
 import mock
 import six
 
@@ -75,6 +77,66 @@ class TestNodeCommand(test_engine.BaseCLITest):
             environment_id=env_id, labels=labels)
         self.assertIsInstance(
             self.m_client.get_all.call_args[1].get('labels')[0], six.text_type)
+
+    def test_node_list_ansible_inventory(self):
+        self.m_client.get_all.return_value = [
+            fake_node.get_fake_node(hostname='node-1',
+                                    ip='10.20.0.2',
+                                    roles=['compute']),
+            fake_node.get_fake_node(hostname='node-2',
+                                    ip='10.20.0.3',
+                                    roles=['compute', 'ceph-osd']),
+            fake_node.get_fake_node(hostname='node-3',
+                                    ip='10.20.0.4',
+                                    roles=['controller']),
+            fake_node.get_fake_node(hostname='node-4',
+                                    ip='10.20.0.5',
+                                    roles=['controller', 'mongo']),
+            fake_node.get_fake_node(hostname='node-5',
+                                    ip='10.20.0.6',
+                                    roles=['controller', 'ceph-osd']),
+        ]
+
+        expected_output = '''\
+[ceph-osd]
+node-2 ansible_host=10.20.0.3
+node-5 ansible_host=10.20.0.6
+
+[compute]
+node-1 ansible_host=10.20.0.2
+node-2 ansible_host=10.20.0.3
+
+[controller]
+node-3 ansible_host=10.20.0.4
+node-4 ansible_host=10.20.0.5
+node-5 ansible_host=10.20.0.6
+
+[mongo]
+node-4 ansible_host=10.20.0.5
+
+
+'''
+
+        # NOTE(rpodolyaka): this hack is needed, as otherwise cliff will
+        # produce an empty *byte* string, which causes StringIO.write() to fail
+        # with TypeError on Python 2.x (it only allows *unicode* strings).
+        # The root cause of the problem is string literals used by cliff
+        # ("" instead of u""), production is not affected, only tests.
+        class StringIO(io.StringIO):
+            def write(self, buf):
+                return super(StringIO, self).write(six.text_type(buf))
+
+        args = 'node list --ansible-inventory'
+        with mock.patch('sys.stdout', new=StringIO()) as mstdout:
+            rv = self.exec_command(args)
+            actual_output = mstdout.getvalue()
+
+        self.assertFalse(rv)
+        self.assertEqual(expected_output, actual_output)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            environment_id=None, labels=None)
 
     def test_node_show(self):
         node_id = 42

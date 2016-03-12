@@ -17,7 +17,8 @@
 
 def get_fake_node(cluster=None, hostname=None, node_id=None, cpu_model=None,
                   roles=None, mac=None, memory_b=None, os_platform=None,
-                  status=None, node_name=None, group_id=None, labels=None):
+                  status=None, node_name=None, group_id=None, labels=None,
+                  ip=None):
     """Creates a fake node
 
     Returns the serialized and parametrized representation of a dumped Fuel
@@ -35,7 +36,7 @@ def get_fake_node(cluster=None, hostname=None, node_id=None, cpu_model=None,
             'error_type': None,
             'cluster': cluster or 1,
             'id': node_id or 42,
-            'ip': '10.20.0.4',
+            'ip': ip or '10.20.0.4',
             'kernel_params': None,
             'group_id': group_id or 1,
             'mac': mac or 'd6:11:3f:b0:f1:43',
