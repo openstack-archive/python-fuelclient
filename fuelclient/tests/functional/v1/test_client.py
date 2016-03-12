@@ -17,10 +17,10 @@
 import os
 import tempfile
 
-from fuelclient.tests.functional import base
+from fuelclient.tests.functional.base import CLIv1TestCase
 
 
-class TestHandlers(base.BaseTestCase):
+class TestHandlers(CLIv1TestCase):
 
     def test_env_action(self):
         # check env help
@@ -289,7 +289,7 @@ class TestHandlers(base.BaseTestCase):
         )
 
 
-class TestCharset(base.BaseTestCase):
+class TestCharset(CLIv1TestCase):
 
     def test_charset_problem(self):
         self.load_data_to_nailgun_server()
@@ -301,7 +301,7 @@ class TestCharset(base.BaseTestCase):
         ))
 
 
-class TestFiles(base.BaseTestCase):
+class TestFiles(CLIv1TestCase):
 
     def test_file_creation(self):
         self.load_data_to_nailgun_server()
@@ -393,7 +393,7 @@ class TestFiles(base.BaseTestCase):
             ))
 
 
-class TestDownloadUploadNodeAttributes(base.BaseTestCase):
+class TestDownloadUploadNodeAttributes(CLIv1TestCase):
 
     def test_upload_download_interfaces(self):
         self.load_data_to_nailgun_server()
@@ -415,35 +415,43 @@ class TestDownloadUploadNodeAttributes(base.BaseTestCase):
                               self.upload_command(cmd)))
 
 
-class TestDeployChanges(base.BaseTestCase):
+class TestDeployChanges(CLIv1TestCase):
 
-    create_env = "env create --name=test --release={0}"
-    add_node = "--env-id=1 node set --node 1 --role=controller"
-    deploy_changes = "deploy-changes --env 1"
-    redeploy_changes = "redeploy-changes --env 1"
+    cmd_create_env = "env create --name=test --release={0}"
+    cmd_add_node = "--env-id=1 node set --node 1 --role=controller"
+    cmd_deploy_changes = "deploy-changes --env 1"
+    cmd_redeploy_changes = "redeploy-changes --env 1"
+
+    messages_success = [
+        "Deploying changes to environment with id=1\n",
+        "Finished deployment!\n"
+    ]
+    message_error = "(No changes to deploy)\n"
 
     def setUp(self):
         super(TestDeployChanges, self).setUp()
         self.load_data_to_nailgun_server()
         release_id = self.get_first_deployable_release_id()
-        self.create_env = self.create_env.format(release_id)
-        self.run_cli_commands((self.create_env, self.add_node))
+        self.cmd_create_env = self.cmd_create_env.format(release_id)
+        self.run_cli_commands((
+            self.cmd_create_env,
+            self.cmd_add_node
+        ))
 
     def test_deploy_changes(self):
-        self.run_cli_commands((self.deploy_changes,))
-
-    def test_no_changes_to_deploy(self):
-        self.run_cli_commands((self.deploy_changes,))
-        self.check_for_stderr(self.deploy_changes,
-                              "(No changes to deploy)\n",
-                              check_errors=False)
+        self.check_all_in_msg(self.cmd_deploy_changes,
+                              self.messages_success)
 
     def test_redeploy_changes(self):
-        self.run_cli_commands((self.deploy_changes,
-                               self.redeploy_changes))
+        self.run_cli_command(self.cmd_deploy_changes)
+        self.check_for_stderr(self.cmd_deploy_changes,
+                              self.message_error,
+                              check_errors=False)
+        self.check_all_in_msg(self.cmd_redeploy_changes,
+                              self.messages_success)
 
 
-class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
+class TestDirectoryDoesntExistErrorMessages(CLIv1TestCase):
 
     def test_settings_upload(self):
         self.check_for_stderr(
@@ -520,7 +528,7 @@ class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
         )
 
 
-class TestUploadSettings(base.BaseTestCase):
+class TestUploadSettings(CLIv1TestCase):
 
     create_env = "env create --name=test --release={0}"
     add_node = "--env-id=1 node set --node 1 --role=controller"
