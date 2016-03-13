@@ -338,7 +338,15 @@ class Plugins(base.BaseObject):
         name = plugin.name_from_file(plugin_path)
         version = plugin.version_from_file(plugin_path)
 
+        # Set environment variable OS_TOKEN for interaction
+        # between plugins hook (pre,post,postun) and keystone/nailgun
+        # e.g. create/delete plugin related user in keystone
+        os.environ['OS_TOKEN'] = cls.connection.auth_token
+
         plugin.install(plugin_path, force=force)
+
+        os.unsetenv('OS_TOKEN')
+
         response = cls.register(name, version, force=force)
         cls.sync(plugin_ids=[response['id']])
 
@@ -351,9 +359,15 @@ class Plugins(base.BaseObject):
         :param str name: plugin name
         :param str version: plugin version
         """
+        os.environ['OS_TOKEN'] = cls.connection.auth_token
+
         plugin = cls.make_obj_by_name(plugin_name, plugin_version)
         cls.unregister(plugin_name, plugin_version)
-        return plugin.remove(plugin_name, plugin_version)
+        r = plugin.remove(plugin_name, plugin_version)
+
+        os.unsetenv('OS_TOKEN')
+
+        return r
 
     @classmethod
     def update(cls, plugin_path):
