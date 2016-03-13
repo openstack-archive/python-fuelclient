@@ -338,7 +338,10 @@ class Plugins(base.BaseObject):
         name = plugin.name_from_file(plugin_path)
         version = plugin.version_from_file(plugin_path)
 
+        os.environ['OS_AUTH_TOKEN'] = cls.connection.auth_token
         plugin.install(plugin_path, force=force)
+        os.unsetenv('OS_AUTH_TOKEN')
+
         response = cls.register(name, version, force=force)
         cls.sync(plugin_ids=[response['id']])
 
