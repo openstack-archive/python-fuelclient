@@ -298,7 +298,7 @@ class NodeAttributesDownload(NodeMixIn, base.BaseCommand):
         file_path = self.client.download_attributes(
             parsed_args.id, parsed_args.dir)
         self.app.stdout.write(
-            "Attributes for node {0} were written to {1}"
+            "Attributes for node {0} were written to {1}\n"
             .format(parsed_args.id, file_path))
 
 
@@ -318,5 +318,5 @@ class NodeAttributesUpload(NodeMixIn, base.BaseCommand):
     def take_action(self, parsed_args):
         self.client.upload_attributes(parsed_args.id, parsed_args.dir)
         self.app.stdout.write(
-            "Attributes for node {0} were uploaded."
+            "Attributes for node {0} were uploaded.\n"
             .format(parsed_args.id))
