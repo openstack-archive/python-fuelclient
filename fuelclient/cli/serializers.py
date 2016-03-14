@@ -83,9 +83,18 @@ class Serializer(object):
             print_method(arg)
 
     def prepare_path(self, path):
-        return "{0}.{1}".format(
-            path, self.format
-        )
+        file_path, file_ext = os.path.splitext(path)
+        # cut dot from the start of extension's name
+        file_ext = file_ext[1:]
+        if not file_ext:
+            return "{0}.{1}".format(
+                path, self.format
+            )
+        if file_ext != self.format:
+            raise error.InvalidFileException(
+                "File '{0}' has unexpected format '{1}'.".format(
+                    path, file_ext))
+        return path
 
     def write_to_path(self, path, data):
         full_path = self.prepare_path(path)
