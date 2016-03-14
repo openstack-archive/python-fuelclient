@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 import six
 
 from fuelclient.commands import base
@@ -299,7 +301,7 @@ class NodeAttributesDownload(NodeMixIn, base.BaseCommand):
             parsed_args.id, parsed_args.dir)
         self.app.stdout.write(
             "Attributes for node {0} were written to {1}"
-            .format(parsed_args.id, file_path))
+            .format(parsed_args.id, file_path) + os.linesep)
 
 
 class NodeAttributesUpload(NodeMixIn, base.BaseCommand):
@@ -319,4 +321,4 @@ class NodeAttributesUpload(NodeMixIn, base.BaseCommand):
         self.client.upload_attributes(parsed_args.id, parsed_args.dir)
         self.app.stdout.write(
             "Attributes for node {0} were uploaded."
-            .format(parsed_args.id))
+            .format(parsed_args.id) + os.linesep)
