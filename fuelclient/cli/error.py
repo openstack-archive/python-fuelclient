@@ -133,7 +133,7 @@ def exceptions_decorator(func):
             message = """
                 Unauthorized: need authentication!
                 Please provide user and password via client
-                fuel --user=user --password=pass [action]
+                fuel --os-username=user --os-password=pass [action]
                 or modify your credentials in your configuration file."""
             exit_with_error(textwrap.dedent(message).strip())
         except FuelClientException as exc:
