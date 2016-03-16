@@ -166,12 +166,18 @@ class TestVIPActions(base.UnitTestCase):
         mopen().__enter__().read.return_value = MANY_VIPS_YAML
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         request_put = self.m_request.put(url, json={})
+
+        file_path = 'vips.yaml'
+
         with mock.patch('fuelclient.objects.environment.os') as env_os:
             env_os.path.exists.return_value = True
-            self.execute('fuel vip --env 1 --upload vips_1.yaml'.split())
+            self.execute(['fuel', 'vip', '--env', '1', '--upload', file_path])
         self.assertEqual(env_os.path.exists.call_count, 1)
         self.assertEqual(request_put.call_count, 1)
         self.assertIn(url, request_put.last_request.url)
+        # FileFormatBasedSerializer.read_from_file must not modify given
+        # file path string
+        self.assertEqual(file_path, mopen.call_args[0][0])
 
     def test_vips_upload_bad_path(self, mos, mopen):
         with mock.patch('sys.stderr', new=six.moves.cStringIO()) as mstderr:

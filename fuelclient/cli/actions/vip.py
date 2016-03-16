@@ -14,6 +14,7 @@
 
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
+from fuelclient.cli import serializers
 from fuelclient.objects.environment import Environment
 
 
@@ -25,6 +26,10 @@ class VIPAction(Action):
 
     def __init__(self):
         super(VIPAction, self).__init__()
+        # NOTE(aroma): 'serializer' attribute for action objects is
+        # overwritten while building parser object
+        # (fuelclient.cli.parser.Parser)
+        self.file_serializer = serializers.FileFormatBasedSerializer()
         self.args = (
             Args.get_env_arg(required=True),
             Args.get_upload_file_arg("Upload changed VIP configuration "
@@ -48,7 +53,7 @@ class VIPAction(Action):
         env = Environment(params.env)
         vips_data = env.read_vips_data_from_file(
             file_path=params.upload,
-            serializer=self.serializer
+            serializer=self.file_serializer
         )
         env.set_vips_data(vips_data)
         print("VIP configuration uploaded.")
