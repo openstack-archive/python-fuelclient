@@ -160,15 +160,18 @@ class Client(object):
 
         return resp.json()
 
-    def put_request(self, api, data):
-        """Make PUT request to specific API with some data."""
+    def put_request(self, api, data, **params):
+        """Make PUT request to specific API with some data.
 
+        :param api: API endpoint (path)
+        :param data: Data send in request, will be serialized to JSON
+        :param params: Params of query string
+        """
         url = self.api_root + api
-
         data_json = json.dumps(data)
-        self.print_debug('PUT {0} data={1}'.format(url, data_json))
+        resp = self.session.put(url, data=data_json, params=params)
 
-        resp = self.session.put(url, data=data_json)
+        self.print_debug('PUT {0} data={1}'.format(resp.url, data_json))
         self._raise_for_status_with_info(resp)
 
         return resp.json()

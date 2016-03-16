@@ -223,6 +223,6 @@ class EnvironmentAction(Action):
                   "downloaded into {1}.yaml.".format(cluster.id, full_path))
         elif params.upload:
             attributes = self.serializer.read_from_file(full_path)
-            cluster.update_attributes(attributes)
+            cluster.update_attributes(attributes, params.force)
             print("Attributes of cluster {0} "
                   "uploaded from {1}.yaml".format(cluster.id, full_path))
