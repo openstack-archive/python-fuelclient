@@ -27,21 +27,17 @@ description:
 maintainers:
 
 - ./:
+    - name:   Alexander Saprykin
+      email:  asaprykin@mirantis.com
+      IRC:    asaprykin
+
     - name:   Bulat Gaifullin
       email:  bgaifullin@mirantis.com
       IRC:    bgaifullin
 
-    - name:   Ivan Kliuk
-      email:  ikliuk@mirantis.com
-      IRC:    IvanKliuk
-
     - name:   Maciej Kwiek
       email:  mkwiek@mirantis.com
       IRC:    mkwiek
-
-    - name:   Roman Prykhodchenko
-      email:  rprikhodchenko@mirantis.com
-      IRC:    romcheg
 
     - name:   Sylwester Brzeczkowski
       email:  sbrzeczkowski@mirantis.com
