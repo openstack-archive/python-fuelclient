@@ -25,7 +25,8 @@ class TestTaskFacade(test_api.BaseLibTest):
         super(TestTaskFacade, self).setUp()
 
         self.version = 'v1'
-        self.res_uri = '/api/{version}/tasks/'.format(version=self.version)
+        self.res_uri = '/api/{version}/transactions/'\
+                       .format(version=self.version)
 
         self.fake_task = utils.get_fake_task()
         self.fake_tasks = [utils.get_fake_task() for _ in range(10)]
