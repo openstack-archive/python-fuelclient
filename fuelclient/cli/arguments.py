@@ -25,6 +25,7 @@ substitutions = {
     # replace from: to
     "env": "environment",
     "nodes": "node",
+    "statuses": "status",
     "net": "network",
     "rel": "release",
     "list": "--list",
@@ -175,6 +176,15 @@ def get_env_arg(required=False):
         "env",
         flags=("--env-id",),
         help="environment id",
+        required=required
+    )
+
+
+def get_single_task_arg(required=False):
+    return get_int_arg(
+        "task",
+        flags=("--task-id", "--tid"),
+        help="task id",
         required=required
     )
 
@@ -666,3 +676,23 @@ def get_upload_file_arg(help_msg):
         flags=("-u", "--upload",),
         help=help_msg
     )
+
+def get_status_arg(help_msg):
+    default_kwargs = {
+        "action": SetAction,
+        "flags": ("--status",),
+        "nargs": '+',
+        "default": None,
+        "help": help_msg
+    }
+    return get_arg("status", **default_kwargs)
+
+def get_deployment_node_arg(help_msg):
+    default_kwargs = {
+        "action": SetAction,
+        "flags": ("--node-id",),
+        "nargs": '+',
+        "default": None,
+        "help": help_msg
+    }
+    return get_arg("node", **default_kwargs)
