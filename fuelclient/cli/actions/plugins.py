@@ -12,6 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
+import six
+
 import fuelclient.cli.arguments as Args
 
 from fuelclient.cli.actions.base import Action
@@ -31,6 +34,7 @@ class PluginAction(Action):
         "name",
         "version",
         "package_version",
+        "releases"
     )
 
     def __init__(self):
@@ -74,6 +78,14 @@ class PluginAction(Action):
                 fuel plugins --list
         """
         plugins = Plugins.get_all_data()
+        # Replace original nested 'release' dictionary (from plugins meta
+        # dictionary) to flat one with necessary release info (os, version)
+        for plugin in plugins:
+            releases = collections.defaultdict(list)
+            for key in plugin['releases']:
+                releases[key['os']].append(key['version'])
+            plugin['releases'] = ', '.join('{} ({})'.format(k, ', '.join(v))
+                                           for k, v in six.iteritems(releases))
         self.serializer.print_to_output(
             plugins,
             format_table(plugins, acceptable_keys=self.acceptable_keys))
