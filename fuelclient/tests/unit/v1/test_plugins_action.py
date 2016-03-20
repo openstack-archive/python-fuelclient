@@ -24,14 +24,6 @@ from fuelclient.objects.plugins import Plugins
 from fuelclient.tests.unit.v1 import base
 
 
-plugin_data = {
-    'id': 1,
-    'name': 'plugin_name',
-    'version': '1.0.0',
-    'package_version': '1.0.0'
-}
-
-
 class TestPluginsActions(base.UnitTestCase):
 
     def setUp(self):
@@ -58,7 +50,20 @@ class TestPluginsActions(base.UnitTestCase):
     @patch.object(Serializer, 'print_to_output')
     @patch.object(Plugins, 'get_all_data')
     def test_list_default(self, get_mock, print_mock):
-        plugins = [plugin_data, plugin_data]
+        plugins = [
+            {'id': 1,
+             'name': 'plugin_name1',
+             'version': '1.0.0',
+             'package_version': '1.0.0',
+             'releases': [{'os': 'ubuntu', 'version': 'liberty-8.0'},
+                          {'os': 'centos', 'version': 'liberty-8.0'}]},
+            {'id': 2,
+             'name': 'plugin_name2',
+             'version': '1.0.0',
+             'package_version': '1.0.0',
+             'releases': [{'os': 'ubuntu', 'version': 'liberty-8.0'},
+                          {'os': 'ubuntu', 'version': 'mitaka-9.0'}]}
+        ]
         get_mock.return_value = plugins
 
         self.exec_plugins([])
@@ -69,7 +74,20 @@ class TestPluginsActions(base.UnitTestCase):
     @patch.object(Serializer, 'print_to_output')
     @patch.object(Plugins, 'get_all_data')
     def test_list(self, get_mock, print_mock):
-        plugins = [plugin_data, plugin_data]
+        plugins = [
+            {'id': 1,
+             'name': 'plugin_name1',
+             'version': '1.0.0',
+             'package_version': '1.0.0',
+             'releases': [{'os': 'ubuntu', 'version': 'liberty-8.0'},
+                          {'os': 'centos', 'version': 'liberty-8.0'}]},
+            {'id': 2,
+             'name': 'plugin_name2',
+             'version': '1.0.0',
+             'package_version': '1.0.0',
+             'releases': [{'os': 'ubuntu', 'version': 'liberty-8.0'},
+                          {'os': 'ubuntu', 'version': 'mitaka-9.0'}]}
+        ]
         get_mock.return_value = plugins
 
         self.exec_plugins(['--list'])
