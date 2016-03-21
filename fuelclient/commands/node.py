@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
+import operator
 import os
 
 import six
@@ -322,3 +324,49 @@ class NodeAttributesUpload(NodeMixIn, base.BaseCommand):
         self.app.stdout.write(
             "Attributes for node {0} were uploaded."
             .format(parsed_args.id) + os.linesep)
+
+
+class NodeAnsibleInventory(NodeMixIn, base.BaseCommand):
+    """Generate ansible inventory file based on the nodes list."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeAnsibleInventory, self).get_parser(prog_name)
+
+        # if this is a required argument, we'll avoid ambiguity of having nodes
+        # of multiple different clusters in the same inventory file
+        parser.add_argument(
+            '-e',
+            '--env',
+            type=int,
+            required=True,
+            help='Use only nodes that are in the specified environment')
+
+        parser.add_argument(
+            '-l',
+            '--labels',
+            type=utils.str_to_unicode,
+            nargs='+',
+            help='Use only nodes that have specific labels')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.get_all(environment_id=parsed_args.env,
+                                   labels=parsed_args.labels)
+
+        nodes_by_role = collections.defaultdict(list)
+        for node in data:
+            for role in node['roles']:
+                nodes_by_role[role].append(node)
+
+        for role, nodes in sorted(nodes_by_role.items()):
+            self.app.stdout.write(u'[{role}]\n'.format(role=role))
+            self.app.stdout.write(
+                u'\n'.join(
+                    u'{name} ansible_host={ip}'.format(name=node['hostname'],
+                                                       ip=node['ip'])
+                    for node in sorted(nodes_by_role[role],
+                                       key=operator.itemgetter('hostname'))
+                )
+            )
+            self.app.stdout.write(u'\n\n')
