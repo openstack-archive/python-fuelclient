@@ -258,7 +258,7 @@ class NodeAction(Action):
                 fuel node --node 2 --skip rsync --end pre_deployment
                 fuel node --node 2 --end netconfig
                 fuel node --node 2 --start hiera --end neutron
-                fuel node --node 2 --start post_deployment
+                fuel node --node 2 --start post_deployment_start
         """
         node_collection = NodeCollection.init_with_ids(params.node)
         env_id_to_start = self.get_env_id(node_collection)
