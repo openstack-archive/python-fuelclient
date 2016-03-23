@@ -17,15 +17,12 @@ from functools import partial
 from itertools import chain
 import math
 from operator import itemgetter
-import os
 import sys
 from time import sleep
 
 import six
 
 from fuelclient.cli.error import DeployProgressError
-from fuelclient.cli.error import InvalidDirectoryException
-from six.moves import urllib
 
 
 def format_table(data, acceptable_keys=None, column_to_join=None):
@@ -100,42 +97,6 @@ def get_bar_for_progress(full_width, progress):
         ">" if number_of_equal_signs < full_width - 2 else "",
         " " * (full_width - 3 - number_of_equal_signs)
     )
-
-
-def download_snapshot_with_progress_bar(
-        url, auth_token, directory=os.path.curdir):
-    """downloads file from specific 'url' with progress bar and save it
-    to some 'directory'.
-    """
-    if not os.path.exists(directory):
-        raise InvalidDirectoryException(
-            "Folder {0} doesn't exist.".format(directory))
-    file_name = os.path.join(
-        os.path.abspath(directory),
-        url.split('/')[-1]
-    )
-    request = urllib.request.Request(url, headers={'x-auth-token': auth_token})
-    download_handle = urllib.request.urlopen(request)
-    with open(file_name, 'wb') as file_handle:
-        meta = download_handle.info()
-        file_size = int(meta.getheaders("Content-Length")[0])
-        print("Downloading: {0} Bytes: {1}".format(url, file_size))
-        file_size_dl = 0
-        block_size = 8192
-        bar = partial(get_bar_for_progress, 80)
-        while True:
-            data_buffer = download_handle.read(block_size)
-            if not data_buffer:
-                break
-            file_size_dl += len(data_buffer)
-            file_handle.write(data_buffer)
-            progress = int(100 * float(file_size_dl) / file_size)
-            sys.stdout.write("\r{0}".format(
-                bar(progress)
-            ))
-            sys.stdout.flush()
-            sleep(1 / 10)
-        print()
 
 
 def print_deploy_progress(deploy_task):
