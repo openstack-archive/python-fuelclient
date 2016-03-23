@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 from mock import call
 from mock import Mock
 from mock import patch
@@ -37,13 +36,10 @@ class TestSnapshot(base.UnitTestCase):
         self.execute(['fuel', 'snapshot', '--conf'])
         self.assertEqual(mstdout.write.call_args_list, [call('key: value\n')])
 
-    @patch('fuelclient.cli.actions.snapshot.DefaultAPIClient',
-           mock.Mock(auth_token='token123'))
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
-    @patch('fuelclient.cli.actions.snapshot.'
-           'download_snapshot_with_progress_bar')
     @patch('sys.stdin')
-    def test_snapshot_with_provided_conf(self, mstdin, mdownload, mstart):
+    @patch('sys.stdout')
+    def test_create_snapshot_with_provided_conf(self, mstdout, mstdin, mstart):
         conf = 'key: value\n'
 
         mstdin.isatty.return_value = False
@@ -55,19 +51,13 @@ class TestSnapshot(base.UnitTestCase):
 
         mstart.assert_called_once_with({'key': 'value'})
         self.assertEqual(mstdin.read.call_count, 1)
+        msg = mstdout.write.call_args_list[2][0][0]
+        self.assertIn("Diagnostic snapshot can be downloaded from", msg)
 
-        mdownload.assert_called_once_with(
-            mock.ANY,
-            auth_token='token123',
-            directory='.')
-
-    @patch('fuelclient.cli.actions.snapshot.DefaultAPIClient',
-           mock.Mock(auth_token='token123'))
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
-    @patch('fuelclient.cli.actions.snapshot.'
-           'download_snapshot_with_progress_bar')
     @patch('sys.stdin')
-    def test_snapshot_without_conf(self, mstdin, mdownload, mstart):
+    @patch('sys.stdout')
+    def test_create_snapshot_without_conf(self, mstdout, mstdin, mstart):
 
         mstdin.isatty.return_value = True
 
@@ -76,15 +66,14 @@ class TestSnapshot(base.UnitTestCase):
         self.execute(['fuel', 'snapshot'])
 
         mstart.assert_called_once_with({})
-        mdownload.assert_called_once_with(
-            mock.ANY,
-            auth_token='token123',
-            directory='.')
+        msg = mstdout.write.call_args_list[2][0][0]
+        self.assertIn("Diagnostic snapshot can be downloaded from", msg)
 
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
     @patch('sys.stdin')
     @patch('sys.stderr')
-    def test_get_snapshot_when_task_is_failed(self, mstderr, mstdin, mstart):
+    def test_create_snapshot_when_task_is_failed(
+            self, mstderr, mstdin, mstart):
         mstdin.isatty.return_value = True
 
         mdata = {'message': 'mock task message'}
@@ -98,3 +87,22 @@ class TestSnapshot(base.UnitTestCase):
         err_msg = ("Snapshot generating task ended with error. "
                    "Task message: {0}".format(mdata['message']))
         mstderr.write.called_once_with(err_msg)
+
+    @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
+    @patch('sys.stdin')
+    @patch('sys.stdout')
+    def test_downloadable_snapshot_url(self, mstdout, mstdin, mstart):
+        expected_url = 'http://127.0.0.1:8000'
+        mdata = {'message': '/api/dump/mock-fuel-snapshot.tar.xz'}
+        mstdin.isatty.return_value = True
+        self.mtask.connection.root = expected_url
+        self.mtask.data = mdata
+
+        mstart.return_value = self.mtask
+
+        self.execute(['fuel', 'snapshot'])
+
+        expected_msg = "Diagnostic snapshot can be downloaded from " \
+                       "{}{}".format(expected_url, mdata)
+        msg = mstdout.write.call_args_list[2][0][0]
+        self.assertIn(expected_msg, msg)

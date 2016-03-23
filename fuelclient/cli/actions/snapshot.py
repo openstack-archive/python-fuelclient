@@ -19,8 +19,6 @@ import yaml
 
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
-from fuelclient.cli.formatting import download_snapshot_with_progress_bar
-from fuelclient.client import DefaultAPIClient
 from fuelclient.objects.task import SnapshotTask
 
 
@@ -32,23 +30,19 @@ class SnapshotAction(Action):
     def __init__(self):
         super(SnapshotAction, self).__init__()
         self.args = (
-            Args.get_dir_arg("Directory to which download snapshot."),
             Args.get_boolean_arg("conf",
-                                 help_="Provide this flag to generate conf")
+                                 help_="Provide this flag to generate conf"),
         )
         self.flag_func_map = (
             ('conf', self.get_snapshot_config),
-            (None, self.get_snapshot),
+            (None, self.create_snapshot),
         )
 
-    def get_snapshot(self, params):
-        """To download diagnostic snapshot:
+    def create_snapshot(self, params):
+        """To create diagnostic snapshot:
                 fuel snapshot
 
-            To download diagnostic snapshot to specific directory:
-                fuel snapshot --dir path/to/directory
-
-            To specify config for snapshoting
+            To specify config for snapshotting:
                 fuel snapshot < conf.yaml
 
         """
@@ -60,15 +54,17 @@ class SnapshotAction(Action):
         snapshot_task = SnapshotTask.start_snapshot_task(conf)
         self.serializer.print_to_output(
             snapshot_task.data,
-            "Generating dump..."
+            "Generating diagnostic snapshot..."
         )
         snapshot_task.wait()
 
         if snapshot_task.status == 'ready':
-            download_snapshot_with_progress_bar(
-                snapshot_task.connection.root + snapshot_task.data["message"],
-                auth_token=DefaultAPIClient.auth_token,
-                directory=params.dir
+            self.serializer.print_to_output(
+                snapshot_task.data,
+                "...Completed...\n"
+                "Diagnostic snapshot can be downloaded from " +
+                snapshot_task.connection.root +
+                snapshot_task.data["message"]
             )
         elif snapshot_task.status == 'error':
             six.print_(
@@ -78,11 +74,10 @@ class SnapshotAction(Action):
             )
 
     def get_snapshot_config(self, params):
-        """Download default config for snapshot
-
+        """Download default config for snapshot:
                 fuel snapshot --conf > dump_conf.yaml
 
-            To use json formatter
+            To use json formatter:
                 fuel snapshot --conf --json
         """
         conf = SnapshotTask.get_default_config()
