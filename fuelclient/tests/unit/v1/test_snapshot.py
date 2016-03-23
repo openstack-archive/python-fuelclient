@@ -43,7 +43,8 @@ class TestSnapshot(base.UnitTestCase):
     @patch('fuelclient.cli.actions.snapshot.'
            'download_snapshot_with_progress_bar')
     @patch('sys.stdin')
-    def test_snapshot_with_provided_conf(self, mstdin, mdownload, mstart):
+    def test_create_snapshot_and_download_with_provided_conf(
+            self, mstdin, mdownload, mstart):
         conf = 'key: value\n'
 
         mstdin.isatty.return_value = False
@@ -51,7 +52,7 @@ class TestSnapshot(base.UnitTestCase):
 
         mstart.return_value = self.mtask
 
-        self.execute(['fuel', 'snapshot'])
+        self.execute(['fuel', 'snapshot', '--download'])
 
         mstart.assert_called_once_with({'key': 'value'})
         self.assertEqual(mstdin.read.call_count, 1)
@@ -67,13 +68,14 @@ class TestSnapshot(base.UnitTestCase):
     @patch('fuelclient.cli.actions.snapshot.'
            'download_snapshot_with_progress_bar')
     @patch('sys.stdin')
-    def test_snapshot_without_conf(self, mstdin, mdownload, mstart):
+    def test_create_snapshot_and_download_without_conf(
+            self, mstdin, mdownload, mstart):
 
         mstdin.isatty.return_value = True
 
         mstart.return_value = self.mtask
 
-        self.execute(['fuel', 'snapshot'])
+        self.execute(['fuel', 'snapshot', '--download'])
 
         mstart.assert_called_once_with({})
         mdownload.assert_called_once_with(
@@ -84,7 +86,8 @@ class TestSnapshot(base.UnitTestCase):
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
     @patch('sys.stdin')
     @patch('sys.stderr')
-    def test_get_snapshot_when_task_is_failed(self, mstderr, mstdin, mstart):
+    def test_create_snapshot_when_task_is_failed(
+            self, mstderr, mstdin, mstart):
         mstdin.isatty.return_value = True
 
         mdata = {'message': 'mock task message'}
@@ -98,3 +101,41 @@ class TestSnapshot(base.UnitTestCase):
         err_msg = ("Snapshot generating task ended with error. "
                    "Task message: {0}".format(mdata['message']))
         mstderr.write.called_once_with(err_msg)
+
+    @patch('fuelclient.cli.actions.snapshot.APIClient',
+           mock.Mock(auth_token='token123'))
+    @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
+    @patch('sys.stdin')
+    @patch('sys.stdout')
+    def test_create_snapshot_with_provided_conf(self, mstdout, mstdin, mstart):
+        conf = 'key: value\n'
+
+        mstdin.isatty.return_value = False
+        mstdin.read.return_value = conf
+
+        mstart.return_value = self.mtask
+
+        self.execute(['fuel', 'snapshot'])
+
+        mstart.assert_called_once_with({'key': 'value'})
+        self.assertEqual(mstdin.read.call_count, 1)
+        message = mstdout.write.call_args_list[2][0][0]
+        self.assertEqual('...Completed...', message)
+
+    @patch('fuelclient.cli.actions.snapshot.APIClient',
+           mock.Mock(auth_token='token123'))
+    @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
+    @patch('sys.stdin')
+    @patch('sys.stdout')
+    def test_create_snapshot_without_conf(self, mstdout, mstdin, mstart):
+
+        mstdin.isatty.return_value = True
+
+        mstart.return_value = self.mtask
+
+        self.execute(['fuel', 'snapshot'])
+
+        mstart.assert_called_once_with({})
+
+        message = mstdout.write.call_args_list[2][0][0]
+        self.assertEqual('...Completed...', message)
