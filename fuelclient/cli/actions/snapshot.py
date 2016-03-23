@@ -32,21 +32,25 @@ class SnapshotAction(Action):
     def __init__(self):
         super(SnapshotAction, self).__init__()
         self.args = (
+            Args.get_download_arg("Download snapshot."),
             Args.get_dir_arg("Directory to which download snapshot."),
             Args.get_boolean_arg("conf",
                                  help_="Provide this flag to generate conf")
         )
         self.flag_func_map = (
             ('conf', self.get_snapshot_config),
-            (None, self.get_snapshot),
+            (None, self.create_snapshot),
         )
 
-    def get_snapshot(self, params):
-        """To download diagnostic snapshot:
+    def create_snapshot(self, params):
+        """To create diagnostic snapshot:
                 fuel snapshot
 
-            To download diagnostic snapshot to specific directory:
-                fuel snapshot --dir path/to/directory
+            To create and download diagnostic snapshot to specific directory:
+                fuel snapshot --download --dir path/to/directory
+
+            To create and download diagnostic snapshot to current directory:
+                fuel snapshot --download
 
             To specify config for snapshoting
                 fuel snapshot < conf.yaml
@@ -65,11 +69,18 @@ class SnapshotAction(Action):
         snapshot_task.wait()
 
         if snapshot_task.status == 'ready':
-            download_snapshot_with_progress_bar(
-                snapshot_task.connection.root + snapshot_task.data["message"],
-                auth_token=APIClient.auth_token,
-                directory=params.dir
-            )
+            if params.download:
+                download_snapshot_with_progress_bar(
+                    snapshot_task.connection.root +
+                    snapshot_task.data["message"],
+                    auth_token=APIClient.auth_token,
+                    directory=params.dir
+                )
+            else:
+                self.serializer.print_to_output(
+                    snapshot_task.data,
+                    "Dump is stored in /var/dump on fuel master node"
+                )
         elif snapshot_task.status == 'error':
             six.print_(
                 "Snapshot generating task ended with error. Task message: {0}"
