@@ -50,6 +50,11 @@ class OpenstackConfig(BaseObject):
     def get_filtered_data(cls, **kwargs):
         url = cls.class_api_path
         params = cls._prepare_params(kwargs)
+
+        node_ids = params.get('node_ids')
+        if node_ids is not None:
+            params['node_ids'] = ','.join([str(n) for n in node_ids])
+
         return cls.connection.get_request(url, params=params)
 
     @classmethod
