@@ -72,6 +72,27 @@ class TestOpenstackConfigActions(base.UnitTestCase):
                               '--upload', '--file', 'config.yaml'])
                 self.assertTrue(m_post.called)
 
+        req = json.loads(m_post.last_request.text)
+        self.assertEqual(req['cluster_id'], 1)
+
+    def test_config_upload_multinode(self):
+        m_post = self.m_request.post(
+            '/api/v1/openstack-config/', json=self.config)
+
+        m_open = mock.mock_open(read_data=yaml.safe_dump(
+            {'configuration': self.config['configuration']}))
+        with mock.patch('fuelclient.cli.serializers.open',
+                        m_open, create=True):
+            with mock.patch('fuelclient.objects.openstack_config.os'):
+                self.execute(['fuel', 'openstack-config', '--env', '1',
+                              '--node', '1,2,3',
+                              '--upload', '--file', 'config.yaml'])
+                self.assertTrue(m_post.called)
+
+        req = json.loads(m_post.last_request.text)
+        self.assertEqual(req['node_ids'], [1, 2, 3])
+        self.assertEqual(req['cluster_id'], 1)
+
     @mock.patch('sys.stderr')
     def test_config_upload_fail(self, mocked_stderr):
         self.assertRaises(
@@ -107,11 +128,21 @@ class TestOpenstackConfigActions(base.UnitTestCase):
         self.assertTrue(m_get.called)
 
         m_get = self.m_request.get(
-            '/api/v1/openstack-config/?cluster_id=84&node_id=42', json=[
+            '/api/v1/openstack-config/?cluster_id=84&node_ids=42', json=[
                 utils.get_fake_openstack_config(id=1, cluster_id=32),
             ])
         self.execute(['fuel', 'openstack-config', '--env', '84',
                       '--node', '42', '--list'])
+        self.assertTrue(m_get.called)
+
+    def test_config_list_multinode(self):
+        m_get = self.m_request.get(
+            '/api/v1/openstack-config/?cluster_id=84&node_ids=1,2,3',
+            json=[utils.get_fake_openstack_config(
+                id=1, cluster_id=32, node_id=1)])
+
+        self.execute(['fuel', 'openstack-config', '--env', '84',
+                      '--node', '1,2,3', '--list'])
         self.assertTrue(m_get.called)
 
     @mock.patch('sys.stderr')
@@ -136,6 +167,17 @@ class TestOpenstackConfigActions(base.UnitTestCase):
         self.assertTrue(m_put.called)
         self.assertEqual({"cluster_id": 42, "force": False},
                          json.loads(m_put.last_request.text))
+
+    def test_config_execute_multinode(self):
+        m_put = self.m_request.put('/api/v1/openstack-config/execute/',
+                                   json={'status': 'ready'})
+
+        self.execute(['fuel', 'openstack-config', '--env', '42',
+                      '--node', '1,2,3', '--execute'])
+        self.assertTrue(m_put.called)
+        self.assertEqual(
+            {"cluster_id": 42, "force": False, "node_ids": [1, 2, 3]},
+            json.loads(m_put.last_request.text))
 
     def test_config_force_execute(self):
         m_put = self.m_request.put('/api/v1/openstack-config/execute/',
