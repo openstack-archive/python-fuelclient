@@ -32,7 +32,7 @@ class OpenstackConfigAction(Action):
         self.args = (
             Args.get_env_arg(),
             Args.get_file_arg("Openstack configuration file"),
-            Args.get_single_node_arg("Node ID"),
+            Args.get_node_arg("Node IDs list"),
             Args.get_single_role_arg("Node role"),
             Args.get_config_id_arg("Openstack config ID"),
             Args.get_deleted_arg("Get deleted configurations"),
@@ -60,7 +60,7 @@ class OpenstackConfigAction(Action):
     def list(self, params):
         """List all available configurations:
             fuel openstack-config --list --env 1
-            fuel openstack-config --list --env 1 --node 1
+            fuel openstack-config --list --env 1 --node 1[,2,3]
             fuel openstack-config --list --env 1 --deleted
         """
         filters = {'cluster_id': params.env}
@@ -69,7 +69,7 @@ class OpenstackConfigAction(Action):
             filters['is_active'] = int(not params.deleted)
 
         if 'node' in params:
-            filters['node_id'] = params.node
+            filters['node_ids'] = params.node
 
         if 'role' in params:
             filters['node_role'] = params.role
@@ -99,18 +99,19 @@ class OpenstackConfigAction(Action):
     def upload(self, params):
         """Upload new configuration from file:
             fuel openstack-config --upload --env 1 --file config.yaml
-            fuel openstack-config --upload --env 1 --node 1 --file config.yaml
+            fuel openstack-config --upload --env 1 --node 1[,2,3,...]
+                --file config.yaml
             fuel openstack-config --upload --env 1
                 --role controller --file config.yaml
         """
-        node_id = getattr(params, 'node', None)
+        node_ids = getattr(params, 'node', None)
         node_role = getattr(params, 'role', None)
         data = OpenstackConfig.read_file(params.file)
 
         config = OpenstackConfig.create(
             cluster_id=params.env,
             configuration=data['configuration'],
-            node_id=node_id, node_role=node_role)
+            node_ids=node_ids, node_role=node_role)
         print("Openstack configuration with id {0} "
               "has been uploaded from file '{1}'"
               "".format(config.id, params.file))
@@ -130,15 +131,15 @@ class OpenstackConfigAction(Action):
     def execute(self, params):
         """Deploy configuration:
             fuel openstack-config --execute --env 1
-            fuel openstack-config --execute --env 1 --node 1
+            fuel openstack-config --execute --env 1 --node 1[,2,3,...]
             fuel openstack-config --execute --env 1 --role controller
             fuel openstack-config --execute --env 1 --force
         """
-        node_id = getattr(params, 'node', None)
+        node_ids = getattr(params, 'node', None)
         node_role = getattr(params, 'role', None)
         force = getattr(params, 'force', False)
         task_result = OpenstackConfig.execute(
-            cluster_id=params.env, node_id=node_id,
+            cluster_id=params.env, node_ids=node_ids,
             node_role=node_role, force=force)
         if task_result['status'] == 'error':
             print(

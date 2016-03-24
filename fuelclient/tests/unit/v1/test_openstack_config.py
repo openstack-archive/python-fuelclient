@@ -107,7 +107,7 @@ class TestOpenstackConfigActions(base.UnitTestCase):
         self.assertTrue(m_get.called)
 
         m_get = self.m_request.get(
-            '/api/v1/openstack-config/?cluster_id=84&node_id=42', json=[
+            '/api/v1/openstack-config/?cluster_id=84&node_ids=42', json=[
                 utils.get_fake_openstack_config(id=1, cluster_id=32),
             ])
         self.execute(['fuel', 'openstack-config', '--env', '84',
