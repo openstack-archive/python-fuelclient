@@ -48,6 +48,7 @@ def get_client(resource, version='v1'):
 
     version_map = {
         'v1': {
+            'deployment_history': v1.deployment_history,
             'environment': v1.environment,
             'fuel-version': v1.fuelversion,
             'network-group': v1.network_group,

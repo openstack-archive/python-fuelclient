@@ -18,6 +18,7 @@ All action classes must be added to action_tuple to be used by parser
 """
 from fuelclient.cli.actions.deploy import DeployChangesAction
 from fuelclient.cli.actions.deploy import RedeployChangesAction
+from fuelclient.cli.actions.deployment_tasks import DeploymentTasksAction
 from fuelclient.cli.actions.environment import EnvironmentAction
 from fuelclient.cli.actions.fact import DeploymentAction
 from fuelclient.cli.actions.fact import ProvisioningAction
@@ -48,6 +49,7 @@ from fuelclient.cli.actions.vip import VIPAction
 actions_tuple = (
     DeployChangesAction,
     DeploymentAction,
+    DeploymentTasksAction,
     EnvironmentAction,
     FuelVersionAction,
     GraphAction,
