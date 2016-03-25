@@ -539,18 +539,7 @@ class TestUploadSettings(base.BaseTestCase):
             self.download_command(self.cmd)
         ))
 
-    def test_upload_settings_before_deployment(self):
+    def test_upload_settings(self):
         msg_success = "Settings configuration uploaded.\n"
         self.check_for_stdout(self.upload_command(self.cmd),
-                              msg_success)
-
-    def test_upload_settings_after_deployment(self):
-        msg_success = "Settings configuration uploaded.\n"
-        msg_error = "couldn't be changed after or during deployment.)\n"
-
-        self.run_cli_command(self.deploy_changes)
-        self.check_for_stderr(self.upload_command(self.cmd),
-                              msg_error,
-                              check_errors=False)
-        self.check_for_stdout(self.upload_command(self.cmd_force),
                               msg_success)
