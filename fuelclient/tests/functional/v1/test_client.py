@@ -192,7 +192,7 @@ class TestHandlers(base.BaseTestCase):
             "task --task-id 1 --debug",
             [
                 "GET http://127.0.0.1",
-                "/api/v1/tasks/1/"
+                "/api/v1/transactions/1/"
             ],
             check_errors=False
         )
@@ -200,7 +200,7 @@ class TestHandlers(base.BaseTestCase):
             "task --task-id 1 --delete --debug",
             [
                 "DELETE http://127.0.0.1",
-                "/api/v1/tasks/1/?force=0"
+                "/api/v1/transactions/1/?force=0"
             ],
             check_errors=False
         )
@@ -208,7 +208,7 @@ class TestHandlers(base.BaseTestCase):
             "task --task-id 1 --delete --force --debug",
             [
                 "DELETE http://127.0.0.1",
-                "/api/v1/tasks/1/?force=1"
+                "/api/v1/transactions/1/?force=1"
             ],
             check_errors=False
         )
@@ -216,7 +216,7 @@ class TestHandlers(base.BaseTestCase):
             "task --tid 1 --delete --debug",
             [
                 "DELETE http://127.0.0.1",
-                "/api/v1/tasks/1/?force=0"
+                "/api/v1/transactions/1/?force=0"
             ],
             check_errors=False
         )
