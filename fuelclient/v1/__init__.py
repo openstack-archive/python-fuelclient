@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from fuelclient.v1 import deployment_history
 from fuelclient.v1 import environment
 from fuelclient.v1 import fuelversion
 from fuelclient.v1 import network_group
@@ -22,7 +23,8 @@ from fuelclient.v1 import task
 from fuelclient.v1 import vip
 
 # Please keeps the list in alphabetical order
-__all__ = ('environment',
+__all__ = ('deployment_history',
+           'environment',
            'fuelversion',
            'network_group',
            'node',
