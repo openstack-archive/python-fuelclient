@@ -21,12 +21,12 @@ from fuelclient.objects.base import BaseObject
 
 class Task(BaseObject):
 
-    class_api_path = "tasks/"
-    instance_api_path = "tasks/{0}/"
+    class_api_path = "transactions/"
+    instance_api_path = "transactions/{0}/"
 
     def delete(self, force=False):
         return self.connection.delete_request(
-            "tasks/{0}/?force={1}".format(
+            "transactions/{0}/?force={1}".format(
                 self.id,
                 int(force),
             ))
