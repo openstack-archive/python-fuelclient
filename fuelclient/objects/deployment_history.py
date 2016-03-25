@@ -21,8 +21,7 @@ class DeploymentHistory(BaseObject):
                      "?nodes={nodes}&statuses={statuses}"
 
     @classmethod
-    def get_all_with_nodes_and_statuses(cls, transaction_id,
-                                        nodes=None, statuses=None):
+    def get_all(cls, transaction_id, nodes=None, statuses=None):
         statuses = ",".join(str(s) for s in statuses) if statuses else ""
         nodes = ",".join(str(n) for n in nodes) if nodes else ""
         history = cls.connection.get_request(

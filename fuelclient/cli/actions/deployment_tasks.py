@@ -45,27 +45,27 @@ class DeploymentTasksAction(Action):
         )
 
     def list(self, params):
-        """To display all deployment tasks:
+        """To display all deployment tasks for task:
                 fuel deployment-tasks --task-id 5
 
-            To display deployment tasks with for some nodes:
+            To display deployment tasks for some nodes:
                 fuel deployment-tasks --task-id 5 --nodes 1,2
 
-            To display deployment tasks with for some statuses(pending, error,
+            To display deployment tasks for some statuses(pending, error,
             ready, running):
-                fuel deployment-tasks --task-id 5 --statuses pending,running
+                fuel deployment-tasks --task-id 5 --status pending,running
 
-            To display deployment tasks with for some statuses(pending, error,
+            To display deployment tasks for some statuses(pending, error,
             ready, running) on some nodes:
-                fuel deployment-tasks --task-id 5 --statuses error --nodes 1,2
+                fuel deployment-tasks --task-id 5 --status error --nodes 1,2
         """
 
-        d_tasks_data = DeploymentHistory.get_all_with_nodes_and_statuses(
+        tasks_data = DeploymentHistory.get_all(
             params.task,
             params.node,
             params.status
         )
         self.serializer.print_to_output(
-            d_tasks_data,
-            format_table(d_tasks_data, acceptable_keys=self.acceptable_keys)
+            tasks_data,
+            format_table(tasks_data, acceptable_keys=self.acceptable_keys)
         )

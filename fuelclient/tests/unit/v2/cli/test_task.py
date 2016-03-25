@@ -17,7 +17,7 @@
 import mock
 
 from fuelclient.tests.unit.v2.cli import test_engine
-from fuelclient.tests.utils import fake_task
+from fuelclient.tests import utils
 
 
 class TestTaskCommand(test_engine.BaseCLITest):
@@ -25,9 +25,9 @@ class TestTaskCommand(test_engine.BaseCLITest):
     def setUp(self):
         super(TestTaskCommand, self).setUp()
 
-        self.m_client.get_all.return_value = [fake_task.get_fake_task()
+        self.m_client.get_all.return_value = [utils.get_fake_task()
                                               for i in range(10)]
-        self.m_client.get_by_id.return_value = fake_task.get_fake_task()
+        self.m_client.get_by_id.return_value = utils.get_fake_task()
 
     def test_task_list(self):
         args = 'task list'
@@ -44,3 +44,17 @@ class TestTaskCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('task', mock.ANY)
         self.m_client.get_by_id.assert_called_once_with(task_id)
+
+    def test_task_history_show(self):
+        task_id = 42
+        args = 'task history show {task_id} '.format(task_id=task_id)
+
+        self.m_client.get_all.return_value = \
+            utils.get_fake_deployment_history()
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('deployment_history',
+                                                  mock.ANY)
+        self.m_client.get_all.assert_called_once_with(transaction_id=task_id,
+                                                      nodes=None,
+                                                      statuses=None)
