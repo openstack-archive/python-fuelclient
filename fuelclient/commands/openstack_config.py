@@ -41,10 +41,10 @@ class OpenstackConfigMixin(object):
         )
 
     @staticmethod
-    def add_node_id_arg(parser):
+    def add_node_ids_arg(parser):
         parser.add_argument(
             '-n', '--node',
-            type=int, default=None, help='Node ID.'
+            type=int, nargs='+', default=None, help='Node IDs.'
         )
 
     @staticmethod
@@ -81,7 +81,7 @@ class OpenstackConfigList(OpenstackConfigMixin, base.BaseCommand):
         parser = super(OpenstackConfigList, self).get_parser(prog_name)
 
         self.add_env_arg(parser)
-        self.add_node_id_arg(parser)
+        self.add_node_ids_arg(parser)
         self.add_node_role_arg(parser)
         self.add_deleted_arg(parser)
 
@@ -89,7 +89,7 @@ class OpenstackConfigList(OpenstackConfigMixin, base.BaseCommand):
 
     def take_action(self, args):
         data = self.client.get_filtered(
-            cluster_id=args.env, node_id=args.node,
+            cluster_id=args.env, node_ids=args.node,
             node_role=args.role, is_active=(not args.deleted))
         data = data_utils.get_display_data_multi(self.columns, data)
 
@@ -124,7 +124,7 @@ class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseCommand):
         parser = super(OpenstackConfigUpload, self).get_parser(prog_name)
 
         self.add_env_arg(parser)
-        self.add_node_id_arg(parser)
+        self.add_node_ids_arg(parser)
         self.add_node_role_arg(parser)
         self.add_file_arg(parser)
 
@@ -133,7 +133,7 @@ class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseCommand):
     def take_action(self, args):
         config = self.client.upload(
             path=args.file, cluster_id=args.env,
-            node_id=args.node, node_role=args.role)
+            node_ids=args.node, node_role=args.role)
 
         msg = "OpenStack configuration with id {0} " \
               "uploaded from file '{0}'\n".format(config.id, args.file)
@@ -148,7 +148,7 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
         parser = super(OpenstackConfigExecute, self).get_parser(prog_name)
 
         self.add_env_arg(parser)
-        self.add_node_id_arg(parser)
+        self.add_node_ids_arg(parser)
         self.add_node_role_arg(parser)
         self.add_force_arg(parser)
 
@@ -156,7 +156,7 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
 
     def take_action(self, args):
         self.client.execute(
-            cluster_id=args.env, node_id=args.node, node_role=args.role,
+            cluster_id=args.env, node_ids=args.node, node_role=args.role,
             force=args.force)
 
         msg = "OpenStack configuration execution started.\n"
