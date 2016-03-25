@@ -20,11 +20,11 @@ class OpenstackConfigClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.OpenstackConfig
 
-    def upload(self, path, cluster_id, node_id=None, node_role=None):
+    def upload(self, path, cluster_id, node_ids=None, node_role=None):
         data = self._entity_wrapper.read_file(path)
         return self._entity_wrapper.create(
             cluster_id=cluster_id, configuration=data['configuration'],
-            node_id=node_id, node_role=node_role)
+            node_ids=node_ids, node_role=node_role)
 
     def download(self, config_id, path):
         config = self._entity_wrapper(config_id)
@@ -33,15 +33,17 @@ class OpenstackConfigClient(base_v1.BaseV1Client):
 
         return path
 
-    def execute(self, config_id, cluster_id, node_id, node_role, force=False):
+    def execute(self, cluster_id, config_id=None, node_ids=None,
+                node_role=None, force=False):
         return self._entity_wrapper.execute(
-            config_id=config_id, cluster_id=cluster_id, node_id=node_id,
+            cluster_id=cluster_id, config_id=config_id, node_ids=node_ids,
             node_role=node_role, force=force)
 
-    def get_filtered(self, cluster_id, node_id, node_role, is_active=True):
+    def get_filtered(self, cluster_id, node_ids=None,
+                     node_role=None, is_active=True):
         return self._entity_wrapper.get_filtered_data(
-            cluster_id=cluster_id, node_id=node_id, node_role=node_role,
-            is_active=is_active)
+            cluster_id=cluster_id, node_ids=node_ids,
+            node_role=node_role, is_active=is_active)
 
 
 def get_client():
