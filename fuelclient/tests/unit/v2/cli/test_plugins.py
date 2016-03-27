@@ -17,6 +17,7 @@
 import mock
 
 from fuelclient.tests.unit.v2.cli import test_engine
+from fuelclient.tests.utils import fake_plugin
 
 
 class TestPluginsCommand(test_engine.BaseCLITest):
@@ -24,6 +25,17 @@ class TestPluginsCommand(test_engine.BaseCLITest):
 
     def setUp(self):
         super(TestPluginsCommand, self).setUp()
+
+        get_fake_plugins = fake_plugin.get_fake_plugins
+
+        self.m_client.get_modified.return_value = get_fake_plugins(10)
+
+    def test_plugin_list(self):
+        args = 'plugins list'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('plugins', mock.ANY)
+        self.m_client.get_modified.assert_called_once_with()
 
     def test_plugins_sync_all(self):
         args = 'plugins sync'
