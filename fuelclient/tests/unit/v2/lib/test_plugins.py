@@ -16,6 +16,7 @@
 
 import fuelclient
 from fuelclient.tests.unit.v2.lib import test_api
+from fuelclient.tests import utils
 
 
 class TestPluginsFacade(test_api.BaseLibTest):
@@ -24,7 +25,19 @@ class TestPluginsFacade(test_api.BaseLibTest):
         super(TestPluginsFacade, self).setUp()
 
         self.version = 'v1'
+        self.res_uri = '/api/{version}/plugins/'.format(version=self.version)
+
+        self.fake_plugins = utils.get_fake_plugins(10)
+
         self.client = fuelclient.get_client('plugins', self.version)
+
+    def test_plugins_list(self):
+
+        matcher = self.m_request.get(self.res_uri, json=self.fake_plugins)
+
+        self.client.get_modified()
+
+        self.assertTrue(self.res_uri, matcher.called)
 
     def test_sync_plugins(self):
         expected_uri = '/api/{version}/plugins/sync/'.format(
