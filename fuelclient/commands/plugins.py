@@ -13,10 +13,39 @@
 #    under the License.
 
 from fuelclient.commands import base
+from fuelclient.common import data_utils
 
 
 class PluginsMixIn(object):
     entity_name = 'plugins'
+
+
+class PluginsList(PluginsMixIn, base.BaseListCommand):
+    """Show list of all available plugins."""
+
+    columns = ('id',
+               'name',
+               'version',
+               'package_version',
+               'releases'
+               )
+
+    def get_parser(self, prog_name):
+        parser = super(PluginsList, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-l',
+            '--list',
+            type=int,
+            help='Show list of all available plugins')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.get_modified()
+        data = data_utils.get_display_data_multi(self.columns, data)
+
+        return self.columns, data
 
 
 class PluginsSync(PluginsMixIn, base.BaseCommand):
