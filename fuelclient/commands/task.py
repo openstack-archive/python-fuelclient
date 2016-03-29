@@ -19,6 +19,16 @@ from fuelclient.common import data_utils
 class TaskMixIn(object):
     entity_name = 'task'
 
+    @staticmethod
+    def add_file_arg(parser):
+        parser.add_argument(
+            '-f',
+            '--file',
+            required=True,
+            type=str,
+            help='YAML file that contains network configuration.'
+        )
+
 
 class TaskList(TaskMixIn, base.BaseListCommand):
     """Show list of all available tasks."""
@@ -85,3 +95,75 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
         data = data_utils.get_display_data_multi(self.columns, data)
 
         return (self.columns, data)
+
+
+class TaskNetworkConfigurationDownload(TaskMixIn, base.BaseListCommand):
+
+    entity_name = 'network-configuration'
+
+    def get_parser(self, prog_name):
+        parser = super(TaskNetworkConfigurationDownload, self).get_parser(
+            prog_name)
+        parser.add_argument('id', type=int,
+                            help='Id of the Task.')
+        self.add_file_arg(parser)
+
+    def take_action(self, parsed_args):
+        networks_data_file_path = self.client.download(
+            transaction_id=parsed_args.id,
+            file_path=parsed_args.file
+        )
+
+        self.app.stdout.write(
+            "Network configuration for task with id={0}"
+            " downloaded to {1}".format(parsed_args.id,
+                                        networks_data_file_path)
+        )
+
+
+class TaskDeploymentInfoDownload(TaskMixIn, base.BaseListCommand):
+
+    entity_name = 'deployment-info'
+
+    def get_parser(self, prog_name):
+        parser = super(TaskDeploymentInfoDownload, self).get_parser(
+            prog_name)
+        parser.add_argument('id', type=int,
+                            help='Id of the Task.')
+        self.add_file_arg(parser)
+
+    def take_action(self, parsed_args):
+        deployment_data_file_path = self.client.download(
+            transaction_id=parsed_args.id,
+            file_path=parsed_args.file
+        )
+
+        self.app.stdout.write(
+            "Deployment info for task with id={0}"
+            " downloaded to {1}".format(parsed_args.id,
+                                        deployment_data_file_path)
+        )
+
+
+class TaskClusterSettingsDownload(TaskMixIn, base.BaseListCommand):
+
+    entity_name = 'cluster-settings'
+
+    def get_parser(self, prog_name):
+        parser = super(TaskClusterSettingsDownload, self).get_parser(
+            prog_name)
+        parser.add_argument('id', type=int,
+                            help='Id of the Task.')
+        self.add_file_arg(parser)
+
+    def take_action(self, parsed_args):
+        cluster_data_file_path = self.client.download(
+            transaction_id=parsed_args.id,
+            file_path=parsed_args.file
+        )
+
+        self.app.stdout.write(
+            "Cluster settings for task with id={0}"
+            " downloaded to {1}".format(parsed_args.id,
+                                        cluster_data_file_path)
+        )
