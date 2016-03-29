@@ -48,9 +48,12 @@ def get_client(resource, version='v1'):
 
     version_map = {
         'v1': {
+            'cluster-settings': v1.cluster_settings,
             'deployment_history': v1.deployment_history,
+            'deployment-info': v1.deployment_info,
             'environment': v1.environment,
             'fuel-version': v1.fuelversion,
+            'network-configuration': v1.network_configuration,
             'network-group': v1.network_group,
             'node': v1.node,
             'openstack-config': v1.openstack_config,
