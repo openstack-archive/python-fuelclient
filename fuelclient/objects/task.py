@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from operator import methodcaller
 from time import sleep
 
@@ -23,6 +25,10 @@ class Task(BaseObject):
 
     class_api_path = "transactions/"
     instance_api_path = "transactions/{0}/"
+    info_types_url_map = {
+        'deployment_info': 'deployment_info',
+        'cluster_settings': 'settings',
+        'network_configuration': 'network_configuration'}
 
     def delete(self, force=False):
         return self.connection.delete_request(
@@ -46,6 +52,91 @@ class Task(BaseObject):
     def wait(self):
         while not self.is_finished:
             sleep(0.5)
+
+    def get_deployment_info(self):
+        return self.connection.get_request(
+            self._get_additional_info_url('deployment_info'))
+
+    def get_network_configuration(self):
+        return self.connection.get_request(
+            self._get_additional_info_url('network_configuration'))
+
+    def get_cluster_settings(self):
+        return self.connection.get_request(
+            self._get_additional_info_url('cluster_settings'))
+
+    def write_deployment_info_to_file(self, data, serializer=None,
+                                      file_path=None):
+        return self._write_additional_info_to_file(
+            'deployment_info', data, serializer, file_path)
+
+    def write_network_configuration_to_file(self, data, serializer=None,
+                                            file_path=None):
+        return self._write_additional_info_to_file(
+            'network_configuration', data, serializer, file_path)
+
+    def write_cluster_settings_to_file(self, data, serializer=None,
+                                       file_path=None):
+        return self._write_additional_info_to_file(
+            'cluster_settings', data, serializer, file_path)
+
+    def _get_additional_info_url(self, info_type):
+        """Generate additional info url.
+
+        :param info_type: one of deployment_info, cluster_settings,
+                          network_configuration
+        :type info_type: str
+        :return: url
+        :rtype: str
+        """
+
+        return self.instance_api_path.format(self.id) +\
+            self.info_types_url_map[info_type]
+
+    def _get_default_additional_info_path(self, info_type):
+        """Generate additional info path.
+
+        :param info_type: one of deployment_info, cluster_settings,
+                          network_configuration
+        :type info_type: str
+        :return: path
+        :rtype: str
+        """
+        return os.path.join(
+            os.path.abspath(os.curdir),
+            "{info_type}_{task_id}".format(
+                info_type=info_type,
+                task_id=self.id)
+        )
+
+    def _write_additional_info_to_file(self, info_type, data, serializer=None,
+                                       file_path=None):
+        """Write additional info data to the given path.
+
+        :param info_type: one of deployment_info, cluster_settings,
+                          network_configuration
+        :type info_type: str
+        :param data: data
+        :type vips_data: list of dict
+        :param serializer: serializer
+        :param file_path: path
+        :type file_path: str
+        :return: path to resulting file
+        :rtype: str
+        """
+
+        serializer = serializer or self.serializer
+
+        if file_path:
+            return serializer.write_to_full_path(
+                file_path,
+                data
+            )
+        else:
+            return serializer.write_to_path(
+                self._get_default_additional_info_path(info_type),
+                data
+            )
 
 
 class DeployTask(Task):
