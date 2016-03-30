@@ -19,6 +19,7 @@ functionality from nailgun objects.
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.deployment_history import DeploymentHistory
 from fuelclient.objects.environment import Environment
+from fuelclient.objects.graph import Graph
 from fuelclient.objects.node import Node
 from fuelclient.objects.node import NodeCollection
 from fuelclient.objects.openstack_config import OpenstackConfig
