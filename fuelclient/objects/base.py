@@ -11,7 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import os
 
+from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.client import APIClient
 
@@ -66,3 +68,18 @@ class BaseObject(object):
     @classmethod
     def get_all(cls):
         return map(cls.init_with_data, cls.get_all_data())
+
+    @classmethod
+    def _check_file_path(cls, file_path):
+        if not os.path.exists(file_path):
+            raise error.InvalidFileException(
+                "File '{0}' doesn't exist.".format(file_path))
+
+    @classmethod
+    def _check_dir(cls, directory):
+        if not os.path.exists(directory):
+            raise error.InvalidDirectoryException(
+                "Directory '{0}' doesn't exist.".format(directory))
+        if not os.path.isdir(directory):
+            raise error.InvalidDirectoryException(
+                "Error: '{0}' is not a directory.".format(directory))
