@@ -50,6 +50,7 @@ def get_client(resource, version='v1'):
         'v1': {
             'environment': v1.environment,
             'fuel-version': v1.fuelversion,
+            'graph': v1.graph,
             'network-group': v1.network_group,
             'node': v1.node,
             'openstack-config': v1.openstack_config,
