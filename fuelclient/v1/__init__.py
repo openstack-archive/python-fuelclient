@@ -15,6 +15,7 @@
 from fuelclient.v1 import deployment_history
 from fuelclient.v1 import environment
 from fuelclient.v1 import fuelversion
+from fuelclient.v1 import graph
 from fuelclient.v1 import network_group
 from fuelclient.v1 import node
 from fuelclient.v1 import openstack_config
@@ -26,6 +27,7 @@ from fuelclient.v1 import vip
 __all__ = ('deployment_history',
            'environment',
            'fuelversion',
+           'graph',
            'network_group',
            'node',
            'openstack_config',
