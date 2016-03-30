@@ -13,12 +13,32 @@
 #    under the License.
 
 import abc
+import os
 
 import six
 
+from fuelclient.cli import error
+
+
+class FileMethodsMixin(object):
+    @classmethod
+    def check_file_path(cls, file_path):
+        if not os.path.exists(file_path):
+            raise error.InvalidFileException(
+                "File '{0}' doesn't exist.".format(file_path))
+
+    @classmethod
+    def check_dir(cls, directory):
+        if not os.path.exists(directory):
+            raise error.InvalidDirectoryException(
+                "Directory '{0}' doesn't exist.".format(directory))
+        if not os.path.isdir(directory):
+            raise error.InvalidDirectoryException(
+                "Error: '{0}' is not a directory.".format(directory))
+
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseV1Client(object):
+class BaseV1Client(FileMethodsMixin):
 
     @abc.abstractproperty
     def _entity_wrapper(self):

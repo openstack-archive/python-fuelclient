@@ -134,7 +134,7 @@ class Environment(BaseObject):
 
     def write_network_data(self, network_data, directory=os.curdir,
                            serializer=None):
-        self._check_dir(directory)
+        self.check_dir(directory)
         return (serializer or self.serializer).write_to_path(
             self.get_network_data_path(directory),
             network_data
@@ -142,7 +142,7 @@ class Environment(BaseObject):
 
     def write_settings_data(self, settings_data, directory=os.curdir,
                             serializer=None):
-        self._check_dir(directory)
+        self.check_dir(directory)
         return (serializer or self.serializer).write_to_path(
             self.get_settings_data_path(directory),
             settings_data
@@ -151,7 +151,7 @@ class Environment(BaseObject):
     def write_vmware_settings_data(self, settings_data, directory=None,
                                    serializer=None):
         directory = directory or os.curdir
-        self._check_dir(directory)
+        self.check_dir(directory)
         return (serializer or self.serializer).write_to_path(
             self.get_vmware_settings_data_path(directory),
             settings_data
@@ -167,23 +167,23 @@ class Environment(BaseObject):
 
     def read_network_data(self, directory=os.curdir,
                           serializer=None):
-        self._check_dir(directory)
+        self.check_dir(directory)
         network_file_path = self.get_network_data_path(directory)
         return (serializer or self.serializer).read_from_file(
             network_file_path)
 
     def read_settings_data(self, directory=os.curdir, serializer=None):
-        self._check_dir(directory)
+        self.check_dir(directory)
         settings_file_path = self.get_settings_data_path(directory)
         return (serializer or self.serializer).read_from_file(
             settings_file_path)
 
-    def _check_file_path(self, file_path):
+    def check_file_path(self, file_path):
         if not os.path.exists(file_path):
             raise error.InvalidFileException(
                 "File '{0}' doesn't exist.".format(file_path))
 
-    def _check_dir(self, directory):
+    def check_dir(self, directory):
         if not os.path.exists(directory):
             raise error.InvalidDirectoryException(
                 "Directory '{0}' doesn't exist.".format(directory))
@@ -192,14 +192,14 @@ class Environment(BaseObject):
                 "Error: '{0}' is not a directory.".format(directory))
 
     def read_vmware_settings_data(self, directory=os.curdir, serializer=None):
-        self._check_dir(directory)
+        self.check_dir(directory)
         return (serializer or self.serializer).read_from_file(
             self.get_vmware_settings_data_path(directory))
 
     def read_network_template_data(self, directory=os.curdir,
                                    serializer=None):
         """Used by 'fuel' command line utility."""
-        self._check_dir(directory)
+        self.check_dir(directory)
         network_template_file_path = self.get_network_template_data_path(
             directory)
         return self.read_network_template_data_from_file(
@@ -369,9 +369,9 @@ class Environment(BaseObject):
 
     def read_deployment_info(self, fact_type,
                              directory=os.path.curdir, serializer=None):
-        self._check_dir(directory)
+        self.check_dir(directory)
         dir_name = self._get_fact_dir_name(fact_type, directory=directory)
-        self._check_dir(dir_name)
+        self.check_dir(dir_name)
         return map(
             lambda f: (serializer or self.serializer).read_from_file(f),
             [os.path.join(dir_name, json_file)
@@ -621,7 +621,7 @@ class Environment(BaseObject):
         :return: data
         :rtype: list|object
         """
-        self._check_file_path(file_path)
+        self.check_file_path(file_path)
         return (serializer or self.serializer).read_from_file(file_path)
 
     def set_vips_data(self, data):
