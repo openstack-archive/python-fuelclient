@@ -14,6 +14,7 @@
 
 from fuelclient.v1 import environment
 from fuelclient.v1 import fuelversion
+from fuelclient.v1 import graph
 from fuelclient.v1 import network_group
 from fuelclient.v1 import node
 from fuelclient.v1 import openstack_config
@@ -24,6 +25,7 @@ from fuelclient.v1 import vip
 # Please keeps the list in alphabetical order
 __all__ = ('environment',
            'fuelversion',
+           'graph',
            'network_group',
            'node',
            'openstack_config',
