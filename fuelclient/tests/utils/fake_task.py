@@ -25,6 +25,7 @@ def get_fake_task(task_id=None, status=None, name=None,
     """
     return {'status': status or 'running',
             'name': name or 'deploy',
+            'id': task_id or 42,
             'task_id': task_id or 42,
             'cluster': cluster or 34,
             'result': result or '',
