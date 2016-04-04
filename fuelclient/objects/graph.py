@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import os
 
 from fuelclient.cli.serializers import Serializer
 from fuelclient.objects.base import BaseObject
@@ -30,6 +31,15 @@ class Graph(BaseObject):
                              "/deployment_graphs/{graph_type}"
 
     cluster_deploy_api_path = "clusters/{cluster_id}/deploy/"
+
+    merged_cluster_tasks_api_path = "clusters/{cluster_id}/deployment_tasks" \
+                                    "/?graph_type={graph_type}"
+
+    merged_plugins_tasks_api_path = "clusters/{cluster_id}/deployment_tasks" \
+                                    "/plugins/?graph_type={graph_type}"
+
+    cluster_release_tasks_api_path = "clusters/{cluster_id}/deployment_tasks" \
+                                     "/release/?graph_type={graph_type}"
 
     @classmethod
     def read_tasks_data_from_file(cls, file_path=None, serializer=None):
@@ -94,3 +104,57 @@ class Graph(BaseObject):
 
         deploy_data = cls.connection.put_request(url, {})
         return DeployTask.init_with_data(deploy_data)
+
+    # download
+    @classmethod
+    def get_merged_cluster_tasks(cls, cluster_id, graph_type=None):
+        return cls.connection.get_request(
+            cls.merged_cluster_tasks_api_path.format(
+                cluster_id=cluster_id,
+                graph_type=graph_type or ""))
+
+    @classmethod
+    def get_merged_plugins_tasks(cls, cluster_id, graph_type=None):
+        return cls.connection.get_request(
+            cls.merged_plugins_tasks_api_path.format(
+                cluster_id=cluster_id,
+                graph_type=graph_type or ""))
+
+    @classmethod
+    def get_release_tasks_for_cluster(cls, cluster_id, graph_type=None):
+        return cls.connection.get_request(
+            cls.merged_plugins_tasks_api_path.format(
+                cluster_id=cluster_id,
+                graph_type=graph_type or ""))
+
+    @classmethod
+    def get_default_tasks_data_path(cls):
+        return os.path.join(
+            os.path.abspath(os.curdir),
+            "cluster_graph"
+        )
+
+    @classmethod
+    def write_tasks_to_file(cls, tasks_data, serializer=None, file_path=None):
+        serializer = serializer or Serializer()
+        if file_path:
+            return serializer.write_to_full_path(
+                file_path,
+                tasks_data
+            )
+        else:
+            return serializer.write_to_path(
+                cls.get_default_tasks_data_path(),
+                tasks_data
+            )
+
+    # list
+    @classmethod
+    def get_graphs_list_for_model(
+            cls, related_model, related_model_id, graph_type=None):
+        return cls.connection.get_request(
+            cls.related_graphs_list_api_path.format(
+                related_model=related_model,
+                related_model_id=related_model_id,
+                graph_type=graph_type or "")
+        )
