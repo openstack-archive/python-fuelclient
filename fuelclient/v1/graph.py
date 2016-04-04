@@ -66,6 +66,55 @@ class GraphClient(base_v1.BaseV1Client):
             nodes=nodes,
             graph_type=graph_type)
 
+    def download(self, env_id,
+                 all, cluster, plugins, release,
+                 graph_type, file_path=None):
+
+        # check params
+        if [all, cluster, plugins, release].count(False) != 3:
+            msg = ("Only one of the "
+                   "--all (-a), "
+                   "--cluster (-c), "
+                   "--release (-r), "
+                   "--plugins (-p) "
+                   "keys should be defined")
+            raise error.BadDataException(msg)
+        # get data
+        if all:
+            tasks_data = self._entity_wrapper.get_merged_cluster_tasks(
+                cluster_id=env_id,
+                graph_type=graph_type)
+        elif cluster:
+            tasks_data = self._entity_wrapper.get_graph_for_model(
+                related_model='clusters',
+                related_model_id=env_id,
+                graph_type=graph_type).get('tasks', [])
+        elif plugins:
+            tasks_data = self._entity_wrapper.get_merged_plugins_tasks(
+                cluster_id=env_id,
+                graph_type=graph_type)
+        elif release:
+            tasks_data = self._entity_wrapper.get_release_tasks_for_cluster(
+                cluster_id=env_id,
+                graph_type=graph_type)
+        else:
+            return
+
+        # write to file
+        graph_data_file_path = self._entity_wrapper.write_tasks_to_file(
+            tasks_data=tasks_data,
+            serializer=Serializer(),
+            file_path=file_path)
+
+        return graph_data_file_path
+
+    def list(self, env_id):
+        # todo(ikutukov): extend lists to support all models
+        return self._entity_wrapper.get_graphs_list_for_model(
+            related_model='clusters',
+            related_model_id=env_id
+        )
+
 
 def get_client():
     return GraphClient()
