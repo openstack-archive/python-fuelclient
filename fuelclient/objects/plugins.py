@@ -453,6 +453,11 @@ class Plugins(base.BaseObject):
             # Replace plugin information
             url = cls.class_instance_path.format(id=resp['id'])
             resp = cls.connection.put_request(url, metadata)
+        elif resp_raw.status_code == 409:
+            error.exit_with_error(
+                "Nothing to do: %(title)s, version "
+                "%(package_version)s, does not update "
+                "installed plugin." % metadata)
         else:
             resp_raw.raise_for_status()
 
