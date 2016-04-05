@@ -16,30 +16,12 @@
 
 import os
 
-from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 
 
-class FileMethodsMixin(object):
-    @classmethod
-    def check_file_path(cls, file_path):
-        if not os.path.exists(file_path):
-            raise error.InvalidFileException(
-                "File '{0}' doesn't exist.".format(file_path))
-
-    @classmethod
-    def check_dir(cls, directory):
-        if not os.path.exists(directory):
-            raise error.InvalidDirectoryException(
-                "Directory '{0}' doesn't exist.".format(directory))
-        if not os.path.isdir(directory):
-            raise error.InvalidDirectoryException(
-                "Error: '{0}' is not a directory.".format(directory))
-
-
-class GraphUpload(base.BaseCommand, FileMethodsMixin):
+class GraphUpload(base.BaseCommand, base.FileMethodsMixin):
     """Upload deployment graph configuration."""
     entity_name = 'graph'
 

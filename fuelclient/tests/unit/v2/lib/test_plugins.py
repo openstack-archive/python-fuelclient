@@ -53,3 +53,7 @@ class TestPluginsFacade(test_api.BaseLibTest):
         self.client.sync(ids=ids)
         self.assertTrue(matcher.called)
         self.assertEqual(ids, matcher.last_request.json()['ids'])
+
+    def test_install_plugins(self):
+        pass
+

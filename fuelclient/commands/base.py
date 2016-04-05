@@ -13,6 +13,7 @@
 #    under the License.
 
 import abc
+import os
 
 from cliff import command
 from cliff import lister
@@ -20,6 +21,7 @@ from cliff import show
 import six
 
 import fuelclient
+from fuelclient.cli import error
 from fuelclient.common import data_utils
 
 
@@ -132,3 +134,20 @@ class BaseDeleteCommand(BaseCommand):
             msg.format(
                 ent=self.entity_name.capitalize(),
                 ent_id=parsed_args.id))
+
+
+class FileMethodsMixin(object):
+    @classmethod
+    def check_file_path(cls, file_path):
+        if not os.path.exists(file_path):
+            raise error.InvalidFileException(
+                "File '{0}' doesn't exist.".format(file_path))
+
+    @classmethod
+    def check_dir(cls, directory):
+        if not os.path.exists(directory):
+            raise error.InvalidDirectoryException(
+                "Directory '{0}' doesn't exist.".format(directory))
+        if not os.path.isdir(directory):
+            raise error.InvalidDirectoryException(
+                "Error: '{0}' is not a directory.".format(directory))
