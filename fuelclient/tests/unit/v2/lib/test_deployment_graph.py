@@ -115,3 +115,19 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             nodes=[1, 2, 3],
             graph_type="custom_graph")
         self.assertTrue(matcher_put.called)
+
+    def test_graphs_list(self):
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/1/deployment_graphs/',
+            json=[]
+        )
+        self.client.list(1)
+        self.assertTrue(matcher_get.called)
+
+    def test_graphs_download(self):
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/1/deployment_tasks/?graph_type=custom_graph',
+            json=[]
+        )
+        self.client.download(env_id=1, level='all', graph_type='custom_graph')
+        self.assertTrue(matcher_get.called)
