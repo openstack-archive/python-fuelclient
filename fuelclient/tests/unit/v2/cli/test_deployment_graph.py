@@ -34,7 +34,7 @@ TASKS_YAML = '''- id: custom-task-1
 
 class TestGraphActions(test_engine.BaseCLITest):
 
-    @mock.patch('fuelclient.commands.graph.os')
+    @mock.patch('fuelclient.commands.base.os')
     def _test_cmd(self, method, cmd_line, expected_kwargs, os_m):
         os_m.exists.return_value = True
         self.m_get_client.reset_mock()

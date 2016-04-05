@@ -53,6 +53,17 @@ class PluginsClient(base_v1.BaseV1Client):
 
         self._entity_wrapper.sync(plugin_ids=ids)
 
+    def install(self, plugin_path, force=False):
+        """Install plugin archive and register it in API service
+
+        :param plugin_path: Name of Fuel plugin file
+        :type plugin_path: str
+        :param force: Update existing plugin meta even if it is not updatable
+        :type force: bool
+        """
+
+        self._entity_wrapper.install(plugin_path, force=force)
+
 
 def get_client():
     return PluginsClient()
