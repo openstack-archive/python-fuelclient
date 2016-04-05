@@ -225,8 +225,12 @@ class TestPluginsObject(base.UnitTestCase):
     def test_install(self, make_obj_by_file_mock, register_mock):
         plugin_obj = self.mock_make_obj_by_file(make_obj_by_file_mock)
         register_mock.return_value = {'id': 1}
-        self.plugin.install(self.path)
 
+        with mock.patch('fuelclient.objects.base.os') as base_os:
+            base_os.path.exists.return_value = True
+            self.plugin.install(self.path)
+
+        self.assertEqual(base_os.path.exists.call_count, 1)
         plugin_obj.install.assert_called_once_with(self.path, force=False)
         register_mock.assert_called_once_with(
             'retrieved_name', 'retrieved_version', force=False)
