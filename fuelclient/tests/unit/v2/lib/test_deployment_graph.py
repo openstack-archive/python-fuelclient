@@ -117,3 +117,25 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             nodes=[1, 2, 3],
             graph_type="custom_graph")
         self.assertTrue(matcher_put.called)
+
+    def test_graphs_list(self):
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/1/deployment_graphs/',
+            json=[{
+                'name': 'updated-graph-name',
+                'tasks': [{
+                    'id': 'test-task2',
+                    'type': 'puppet',
+                    'task_name': 'test-task2',
+                    'version': '2.0.0'
+                }],
+                'relations': [{
+                    'model': 'cluster',
+                    'model_id': 370,
+                    'type': 'custom-graph'
+                }],
+                'id': 1
+            }]
+        )
+        self.client.list(1)
+        self.assertTrue(matcher_get.called)
