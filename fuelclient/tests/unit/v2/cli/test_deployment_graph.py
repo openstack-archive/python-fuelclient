@@ -15,6 +15,7 @@
 #    under the License.
 
 import mock
+import six
 import yaml
 
 from fuelclient.tests.unit.v2.cli import test_engine
@@ -86,3 +87,44 @@ class TestGraphActions(test_engine.BaseCLITest):
                 nodes=[1, 2, 3]
             )
         )
+
+    def test_download(self):
+        self._test_cmd(
+            'download',
+            '--env 1 --all --file existing_graph.yaml --type custom_graph',
+            dict(
+                env_id=1,
+                level='all',
+                graph_type='custom_graph'
+            )
+        )
+
+    def test_list(self):
+        with mock.patch('sys.stdout', new=six.moves.cStringIO()) as m_stdout:
+            self.m_get_client.reset_mock()
+            self.m_client.get_filtered.reset_mock()
+            self.m_client.list.return_value = [
+                {
+                    'name': 'updated-graph-name',
+                    'tasks': [{
+                        'id': 'test-task2',
+                        'type': 'puppet',
+                        'task_name': 'test-task2',
+                        'version': '2.0.0'
+                    }],
+                    'relations': [{
+                        'model': 'cluster',
+                        'model_id': 370,
+                        'type': 'custom-graph'
+                    }],
+                    'id': 1
+                }
+            ]
+            self.exec_command('graph list --env 1')
+            self.m_get_client.assert_called_once_with('graph', mock.ANY)
+            self.m_client.list.assert_called_once_with(env_id=1)
+
+            self.assertIn('1', m_stdout.getvalue())
+            self.assertIn('updated-graph-name', m_stdout.getvalue())
+            self.assertIn('custom-graph', m_stdout.getvalue())
+            self.assertIn('test-task2', m_stdout.getvalue())
