@@ -25,6 +25,8 @@ class TestPluginsCommand(test_engine.BaseCLITest):
     def setUp(self):
         super(TestPluginsCommand, self).setUp()
 
+        self.file_name = '/tmp/path/plugin.rpm'
+
     def test_plugins_sync_all(self):
         args = 'plugins sync'
         self.exec_command(args)
@@ -39,3 +41,14 @@ class TestPluginsCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('plugins', mock.ANY)
         self.m_client.sync.assert_called_once_with(ids=ids)
+
+    def test_plugins_install(self):
+        args = 'plugins install {file_name}'.format(file_name=self.file_name)
+
+        with mock.patch('fuelclient.commands.base.os') as os_m:
+            os_m.path.exists.return_value = True
+            self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('plugins', mock.ANY)
+        self.m_client.install.assert_called_once_with(self.file_name,
+                                                      force=False)

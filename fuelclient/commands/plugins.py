@@ -37,3 +37,35 @@ class PluginsSync(PluginsMixIn, base.BaseCommand):
         ids = parsed_args.ids if len(parsed_args.ids) > 0 else None
         self.client.sync(ids=ids)
         self.app.stdout.write("Plugins were successfully synchronized.\n")
+
+
+class PluginsInstall(PluginsMixIn, base.BaseCommand, base.FileMethodsMixin):
+    """Install plugin archive and register it in API service"""
+
+    def get_parser(self, prog_name):
+        parser = super(PluginsInstall, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'plugin_path',
+            type=str,
+            metavar='plugin-filename',
+            help='Path to Fuel plugin file.'
+        )
+
+        parser.add_argument(
+            '-f',
+            '--force',
+            action='store_true',
+            default=False,
+            help='Updates meta information about the plugin even it does not'
+                 'support updates.'
+        )
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.check_file_path(parsed_args.plugin_path)
+        self.client.install(parsed_args.plugin_path,
+                            force=parsed_args.force)
+        self.app.stdout.write("Plugin {0} was successfully installed.\n".
+                              format(parsed_args.plugin_path))
