@@ -96,7 +96,6 @@ class PluginAction(Action):
                fuel plugins --install plugin-name-2.0-2.0.1-0.noarch.rpm
         """
         file_path = params.install
-        self.check_file(file_path)
         results = Plugins.install(file_path, force=params.force)
         self.serializer.print_to_output(
             results,

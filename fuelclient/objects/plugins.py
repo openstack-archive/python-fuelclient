@@ -335,6 +335,7 @@ class Plugins(base.BaseObject):
         :return: Plugins information
         :rtype: dict
         """
+        cls._check_file_path(plugin_path)
         plugin = cls.make_obj_by_file(plugin_path)
 
         name = plugin.name_from_file(plugin_path)

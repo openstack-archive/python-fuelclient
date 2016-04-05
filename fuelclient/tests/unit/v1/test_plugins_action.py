@@ -96,16 +96,14 @@ class TestPluginsActions(base.UnitTestCase):
         self.assert_print_table(print_mock, plugins)
 
     @patch.object(Serializer, 'print_to_output')
-    @patch.object(PluginAction, 'check_file')
     @patch.object(Plugins, 'install', return_value='some_result')
-    def test_install(self, install_mock, check_mock, print_mock):
+    def test_install(self, install_mock, print_mock):
         self.exec_plugins(['--install', self.file_name])
         self.assert_print(
             print_mock,
             'some_result',
             'Plugin /tmp/path/plugin.fp was successfully installed.')
         install_mock.assert_called_once_with(self.file_name, force=False)
-        check_mock.assert_called_once_with(self.file_name)
 
     @patch.object(Serializer, 'print_to_output')
     @patch.object(Plugins, 'remove', return_value='some_result')
