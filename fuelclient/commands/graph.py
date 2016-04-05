@@ -19,6 +19,7 @@ import os
 from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
+from fuelclient.common import data_utils
 
 
 class FileMethodsMixin(object):
@@ -148,3 +149,134 @@ class GraphExecute(base.BaseCommand):
         self.app.stdout.write(
             "Deployment was executed\n"
         )
+
+
+class GraphDownload(base.BaseCommand):
+    """Download deployment graph configuration."""
+    entity_name = 'graph'
+
+    def get_parser(self, prog_name):
+        parser = super(GraphDownload, self).get_parser(prog_name)
+        tasks_level = parser.add_mutually_exclusive_group()
+        parser.add_argument('-e',
+                            '--env',
+                            type=int,
+                            required=True,
+                            help='Id of the environment')
+
+        tasks_level.add_argument('-a',
+                                 '--all',
+                                 action="store_true",
+                                 required=False,
+                                 default=False,
+                                 help='Download merged graph for the '
+                                      'environment')
+        tasks_level.add_argument('-c',
+                                 '--cluster',
+                                 action="store_true",
+                                 required=False,
+                                 default=False,
+                                 help='Download cluster-specific tasks')
+        tasks_level.add_argument('-p',
+                                 '--plugins',
+                                 action="store_true",
+                                 required=False,
+                                 default=False,
+                                 help='Download plugins-specific tasks')
+        tasks_level.add_argument('-r',
+                                 '--release',
+                                 action="store_true",
+                                 required=False,
+                                 default=False,
+                                 help='Download release-specific tasks')
+
+        parser.add_argument('-t',
+                            '--type',
+                            type=str,
+                            default=None,
+                            required=False,
+                            help='Graph type string')
+        parser.add_argument('-f',
+                            '--file',
+                            type=str,
+                            required=False,
+                            default=None,
+                            help='YAML file that contains tasks data.')
+        return parser
+
+    @classmethod
+    def get_default_tasks_data_path(cls):
+        return os.path.join(
+            os.path.abspath(os.curdir),
+            "cluster_graph"
+        )
+
+    @classmethod
+    def write_tasks_to_file(cls, tasks_data, serializer=None, file_path=None):
+        serializer = serializer or Serializer()
+        if file_path:
+            return serializer.write_to_full_path(
+                file_path,
+                tasks_data
+            )
+        else:
+            return serializer.write_to_path(
+                cls.get_default_tasks_data_path(),
+                tasks_data
+            )
+
+    def take_action(self, args):
+        tasks_data = []
+        for tasks_level_name in ('all', 'cluster', 'release', 'plugins'):
+            if getattr(args, tasks_level_name):
+                tasks_data = self.client.download(
+                    env_id=args.env,
+                    level=tasks_level_name,
+                    graph_type=args.type
+                )
+                break
+
+        # write to file
+        graph_data_file_path = self.write_tasks_to_file(
+            tasks_data=tasks_data,
+            serializer=Serializer(),
+            file_path=args.file)
+
+        self.app.stdout.write(
+            "Tasks was downloaded to {0}".format(graph_data_file_path)
+        )
+
+
+class GraphList(base.BaseListCommand):
+    """Upload deployment graph configuration."""
+    entity_name = 'graph'
+    columns = ("id",
+               "name",
+               "tasks",
+               "relations")
+
+    def get_parser(self, prog_name):
+        parser = super(GraphList, self).get_parser(prog_name)
+        parser.add_argument('-e',
+                            '--env',
+                            type=int,
+                            required=True,
+                            help='Environment identifier')
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.list(
+            env_id=parsed_args.env
+        )
+        # format fields
+        for d in data:
+            d['relations'] = "\n".join(
+                'as "{type}" to {model}(ID={model_id})'
+                .format(**r) for r in d['relations']
+            )
+            d['tasks'] = ', '.join(sorted(t['id'] for t in d['tasks']))
+        data = data_utils.get_display_data_multi(self.columns, data)
+        scolumn_ids = [self.columns.index(col)
+                       for col in parsed_args.sort_columns]
+        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
+        return self.columns, data

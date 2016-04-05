@@ -31,6 +31,15 @@ class GraphClient(base_v1.BaseV1Client):
 
     cluster_deploy_api_path = "clusters/{env_id}/deploy/"
 
+    merged_cluster_tasks_api_path = "clusters/{env_id}/deployment_tasks" \
+                                    "/?graph_type={graph_type}"
+
+    merged_plugins_tasks_api_path = "clusters/{env_id}/deployment_tasks" \
+                                    "/plugins/?graph_type={graph_type}"
+
+    cluster_release_tasks_api_path = "clusters/{env_id}/deployment_tasks" \
+                                     "/release/?graph_type={graph_type}"
+
     @classmethod
     def update_graph_for_model(
             cls, data, related_model, related_model_id, graph_type=None):
@@ -91,6 +100,57 @@ class GraphClient(base_v1.BaseV1Client):
 
         deploy_data = APIClient.put_request(url, {})
         return objects.DeployTask.init_with_data(deploy_data)
+
+    # download
+    @classmethod
+    def get_merged_cluster_tasks(cls, env_id, graph_type=None):
+        return APIClient.get_request(
+            cls.merged_cluster_tasks_api_path.format(
+                env_id=env_id,
+                graph_type=graph_type or ""))
+
+    @classmethod
+    def get_merged_plugins_tasks(cls, env_id, graph_type=None):
+        return APIClient.get_request(
+            cls.merged_plugins_tasks_api_path.format(
+                env_id=env_id,
+                graph_type=graph_type or ""))
+
+    @classmethod
+    def get_release_tasks_for_cluster(cls, env_id, graph_type=None):
+        return APIClient.get_request(
+            cls.merged_plugins_tasks_api_path.format(
+                env_id=env_id,
+                graph_type=graph_type or ""))
+
+    def download(self, env_id, level, graph_type):
+        tasks_levels = {
+            'all': lambda: self.get_merged_cluster_tasks(
+                env_id=env_id, graph_type=graph_type),
+
+            'cluster': lambda: self.get_graph_for_model(
+                related_model='clusters',
+                related_model_id=env_id,
+                graph_type=graph_type).get('tasks', []),
+
+            'plugins': lambda: self.get_merged_plugins_tasks(
+                env_id=env_id,
+                graph_type=graph_type),
+
+            'release': lambda: self.get_release_tasks_for_cluster(
+                env_id=env_id,
+                graph_type=graph_type)
+        }
+        return tasks_levels[level]()
+
+    # list
+    @classmethod
+    def list(cls, env_id):
+        # todo(ikutukov): extend lists to support all models
+        return APIClient.get_request(
+            cls.related_graphs_list_api_path.format(
+                related_model='clusters',
+                related_model_id=env_id))
 
 
 def get_client():
