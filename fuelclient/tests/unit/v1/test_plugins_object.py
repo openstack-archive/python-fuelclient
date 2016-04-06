@@ -350,7 +350,7 @@ class TestPluginsObject(base.UnitTestCase):
     @patch.object(Plugins.connection, 'post_request_raw',
                   return_value=MagicMock(
                       status_code=409,
-                      **{'json.return_value': {'id': 99}}))
+                      **{'json.return_value': {'message': '{"id": 99}'}}))
     @patch.object(Plugins.connection, 'put_request', return_value='put_return')
     def test_update_or_create_updates_without_force(
             self, put_mock, post_mock, get_for_update_mock):
