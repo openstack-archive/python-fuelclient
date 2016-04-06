@@ -265,7 +265,7 @@ class TestHandlers(base.CLIv1TestCase):
 
     def test_create_network_group_fails_w_duplicate_name(self):
         err_msg = ("(Network with name storage already exists "
-                   "in node group default)\n")
+                   "in node group Default)\n")
         release_id = self.get_first_deployable_release_id()
         self.run_cli_commands((
             "env create --name=NewEnv --release={0} --nst=gre"
