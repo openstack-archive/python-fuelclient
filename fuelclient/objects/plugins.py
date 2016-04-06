@@ -13,6 +13,7 @@
 #    under the License.
 
 import abc
+import json
 import os
 import shutil
 import subprocess
@@ -451,7 +452,8 @@ class Plugins(base.BaseObject):
 
         if resp_raw.status_code == 409 and force:
             # Replace plugin information
-            url = cls.class_instance_path.format(id=resp['id'])
+            message = json.loads(resp['message'])
+            url = cls.class_instance_path.format(id=message['id'])
             resp = cls.connection.put_request(url, metadata)
         else:
             resp_raw.raise_for_status()
