@@ -27,6 +27,6 @@ def get_fake_env(name=None, status=None, release_id=None,
             'is_customized': False,
             'release_id': release_id or 2,
             'name': name or 'fake_env',
-            'fuel_version': fuel_version or '9.0',
+            'fuel_version': fuel_version or '10.0',
             'id': env_id or 1,
             'changes': []}
