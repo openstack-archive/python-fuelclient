@@ -21,6 +21,9 @@ from fuelclient.tests.unit.v1 import base
 
 class TestChangePassword(base.UnitTestCase):
 
+    def assert_print(self, print_mock, result, msg):
+        print_mock.assert_called_once_with(result, msg)
+
     def test_get_password_from_prompt(self):
         user_action = UserAction()
         passwd = 'secret!'
@@ -38,12 +41,17 @@ class TestChangePassword(base.UnitTestCase):
                 ArgumentException, 'Passwords are not the same'):
             user_action._get_password_from_prompt()
 
+    @mock.patch('fuelclient.cli.serializers.Serializer.print_to_output')
+    @mock.patch('fuelclient.cli.actions.user.fuelclient_settings')
     @mock.patch('fuelclient.cli.actions.user.APIClient')
-    def test_change_password(self, mapiclient):
+    def test_change_password(self, mapiclient, settings_mock, print_mock):
         user_action = UserAction()
         params = mock.Mock()
         params.newpass = None
         password = 'secret'
+        conf_file = '/tmp/fuel_client.yaml'
+        settings_mock.get_settings.return_value = mock.Mock(
+            user_settings=conf_file)
 
         with mock.patch('fuelclient.cli.actions.user.getpass',
                         return_value=password) as mgetpass:
@@ -56,6 +64,15 @@ class TestChangePassword(base.UnitTestCase):
 
         mgetpass.assert_has_calls(calls)
         mapiclient.update_own_password.assert_called_once_with(password)
+
+        msg = "\nPassword changed.\nPlease note that configuration " \
+            "is not automatically updated.\nYou may want to update " \
+            "{0}.".format(conf_file)
+
+        self.assert_print(
+            print_mock,
+            None,
+            msg)
 
     @mock.patch('fuelclient.cli.actions.user.APIClient')
     def test_change_password_w_newpass(self, mapiclient):
