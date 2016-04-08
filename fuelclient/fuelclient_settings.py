@@ -61,17 +61,19 @@ class FuelClientSettings(object):
         default_settings = pkg_resources.resource_filename('fuelclient',
                                                            'fuel_client.yaml')
 
-        user_settings = os.path.join(user_conf_dir, 'fuel', 'fuel_client.yaml')
+        self.user_settings = os.path.join(user_conf_dir, 'fuel',
+                                          'fuel_client.yaml')
         custom_settings = os.getenv('FUELCLIENT_CUSTOM_SETTINGS')
 
-        if not os.path.exists(user_settings) and not custom_settings:
-            self.populate_default_settings(default_settings, user_settings)
+        if not os.path.exists(self.user_settings) and not custom_settings:
+            self.populate_default_settings(default_settings,
+                                           self.user_settings)
             six.print_('Settings for Fuel Client have been saved to {0}.\n'
                        'Consider changing default values to the ones which '
-                       'are appropriate for you.'.format(user_settings))
+                       'are appropriate for you.'.format(self.user_settings))
 
         self._add_file_if_exists(default_settings, settings_files)
-        self._add_file_if_exists(user_settings, settings_files)
+        self._add_file_if_exists(self.user_settings, settings_files)
 
         # Add a custom settings file specified by user
         self._add_file_if_exists(custom_settings, settings_files)
