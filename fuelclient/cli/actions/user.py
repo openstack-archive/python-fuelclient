@@ -18,6 +18,7 @@ from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.error import ArgumentException
 from fuelclient.client import APIClient
+from fuelclient import fuelclient_settings
 
 
 class UserAction(Action):
@@ -56,3 +57,9 @@ class UserAction(Action):
             password = self._get_password_from_prompt()
 
         APIClient.update_own_password(password)
+        settings = fuelclient_settings.get_settings()
+        self.serializer.print_to_output(
+            None, "\nPassword changed.\nPlease note that configuration "
+            "is not automatically updated.\nYou may want to update "
+            "{0}.".format(
+                settings.user_settings))
