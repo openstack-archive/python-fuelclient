@@ -26,7 +26,6 @@ class TestDeployChanges(base.CLIv2TestCase):
 
     pattern_success = (r"^Deployment task with id (\d{1,}) "
                        r"for the environment 1 has been started.\n$")
-    message_error = "(No changes to deploy)\n"
 
     def setUp(self):
         super(TestDeployChanges, self).setUp()
@@ -47,10 +46,6 @@ class TestDeployChanges(base.CLIv2TestCase):
                                                  self.pattern_success)
         task_id = result.group(1)
         self.wait_task_ready(task_id)
-
-        self.check_for_stderr(self.cmd_deploy_changes,
-                              self.message_error,
-                              check_errors=False)
 
         self.check_for_stdout_by_regexp(self.cmd_redeploy_changes,
                                         self.pattern_success)
