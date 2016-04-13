@@ -35,7 +35,7 @@ class OpenstackConfig(BaseObject):
     def create(cls, **kwargs):
         params = cls._prepare_params(kwargs)
         data = cls.connection.post_request(cls.class_api_path, params)
-        return cls.init_with_data(data)
+        return [cls.init_with_data(item) for item in data]
 
     def delete(self):
         return self.connection.delete_request(
