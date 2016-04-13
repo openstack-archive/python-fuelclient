@@ -62,7 +62,7 @@ class TestOpenstackConfigActions(base.UnitTestCase):
 
     def test_config_upload(self):
         m_post = self.m_request.post(
-            '/api/v1/openstack-config/', json=self.config)
+            '/api/v1/openstack-config/', json=[self.config])
         m_open = mock.mock_open(read_data=yaml.safe_dump(
             {'configuration': self.config['configuration']}))
         with mock.patch('fuelclient.cli.serializers.open',
@@ -76,8 +76,11 @@ class TestOpenstackConfigActions(base.UnitTestCase):
         self.assertEqual(req['cluster_id'], 1)
 
     def test_config_upload_multinode(self):
+        configs = [utils.get_fake_openstack_config(node_id=node_id)
+                   for node_id in [1, 2, 3]]
+
         m_post = self.m_request.post(
-            '/api/v1/openstack-config/', json=self.config)
+            '/api/v1/openstack-config/', json=configs)
 
         m_open = mock.mock_open(read_data=yaml.safe_dump(
             {'configuration': self.config['configuration']}))
