@@ -352,6 +352,21 @@ class TestPluginsObject(base.UnitTestCase):
                       status_code=409,
                       **{'json.return_value': {'id': 99}}))
     @patch.object(Plugins.connection, 'put_request', return_value='put_return')
+    def test_update_or_create_updates_without_force(
+            self, put_mock, post_mock, get_for_update_mock):
+        meta = {'id': 99, 'version': '1.0.0', 'package_version': '2.0.0',
+                'title': 'Plugin title'}
+        self.assertRaises(SystemExit,
+                          self.plugin.update_or_create,
+                          meta,
+                          force=False)
+
+    @patch.object(Plugins, 'get_plugin_for_update', return_value=None)
+    @patch.object(Plugins.connection, 'post_request_raw',
+                  return_value=MagicMock(
+                      status_code=409,
+                      **{'json.return_value': {'id': 99}}))
+    @patch.object(Plugins.connection, 'put_request', return_value='put_return')
     def test_update_or_create_updates_with_force(
             self, put_mock, post_mock, get_for_update_mock):
         meta = {'id': 99, 'version': '1.0.0', 'package_version': '2.0.0'}
