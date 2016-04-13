@@ -20,6 +20,10 @@ class OpenstackConfigMixin(object):
 
     entity_name = 'openstack-config'
 
+    columns = (
+        'id', 'is_active', 'config_type',
+        'cluster_id', 'node_id', 'node_role')
+
     @staticmethod
     def add_env_arg(parser):
         parser.add_argument(
@@ -30,7 +34,7 @@ class OpenstackConfigMixin(object):
     @staticmethod
     def add_file_arg(parser):
         parser.add_argument(
-            '-f', '--file', required=True,
+            '--file', required=True,
             type=str, help='YAML file that contains openstack configuration.')
 
     @staticmethod
@@ -69,13 +73,9 @@ class OpenstackConfigMixin(object):
         )
 
 
-class OpenstackConfigList(OpenstackConfigMixin, base.BaseCommand):
+class OpenstackConfigList(OpenstackConfigMixin, base.BaseListCommand):
     """List all openstack configurations.
     """
-
-    columns = (
-        'id', 'is_active', 'config_type',
-        'cluster_id', 'node_id', 'node_role')
 
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigList, self).get_parser(prog_name)
@@ -116,7 +116,7 @@ class OpenstackConfigDownload(OpenstackConfigMixin, base.BaseCommand):
         self.app.stdout.write(msg)
 
 
-class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseCommand):
+class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseListCommand):
     """Upload new opesntack configuration from file.
     """
 
@@ -131,13 +131,13 @@ class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseCommand):
         return parser
 
     def take_action(self, args):
-        config = self.client.upload(
+        configs = self.client.upload(
             path=args.file, cluster_id=args.env,
             node_ids=args.node, node_role=args.role)
 
-        msg = "OpenStack configuration with id {0} " \
-              "uploaded from file '{0}'\n".format(config.id, args.file)
-        self.app.stdout.write(msg)
+        data = [c.data for c in configs]
+        data = data_utils.get_display_data_multi(self.columns, data)
+        return self.columns, data
 
 
 class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):

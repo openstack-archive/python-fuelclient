@@ -98,7 +98,7 @@ class TestOpenstackConfigClient(test_api.BaseLibTest):
         fake_config = utils.get_fake_openstack_config(
             cluster_id=cluster_id)
 
-        m_post = self.m_request.post(self.uri, json=fake_config)
+        m_post = self.m_request.post(self.uri, json=[fake_config])
 
         m_open = mock.mock_open(read_data=yaml.safe_dump({
             'configuration': fake_config['configuration']
@@ -116,13 +116,17 @@ class TestOpenstackConfigClient(test_api.BaseLibTest):
 
     def test_config_upload_multinode(self):
         cluster_id = 1
-        fake_config = utils.get_fake_openstack_config(
-            cluster_id=cluster_id)
+        fake_configs = [
+            utils.get_fake_openstack_config(
+                cluster_id=cluster_id, node_id=42),
+            utils.get_fake_openstack_config(
+                cluster_id=cluster_id, node_id=44)
+        ]
 
-        m_post = self.m_request.post(self.uri, json={'id': 42})
+        m_post = self.m_request.post(self.uri, json=fake_configs)
 
         m_open = mock.mock_open(read_data=yaml.safe_dump({
-            'configuration': fake_config['configuration']
+            'configuration': fake_configs[0]['configuration']
         }))
         with mock.patch(
                 'fuelclient.cli.serializers.open', m_open, create=True), \

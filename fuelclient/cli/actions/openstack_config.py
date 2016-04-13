@@ -108,13 +108,21 @@ class OpenstackConfigAction(Action):
         node_role = getattr(params, 'role', None)
         data = OpenstackConfig.read_file(params.file)
 
-        config = OpenstackConfig.create(
+        configs = OpenstackConfig.create(
             cluster_id=params.env,
             configuration=data['configuration'],
             node_ids=node_ids, node_role=node_role)
-        print("Openstack configuration with id {0} "
-              "has been uploaded from file '{1}'"
-              "".format(config.id, params.file))
+        configs = [c.data for c in configs]
+        print("Openstack configurations "
+              "have been uploaded from file '{0}'"
+              "".format(params.file))
+        self.serializer.print_to_output(
+            configs,
+            format_table(
+                configs,
+                acceptable_keys=self.acceptable_keys
+            )
+        )
 
     @check_all('config-id')
     def delete(self, params):
