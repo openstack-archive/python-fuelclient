@@ -18,6 +18,7 @@
 import mock
 import requests_mock as rm
 from six import moves
+import itertools
 
 from fuelclient.objects.environment import Environment
 from fuelclient.tests.unit.v1 import base
@@ -59,6 +60,42 @@ class TestEnvironment(base.UnitTestCase):
         self.assertIn("WARNING: GRE network segmentation type is "
                       "deprecated since 7.0 release.",
                       m_stderr.getvalue())
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_deploy_changes(self, task_data):
+        for dry_run, noop in itertools.product((True, False), (True, False)):
+            mdeploy = self.m_request.put('/api/v1/clusters/1/changes'
+                                         '?dry_run={0}&noop={1}'.format(
+                int(dry_run), int(noop)), json={})
+
+            cmd = ['fuel', 'deploy-changes', '--env', '1']
+            if dry_run:
+                cmd.append('--dry-run')
+            if noop:
+                cmd.append('--noop')
+            self.execute(cmd)
+            self.assertEqual(mdeploy.last_request.qs['dry_run'][0],
+                             str(int(dry_run)))
+            self.assertEqual(mdeploy.last_request.qs['noop'][0],
+                             str(int(noop)))
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_redeploy_changes(self, task_data):
+        for dry_run, noop in itertools.product((True, False), (True, False)):
+            mdeploy = self.m_request.put('/api/v1/clusters/1/changes/redeploy'
+                                         '?dry_run={0}&noop={1}'.format(
+                int(dry_run), int(noop)), json={})
+
+            cmd = ['fuel', 'redeploy-changes', '--env', '1']
+            if dry_run:
+                cmd.append('--dry-run')
+            if noop:
+                cmd.append('--noop')
+            self.execute(cmd)
+            self.assertEqual(mdeploy.last_request.qs['dry_run'][0],
+                             str(int(dry_run)))
+            self.assertEqual(mdeploy.last_request.qs['noop'][0],
+                             str(int(noop)))
 
 
 class TestEnvironmentOstf(base.UnitTestCase):
