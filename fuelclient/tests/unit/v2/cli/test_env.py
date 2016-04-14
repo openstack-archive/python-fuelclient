@@ -89,18 +89,64 @@ class TestEnvCommand(test_engine.BaseCLITest):
             self.assertIn('--force', m_stdout.getvalue())
 
     def test_env_deploy(self):
-        args = 'env deploy 42'
+        dry_run = False
+        args = 'env deploy'
+
+        args += ' 42'
+
         self.exec_command(args)
 
-        self.m_get_client.assert_called_once_with('environment', mock.ANY)
-        self.m_client.deploy_changes.assert_called_once_with(42)
+        calls = list()
+        calls.append(mock.call.deploy_changes(42,
+                                              dry_run=dry_run))
+
+        self.m_get_client.assert_called_with('environment', mock.ANY)
+        self.m_client.assert_has_calls(calls)
+
+    def test_env_deploy_dry_run(self):
+        dry_run = True
+
+        args = 'env deploy -d'
+        args += ' 42'
+
+        self.exec_command(args)
+
+        calls = list()
+        calls.append(mock.call.deploy_changes(42,
+                                              dry_run=dry_run))
+
+        self.m_get_client.assert_called_with('environment', mock.ANY)
+        self.m_client.assert_has_calls(calls)
 
     def test_env_redeploy(self):
-        args = 'env redeploy 42'
+        dry_run = False
+        args = 'env redeploy'
+
+        args += ' 42'
+
         self.exec_command(args)
 
-        self.m_get_client.assert_called_once_with('environment', mock.ANY)
-        self.m_client.redeploy_changes.assert_called_once_with(42)
+        calls = list()
+        calls.append(mock.call.redeploy_changes(42,
+                                                dry_run=dry_run))
+
+        self.m_get_client.assert_called_with('environment', mock.ANY)
+        self.m_client.assert_has_calls(calls)
+
+    def test_env_redeploy_dry_run(self):
+        dry_run = True
+        args = 'env redeploy -d'
+
+        args += ' 42'
+
+        self.exec_command(args)
+
+        calls = list()
+        calls.append(mock.call.redeploy_changes(42,
+                                                dry_run=dry_run))
+
+        self.m_get_client.assert_called_with('environment', mock.ANY)
+        self.m_client.assert_has_calls(calls)
 
     def test_env_add_nodes(self):
         args = 'env add nodes -e 42 -n 24 25 -r compute cinder'
