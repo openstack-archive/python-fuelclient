@@ -16,6 +16,7 @@
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.formatting import print_deploy_progress
+import fuelclient.error as error
 from fuelclient.objects.environment import Environment
 
 
@@ -28,6 +29,8 @@ class ChangesAction(Action):
         super(ChangesAction, self).__init__()
         self.args = (
             Args.get_env_arg(required=True),
+            Args.get_dry_run_deployment_arg(),
+            Args.get_noop_deployment_arg()
         )
         self.flag_func_map = (
             (None, self.deploy_changes),
@@ -38,7 +41,13 @@ class ChangesAction(Action):
             fuel --env 1 {action_name}
         """
         env = Environment(params.env)
-        deploy_task = getattr(env, self.actions_func_map[self.action_name])()
+        if params.dry_run and params.noop:
+            raise error.ArgumentException(
+                "Simultaneous dry-run and noop are not supported"
+            )
+        deploy_task = getattr(
+            env, self.actions_func_map[self.action_name])(
+            dry_run=params.dry_run, noop=params.noop)
         self.serializer.print_to_output(
             deploy_task.data,
             deploy_task,
