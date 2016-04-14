@@ -107,12 +107,6 @@ class Environment(BaseObject):
         )
         return DeployTask.init_with_data(deploy_data)
 
-    def get_network_data_path(self, directory=os.curdir):
-        return os.path.join(
-            os.path.abspath(directory),
-            "network_{0}".format(self.id)
-        )
-
     def get_settings_data_path(self, directory=os.curdir):
         return os.path.join(
             os.path.abspath(directory),
@@ -130,14 +124,6 @@ class Environment(BaseObject):
         return os.path.join(
             os.path.abspath(directory),
             "network_template_{0}".format(self.id)
-        )
-
-    def write_network_data(self, network_data, directory=os.curdir,
-                           serializer=None):
-        self._check_dir(directory)
-        return (serializer or self.serializer).write_to_path(
-            self.get_network_data_path(directory),
-            network_data
         )
 
     def write_settings_data(self, settings_data, directory=os.curdir,
@@ -164,13 +150,6 @@ class Environment(BaseObject):
             self.get_network_template_data_path(directory),
             template_data
         )
-
-    def read_network_data(self, directory=os.curdir,
-                          serializer=None):
-        self._check_dir(directory)
-        network_file_path = self.get_network_data_path(directory)
-        return (serializer or self.serializer).read_from_file(
-            network_file_path)
 
     def read_settings_data(self, directory=os.curdir, serializer=None):
         self._check_dir(directory)

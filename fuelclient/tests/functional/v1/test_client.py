@@ -466,7 +466,7 @@ class TestDirectoryDoesntExistErrorMessages(base.CLIv1TestCase):
     def test_net_upload(self):
         self.check_for_stderr(
             "network --upload --dir /foo/bar/baz --env 1",
-            "Directory '/foo/bar/baz' doesn't exist.\n",
+            '"/foo/bar/baz" does not exist or is not a directory\n',
             check_errors=False
         )
 
@@ -479,7 +479,8 @@ class TestDirectoryDoesntExistErrorMessages(base.CLIv1TestCase):
         ))
         self.check_for_stderr(
             "network --download --dir /foo/bar/baz --env 1",
-            "Directory '/foo/bar/baz' doesn't exist.\n",
+            ('Cannot write to "/foo/bar/baz". The path is not writable or is '
+             'not a directory.\n'),
             check_errors=False
         )
 
@@ -492,7 +493,8 @@ class TestDirectoryDoesntExistErrorMessages(base.CLIv1TestCase):
         ))
         self.check_for_stderr(
             "--env 1 network --download --dir /foo/bar/baz",
-            "Directory '/foo/bar/baz' doesn't exist.\n",
+            'Cannot write to "/foo/bar/baz". The path is not writable or is '
+            'not a directory.\n',
             check_errors=False
         )
 
@@ -512,7 +514,7 @@ class TestDirectoryDoesntExistErrorMessages(base.CLIv1TestCase):
     def test_upload_network_configuration(self):
         self.check_for_stderr(
             "--env 1 network --upload --dir /foo/bar/baz",
-            "Directory '/foo/bar/baz' doesn't exist.\n",
+            '"/foo/bar/baz" does not exist or is not a directory\n',
             check_errors=False
         )
 
