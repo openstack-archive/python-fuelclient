@@ -15,12 +15,13 @@
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
+from fuelclient.common import mixins
 from fuelclient.objects.environment import Environment
 
 
-class NetworkAction(Action):
-    """Show or modify network settings of specific environments
-    """
+class NetworkAction(Action, mixins.FileOperationsCommand):
+    """Show or modify network settings of specific environments."""
+
     action_name = "network"
 
     def __init__(self):
@@ -50,10 +51,9 @@ class NetworkAction(Action):
                 fuel --env 1 network --upload --dir path/to/directory
         """
         env = Environment(params.env)
-        network_data = env.read_network_data(
-            directory=params.dir,
-            serializer=self.serializer
-        )
+        network_data = self.read_network_data(env.id,
+                                              self.serializer.format,
+                                              directory=params.dir)
         env.set_network_data(network_data)
         print("Network configuration uploaded.")
 
@@ -76,10 +76,10 @@ class NetworkAction(Action):
         """
         env = Environment(params.env)
         network_data = env.get_network_data()
-        network_file_path = env.write_network_data(
-            network_data,
-            directory=params.dir,
-            serializer=self.serializer)
+        network_file_path = self.write_network_data(env.id,
+                                                    network_data,
+                                                    self.serializer.format,
+                                                    directory=params.dir)
         print(
             "Network configuration for environment with id={0}"
             " downloaded to {1}"
