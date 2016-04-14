@@ -111,6 +111,10 @@ class EnvironmentException(Exception):
     pass
 
 
+class BadSerializer(FuelClientException):
+    pass
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of DefaultAPIClient class
