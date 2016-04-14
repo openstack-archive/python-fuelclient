@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 import mock
 import requests_mock as rm
 from six import moves
@@ -59,6 +58,110 @@ class TestEnvironment(base.UnitTestCase):
         self.assertIn("WARNING: GRE network segmentation type is "
                       "deprecated since 7.0 release.",
                       m_stderr.getvalue())
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_deploy_changes(self, task_data):
+        dry_run = False
+        noop = False
+        mdeploy = self.m_request.put('/api/v1/clusters/1/changes'
+                                     '?dry_run={0}&noop={1}'.format(
+                                         int(dry_run), int(noop)), json={})
+
+        cmd = ['fuel', 'deploy-changes', '--env', '1']
+        self.execute(cmd)
+        self.check_deploy_redeploy_changes(dry_run, mdeploy, noop)
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_deploy_changes_dry_run(self, task_data):
+        dry_run = True
+        noop = False
+        mdeploy = self.m_request.put('/api/v1/clusters/1/changes'
+                                     '?dry_run={0}&noop={1}'.format(
+                                         int(dry_run), int(noop)), json={})
+
+        cmd = ['fuel', 'deploy-changes', '--env', '1']
+
+        cmd.append('--dry-run')
+        self.execute(cmd)
+        self.check_deploy_redeploy_changes(dry_run, mdeploy, noop)
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_deploy_changes_noop(self, task_data):
+        dry_run = False
+        noop = True
+        mdeploy = self.m_request.put('/api/v1/clusters/1/changes'
+                                     '?dry_run={0}&noop={1}'.format(
+                                         int(dry_run), int(noop)), json={})
+
+        cmd = ['fuel', 'deploy-changes', '--env', '1']
+
+        cmd.append('--noop')
+        self.execute(cmd)
+        self.check_deploy_redeploy_changes(dry_run, mdeploy, noop)
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_deploy_changes_noop_dry_run(self, task_data):
+        cmd = ['fuel', 'deploy-changes', '--env', '1']
+
+        cmd.append('--dry-run')
+        cmd.append('--noop')
+        self.assertRaises(SystemExit, self.execute, cmd)
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_redeploy_changes(self, task_data):
+        dry_run = False
+        noop = False
+        mdeploy = self.m_request.put('/api/v1/clusters/1/changes/redeploy'
+                                     '?dry_run={0}&noop={1}'.format(
+                                         int(dry_run), int(noop)), json={})
+
+        cmd = ['fuel', 'redeploy-changes', '--env', '1']
+
+        self.execute(cmd)
+        self.check_deploy_redeploy_changes(dry_run, mdeploy, noop)
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_redeploy_changes_dry_run(self, task_data):
+        dry_run = True
+        noop = False
+        mdeploy = self.m_request.put('/api/v1/clusters/1/changes/redeploy'
+                                     '?dry_run={0}&noop={1}'.format(
+                                         int(dry_run), int(noop)), json={})
+
+        cmd = ['fuel', 'redeploy-changes', '--env', '1']
+
+        cmd.append('--dry-run')
+        self.execute(cmd)
+        self.check_deploy_redeploy_changes(dry_run, mdeploy, noop)
+
+    def check_deploy_redeploy_changes(self, dry_run, mdeploy, noop):
+        self.assertEqual(mdeploy.last_request.qs['dry_run'][0],
+                         str(int(dry_run)))
+        self.assertEqual(mdeploy.last_request.qs['noop'][0],
+                         str(int(noop)))
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_redeploy_changes_noop(self, task_data):
+        dry_run = False
+        noop = True
+        mdeploy = self.m_request.put('/api/v1/clusters/1/changes/redeploy'
+                                     '?dry_run={0}&noop={1}'.format(
+                                         int(dry_run), int(noop)), json={})
+
+        cmd = ['fuel', 'redeploy-changes', '--env', '1']
+        if dry_run:
+            cmd.append('--dry-run')
+        if noop:
+            cmd.append('--noop')
+        self.execute(cmd)
+        self.check_deploy_redeploy_changes(dry_run, mdeploy, noop)
+
+    @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
+    def test_redeploy_changes_noop_dry_run(self, task_data):
+        cmd = ['fuel', 'redeploy-changes', '--env', '1']
+        cmd.append('--dry-run')
+        cmd.append('--noop')
+        self.assertRaises(SystemExit, self.execute, cmd)
 
 
 class TestEnvironmentOstf(base.UnitTestCase):
