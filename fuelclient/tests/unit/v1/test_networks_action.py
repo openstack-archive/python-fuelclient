@@ -16,7 +16,7 @@
 
 import yaml
 
-from mock import patch
+import mock
 
 from fuelclient.tests.unit.v1 import base
 
@@ -42,40 +42,40 @@ NETWORK_CONFIG_ERROR_OUTPUT = {
 }
 
 
-@patch('fuelclient.cli.serializers.open', create=True)
-@patch('fuelclient.cli.actions.base.os')
+@mock.patch('fuelclient.cli.actions.base.os')
 class TestNetworkActions(base.UnitTestCase):
 
-    def test_network_download(self, mos, mopen):
+    def test_network_download(self, mos):
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         self.m_request.get('/api/v1/clusters/1/network_configuration/neutron',
                            json=yaml.load(FILE_INPUT))
-        self.execute(['fuel', 'network', '--env', '1', '--download'])
-        mopen().__enter__().write.assert_called_once_with(FILE_INPUT)
 
-    def test_network_upload(self, mos, mopen):
-        mopen().__enter__().read.return_value = FILE_INPUT
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.common.mixins.open', m_open, create=True):
+            self.execute(['fuel', 'network', '--env', '1', '--download'])
+
+        m_open().write.assert_called_once_with(FILE_INPUT)
+
+    def test_network_upload(self, mos):
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         mneutron_put = self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',
             json=NETWORK_CONFIG_OK_OUTPUT)
-        self.execute(['fuel', 'network', '--env', '1', '--upload'])
-        self.assertEqual(mneutron_put.call_count, 1)
-        url = mneutron_put.request_history[0].url
-        self.assertIn('clusters/1/network_configuration/neutron', url)
 
-    def test_network_upload_with_error(self, mos, mopen):
-        mopen().__enter__().read.return_value = FILE_INPUT
+        m_open = mock.mock_open(read_data=FILE_INPUT)
+        with mock.patch('fuelclient.common.mixins.open', m_open, create=True):
+            self.execute(['fuel', 'network', '--env', '1', '--upload'])
+
+        self.assertEqual(mneutron_put.call_count, 1)
+
+    def test_network_upload_with_error(self, mos):
         self.m_request.get('/api/v1/clusters/1/', json=ENV_OUTPUT)
         self.m_request.put(
             '/api/v1/clusters/1/network_configuration/neutron',
             status_code=400, json=NETWORK_CONFIG_ERROR_OUTPUT)
 
-        with patch("sys.stderr") as m_stderr:
-            self.assertRaises(
-                SystemExit, self.execute,
-                ['fuel', 'network', '--env', '1', '--upload'])
-
-        self.assertIn("400 Client Error", m_stderr.write.call_args[0][0])
-        self.assertIn(NETWORK_CONFIG_ERROR_OUTPUT['message'],
-                      m_stderr.write.call_args[0][0])
+        m_open = mock.mock_open(read_data=FILE_INPUT)
+        with mock.patch('fuelclient.common.mixins.open', m_open, create=True):
+            self.assertRaises(SystemExit,
+                              self.execute,
+                              ['fuel', 'network', '--env', '1', '--upload'])
