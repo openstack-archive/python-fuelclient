@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import itertools
 import mock
 
 import fuelclient
@@ -117,9 +118,28 @@ class TestEnvFacade(test_api.BaseLibTest):
         expected_uri = self.get_object_uri(self.res_uri, env_id, '/changes')
         matcher = self.m_request.put(expected_uri, json={})
 
-        self.client.deploy_changes(env_id)
+        for dry_run, noop in itertools.product((True, False), (True, False)):
+            self.client.deploy_changes(env_id, dry_run=dry_run, noop=noop)
+            self.assertTrue(matcher.called)
+            self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                             str(int(dry_run)))
+            self.assertEqual(matcher.last_request.qs['noop'][0],
+                             str(int(noop)))
 
-        self.assertTrue(matcher.called)
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_redeploy(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id,
+                                           '/changes/redeploy')
+        matcher = self.m_request.put(expected_uri, json={})
+
+        for dry_run, noop in itertools.product((True, False), (True, False)):
+            self.client.redeploy_changes(env_id, dry_run=dry_run, noop=noop)
+            self.assertTrue(matcher.called)
+            self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                             str(int(dry_run)))
+            self.assertEqual(matcher.last_request.qs['noop'][0],
+                             str(int(noop)))
 
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_update(self, m_init):

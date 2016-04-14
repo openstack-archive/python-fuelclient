@@ -258,6 +258,21 @@ def get_sync_deployment_tasks_arg():
         help="Update tasks for each release.")
 
 
+def get_dry_run_deployment_arg():
+    return get_boolean_arg(
+        "dry-run",
+        dest='dry_run',
+        help="Whether to do dry run of the deployment by asking the task "
+             "executor to simply dump the resulting graph into a dot file")
+
+
+def get_noop_deployment_arg():
+    return get_boolean_arg(
+        "noop",
+        help="Whether to do noop deployment which will ask task executor"
+             "to run noop drivers for each task (e.g. puppet apply --noop)")
+
+
 def get_file_pattern_arg():
     return get_str_arg(
         "filepattern",
