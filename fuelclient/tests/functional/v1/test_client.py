@@ -322,9 +322,9 @@ class TestFiles(base.CLIv1TestCase):
                 "--env 1 deployment --default",
                 (
                     "deployment_1",
-                    "deployment_1/primary-controller_1.yaml",
-                    "deployment_1/compute_2.yaml",
-                    "deployment_1/compute_3.yaml"
+                    "deployment_1/1.yaml",
+                    "deployment_1/2.yaml",
+                    "deployment_1/3.yaml"
                 )
             ),
             (
@@ -340,9 +340,9 @@ class TestFiles(base.CLIv1TestCase):
             (
                 "--env 1 deployment --default --json",
                 (
-                    "deployment_1/primary-controller_1.json",
-                    "deployment_1/compute_2.json",
-                    "deployment_1/compute_3.json"
+                    "deployment_1/1.json",
+                    "deployment_1/2.json",
+                    "deployment_1/3.json"
                 )
             ),
             (

@@ -23,6 +23,10 @@ class Task(BaseObject):
 
     class_api_path = "transactions/"
     instance_api_path = "transactions/{0}/"
+    info_types_url_map = {
+        'deployment_info': 'deployment_info',
+        'cluster_settings': 'settings',
+        'network_configuration': 'network_configuration'}
 
     def delete(self, force=False):
         return self.connection.delete_request(
@@ -46,6 +50,31 @@ class Task(BaseObject):
     def wait(self):
         while not self.is_finished:
             sleep(0.5)
+
+    def deployment_info(self):
+        return self.connection.get_request(
+            self._get_additional_info_url('deployment_info'))
+
+    def network_configuration(self):
+        return self.connection.get_request(
+            self._get_additional_info_url('network_configuration'))
+
+    def cluster_settings(self):
+        return self.connection.get_request(
+            self._get_additional_info_url('cluster_settings'))
+
+    def _get_additional_info_url(self, info_type):
+        """Generate additional info url.
+
+        :param info_type: one of deployment_info, cluster_settings,
+                          network_configuration
+        :type info_type: str
+        :return: url
+        :rtype: str
+        """
+
+        return self.instance_api_path.format(self.id) +\
+            self.info_types_url_map[info_type]
 
 
 class DeployTask(Task):
