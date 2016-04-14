@@ -12,15 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from fuelclient.common import mixins
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.objects.environment import Environment
 
 
-class NetworkAction(Action):
-    """Show or modify network settings of specific environments
-    """
+class NetworkAction(Action, mixins.FileOperationsCommand):
+    """Show or modify network settings of specific environments."""
+
     action_name = "network"
 
     def __init__(self):
@@ -50,7 +51,7 @@ class NetworkAction(Action):
                 fuel --env 1 network --upload --dir path/to/directory
         """
         env = Environment(params.env)
-        network_data = env.read_network_data(
+        network_data = self.read_network_data(
             directory=params.dir,
             serializer=self.serializer
         )
@@ -76,10 +77,9 @@ class NetworkAction(Action):
         """
         env = Environment(params.env)
         network_data = env.get_network_data()
-        network_file_path = env.write_network_data(
-            network_data,
-            directory=params.dir,
-            serializer=self.serializer)
+        network_file_path = self.write_network_data(network_data,
+                                                    directory=params.dir,
+                                                    serializer=self.serializer)
         print(
             "Network configuration for environment with id={0}"
             " downloaded to {1}"
