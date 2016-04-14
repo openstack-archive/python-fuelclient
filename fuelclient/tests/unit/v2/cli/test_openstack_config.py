@@ -78,7 +78,7 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
         cmd = 'openstack-config upload --env {0} ' \
               '--node {1}'.format(self.CLUSTER_ID, self.NODE_ID)
         self.assertRaises(SystemExit, self.exec_command, cmd)
-        self.assertIn('-f/--file',
+        self.assertIn('--file',
                       mocked_stderr.write.call_args_list[-1][0][0])
         mocked_stderr.reset_mock()
 
@@ -101,7 +101,7 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
     def test_config_download_fail(self, mocked_stderr):
         cmd = 'openstack-config download 1'
         self.assertRaises(SystemExit, self.exec_command, cmd)
-        self.assertIn('-f/--file',
+        self.assertIn('--file',
                       mocked_stderr.write.call_args_list[-1][0][0])
 
     def test_config_execute(self):
