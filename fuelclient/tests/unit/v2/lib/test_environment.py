@@ -116,10 +116,97 @@ class TestEnvFacade(test_api.BaseLibTest):
         env_id = 42
         expected_uri = self.get_object_uri(self.res_uri, env_id, '/changes')
         matcher = self.m_request.put(expected_uri, json={})
+        dry_run = False
+        noop = False
 
-        self.client.deploy_changes(env_id)
-
+        self.client.deploy_changes(env_id, dry_run=dry_run, noop=noop)
         self.assertTrue(matcher.called)
+        self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                         str(int(dry_run)))
+        self.assertEqual(matcher.last_request.qs['noop'][0],
+                         str(int(noop)))
+
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_deploy_dry_run(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id, '/changes')
+        matcher = self.m_request.put(expected_uri, json={})
+
+        dry_run = True
+        noop = False
+
+        self.client.deploy_changes(env_id, dry_run=dry_run, noop=noop)
+        self.assertTrue(matcher.called)
+        self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                         str(int(dry_run)))
+        self.assertEqual(matcher.last_request.qs['noop'][0],
+                         str(int(noop)))
+
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_deploy_noop(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id, '/changes')
+        matcher = self.m_request.put(expected_uri, json={})
+
+        dry_run = False
+        noop = True
+
+        self.client.deploy_changes(env_id, dry_run=dry_run, noop=noop)
+        self.assertTrue(matcher.called)
+        self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                         str(int(dry_run)))
+        self.assertEqual(matcher.last_request.qs['noop'][0],
+                         str(int(noop)))
+
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_redeploy(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id,
+                                           '/changes/redeploy')
+        matcher = self.m_request.put(expected_uri, json={})
+        dry_run = False
+        noop = False
+
+        self.client.redeploy_changes(env_id, dry_run=dry_run, noop=noop)
+        self.assertTrue(matcher.called)
+        self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                         str(int(dry_run)))
+        self.assertEqual(matcher.last_request.qs['noop'][0],
+                         str(int(noop)))
+
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_redeploy_dry_run(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id,
+                                           '/changes/redeploy')
+        matcher = self.m_request.put(expected_uri, json={})
+
+        dry_run = True
+        noop = False
+
+        self.client.redeploy_changes(env_id, dry_run=dry_run, noop=noop)
+        self.assertTrue(matcher.called)
+        self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                         str(int(dry_run)))
+        self.assertEqual(matcher.last_request.qs['noop'][0],
+                         str(int(noop)))
+
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_redeploy_noop(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id,
+                                           '/changes/redeploy')
+        matcher = self.m_request.put(expected_uri, json={})
+
+        dry_run = False
+        noop = True
+
+        self.client.redeploy_changes(env_id, dry_run=dry_run, noop=noop)
+        self.assertTrue(matcher.called)
+        self.assertEqual(matcher.last_request.qs['dry_run'][0],
+                         str(int(dry_run)))
+        self.assertEqual(matcher.last_request.qs['noop'][0],
+                         str(int(noop)))
 
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_update(self, m_init):
