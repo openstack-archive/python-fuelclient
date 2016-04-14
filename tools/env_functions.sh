@@ -51,7 +51,7 @@ function prepare_fuel_web_repo {
     echo "Cloning $FUEL_WEB_REPO repo."
 
     if [[ "$FUEL_WEB_CLONE" == "yes" ]]; then
-        git clone --depth 1 $FUEL_WEB_REPO $FUEL_WEB_ROOT || \
+        git clone ${FUEL_WEB_REPO} ${FUEL_WEB_ROOT} || \
             { echo "Failed to clone $FUEL_WEB_REPO repo"; exit 1; }
     fi
 
