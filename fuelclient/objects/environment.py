@@ -356,13 +356,20 @@ class Environment(BaseObject):
             (serializer or self.serializer).write_to_path(
                 engine_file_path, facts["engine"])
             facts = facts["nodes"]
-            name_template = u"{name}"
+
+            def name_builder(fact):
+                return fact['name']
         else:
-            name_template = "{role}_{uid}"
+            def name_builder(fact):
+                if 'role' in fact:
+                    # from 9.0 the deployment info is serialized only per node
+                    return "{role}_{uid}".format(**fact)
+                return fact['uid']
+
         for _fact in facts:
             fact_path = os.path.join(
                 dir_name,
-                name_template.format(**_fact)
+                name_builder(_fact)
             )
             (serializer or self.serializer).write_to_path(fact_path, _fact)
         return dir_name
