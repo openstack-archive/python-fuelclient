@@ -322,9 +322,9 @@ class TestFiles(base.CLIv1TestCase):
                 "--env 1 deployment --default",
                 (
                     "deployment_1",
-                    "deployment_1/primary-controller_1.yaml",
-                    "deployment_1/compute_2.yaml",
-                    "deployment_1/compute_3.yaml"
+                    "deployment_1/1.yaml",
+                    "deployment_1/2.yaml",
+                    "deployment_1/3.yaml"
                 )
             ),
             (
@@ -340,9 +340,9 @@ class TestFiles(base.CLIv1TestCase):
             (
                 "--env 1 deployment --default --json",
                 (
-                    "deployment_1/primary-controller_1.json",
-                    "deployment_1/compute_2.json",
-                    "deployment_1/compute_3.json"
+                    "deployment_1/1.json",
+                    "deployment_1/2.json",
+                    "deployment_1/3.json"
                 )
             ),
             (
@@ -426,7 +426,6 @@ class TestDeployChanges(base.CLIv1TestCase):
         "Deploying changes to environment with id=1\n",
         "Finished deployment!\n"
     ]
-    message_error = "(No changes to deploy)\n"
 
     def setUp(self):
         super(TestDeployChanges, self).setUp()
@@ -444,9 +443,6 @@ class TestDeployChanges(base.CLIv1TestCase):
 
     def test_redeploy_changes(self):
         self.run_cli_command(self.cmd_deploy_changes)
-        self.check_for_stderr(self.cmd_deploy_changes,
-                              self.message_error,
-                              check_errors=False)
         self.check_all_in_msg(self.cmd_redeploy_changes,
                               self.messages_success)
 
