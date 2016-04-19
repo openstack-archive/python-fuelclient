@@ -327,11 +327,6 @@ class Environment(BaseObject):
     def get_facts(self, fact_type, nodes=None):
         facts = self.connection.get_request(
             self._get_fact_url(fact_type, nodes=nodes))
-        if not facts:
-            raise error.ServerDataException(
-                "There is no {0} info for this "
-                "environment!".format(fact_type)
-            )
         return facts
 
     def upload_facts(self, fact_type, facts):

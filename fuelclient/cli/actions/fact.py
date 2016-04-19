@@ -19,7 +19,6 @@ from fuelclient.objects.environment import Environment
 
 
 class FactAction(Action):
-
     action_name = None
 
     def __init__(self):
@@ -105,14 +104,19 @@ class FactAction(Action):
                 fuel --env 1 {action_name} --download
         """
         env = Environment(params.env)
+        facts = env.get_facts(self.action_name, nodes=params.node)
+        if not facts:
+            facts = env.get_default_facts(self.action_name, nodes=params.node)
+            print("There is no {0} info for this environment! \nDefault {0} "
+                  "info is downloading instead...".format(self.action_name))
         dir_name = env.write_facts_to_dir(
             self.action_name,
-            env.get_facts(self.action_name, nodes=params.node),
+            facts,
             directory=params.dir,
             serializer=self.serializer
         )
         print(
-            "Current {0} info was downloaded to {1}".format(
+            "{0} info was downloaded to {1}".format(
                 self.action_name,
                 dir_name
             )
