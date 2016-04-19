@@ -328,7 +328,26 @@ class TestFiles(base.CLIv1TestCase):
                 )
             ),
             (
+                "--env 1 deployment --download",
+                (
+                    "deployment_1",
+                    "deployment_1/1.yaml",
+                    "deployment_1/2.yaml",
+                    "deployment_1/3.yaml"
+                )
+            ),
+            (
                 "--env 1 provisioning --default",
+                (
+                    "provisioning_1",
+                    "provisioning_1/engine.yaml",
+                    "provisioning_1/node-1.yaml",
+                    "provisioning_1/node-2.yaml",
+                    "provisioning_1/node-3.yaml"
+                )
+            ),
+            (
+                "--env 1 provisioning --download",
                 (
                     "provisioning_1",
                     "provisioning_1/engine.yaml",
