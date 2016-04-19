@@ -15,6 +15,7 @@
 #    under the License.
 
 import mock
+import os
 import yaml
 
 from fuelclient.tests.unit.v2.cli import test_engine
@@ -29,6 +30,7 @@ class TestTaskCommand(test_engine.BaseCLITest):
         self.m_client.get_all.return_value = [utils.get_fake_task()
                                               for i in range(10)]
         self.m_client.get_by_id.return_value = utils.get_fake_task()
+        self.current_path = os.path.join(os.path.abspath(os.curdir))
 
     def test_task_list(self):
         args = 'task list'
@@ -61,7 +63,7 @@ class TestTaskCommand(test_engine.BaseCLITest):
                                                       statuses=None)
 
     def _test_cmd(self, cmd, method, cmd_line, client,
-                  return_data, expected_kwargs):
+                  return_data, expected_file_path, expected_kwargs):
         self.m_get_client.reset_mock()
         self.m_client.get_filtered.reset_mock()
         self.m_client.__getattr__(method).return_value =\
@@ -72,6 +74,7 @@ class TestTaskCommand(test_engine.BaseCLITest):
             self.exec_command('task {0} {1} {2}'.format(cmd, method,
                                                         cmd_line))
 
+        m_open.assert_called_once_with(expected_file_path, 'w')
         written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
         expected_yaml = yaml.safe_load(return_data)
         self.assertEqual(written_yaml, expected_yaml)
@@ -81,19 +84,24 @@ class TestTaskCommand(test_engine.BaseCLITest):
             **expected_kwargs)
 
     def test_task_deployment_info_download(self):
-        self._test_cmd('deployment-info', 'download', '1',
+        self._test_cmd('deployment-info', 'download', '1 ',
                        'deployment-info',
                        utils.get_fake_yaml_deployment_info(),
+                       "{0}/deployment_info_1.yaml".format(
+                           self.current_path),
                        dict(transaction_id=1))
 
     def test_task_cluster_settings_download(self):
-        self._test_cmd('settings', 'download', '1',
+        self._test_cmd('settings', 'download', '1 --file settings.yaml',
                        'cluster-settings',
                        utils.get_fake_yaml_cluster_settings(),
+                       'settings.yaml',
                        dict(transaction_id=1))
 
     def test_task_network_configuration_download(self):
         self._test_cmd('network-configuration', 'download', '1',
                        'network-configuration',
                        utils.get_fake_yaml_network_conf(),
+                       "{0}/network_configuration_1.yaml".format(
+                           self.current_path),
                        dict(transaction_id=1))

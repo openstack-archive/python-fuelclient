@@ -50,10 +50,17 @@ class TaskMixIn(object):
         :return: path to resulting file
         :rtype: str
         """
-        return (serializer or Serializer()).write_to_path(
-            (file_path or cls.get_default_info_path(info_type,
-                                                    transaction_id)),
-            data)
+        serializer = serializer or Serializer()
+        if file_path:
+            return serializer.write_to_full_path(
+                file_path,
+                data
+            )
+        else:
+            return serializer.write_to_path(
+                cls.get_default_info_path(info_type, transaction_id),
+                data
+            )
 
     @staticmethod
     def get_default_info_path(info_type, transaction_id):
@@ -88,12 +95,12 @@ class TaskMixIn(object):
         :rtype: str
         """
         data = self.client.download(transaction_id=transaction_id)
-        data_file_path = TaskMixIn.write_info_to_file(
-            info_type,
-            data,
-            transaction_id,
-            file_path)
-        return data_file_path
+        return self.write_info_to_file(
+            info_type=info_type,
+            data=data,
+            transaction_id=transaction_id,
+            serializer=Serializer(),
+            file_path=file_path)
 
 
 class TaskInfoFileMixIn(TaskMixIn):
