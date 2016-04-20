@@ -279,10 +279,10 @@ class TestHandlers(base.CLIv1TestCase):
         )
 
     def test_create_network_group_fails_w_invalid_group(self):
-        err_msg = "(Node group with ID 0 does not exist)\n"
+        err_msg = "(Node group with ID 997755 does not exist)\n"
 
         self.check_for_stderr(
-            ("network-group --create --name test --node-group 0 "
+            ("network-group --create --name test --node-group 997755 "
              "--vlan 10 --cidr 10.0.0.0/24"),
             err_msg,
             check_errors=False
