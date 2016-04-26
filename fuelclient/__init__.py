@@ -26,7 +26,17 @@ except ImportError:
     __version__ = ""
 
 
-def get_client(resource, version='v1'):
+def connect(host, port, http_proxy=None, os_username=None, os_password=None,
+            os_tenant_name=None, debug=False):
+    """Creates API connection."""
+    from fuelclient import client
+
+    return client.Client(
+        host, port, http_proxy=http_proxy, os_username=os_username,
+        os_password=os_password, os_tenant_name=os_tenant_name, debug=debug)
+
+
+def get_client(resource, version='v1', connection=None):
     """Gets an API client for a resource
 
     python-fuelclient provides access to Fuel's API
@@ -40,6 +50,8 @@ def get_client(resource, version='v1'):
     :param version:  Version of the Fuel's API
     :type version:   str,
                      Available: v1. Default: v1.
+    :param connection: API connection
+    :type connection: fuelclient.client.Client
     :return:         Facade to the specified resource that wraps
                      calls to the specified version of the API.
 
@@ -65,7 +77,7 @@ def get_client(resource, version='v1'):
     }
 
     try:
-        return version_map[version][resource].get_client()
+        return version_map[version][resource].get_client(connection)
     except KeyError:
         msg = 'Cannot load API client for "{r}" in the API version "{v}".'
         raise ValueError(msg.format(r=resource, v=version))

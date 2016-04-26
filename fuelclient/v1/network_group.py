@@ -46,5 +46,5 @@ class NetworkGroupClient(base_v1.BaseV1Client):
         env_obj.delete()
 
 
-def get_client():
-    return NetworkGroupClient()
+def get_client(connection):
+    return NetworkGroupClient(connection)

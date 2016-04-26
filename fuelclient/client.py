@@ -34,19 +34,39 @@ class Client(object):
     """This class handles API requests
     """
 
-    def __init__(self):
-        conf = fuelclient_settings.get_settings()
+    def __init__(self, host, port, http_proxy=None, http_timeout=None,
+                 os_username=None, os_password=None,
+                 os_tenant_name=None, debug=False):
+        self.debug = debug
 
-        self.debug = False
-        self.root = "http://{server}:{port}".format(server=conf.SERVER_ADDRESS,
-                                                    port=conf.SERVER_PORT)
+        self._http_proxy = http_proxy
+        self._http_timeout = http_timeout
+        self._os_username = os_username
+        self._os_password = os_password
+        self._os_tenant_name = os_tenant_name
+
+        self.root = "http://{host}:{port}".format(host=host, port=port)
 
         self.keystone_base = urlparse.urljoin(self.root, "/keystone/v2.0")
         self.api_root = urlparse.urljoin(self.root, "/api/v1/")
         self.ostf_root = urlparse.urljoin(self.root, "/ostf/")
+
         self._keystone_client = None
         self._auth_required = None
         self._session = None
+
+    @classmethod
+    def default_client(cls):
+        conf = fuelclient_settings.get_settings()
+        return cls(
+            host=conf.SERVER_ADDRESS,
+            port=conf.SERVER_PORT,
+            http_proxy=conf.HTTP_PROXY,
+            http_timeout=conf.HTTP_TIMEOUT,
+            os_username=conf.OS_USERNAME,
+            os_password=conf.OS_PASSWORD,
+            os_tenant_name=conf.OS_TENANT_NAME
+        )
 
     def _make_common_headers(self):
         """Returns a dict of HTTP headers common for all requests."""
@@ -57,23 +77,17 @@ class Client(object):
 
     def _make_proxies(self):
         """Provides HTTP proxy configuration for requests module."""
-
-        conf = fuelclient_settings.get_settings()
-
-        if conf.HTTP_PROXY is None:
+        if self._http_proxy is None:
             return None
 
-        return {'http': conf.HTTP_PROXY,
-                'https': conf.HTTP_PROXY}
+        return {'http': self._http_proxy,
+                'https': self._http_proxy}
 
     def _make_session(self):
         """Initializes a HTTP session."""
-
-        conf = fuelclient_settings.get_settings()
-
         session = requests.Session()
         session.headers.update(self._make_common_headers())
-        session.timeout = conf.HTTP_TIMEOUT
+        session.timeout = self._http_timeout
         session.proxies = self._make_proxies()
 
         return session
@@ -119,21 +133,17 @@ class Client(object):
         return self._keystone_client
 
     def update_own_password(self, new_pass):
-        conf = fuelclient_settings.get_settings()
-
         if self.auth_token:
-            self.keystone_client.users.update_own_password(conf.OS_PASSWORD,
-                                                           new_pass)
+            self.keystone_client.users.update_own_password(
+                self._os_password, new_pass)
 
     def initialize_keystone_client(self):
-        conf = fuelclient_settings.get_settings()
-
         if self.auth_required:
             self._keystone_client = auth_client.Client(
                 auth_url=self.keystone_base,
-                username=conf.OS_USERNAME,
-                password=conf.OS_PASSWORD,
-                tenant_name=conf.OS_TENANT_NAME)
+                username=self._os_username,
+                password=self._os_password,
+                tenant_name=self._os_tenant_name)
 
             self._keystone_client.session.auth = self._keystone_client
             self._keystone_client.authenticate()
@@ -233,4 +243,7 @@ class Client(object):
 
 # This line is single point of instantiation for 'Client' class,
 # which intended to implement Singleton design pattern.
-APIClient = Client()
+APIClient = Client.default_client()
+"""
+.. deprecated:: Use fuelclient.client.Client instead
+"""

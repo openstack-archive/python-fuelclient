@@ -27,5 +27,5 @@ class DeploymentInfoClient(base_v1.BaseV1Client):
         return task.deployment_info()
 
 
-def get_client():
-    return DeploymentInfoClient()
+def get_client(connection):
+    return DeploymentInfoClient(connection)
