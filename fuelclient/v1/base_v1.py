@@ -16,13 +16,23 @@ import abc
 
 import six
 
+from fuelclient import client
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseV1Client(object):
 
-    @abc.abstractproperty
-    def _entity_wrapper(self):
-        pass
+    def __init__(self, connection=None):
+        if connection is None:
+            connection = client.APIClient
+        self.connection = connection
+
+        cls_wrapper = self.__class__._entity_wrapper
+        self._entity_wrapper = type(
+            cls_wrapper.__name__,
+            (cls_wrapper, ),
+            {'connection': self.connection}
+        )
 
     def get_all(self):
         result = self._entity_wrapper.get_all_data()

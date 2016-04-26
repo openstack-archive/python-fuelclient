@@ -21,5 +21,5 @@ class TaskClient(base_v1.BaseV1Client):
     _entity_wrapper = objects.Task
 
 
-def get_client():
-    return TaskClient()
+def get_client(connection):
+    return TaskClient(connection)
