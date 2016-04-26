@@ -21,5 +21,5 @@ class FuelVersionClient(base_v1.BaseV1Client):
     _entity_wrapper = objects.FuelVersion
 
 
-def get_client():
-    return FuelVersionClient()
+def get_client(connection):
+    return FuelVersionClient(connection)

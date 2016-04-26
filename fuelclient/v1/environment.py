@@ -120,5 +120,5 @@ class EnvironmentClient(base_v1.BaseV1Client):
         env.delete_network_template_data()
 
 
-def get_client():
-    return EnvironmentClient()
+def get_client(connection):
+    return EnvironmentClient(connection)

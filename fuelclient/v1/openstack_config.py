@@ -50,5 +50,5 @@ class OpenstackConfigClient(base_v1.BaseV1Client):
         config.delete()
 
 
-def get_client():
-    return OpenstackConfigClient()
+def get_client(connection):
+    return OpenstackConfigClient(connection)

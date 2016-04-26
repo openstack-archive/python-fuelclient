@@ -213,5 +213,5 @@ class NodeClient(base_v1.BaseV1Client):
         return SplittedLabel(name, value, bool(separator))
 
 
-def get_client():
-    return NodeClient()
+def get_client(connection):
+    return NodeClient(connection)

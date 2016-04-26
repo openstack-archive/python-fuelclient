@@ -110,5 +110,5 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
             return history_records
 
 
-def get_client():
-    return DeploymentHistoryClient()
+def get_client(connection):
+    return DeploymentHistoryClient(connection)

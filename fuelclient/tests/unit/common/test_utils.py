@@ -239,7 +239,7 @@ class TestUtils(base.UnitTestCase):
 
         with self.assertRaisesRegexp(error.HTTPError,
                                      '403.*{}'.format(text)):
-            client.Client().post_request('address')
+            client.APIClient.post_request('address')
 
     def test_parse_to_list_of_dicts(self):
         items = utils.parse_to_list_of_dicts([{"id": 1}])

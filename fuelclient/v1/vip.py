@@ -60,5 +60,5 @@ class VipClient(base_v1.BaseV1Client):
         env.create_vip(**vip_data)
 
 
-def get_client():
-    return VipClient()
+def get_client(connection):
+    return VipClient(connection)

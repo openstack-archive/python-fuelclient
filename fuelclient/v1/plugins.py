@@ -30,5 +30,5 @@ class PluginsClient(base_v1.BaseV1Client):
         self._entity_wrapper.sync(plugin_ids=ids)
 
 
-def get_client():
-    return PluginsClient()
+def get_client(connection):
+    return PluginsClient(connection)
