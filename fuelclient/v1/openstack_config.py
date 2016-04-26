@@ -46,5 +46,5 @@ class OpenstackConfigClient(base_v1.BaseV1Client):
             node_role=node_role, is_active=is_active)
 
 
-def get_client():
-    return OpenstackConfigClient()
+def get_client(connection):
+    return OpenstackConfigClient(connection)

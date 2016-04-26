@@ -27,5 +27,5 @@ class NetworkConfigurationClient(base_v1.BaseV1Client):
         return task.network_configuration()
 
 
-def get_client():
-    return NetworkConfigurationClient()
+def get_client(connection):
+    return NetworkConfigurationClient(connection)

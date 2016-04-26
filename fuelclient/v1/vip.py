@@ -50,5 +50,5 @@ class VipClient(base_v1.BaseV1Client):
         env.set_vips_data(vips_data)
 
 
-def get_client():
-    return VipClient()
+def get_client(connection):
+    return VipClient(connection)

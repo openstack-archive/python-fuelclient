@@ -15,7 +15,6 @@
 #    under the License.
 
 from fuelclient.cli import error
-from fuelclient.client import APIClient
 from fuelclient import objects
 from fuelclient.v1 import base_v1
 
@@ -40,33 +39,30 @@ class GraphClient(base_v1.BaseV1Client):
     cluster_release_tasks_api_path = "clusters/{env_id}/deployment_tasks" \
                                      "/release/?graph_type={graph_type}"
 
-    @classmethod
     def update_graph_for_model(
-            cls, data, related_model, related_model_id, graph_type=None):
-        return APIClient.put_request(
-            cls.related_graph_api_path.format(
+            self, data, related_model, related_model_id, graph_type=None):
+        return self.connection.put_request(
+            self.related_graph_api_path.format(
                 related_model=related_model,
                 related_model_id=related_model_id,
                 graph_type=graph_type or ""),
             data
         )
 
-    @classmethod
     def create_graph_for_model(
-            cls, data, related_model, related_model_id, graph_type=None):
-        return APIClient.post_request(
-            cls.related_graph_api_path.format(
+            self, data, related_model, related_model_id, graph_type=None):
+        return self.connection.post_request(
+            self.related_graph_api_path.format(
                 related_model=related_model,
                 related_model_id=related_model_id,
                 graph_type=graph_type or ""),
             data
         )
 
-    @classmethod
     def get_graph_for_model(
-            cls, related_model, related_model_id, graph_type=None):
-        return APIClient.get_request(
-            cls.related_graph_api_path.format(
+            self, related_model, related_model_id, graph_type=None):
+        return self.connection.get_request(
+            self.related_graph_api_path.format(
                 related_model=related_model,
                 related_model_id=related_model_id,
                 graph_type=graph_type or ""))
@@ -83,8 +79,7 @@ class GraphClient(base_v1.BaseV1Client):
                 self.create_graph_for_model(
                     {'tasks': data}, related_model, related_id, graph_type)
 
-    @classmethod
-    def execute(cls, env_id, nodes, graph_type=None):
+    def execute(self, env_id, nodes, graph_type=None):
         put_args = []
 
         if nodes:
@@ -94,32 +89,28 @@ class GraphClient(base_v1.BaseV1Client):
             put_args.append(("graph_type=" + graph_type))
 
         url = "".join([
-            cls.cluster_deploy_api_path.format(env_id=env_id),
+            self.cluster_deploy_api_path.format(env_id=env_id),
             '?',
             '&'.join(put_args)])
 
-        deploy_data = APIClient.put_request(url, {})
+        deploy_data = self.connection.put_request(url, {})
         return objects.DeployTask.init_with_data(deploy_data)
 
-    # download
-    @classmethod
-    def get_merged_cluster_tasks(cls, env_id, graph_type=None):
-        return APIClient.get_request(
-            cls.merged_cluster_tasks_api_path.format(
+    def get_merged_cluster_tasks(self, env_id, graph_type=None):
+        return self.connection.get_request(
+            self.merged_cluster_tasks_api_path.format(
                 env_id=env_id,
                 graph_type=graph_type or ""))
 
-    @classmethod
-    def get_merged_plugins_tasks(cls, env_id, graph_type=None):
-        return APIClient.get_request(
-            cls.merged_plugins_tasks_api_path.format(
+    def get_merged_plugins_tasks(self, env_id, graph_type=None):
+        return self.connection.get_request(
+            self.merged_plugins_tasks_api_path.format(
                 env_id=env_id,
                 graph_type=graph_type or ""))
 
-    @classmethod
-    def get_release_tasks_for_cluster(cls, env_id, graph_type=None):
-        return APIClient.get_request(
-            cls.merged_plugins_tasks_api_path.format(
+    def get_release_tasks_for_cluster(self, env_id, graph_type=None):
+        return self.connection.get_request(
+            self.merged_plugins_tasks_api_path.format(
                 env_id=env_id,
                 graph_type=graph_type or ""))
 
@@ -143,15 +134,13 @@ class GraphClient(base_v1.BaseV1Client):
         }
         return tasks_levels[level]()
 
-    # list
-    @classmethod
-    def list(cls, env_id):
+    def list(self, env_id):
         # todo(ikutukov): extend lists to support all models
-        return APIClient.get_request(
-            cls.related_graphs_list_api_path.format(
+        return self.connection.get_request(
+            self.related_graphs_list_api_path.format(
                 related_model='clusters',
                 related_model_id=env_id))
 
 
-def get_client():
-    return GraphClient()
+def get_client(connection):
+    return GraphClient(connection)
