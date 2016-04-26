@@ -27,5 +27,5 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
             statuses=statuses)
 
 
-def get_client():
-    return DeploymentHistoryClient()
+def get_client(connection):
+    return DeploymentHistoryClient(connection)
