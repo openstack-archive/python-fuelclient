@@ -30,7 +30,7 @@ class BaseLibTest(oslo_base.BaseTestCase):
         self.m_request = rm.Mocker()
         self.m_request.start()
 
-        self.auth_required_patch = patch.object(client.Client,
+        self.auth_required_patch = patch.object(client.APIClient,
                                                 'auth_required',
                                                 new_callable=mock.PropertyMock)
         self.m_auth_required = self.auth_required_patch.start()

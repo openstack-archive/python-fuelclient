@@ -30,7 +30,7 @@ logger = logging.getLogger()
 logger.addHandler(NullHandler())
 
 
-class Client(object):
+class APIClient(object):
     """This class handles API requests
     """
 
@@ -241,9 +241,9 @@ class Client(object):
         except requests.exceptions.HTTPError as e:
             raise error.HTTPError(error.get_full_error_message(e))
 
-# This line is single point of instantiation for 'Client' class,
+# This line is single point of instantiation for 'APIClient' class,
 # which intended to implement Singleton design pattern.
-APIClient = Client.default_client()
+DefaultAPIClient = APIClient.default_client()
 """
-.. deprecated:: Use fuelclient.client.Client instead
+.. deprecated:: Use fuelclient.client.APIClient instead
 """

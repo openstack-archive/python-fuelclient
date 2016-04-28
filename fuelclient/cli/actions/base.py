@@ -21,7 +21,7 @@ import six
 from fuelclient.cli import error
 from fuelclient.cli.formatting import quote_and_join
 from fuelclient.cli.serializers import Serializer
-from fuelclient.client import APIClient
+from fuelclient.client import DefaultAPIClient
 
 
 class Action(object):
@@ -47,7 +47,7 @@ class Action(object):
     def action_func(self, params):
         """Entry point for all actions subclasses
         """
-        APIClient.debug_mode(debug=params.debug)
+        DefaultAPIClient.debug_mode(debug=params.debug)
 
         self.serializer = Serializer.from_params(params)
         if self.flag_func_map is not None:

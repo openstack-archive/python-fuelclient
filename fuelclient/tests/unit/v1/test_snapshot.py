@@ -37,7 +37,7 @@ class TestSnapshot(base.UnitTestCase):
         self.execute(['fuel', 'snapshot', '--conf'])
         self.assertEqual(mstdout.write.call_args_list, [call('key: value\n')])
 
-    @patch('fuelclient.cli.actions.snapshot.APIClient',
+    @patch('fuelclient.cli.actions.snapshot.DefaultAPIClient',
            mock.Mock(auth_token='token123'))
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
     @patch('fuelclient.cli.actions.snapshot.'
@@ -61,7 +61,7 @@ class TestSnapshot(base.UnitTestCase):
             auth_token='token123',
             directory='.')
 
-    @patch('fuelclient.cli.actions.snapshot.APIClient',
+    @patch('fuelclient.cli.actions.snapshot.DefaultAPIClient',
            mock.Mock(auth_token='token123'))
     @patch('fuelclient.cli.actions.snapshot.SnapshotTask.start_snapshot_task')
     @patch('fuelclient.cli.actions.snapshot.'

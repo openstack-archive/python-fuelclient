@@ -239,4 +239,4 @@ class TestUtils(base.UnitTestCase):
 
         with self.assertRaisesRegexp(error.HTTPError,
                                      '403.*{}'.format(text)):
-            client.APIClient.post_request('address')
+            client.DefaultAPIClient.post_request('address')

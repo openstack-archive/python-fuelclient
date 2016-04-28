@@ -113,7 +113,7 @@ class EnvironmentException(Exception):
 
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
-    in methods of APIClient class
+    in methods of DefaultAPIClient class
     """
     @wraps(func)
     def wrapper(*args, **kwargs):

@@ -31,7 +31,7 @@ def connect(host, port, http_proxy=None, os_username=None, os_password=None,
     """Creates API connection."""
     from fuelclient import client
 
-    return client.Client(
+    return client.APIClient(
         host, port, http_proxy=http_proxy, os_username=os_username,
         os_password=os_password, os_tenant_name=os_tenant_name, debug=debug)
 
@@ -51,7 +51,7 @@ def get_client(resource, version='v1', connection=None):
     :type version:   str,
                      Available: v1. Default: v1.
     :param connection: API connection
-    :type connection: fuelclient.client.Client
+    :type connection: fuelclient.client.APIClient
     :return:         Facade to the specified resource that wraps
                      calls to the specified version of the API.
 
