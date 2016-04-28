@@ -222,8 +222,10 @@ class TestUtils(base.UnitTestCase):
         self.assertIsInstance(result, six.text_type)
         self.assertEqual(result, expected_data)
 
-    @mock.patch('sys.getfilesystemencoding', return_value='iso-8859-16')
-    def test_latin_str_to_unicode(self, _):
+    @mock.patch('fuelclient.utils.sys')
+    def test_latin_str_to_unicode(self, sys_mock):
+        sys_mock.getfilesystemencoding.return_value = 'iso-8859-16'
+
         test_data = 'czegoś' if six.PY3 else u'czegoś'.encode('iso-8859-16')
         expected_data = test_data if six.PY3 else u'czegoś'
         result = utils.str_to_unicode(test_data)
