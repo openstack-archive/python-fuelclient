@@ -28,7 +28,7 @@ class BaseV1Client(object):
 
     def __init__(self, connection=None):
         if connection is None:
-            connection = client.APIClient
+            connection = client.DefaultAPIClient
         self.connection = connection
 
         cls_wrapper = self.__class__._entity_wrapper

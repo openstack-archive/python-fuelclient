@@ -42,7 +42,7 @@ class UnitTestCase(oslo_base.BaseTestCase):
         super(UnitTestCase, self).setUp()
 
         self.auth_required_patcher = mock.patch('fuelclient.client.'
-                                                'Client.auth_required',
+                                                'APIClient.auth_required',
                                                 new_callable=mock.PropertyMock)
 
         self.auth_required_mock = self.auth_required_patcher.start()

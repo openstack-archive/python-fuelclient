@@ -13,7 +13,7 @@
 #    under the License.
 
 from fuelclient.cli.serializers import Serializer
-from fuelclient.client import APIClient
+from fuelclient.client import DefaultAPIClient
 
 
 class BaseObject(object):
@@ -22,14 +22,14 @@ class BaseObject(object):
     'class_api_path' - url path to object handler on Nailgun server.
     'instance_api_path' - url path template which formatted with object id
     returns only one serialized object.
-    'connection' - 'Client' class instance from fuelclient.client
+    'connection' - 'APIClient' class instance from fuelclient.client
     """
     class_api_path = None
     instance_api_path = None
-    connection = APIClient
+    connection = DefaultAPIClient
 
     def __init__(self, obj_id, **kwargs):
-        self.connection = APIClient
+        self.connection = DefaultAPIClient
         self.serializer = Serializer.from_params(kwargs.get('params'))
         self.id = obj_id
         self._data = None
