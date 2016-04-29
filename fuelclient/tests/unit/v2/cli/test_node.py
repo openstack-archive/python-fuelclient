@@ -174,7 +174,9 @@ node-4 ansible_host=10.20.0.5
         args = 'node update {node_id} --hostname {hostname}'\
             .format(node_id=node_id, hostname=hostname)
 
-        self.exec_command(args)
+        with mock.patch('sys.stdout', new=io.StringIO()) as mstdout:
+            self.exec_command(args)
+            self.assertIn(hostname, mstdout.getvalue())
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.update.assert_called_once_with(

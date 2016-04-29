@@ -113,6 +113,7 @@ class NodeUpdate(NodeMixIn, base.BaseShowCommand):
     """Change given attributes for a node."""
 
     columns = NodeShow.columns
+    numa_fields = NodeShow.numa_fields
 
     def get_parser(self, prog_name):
         parser = super(NodeUpdate, self).get_parser(prog_name)
@@ -140,10 +141,15 @@ class NodeUpdate(NodeMixIn, base.BaseShowCommand):
 
         updated_node = self.client.update(
             parsed_args.id, **updates)
+
+        numa_topology = updated_node['meta'].get('numa_topology', {})
+        for key in self.numa_fields:
+            updated_node[key] = numa_topology.get(key)
+
         updated_node = data_utils.get_display_data_single(
             self.columns, updated_node)
 
-        return (self.columns, updated_node)
+        return self.columns, updated_node
 
 
 class NodeVmsList(NodeMixIn, base.BaseShowCommand):
