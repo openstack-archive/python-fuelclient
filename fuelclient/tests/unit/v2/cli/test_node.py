@@ -19,6 +19,7 @@ import io
 import mock
 import six
 
+from fuelclient.commands import node as cmd_node
 from fuelclient import main as main_mod
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_node
@@ -161,11 +162,13 @@ node-4 ansible_host=10.20.0.5
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.node_vms_create.assert_called_once_with(node_id, config)
 
-    def test_node_set_hostname(self):
+    @mock.patch('cliff.formatters.table.TableFormatter.emit_one')
+    def test_node_set_hostname(self, m_emit_one):
         self.m_client._updatable_attributes = \
             node.NodeClient._updatable_attributes
         node_id = 42
         hostname = 'test-name'
+        expected_field_data = cmd_node.NodeShow.columns
 
         self.m_client.update.return_value = \
             fake_node.get_fake_node(node_id=node_id,
@@ -175,15 +178,21 @@ node-4 ansible_host=10.20.0.5
             .format(node_id=node_id, hostname=hostname)
 
         self.exec_command(args)
+        m_emit_one.assert_called_once_with(expected_field_data,
+                                           mock.ANY,
+                                           mock.ANY,
+                                           mock.ANY)
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.update.assert_called_once_with(
             node_id, hostname=hostname)
 
-    def test_node_set_name(self):
+    @mock.patch('cliff.formatters.table.TableFormatter.emit_one')
+    def test_node_set_name(self, m_emit_one):
         self.m_client._updatable_attributes = \
             node.NodeClient._updatable_attributes
         node_id = 37
+        expected_field_data = cmd_node.NodeShow.columns
 
         test_cases = ('new-name', 'New Name', 'śćż∑ Pó', '你一定是无聊')
         for name in test_cases:
@@ -199,6 +208,10 @@ node-4 ansible_host=10.20.0.5
             if six.PY2:
                 name = name.decode('utf-8')
 
+            m_emit_one.assert_called_with(expected_field_data,
+                                          mock.ANY,
+                                          mock.ANY,
+                                          mock.ANY)
             self.m_get_client.assert_called_once_with('node', mock.ANY)
             self.m_client.update.assert_called_once_with(
                 node_id, name=name)

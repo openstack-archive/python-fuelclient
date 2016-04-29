@@ -26,6 +26,19 @@ from fuelclient import utils
 class NodeMixIn(object):
     entity_name = 'node'
 
+    numa_fields = (
+        'numa_nodes',
+        'supported_hugepages',
+        'distances')
+
+    @classmethod
+    def get_numa_topology_info(cls, data):
+        numa_topology_info = {}
+        numa_topology = data['meta'].get('numa_topology', {})
+        for key in cls.numa_fields:
+            numa_topology_info[key] = numa_topology.get(key)
+        return numa_topology_info
+
 
 class NodeList(NodeMixIn, base.BaseListCommand):
     """Show list of all available nodes."""
@@ -69,10 +82,6 @@ class NodeList(NodeMixIn, base.BaseListCommand):
 
 class NodeShow(NodeMixIn, base.BaseShowCommand):
     """Show info about node with given id."""
-    numa_fields = (
-        'numa_nodes',
-        'supported_hugepages',
-        'distances')
 
     columns = ('id',
                'name',
@@ -96,15 +105,12 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
                # TODO(romcheg): network_data mostly never fits the screen
                # 'network_data',
                'manufacturer')
-    columns += numa_fields
+    columns += NodeMixIn.numa_fields
 
     def take_action(self, parsed_args):
         data = self.client.get_by_id(parsed_args.id)
-
-        numa_topology = data['meta'].get('numa_topology', {})
-        for key in self.numa_fields:
-            data[key] = numa_topology.get(key)
-
+        numa_topology = self.get_numa_topology_info(data)
+        data.update(numa_topology)
         data = data_utils.get_display_data_single(self.columns, data)
         return self.columns, data
 
@@ -140,10 +146,12 @@ class NodeUpdate(NodeMixIn, base.BaseShowCommand):
 
         updated_node = self.client.update(
             parsed_args.id, **updates)
+        numa_topology = self.get_numa_topology_info(updated_node)
+        updated_node.update(numa_topology)
         updated_node = data_utils.get_display_data_single(
             self.columns, updated_node)
 
-        return (self.columns, updated_node)
+        return self.columns, updated_node
 
 
 class NodeVmsList(NodeMixIn, base.BaseShowCommand):
