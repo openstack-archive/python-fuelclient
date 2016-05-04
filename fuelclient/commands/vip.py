@@ -30,6 +30,17 @@ class VipMixIn(object):
             help='Environment identifier'
         )
 
+    @staticmethod
+    def add_network_id_arg(parser):
+        parser.add_argument(
+            "-n",
+            "--network",
+            type=int,
+            default=None,
+            required=False,
+            help="Network identifier"
+        )
+
 
 class VipDownload(VipMixIn, base.BaseCommand):
     """Download VIPs configuration."""
@@ -43,17 +54,6 @@ class VipDownload(VipMixIn, base.BaseCommand):
             default=None,
             required=False,
             help="IP address entity identifier"
-        )
-
-    @staticmethod
-    def add_network_id_arg(parser):
-        parser.add_argument(
-            "-n",
-            "--network",
-            type=int,
-            default=None,
-            required=False,
-            help="Network identifier"
         )
 
     @staticmethod
@@ -124,3 +124,59 @@ class VipUpload(VipMixIn, base.BaseCommand):
     def take_action(self, args):
         self.client.upload(env_id=args.env, file_path=args.file)
         self.app.stdout.write("VIP configuration uploaded.")
+
+
+class VipCreate(VipMixIn, base.BaseCommand):
+    """Create VIP"""
+
+    @staticmethod
+    def add_vip_name_arg(parser):
+        parser.add_argument(
+            '-N',
+            '--name',
+            required=True,
+            type=str,
+            help="VIP name"
+        )
+
+    @staticmethod
+    def add_ip_addr_arg(parser):
+        parser.add_argument(
+            '-a',
+            '--address',
+            required=True,
+            type=str,
+            help="IP-address for the VIP"
+        )
+
+    @staticmethod
+    def add_vip_namespace_arg(parser):
+        parser.add_argument(
+            '--namespace',
+            required=False,
+            type=str,
+            help="VIP namespace"
+        )
+
+    def get_parser(self, prog_name):
+        parser = super(VipCreate, self).get_parser(prog_name)
+        self.add_env_id_arg(parser)
+        self.add_network_id_arg(parser)
+        self.add_vip_name_arg(parser)
+        self.add_ip_addr_arg(parser)
+        self.add_vip_namespace_arg(parser)
+        return parser
+
+    def take_action(self, args):
+        vip_kwargs = {
+            "env_id": args.env,
+            "ip_addr": args.address,
+            "network": args.network,
+            "vip_name": args.name,
+        }
+        if args.namespace is not None:
+            vip_kwargs['vip_namespace'] = args.namespace
+
+        self.client.create(**vip_kwargs)
+
+        self.app.stdout.write("VIP has been created.")

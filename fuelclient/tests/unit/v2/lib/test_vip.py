@@ -64,3 +64,15 @@ class TestVipFacade(test_api.BaseLibTest):
         written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
         expected_yaml = yaml.safe_load(MANY_VIPS_YAML)
         self.assertEqual(written_yaml, expected_yaml)
+
+    def test_vip_create(self):
+        expected = {'ip_addr': '127.0.0.1', 'vip_name': 'test', 'network': 1}
+        request_post = self.m_request.post(self.res_uri, json={})
+        self.client.create(
+            self.env_id,
+            ip_addr=expected['ip_addr'],
+            vip_name=expected['vip_name'],
+            network=expected['network']
+        )
+        self.assertTrue(request_post.called)
+        self.assertEqual(request_post.last_request.json(), expected)
