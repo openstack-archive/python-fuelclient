@@ -161,6 +161,10 @@ class TestVIPActions(base.UnitTestCase):
             mopen.call_args_list[0][0][0]
         )
 
+    def check_request(self, request_mock, url):
+        self.assertEqual(request_mock.call_count, 1)
+        self.assertIn(url, request_mock.last_request.url)
+
     def test_vips_upload(self, mos, mopen):
         url = '/api/v1/clusters/1/network_configuration/ips/vips/'
         mopen().__enter__().read.return_value = MANY_VIPS_YAML
@@ -173,8 +177,7 @@ class TestVIPActions(base.UnitTestCase):
             env_os.path.exists.return_value = True
             self.execute(['fuel', 'vip', '--env', '1', '--upload', file_path])
         self.assertEqual(env_os.path.exists.call_count, 1)
-        self.assertEqual(request_put.call_count, 1)
-        self.assertIn(url, request_put.last_request.url)
+        self.check_request(request_put, url)
         # FileFormatBasedSerializer.read_from_file must not modify given
         # file path string
         self.assertEqual(file_path, mopen.call_args[0][0])
@@ -189,3 +192,24 @@ class TestVIPActions(base.UnitTestCase):
                     'fuel vip --env 1 --upload vips_1.yaml'.split()
                 )
             self.assertIn("doesn't exist", mstderr.getvalue())
+
+    def test_create_vip(self, *_):
+        url = '/api/v1/clusters/1/network_configuration/ips/vips/'
+        request_post = self.m_request.post(url, json={})
+
+        env_id = 1
+        vip_data = {
+            "ip_addr": "127.0.0.1",
+            "network": -1,
+            "vip_name": 'test',
+            "vip_namespace": 'test-namespace'
+        }
+
+        self.execute(["fuel", "--env", str(env_id), "vip", "create",
+                      "--ip-addr", vip_data['ip_addr'],
+                      "--network", str(vip_data['network']),
+                      "--name", vip_data['vip_name'],
+                      "--namespace", vip_data['vip_namespace']])
+
+        self.check_request(request_post, url)
+        self.assertEqual(request_post.last_request.json(), vip_data)

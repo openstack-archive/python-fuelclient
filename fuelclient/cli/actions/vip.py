@@ -32,18 +32,42 @@ class VIPAction(Action):
         self.file_serializer = serializers.FileFormatBasedSerializer()
         self.args = (
             Args.get_env_arg(required=True),
+            Args.get_create_arg("Create VIP"),
             Args.get_upload_file_arg("Upload changed VIP configuration "
                                      "from given file"),
             Args.get_download_arg("Download VIP configuration"),
             Args.get_file_arg("Target file with vip data."),
             Args.get_ip_id_arg("IP address entity identifier"),
+            Args.get_ip_address_arg("IP address string"),
             Args.get_network_id_arg("Network identifier"),
             Args.get_network_role_arg("Network role string"),
+            Args.get_vip_name_arg("VIP name string"),
+            Args.get_vip_namespace_arg("VIP namespace string"),
         )
         self.flag_func_map = (
+            ("create", self.create),
             ("upload", self.upload),
             ("download", self.download)
         )
+
+    def create(self, params):
+        """To create VIP for environment:
+            fuel --env 1 vip create --address 172.16.0.10 --network 1 \\
+                --name public_vip --namespace haproxy
+        """
+        env = Environment(params.env)
+        vip_kwargs = {
+            "ip_addr": getattr(params, 'ip-address'),
+            "network": getattr(params, 'network'),
+            "vip_name": getattr(params, 'vip-name'),
+        }
+
+        vip_namespace = getattr(params, 'vip-namespace', None)
+        if vip_namespace is not None:
+            vip_kwargs['vip_namespace'] = vip_namespace
+
+        env.create_vip(**vip_kwargs)
+        print("VIP has been created")
 
     def upload(self, params):
         """To upload VIP configuration from some

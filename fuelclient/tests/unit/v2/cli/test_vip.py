@@ -30,6 +30,22 @@ class TestVIPActions(test_engine.BaseCLITest):
         self.m_client.__getattr__(method).assert_called_once_with(
             **expected_kwargs)
 
+    def test_vip_create(self):
+        expected = {
+            "env_id": 1,
+            "ip_addr": '127.0.0.1',
+            "network": 1,
+            "vip_name": 'test',
+            "vip_namespace": 'test-namespace'
+        }
+        cmd_line = (
+            '--env {0} --network {1} --address {2} --name {3} --namespace {4}'
+            .format(expected['env_id'], expected['network'],
+                    expected['ip_addr'], expected['vip_name'],
+                    expected['vip_namespace'])
+        )
+        self._test_cmd('create', cmd_line, expected)
+
     def test_vip_download(self):
         self._test_cmd('download', '--env 1', dict(
             env_id=1,
