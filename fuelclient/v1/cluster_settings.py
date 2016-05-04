@@ -27,5 +27,5 @@ class ClusterSettingsClient(base_v1.BaseV1Client):
         return task.cluster_settings()
 
 
-def get_client():
-    return ClusterSettingsClient()
+def get_client(connection):
+    return ClusterSettingsClient(connection)
