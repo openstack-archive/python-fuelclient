@@ -640,3 +640,11 @@ class Environment(BaseObject):
         :rtype: object
         """
         return self.connection.put_request(self._get_ip_addrs_url(), data)
+
+    def create_vip(self, **vip_kwargs):
+        """Create VIP through request to Nailgun API
+
+        :param vip_data: attributes of the VIP to be created
+        """
+        payload = [vip_kwargs]
+        return self.connection.post_request(self._get_ip_addrs_url(), payload)
