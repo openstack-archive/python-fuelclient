@@ -646,6 +646,31 @@ def get_vip_arg(help_msg):
     )
 
 
+def get_vip_name_arg(help_msg):
+    return get_str_arg(
+        "vip-name",
+        flags=("--name",),
+        help=help_msg
+    )
+
+
+def get_vip_namespace_arg(help_msg, required=False):
+    return get_str_arg(
+        "vip-namespace",
+        flags=("--namespace",),
+        required=required,
+        help=help_msg
+    )
+
+
+def get_ip_address_arg(help_msg):
+    return get_str_arg(
+        "ip-address",
+        flags=("--address", "--ip-addr"),
+        help=help_msg
+    )
+
+
 def get_ip_id_arg(help_msg):
     return get_int_arg(
         "ip-address-id",

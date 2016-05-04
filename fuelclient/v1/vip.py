@@ -49,6 +49,16 @@ class VipClient(base_v1.BaseV1Client):
         )
         env.set_vips_data(vips_data)
 
+    @staticmethod
+    def create(env_id, ip_addr, network, vip_name):
+        env = objects.Environment(env_id)
+        vip_data = {
+            'ip_addr': ip_addr,
+            'network': network,
+            'vip_name': vip_name
+        }
+        env.create_vip(**vip_data)
+
 
 def get_client():
     return VipClient()
