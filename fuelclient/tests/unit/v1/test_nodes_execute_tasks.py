@@ -36,6 +36,20 @@ class TestNodeExecuteTasksAction(base.UnitTestCase):
         put = self.m_request.put(rm.ANY, json={'id': 43})
 
         self.execute(['fuel', 'node', '--node', '1,2', '--tasks'] + self.tasks)
+        self.assertEqual(
+            put.last_request.url,
+            'http://127.0.0.1:8000/api/v1/clusters/1/deploy_tasks/?nodes=1,2')
+        self.assertEqual(put.last_request.json(), self.tasks)
+
+    def test_execute_provided_list_of_tasks_w_force(self):
+        put = self.m_request.put(rm.ANY, json={'id': 43})
+
+        self.execute((['fuel', 'node', '--node', '1,2', '--tasks']
+                      + self.tasks + ['--force']))
+        self.assertEqual(
+            put.last_request.url,
+            'http://127.0.0.1:8000/api/v1/clusters/1/deploy_tasks/?nodes=1,2'
+            '&force=1')
         self.assertEqual(put.last_request.json(), self.tasks)
 
     @patch('fuelclient.objects.environment.Environment.get_deployment_tasks')

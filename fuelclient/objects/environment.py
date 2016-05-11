@@ -456,11 +456,16 @@ class Environment(BaseObject):
             )
         )
 
-    def _get_method_url(self, method_type, nodes):
-        return "clusters/{0}/{1}/?nodes={2}".format(
+    def _get_method_url(self, method_type, nodes, force=False):
+        endpoint = "clusters/{0}/{1}/?nodes={2}".format(
             self.id,
             method_type,
             ','.join(map(lambda n: str(n.id), nodes)))
+
+        if force:
+            endpoint += '&force=1'
+
+        return endpoint
 
     def install_selected_nodes(self, method_type, nodes):
         return Task.init_with_data(
@@ -470,10 +475,10 @@ class Environment(BaseObject):
             )
         )
 
-    def execute_tasks(self, nodes, tasks):
+    def execute_tasks(self, nodes, tasks, force):
         return Task.init_with_data(
             self.connection.put_request(
-                self._get_method_url('deploy_tasks', nodes),
+                self._get_method_url('deploy_tasks', nodes=nodes, force=force),
                 tasks
             )
         )
