@@ -266,6 +266,7 @@ class NodeAction(Action):
         env = Environment(env_id_to_start)
 
         tasks = params.tasks or None
+        force = params.force or None
 
         if params.skip or params.end or params.start:
             tasks = env.get_tasks(
@@ -278,7 +279,8 @@ class NodeAction(Action):
             self.serializer.print_to_output({}, "Nothing to run.")
             return
 
-        task = env.execute_tasks(node_collection.collection, tasks=tasks)
+        task = env.execute_tasks(
+            node_collection.collection, tasks=tasks, force=force)
 
         self.serializer.print_to_output(
             task.data,
