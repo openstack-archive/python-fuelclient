@@ -254,6 +254,7 @@ class NodeAction(Action):
     def execute_tasks(self, params):
         """Execute deployment tasks
                 fuel node --node 2 --tasks hiera netconfig
+                fuel node --node 2 --tasks netconfig --force
                 fuel node --node 2 --skip hiera netconfig
                 fuel node --node 2 --skip rsync --end pre_deployment_end
                 fuel node --node 2 --end netconfig
@@ -266,6 +267,7 @@ class NodeAction(Action):
         env = Environment(env_id_to_start)
 
         tasks = params.tasks or None
+        force = params.force or None
 
         if params.skip or params.end or params.start:
             tasks = env.get_tasks(
@@ -278,7 +280,8 @@ class NodeAction(Action):
             self.serializer.print_to_output({}, "Nothing to run.")
             return
 
-        task = env.execute_tasks(node_collection.collection, tasks=tasks)
+        task = env.execute_tasks(
+            node_collection.collection, tasks=tasks, force=force)
 
         self.serializer.print_to_output(
             task.data,
