@@ -161,11 +161,11 @@ class NodeCollection(object):
 
     @classmethod
     def init_with_ids(cls, ids):
-        return cls(map(Node, ids))
+        return cls(list(map(Node, ids)))
 
     @classmethod
     def init_with_data(cls, data):
-        return cls(map(Node.init_with_data, data))
+        return cls(list(map(Node.init_with_data, data)))
 
     def __str__(self):
         return "nodes [{0}]".format(
