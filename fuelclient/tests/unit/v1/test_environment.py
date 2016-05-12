@@ -81,6 +81,20 @@ class TestEnvironmentOstf(base.UnitTestCase):
         self.assertIn(1, self.env._testruns_ids)
         self.assertIn(2, self.env._testruns_ids)
 
+    @mock.patch.object(Environment.connection, 'post_request')
+    def test_credentials_are_passed_to_ostf(self, post_request):
+        self.env.run_test_sets(['sanity'], {'tenant': 't1',
+                                            'username': 'u1',
+                                            'password': 'p1'})
+        run_test_request = post_request.call_args[0][1]
+        self.assertTrue(len(run_test_request) > 0, 'Got empty request')
+        self.assertIn('metadata', run_test_request[0])
+        self.assertIn('ostf_os_access_creds', run_test_request[0]['metadata'])
+        creds = run_test_request[0]['metadata']['ostf_os_access_creds']
+        self.assertEqual(creds['ostf_os_tenant_name'], 't1')
+        self.assertEqual(creds['ostf_os_username'], 'u1')
+        self.assertEqual(creds['ostf_os_password'], 'p1')
+
     @mock.patch.object(Environment.connection, 'get_request', mock.Mock(
         side_effect=[
             {'id': 1, 'status': 'running'},
