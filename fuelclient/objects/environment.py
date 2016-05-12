@@ -415,19 +415,29 @@ class Environment(BaseObject):
     def is_in_running_test_sets(self, test_set):
         return test_set["testset"] in self._test_sets_to_run
 
-    def run_test_sets(self, test_sets_to_run):
+    def run_test_sets(self, test_sets_to_run, ostf_credentials=None):
         self._test_sets_to_run = test_sets_to_run
-        tests_data = map(
-            lambda testset: {
-                "testset": testset,
+
+        def make_test_set(name):
+            result = {
+                "testset": name,
                 "metadata": {
                     "config": {},
-                    "cluster_id": self.id
+                    "cluster_id": self.id,
                 }
-            },
-            test_sets_to_run
-        )
+            }
+            if ostf_credentials:
+                creds = result['metadata'].setdefault(
+                    'ostf_os_access_creds', {})
+                if 'tenant' in ostf_credentials:
+                    creds['ostf_os_tenant_name'] = ostf_credentials['tenant']
+                if 'username' in ostf_credentials:
+                    creds['ostf_os_username'] = ostf_credentials['username']
+                if 'password' in ostf_credentials:
+                    creds['ostf_os_password'] = ostf_credentials['password']
+            return result
 
+        tests_data = map(make_test_set, test_sets_to_run)
         testruns = self.connection.post_request(
             "testruns", tests_data, ostf=True)
         self._testruns_ids = [tr['id'] for tr in testruns]
