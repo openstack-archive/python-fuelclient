@@ -68,7 +68,7 @@ class HealthCheckAction(Action):
             )
         test_sets_to_check = params.check or set(
             ts["id"] for ts in env.get_testsets())
-        env.run_test_sets(test_sets_to_check)
+        env.run_test_sets(test_sets_to_check, params)
         tests_state = env.get_state_of_tests()
         self.serializer.print_to_output(
             tests_state,
