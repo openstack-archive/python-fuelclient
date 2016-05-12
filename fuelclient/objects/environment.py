@@ -415,14 +415,22 @@ class Environment(BaseObject):
     def is_in_running_test_sets(self, test_set):
         return test_set["testset"] in self._test_sets_to_run
 
-    def run_test_sets(self, test_sets_to_run):
+    def run_test_sets(self, test_sets_to_run, params):
         self._test_sets_to_run = test_sets_to_run
+        ostf_os_access_creds = None
+        if params.ostf_username:
+            ostf_os_access_creds = {
+                "ostf_os_tenant_name": params.ostf_tenant_name or '',
+                "ostf_os_username": params.ostf_username or '',
+                "ostf_os_password": params.ostf_password or '',
+            }
         tests_data = map(
             lambda testset: {
                 "testset": testset,
                 "metadata": {
                     "config": {},
-                    "cluster_id": self.id
+                    "cluster_id": self.id,
+                    "ostf_os_access_creds": ostf_os_access_creds
                 }
             },
             test_sets_to_run
