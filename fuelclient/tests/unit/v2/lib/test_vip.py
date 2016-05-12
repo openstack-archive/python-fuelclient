@@ -66,13 +66,9 @@ class TestVipFacade(test_api.BaseLibTest):
         self.assertEqual(written_yaml, expected_yaml)
 
     def test_vip_create(self):
-        expected = {'ip_addr': '127.0.0.1', 'vip_name': 'test', 'network': 1}
+        vip_kwargs = {'ip_addr': '127.0.0.1', 'vip_name': 'test', 'network': 1,
+                      'vip_namespace': 'test-namespace'}
         request_post = self.m_request.post(self.res_uri, json={})
-        self.client.create(
-            self.env_id,
-            ip_addr=expected['ip_addr'],
-            vip_name=expected['vip_name'],
-            network=expected['network']
-        )
+        self.client.create(self.env_id, **vip_kwargs)
         self.assertTrue(request_post.called)
-        self.assertEqual(request_post.last_request.json(), expected)
+        self.assertEqual(request_post.last_request.json(), vip_kwargs)
