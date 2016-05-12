@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sys
 
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
@@ -19,6 +20,7 @@ from fuelclient.cli.error import EnvironmentException
 from fuelclient.cli.formatting import format_table
 from fuelclient.cli.formatting import print_health_check
 from fuelclient.objects.environment import Environment
+import six
 
 
 class HealthCheckAction(Action):
@@ -38,7 +40,10 @@ class HealthCheckAction(Action):
             Args.get_env_arg(required=True),
             Args.get_list_arg("List all available checks"),
             Args.get_force_arg("Forced test run"),
-            Args.get_check_arg("Run check for some testset.")
+            Args.get_check_arg("Run check for some testset."),
+            Args.get_ostf_username_arg(),
+            Args.get_ostf_password_arg(),
+            Args.get_ostf_tenant_name_arg()
         )
 
         self.flag_func_map = (
@@ -68,7 +73,17 @@ class HealthCheckAction(Action):
             )
         test_sets_to_check = params.check or set(
             ts["id"] for ts in env.get_testsets())
-        env.run_test_sets(test_sets_to_check)
+        ostf_credentials = {}
+        if params.ostf_tenant_name is not None:
+            ostf_credentials['tenant'] = params.ostf_tenant_name
+        if params.ostf_username is not None:
+            ostf_credentials['username'] = params.ostf_username
+        if params.ostf_password is not None:
+            ostf_credentials['password'] = params.ostf_password
+        if not ostf_credentials:
+            six.print_("WARNING: ostf credentials are going to be",
+                       "mandatory in the next release.", file=sys.stderr)
+        env.run_test_sets(test_sets_to_check, ostf_credentials)
         tests_state = env.get_state_of_tests()
         self.serializer.print_to_output(
             tests_state,
