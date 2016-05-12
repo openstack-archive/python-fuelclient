@@ -75,7 +75,7 @@ class TestEnvironmentOstf(base.UnitTestCase):
     def test_run_test_sets(self):
         self.assertEqual(self.env._testruns_ids, [])
 
-        testruns = self.env.run_test_sets(['sanity', 'ha'])
+        testruns = self.env.run_test_sets(['sanity', 'ha'], mock.Mock())
 
         self.assertEqual(len(testruns), 2)
         self.assertIn(1, self.env._testruns_ids)
