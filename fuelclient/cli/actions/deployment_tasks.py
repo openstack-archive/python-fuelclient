@@ -16,15 +16,14 @@ from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli.formatting import format_table
-from fuelclient.objects.deployment_history import DeploymentHistory
+
+from fuelclient.v1.deployment_history import DeploymentHistoryClient
 
 
 class DeploymentTasksAction(Action):
     """Show deployment tasks
     """
     action_name = "deployment-tasks"
-    acceptable_keys = ("deployment_graph_task_name", "node_id", "status",
-                       "time_start", "time_end")
 
     def __init__(self):
         super(DeploymentTasksAction, self).__init__()
@@ -38,6 +37,10 @@ class DeploymentTasksAction(Action):
             ),
             Args.get_status_arg(
                 "Statuses: pending, error, ready, running, skipped"
+            ),
+            Args.get_tasks_names_arg(
+                "Show deployment history for specific deployment tasks names "
+                "and group output by task"
             )
         ]
         self.flag_func_map = (
@@ -58,14 +61,31 @@ class DeploymentTasksAction(Action):
             To display deployment tasks for some statuses(pending, error,
             ready, running) on some nodes:
                 fuel deployment-tasks --task-id 5 --status error --nodes 1,2
-        """
 
-        tasks_data = DeploymentHistory.get_all(
-            params.task,
-            params.node,
-            params.status
+            To display certain deployment tasks results only:
+                fuel deployment-tasks --task-id 5
+                    --task-name task-name1,task-name2
+
+        """
+        client = DeploymentHistoryClient()
+        tasks_names = getattr(params, 'task-name')
+        group_by_tasks = bool(tasks_names)
+        data = client.get_all(
+            transaction_id=params.task,
+            nodes=params.node,
+            statuses=params.status,
+            tasks_names=tasks_names,
+            group_by_tasks=group_by_tasks
         )
+
+        if group_by_tasks:
+            table_keys = client.tasks_records_keys
+        else:
+            table_keys = client.history_records_keys
         self.serializer.print_to_output(
-            tasks_data,
-            format_table(tasks_data, acceptable_keys=self.acceptable_keys)
+            data,
+            format_table(
+                data,
+                acceptable_keys=table_keys
+            )
         )
