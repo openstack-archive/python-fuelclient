@@ -144,12 +144,12 @@ class TaskShow(TaskMixIn, base.BaseShowCommand):
 
 
 class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
-    """Show deployment history about task with given id"""
+    """Show deployment history about task with given ID."""
 
     entity_name = 'deployment_history'
 
     columns = (
-        'deployment_graph_task_name',
+        'task_name',
         'node_id',
         'status',
         'time_start',
@@ -158,8 +158,8 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
     def get_parser(self, prog_name):
         parser = super(TaskHistoryShow, self).get_parser(prog_name)
 
-        parser.add_argument('id', type=int,
-                            help='Id of the Task.')
+        parser.add_argument('id', type=int, help='Id of the Task')
+
         parser.add_argument(
             '-n',
             '--nodes',
@@ -175,17 +175,25 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
             nargs='+',
             help='Show deployment history for specific statuses')
 
+        parser.add_argument(
+            '-d',
+            '--tasks-names',
+            type=str,
+            nargs='+',
+            help='Show deployment history for specific deployment tasks names')
+
         return parser
 
     def take_action(self, parsed_args):
         data = self.client.get_all(
             transaction_id=parsed_args.id,
             nodes=parsed_args.nodes,
-            statuses=parsed_args.statuses)
+            statuses=parsed_args.statuses,
+            tasks_names=parsed_args.tasks_names)
 
         data = data_utils.get_display_data_multi(self.columns, data)
 
-        return (self.columns, data)
+        return self.columns, data
 
 
 class TaskNetworkConfigurationDownload(TaskInfoFileMixIn, base.BaseCommand):
