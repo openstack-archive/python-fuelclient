@@ -18,16 +18,24 @@ from fuelclient.objects.base import BaseObject
 class DeploymentHistory(BaseObject):
 
     class_api_path = "transactions/{transaction_id}/deployment_history/"\
-                     "?nodes={nodes}&statuses={statuses}"
+                     "?nodes={nodes}&statuses={statuses}" \
+                     "&tasks_names={tasks_names}"
 
     @classmethod
-    def get_all(cls, transaction_id, nodes=None, statuses=None):
-        statuses = ",".join(str(s) for s in statuses) if statuses else ""
-        nodes = ",".join(str(n) for n in nodes) if nodes else ""
+    def get_all(cls, transaction_id, nodes=None,
+                statuses=None, tasks_names=None):
+
+        parameters = {
+            'statuses': statuses,
+            'nodes': nodes,
+            'tasks_names': tasks_names
+        }
+        for k in parameters:
+            parameters[k] = ",".join(str(s) for s in parameters[k]) \
+                if parameters[k] else ""
+
         history = cls.connection.get_request(
             cls.class_api_path.format(
                 transaction_id=transaction_id,
-                nodes=nodes,
-                statuses=statuses))
-
+                **parameters))
         return history
