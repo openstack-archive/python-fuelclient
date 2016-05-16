@@ -34,6 +34,8 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
     :acceptable_keys list(str): list of keys for which to create table
                                 also specifies their order
     """
+
+    # prepare columns
     if column_to_join is not None:
         for data_dict in data:
             for column_name in column_to_join:
@@ -41,13 +43,27 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
                     sorted(data_dict[column_name])
                 )
     if acceptable_keys is not None:
-        rows = [tuple(value[key] for key in acceptable_keys)
+        rows = [tuple(value.get(key, "") for key in acceptable_keys)
                 for value in data]
         header = tuple(acceptable_keys)
     else:
         rows = [tuple(x.values()) for x in data]
         header = tuple(data[0].keys())
     number_of_columns = len(header)
+
+    # split multi-lines cells if there is no automatic columns merge
+    if column_to_join:
+        def format_cell(cell):
+            return [cell or ""]
+    else:
+        def format_cell(cell):
+            return six.text_type(cell).split('\n')
+    rows = [
+        [format_cell(cell) if cell is not None else [''] for cell in row]
+        for row in rows
+    ]
+
+    # calculate columns widths
     column_widths = dict(
         zip(
             range(number_of_columns),
@@ -56,21 +72,42 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
     )
     for row in rows:
         column_widths.update(
-            (index, max(column_widths[index], len(six.text_type(element))))
-            for index, element in enumerate(row)
+            (
+                index,
+                max(
+                    column_widths[index],
+                    max(len(six.text_type(line)) for line in cell)
+                )
+            )
+            for index, cell in enumerate(row)
         )
+
+    # make output
+    hor_delimeter = u'-+-'.join(column_widths[column_index] * u'-'
+                                for column_index in range(number_of_columns))
+
     row_template = u' | '.join(
         u"{{{0}:{1}}}".format(idx, width)
         for idx, width in column_widths.items()
     )
 
-    return u'\n'.join(
-        (row_template.format(*header),
-         u'-|-'.join(column_widths[column_index] * u'-'
-                     for column_index in range(number_of_columns)),
-         u'\n'.join(row_template.format(*map(six.text_type, x))
-                    for x in rows))
-    )
+    output_lines = [
+        row_template.format(*header),
+        hor_delimeter
+    ]
+
+    for row in rows:
+        max_cell_lines = max(len(cell) for cell in row)
+        for cell_line_no in range(max_cell_lines):
+            output_lines.append(
+                row_template.format(
+                    *(
+                        cell[cell_line_no] if len(cell) > cell_line_no else u""
+                        for cell in row
+                    )
+                )
+            )
+    return u'\n'.join(output_lines)
 
 
 def quote_and_join(words):
