@@ -60,7 +60,8 @@ class TestTaskCommand(test_engine.BaseCLITest):
                                                   mock.ANY)
         self.m_client.get_all.assert_called_once_with(transaction_id=task_id,
                                                       nodes=None,
-                                                      statuses=None)
+                                                      statuses=None,
+                                                      tasks_names=None)
 
     def _test_cmd(self, cmd, method, cmd_line, client,
                   return_data, expected_file_path, expected_kwargs):
