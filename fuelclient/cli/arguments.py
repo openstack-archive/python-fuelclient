@@ -705,9 +705,7 @@ def get_upload_file_arg(help_msg):
 
 def get_status_arg(help_msg):
     default_kwargs = {
-        "action": SetAction,
         "flags": ("--status",),
-        "nargs": '+',
         "default": None,
         "help": help_msg
     }
@@ -716,10 +714,17 @@ def get_status_arg(help_msg):
 
 def get_deployment_node_arg(help_msg):
     default_kwargs = {
-        "action": SetAction,
         "flags": ("--node-id",),
-        "nargs": '+',
         "default": None,
         "help": help_msg
     }
     return get_arg("node", **default_kwargs)
+
+
+def get_tasks_names_arg(help_msg):
+    default_kwargs = {
+        "flags": ("-d", "--task-name",),
+        "default": None,
+        "help": help_msg
+    }
+    return get_arg("task-name", **default_kwargs)
