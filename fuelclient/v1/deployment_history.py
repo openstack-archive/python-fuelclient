@@ -20,11 +20,13 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.DeploymentHistory
 
-    def get_all(self, transaction_id, nodes=None, statuses=None):
+    def get_all(self, transaction_id, nodes=None,
+                statuses=None, tasks_names=None):
         return self._entity_wrapper.get_all(
             transaction_id=transaction_id,
             nodes=nodes,
-            statuses=statuses)
+            statuses=statuses,
+            tasks_names=tasks_names)
 
 
 def get_client(connection):

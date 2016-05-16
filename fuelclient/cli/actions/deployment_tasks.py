@@ -38,6 +38,9 @@ class DeploymentTasksAction(Action):
             ),
             Args.get_status_arg(
                 "Statuses: pending, error, ready, running, skipped"
+            ),
+            Args.get_tasks_names_arg(
+                "Show deployment history for specific deployment tasks names"
             )
         ]
         self.flag_func_map = (
@@ -58,14 +61,30 @@ class DeploymentTasksAction(Action):
             To display deployment tasks for some statuses(pending, error,
             ready, running) on some nodes:
                 fuel deployment-tasks --task-id 5 --status error --nodes 1,2
+
+            To display certain deployment tasks results only you could use:
+                fuel deployment-tasks --task-name task-name1,task-name2
+
         """
 
         tasks_data = DeploymentHistory.get_all(
-            params.task,
-            params.node,
-            params.status
+            transaction_id=params.task,
+            nodes=params.node,
+            statuses=params.status,
+            tasks_names=getattr(params, 'task-name')
         )
+        processed_tasks = []
+        for record in tasks_data:
+            processed_task = {}
+            for key in record:
+                if key in self.acceptable_keys:
+                    processed_task[key] = record[key]
+            processed_tasks.append(processed_task)
+
         self.serializer.print_to_output(
-            tasks_data,
-            format_table(tasks_data, acceptable_keys=self.acceptable_keys)
+            processed_tasks,
+            format_table(
+                processed_tasks,
+                acceptable_keys=self.acceptable_keys
+            )
         )

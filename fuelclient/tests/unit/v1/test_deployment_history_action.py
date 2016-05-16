@@ -51,7 +51,10 @@ class TestDeploymentTasksAction(base.UnitTestCase):
     @patch.object(Serializer, 'print_to_output')
     def test_show_full_history(self, print_mock):
         self.m_history_api = self.m_request.get(
-            '/api/v1/transactions/1/deployment_history/?nodes=&statuses=',
+            '/api/v1/transactions/1/deployment_history/?'
+            'nodes=&'
+            'statuses=&'
+            'tasks_names=',
             json=HISTORY_API_OUTPUT)
 
         self.execute(
@@ -62,7 +65,10 @@ class TestDeploymentTasksAction(base.UnitTestCase):
 
     def test_show_history_for_special_nodes(self):
         self.m_history_api = self.m_request.get(
-            '/api/v1/transactions/1/deployment_history/?nodes=1,2&statuses=',
+            '/api/v1/transactions/1/deployment_history/?'
+            'nodes=1,2&'
+            'statuses=&'
+            'tasks_names=',
             json={})
 
         self.execute(
@@ -72,10 +78,27 @@ class TestDeploymentTasksAction(base.UnitTestCase):
 
         self.assertEqual(self.m_history_api.call_count, 1)
 
+    def test_show_history_for_special_tasks(self):
+        self.m_history_api = self.m_request.get(
+            '/api/v1/transactions/1/deployment_history/?'
+            'nodes=&'
+            'statuses=&'
+            'tasks_names=test1,test2',
+            json={})
+
+        self.execute(
+            ['fuel', 'deployment-tasks', '--tid', '1',
+             '--task-name', 'test1,test2']
+        )
+
+        self.assertEqual(self.m_history_api.call_count, 1)
+
     def test_show_history_with_special_statuses(self):
         self.m_history_api = self.m_request.get(
-            '/api/v1/transactions/1/deployment_history/'
-            '?nodes=&statuses=ready,skipped',
+            '/api/v1/transactions/1/deployment_history/?'
+            'nodes=&'
+            'statuses=ready,skipped&'
+            'tasks_names=',
             json={})
         self.execute(
             ['fuel', 'deployment-tasks', '--tid', '1',
@@ -83,13 +106,16 @@ class TestDeploymentTasksAction(base.UnitTestCase):
         )
         self.assertEqual(self.m_history_api.call_count, 1)
 
-    def test_show_history_with_special_statuses_for_special_nodes(self):
+    def test_show_history_for__special_statuses__nodes_and_tasks(self):
         self.m_history_api = self.m_request.get(
-            '/api/v1/transactions/1/deployment_history/'
-            '?nodes=1,2&statuses=ready,skipped',
+            '/api/v1/transactions/1/deployment_history/?'
+            'nodes=1,2&'
+            'statuses=ready,skipped&'
+            'tasks_names=test1,test2',
             json={})
         self.execute(
             ['fuel', 'deployment-tasks', '--tid', '1',
-             '--status', 'ready,skipped', '--node', '1,2']
+             '--status', 'ready,skipped', '--node', '1,2',
+             '--task-name', 'test1,test2']
         )
         self.assertEqual(self.m_history_api.call_count, 1)
