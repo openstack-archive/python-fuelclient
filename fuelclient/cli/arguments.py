@@ -723,3 +723,14 @@ def get_deployment_node_arg(help_msg):
         "help": help_msg
     }
     return get_arg("node", **default_kwargs)
+
+
+def get_tasks_names_arg(help_msg):
+    default_kwargs = {
+        "action": SetAction,
+        "flags": ("-d", "--task-name",),
+        "nargs": '+',
+        "default": None,
+        "help": help_msg
+    }
+    return get_arg("task-name", **default_kwargs)

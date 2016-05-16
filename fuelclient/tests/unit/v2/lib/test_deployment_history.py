@@ -27,21 +27,43 @@ class TestDeploymentHistoryFacade(test_api.BaseLibTest):
         self.version = 'v1'
         self.transaction_id = '1'
         self.res_uri = '/api/{0}/transactions/{1}'\
-                       '/deployment_history/?nodes=&statuses='.format(
-                           self.version, self.transaction_id)
+                       '/deployment_history/' \
+                       ''.format(self.version, self.transaction_id)
 
         self.fake_history = utils.get_fake_deployment_history()
 
-        self.client = fuelclient.get_client('deployment_history',
-                                            self.version)
+        self.client = fuelclient.get_client('deployment_history', self.version)
+
+    def get_url(self, nodes='', statuses='', tasks_names=''):
+        return self.res_uri + '?nodes={}&statuses={}&tasks_names={}'.format(
+            nodes, statuses, tasks_names
+        )
 
     def test_deployment_history_list(self):
 
-        matcher = self.m_request.get(self.res_uri, json=self.fake_history)
+        matcher = self.m_request.get(self.get_url(), json=self.fake_history)
 
         self.client.get_all(
             transaction_id=self.transaction_id,
             nodes=None,
             statuses=None)
+
+        self.assertTrue(matcher.called)
+
+    def test_deployment_history_parameters(self):
+
+        matcher = self.m_request.get(
+            self.get_url(
+                nodes='1,2',
+                statuses='ready,error',
+                tasks_names='custom_task1,custom_task12'
+            ), json=self.fake_history)
+
+        self.client.get_all(
+            transaction_id=self.transaction_id,
+            nodes=['1', '2'],
+            statuses=['ready', 'error'],
+            tasks_names=['custom_task1', 'custom_task12']
+        )
 
         self.assertTrue(matcher.called)
