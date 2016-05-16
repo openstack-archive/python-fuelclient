@@ -60,7 +60,23 @@ class TestTaskCommand(test_engine.BaseCLITest):
                                                   mock.ANY)
         self.m_client.get_all.assert_called_once_with(transaction_id=task_id,
                                                       nodes=None,
-                                                      statuses=None)
+                                                      statuses=None,
+                                                      tasks_names=None)
+
+    def test_task_history_parameters(self):
+        task_id = 42
+        args = 'task history show {task_id} --tasks-names task1 task2 ' \
+               '--statuses ready error --nodes 1 2'.format(task_id=task_id)
+
+        self.m_client.get_all.return_value = \
+            utils.get_fake_deployment_history()
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('deployment_history',
+                                                  mock.ANY)
+        self.m_client.get_all.assert_called_once_with(
+            transaction_id=task_id, nodes=['1', '2'],
+            statuses=['ready', 'error'], tasks_names=['task1', 'task2'])
 
     def _test_cmd(self, cmd, method, cmd_line, client,
                   return_data, expected_file_path, expected_kwargs):
