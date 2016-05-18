@@ -13,6 +13,7 @@
 #    under the License.
 
 import collections
+import json
 import operator
 import os
 
@@ -175,7 +176,7 @@ class NodeCreateVMsConf(NodeMixIn, base.BaseCommand):
                             help='Id of the {0}.'.format(self.entity_name))
         parser.add_argument(
             '--conf',
-            type=str,
+            type=json.loads,
             required=True,
             nargs='+',
             help='JSONs with VMs configuration',
