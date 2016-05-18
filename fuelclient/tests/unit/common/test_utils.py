@@ -240,3 +240,30 @@ class TestUtils(base.UnitTestCase):
         with self.assertRaisesRegexp(error.HTTPError,
                                      '403.*{}'.format(text)):
             client.DefaultAPIClient.post_request('address')
+
+    def test_parse_to_list_of_dicts(self):
+        items = utils.parse_to_list_of_dicts(['{"id": 1}'])
+        self.assertEqual(items, [{"id": 1}])
+
+        items = utils.parse_to_list_of_dicts(['{"id": 2}', '{"id": 3}'])
+        self.assertEqual(items, [{"id": 2}, {"id": 3}])
+
+        items = utils.parse_to_list_of_dicts(['[{"id": 4}]'])
+        self.assertEqual(items, [{"id": 4}])
+
+        items = utils.parse_to_list_of_dicts(
+            ['[{"id": 5}, {"id": 6}]', '{"id": 7}'])
+        self.assertEqual(items, [{"id": 5}, {"id": 6}, {"id": 7}])
+
+    def test_parse_to_list_of_dicts_fail(self):
+        self.assertRaisesRegexp(
+            error.BadDataException, 'Not valid JSON data',
+            utils.parse_to_list_of_dicts, [{"id": 1}])
+
+        self.assertRaisesRegexp(
+            error.BadDataException, 'Not valid JSON data',
+            utils.parse_to_list_of_dicts, ['{"id": }'])
+
+        self.assertRaisesRegexp(
+            error.BadDataException, 'The dict or list instance expected',
+            utils.parse_to_list_of_dicts, ['42'])
