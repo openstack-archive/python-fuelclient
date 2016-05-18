@@ -77,7 +77,7 @@ class ClientPerfTest(base.UnitTestCase):
     def setUp(self):
         super(ClientPerfTest, self).setUp()
 
-        token_patcher = mock.patch.object(client.Client, 'auth_token',
+        token_patcher = mock.patch.object(client.APIClient, 'auth_token',
                                           new_callable=mock.PropertyMock)
         self.mock_auth_token = token_patcher.start()
         self.addCleanup(self.mock_auth_token.stop)

@@ -15,7 +15,7 @@
 import sys
 
 from fuelclient.cli.actions.base import Action
-from fuelclient.client import APIClient
+from fuelclient.client import DefaultAPIClient
 
 
 class TokenAction(Action):
@@ -34,4 +34,4 @@ class TokenAction(Action):
     def get_token(self, params):
         """Print out a valid Keystone auth token
         """
-        sys.stdout.write(APIClient.auth_token)
+        sys.stdout.write(DefaultAPIClient.auth_token)

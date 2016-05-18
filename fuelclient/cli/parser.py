@@ -196,7 +196,7 @@ class Parser(object):
 
     def move_argument_before_action(self, flag, has_value=True):
         """We need to move general argument before action, we use them
-        not directly in action but in APIClient.
+        not directly in action but in DefaultAPIClient.
         """
         for arg in self.args:
             if flag in arg:

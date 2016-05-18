@@ -43,7 +43,7 @@ class TestChangePassword(base.UnitTestCase):
 
     @mock.patch('fuelclient.cli.serializers.Serializer.print_to_output')
     @mock.patch('fuelclient.cli.actions.user.fuelclient_settings')
-    @mock.patch('fuelclient.cli.actions.user.APIClient')
+    @mock.patch('fuelclient.cli.actions.user.DefaultAPIClient')
     def test_change_password(self, mapiclient, settings_mock, print_mock):
         user_action = UserAction()
         params = mock.Mock()
@@ -74,7 +74,7 @@ class TestChangePassword(base.UnitTestCase):
             None,
             msg)
 
-    @mock.patch('fuelclient.cli.actions.user.APIClient')
+    @mock.patch('fuelclient.cli.actions.user.DefaultAPIClient')
     def test_change_password_w_newpass(self, mapiclient):
         user_action = UserAction()
         params = mock.Mock()

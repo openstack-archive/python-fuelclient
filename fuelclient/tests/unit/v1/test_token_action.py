@@ -23,7 +23,7 @@ from fuelclient.tests.unit.v1 import base
 
 class TestPluginsActions(base.UnitTestCase):
 
-    @mock.patch('fuelclient.cli.actions.token.APIClient')
+    @mock.patch('fuelclient.cli.actions.token.DefaultAPIClient')
     def test_token_action(self, mAPIClient):
         with mock.patch('sys.stdout', new=io.StringIO()) as mstdout:
             token = u'token123'
