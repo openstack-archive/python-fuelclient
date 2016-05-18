@@ -135,7 +135,7 @@ def file_exists(path):
     return os.path.lexists(path)
 
 
-def parse_to_list_of_dicts(str_list):
+def parse_to_list_of_dicts(items):
     """Parse list of json strings to dictionaries
 
     :param list: list of dicts and json string
@@ -143,14 +143,17 @@ def parse_to_list_of_dicts(str_list):
 
     """
     dict_list = []
-    for json_str in str_list:
-        if not isinstance(json_str, dict):
+    for item in items:
+        if isinstance(item, six.string_types):
             try:
-                json_str = json.loads(json_str)
+                item = json.loads(item)
             except Exception:
                 raise error.BadDataException(
-                    'Not valid JSON data: {0}'.format(json_str))
-        dict_list.append(json_str)
+                    'Not valid JSON data: {0}'.format(item))
+        if isinstance(item, dict):
+            dict_list.append(item)
+        elif isinstance(item, (list, tuple)):
+            dict_list.extend(item)
     return dict_list
 
 
