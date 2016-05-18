@@ -162,6 +162,21 @@ node-4 ansible_host=10.20.0.5
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.node_vms_create.assert_called_once_with(node_id, config)
 
+    def test_node_vms_conf_create_from_list(self):
+        vms_conf = r'[{"id": 2}, {"id": 3}]'
+        config = [{'id': 2},
+                  {'id': 3}]
+
+        node_id = 42
+
+        args = "node create-vms-conf {0} --conf '{1}'".format(
+            node_id,
+            vms_conf)
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.node_vms_create.assert_called_once_with(node_id, config)
+
     @mock.patch('cliff.formatters.table.TableFormatter.emit_one')
     def test_node_set_hostname(self, m_emit_one):
         self.m_client._updatable_attributes = \
