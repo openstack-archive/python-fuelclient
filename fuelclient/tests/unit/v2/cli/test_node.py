@@ -161,6 +161,30 @@ node-4 ansible_host=10.20.0.5
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.node_vms_create.assert_called_once_with(node_id, config)
 
+    def test_node_vms_conf_create_from_list(self):
+        vms_conf = '[{"id": 2}, {"id": 3}]'
+        config = [{'id': 2}, {'id': 3}]
+
+        node_id = 42
+
+        args = "node create-vms-conf {0} --conf '{1}'".format(
+            node_id, vms_conf)
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.node_vms_create.assert_called_once_with(node_id, config)
+
+    @mock.patch('argparse.ArgumentParser.error')
+    def test_node_vms_conf_create_fail(self, m_error):
+        vms_conf = '[{"id": '
+        node_id = 42
+
+        args = "node create-vms-conf {0} --conf '{1}'".format(
+            node_id, vms_conf)
+        self.exec_command(args)
+        args, _ = m_error.call_args
+        self.assertIn('--conf', args[0])
+
     def test_node_set_hostname(self):
         self.m_client._updatable_attributes = \
             node.NodeClient._updatable_attributes

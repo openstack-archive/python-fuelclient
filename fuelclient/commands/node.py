@@ -13,11 +13,13 @@
 #    under the License.
 
 import collections
+import json
 import operator
 import os
 
 import six
 
+from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 from fuelclient import utils
@@ -167,7 +169,7 @@ class NodeCreateVMsConf(NodeMixIn, base.BaseCommand):
                             help='Id of the {0}.'.format(self.entity_name))
         parser.add_argument(
             '--conf',
-            type=str,
+            type=json.loads,
             required=True,
             nargs='+',
             help='JSONs with VMs configuration',
@@ -176,7 +178,12 @@ class NodeCreateVMsConf(NodeMixIn, base.BaseCommand):
         return parser
 
     def take_action(self, parsed_args):
-        confs = utils.parse_to_list_of_dicts(parsed_args.conf)
+        try:
+            confs = utils.parse_to_list_of_dicts(parsed_args.conf)
+        except TypeError:
+            raise error.BadDataException(
+                'VM configuration should be a dictionary '
+                'or a list of dictionaries')
         data = self.client.node_vms_create(parsed_args.id, confs)
         msg = "{0}".format(data)
         self.app.stdout.write(msg)
