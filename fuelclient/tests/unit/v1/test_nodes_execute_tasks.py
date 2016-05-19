@@ -17,6 +17,7 @@
 from mock import patch
 import requests_mock as rm
 
+from fuelclient import fuelclient_settings
 from fuelclient.tests.unit.v1 import base
 from fuelclient.tests.utils import fake_node
 
@@ -31,6 +32,7 @@ class TestNodeExecuteTasksAction(base.UnitTestCase):
         m_fresh_data = node_patch.start()
         m_fresh_data.return_value = fake_node.get_fake_node()
         self.addCleanup(node_patch.stop)
+        self.conf = fuelclient_settings.get_settings()
 
     def test_execute_provided_list_of_tasks(self):
         put = self.m_request.put(rm.ANY, json={'id': 43})
@@ -38,7 +40,11 @@ class TestNodeExecuteTasksAction(base.UnitTestCase):
         self.execute(['fuel', 'node', '--node', '1,2', '--tasks'] + self.tasks)
         self.assertEqual(
             put.last_request.url,
-            'http://127.0.0.1:8000/api/v1/clusters/1/deploy_tasks/?nodes=1,2')
+            'http://{}:{}/api/v1/clusters/1/deploy_tasks/?nodes=1,2'.format(
+                self.conf.SERVER_ADDRESS,
+                self.conf.SERVER_PORT
+            )
+        )
         self.assertEqual(put.last_request.json(), self.tasks)
 
     def test_execute_provided_list_of_tasks_w_force(self):
@@ -48,8 +54,10 @@ class TestNodeExecuteTasksAction(base.UnitTestCase):
                       + self.tasks + ['--force']))
         self.assertEqual(
             put.last_request.url,
-            'http://127.0.0.1:8000/api/v1/clusters/1/deploy_tasks/?nodes=1,2'
-            '&force=1')
+            'http://{}:{}/api/v1/clusters/1/deploy_tasks/?nodes=1,2&force=1'
+            .format(self.conf.SERVER_ADDRESS,
+                    self.conf.SERVER_PORT)
+        )
         self.assertEqual(put.last_request.json(), self.tasks)
 
     @patch('fuelclient.objects.environment.Environment.get_deployment_tasks')
