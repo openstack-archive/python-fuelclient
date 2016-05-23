@@ -131,7 +131,7 @@ class GraphClient(base_v1.BaseV1Client):
 
     def get_release_tasks_for_cluster(self, env_id, graph_type=None):
         return self.connection.get_request(
-            self.merged_plugins_tasks_api_path.format(
+            self.cluster_release_tasks_api_path.format(
                 env_id=env_id,
                 graph_type=graph_type or ""))
 

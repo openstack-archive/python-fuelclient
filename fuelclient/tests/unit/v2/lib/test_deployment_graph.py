@@ -160,10 +160,40 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
         self.client.list(1)
         self.assertTrue(matcher_get.called)
 
-    def test_graphs_download(self):
+    def test_graphs_download_all(self):
         matcher_get = self.m_request.get(
             '/api/v1/clusters/1/deployment_tasks/?graph_type=custom_graph',
             json=[]
         )
-        self.client.download(env_id=1, level='all', graph_type='custom_graph')
+        self.client.download(env_id=1, level='all',
+                             graph_type='custom_graph')
+        self.assertTrue(matcher_get.called)
+
+    def test_graphs_download_release(self):
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/1/deployment_tasks/'
+            'release/?graph_type=custom_graph',
+            json=[]
+        )
+        self.client.download(env_id=1, level='release',
+                             graph_type='custom_graph')
+        self.assertTrue(matcher_get.called)
+
+    def test_graphs_download_plugins(self):
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/1/deployment_tasks/'
+            'plugins/?graph_type=custom_graph',
+            json=[]
+        )
+        self.client.download(env_id=1, level='plugins',
+                             graph_type='custom_graph')
+        self.assertTrue(matcher_get.called)
+
+    def test_graphs_download_cluster(self):
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/1/deployment_graphs/custom_graph',
+            json={'tasks': []}
+        )
+        self.client.download(env_id=1, level='cluster',
+                             graph_type='custom_graph')
         self.assertTrue(matcher_get.called)
