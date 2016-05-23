@@ -65,16 +65,22 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
         env.assign(nodes, roles)
 
-    def deploy_changes(self, environment_id):
+    def deploy_changes(self, environment_id, dry_run=False, noop=False):
         env = self._entity_wrapper(obj_id=environment_id)
-        deploy_task = env.deploy_changes()
 
+        if dry_run and noop:
+            raise error.ActionException("Dry run and noop actions are"
+                                        "not allowed together")
+        deploy_task = env.deploy_changes(dry_run=dry_run, noop=noop)
         return deploy_task.id
 
-    def redeploy_changes(self, environment_id):
+    def redeploy_changes(self, environment_id, dry_run=False, noop=False):
         env = self._entity_wrapper(obj_id=environment_id)
-        redeploy_task = env.redeploy_changes()
 
+        if dry_run and noop:
+            raise error.ActionException("Dry run and noop actions are"
+                                        "not allowed together")
+        redeploy_task = env.redeploy_changes(dry_run=dry_run, noop=noop)
         return redeploy_task.id
 
     def spawn_vms(self, environment_id):
