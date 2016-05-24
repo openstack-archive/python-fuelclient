@@ -195,7 +195,7 @@ run_cli_tests() {
     # run tests
     NAILGUN_CONFIG=$config LISTEN_PORT=$NAILGUN_PORT \
         NAILGUN_ROOT=$NAILGUN_ROOT tox -e$env_to_run -- -vv $testropts \
-        ${certain_tests[@]} --xunit-file $FUELCLIENT_XUNIT || return 1
+        ${certain_tests[@]} --with-xunit --xunit-file $FUELCLIENT_XUNIT || return 1
     popd > /dev/null
 
     return 0
@@ -320,7 +320,7 @@ run_server() {
 
             local http_code=$(curl -s -w %{http_code} -o /dev/null $NAILGUN_CHECK_URL)
 
-            if [[ "$http_code" = "200" ]]; then return 0; fi
+            if [[ "$http_code" != "000" ]]; then return 0; fi
 
             sleep 0.1
             i=$((i + 1))
