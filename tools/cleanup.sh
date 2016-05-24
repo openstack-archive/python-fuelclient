@@ -34,7 +34,7 @@ kill_server() {
 drop_database () {
     echo "Dropping the database."
 
-    if [[ -f "$NAILGUN_CONFIG" ]] && [[ -d $NAILGUN_ROOT ]]; then
+    if [[ -d $NAILGUN_ROOT ]]; then
         pushd $NAILGUN_ROOT > /dev/null
         tox -e venv -- python manage.py dropdb > /dev/null
         popd > /dev/null
