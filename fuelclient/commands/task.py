@@ -29,7 +29,7 @@ class TaskMixIn(object):
             '--file',
             required=False,
             type=str,
-            help='YAML file that contains network configuration.'
+            help='Output file in YAML format.'
         )
 
     @classmethod
@@ -204,6 +204,7 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
 
 
 class TaskNetworkConfigurationDownload(TaskInfoFileMixIn, base.BaseCommand):
+    """Save task network configuration to a file."""
 
     entity_name = 'network-configuration'
     info_type = 'network_configuration'
@@ -217,6 +218,7 @@ class TaskNetworkConfigurationDownload(TaskInfoFileMixIn, base.BaseCommand):
 
 
 class TaskDeploymentInfoDownload(TaskInfoFileMixIn, base.BaseCommand):
+    """Save task deployment info to a file."""
 
     entity_name = 'deployment-info'
     info_type = 'deployment_info'
@@ -230,6 +232,7 @@ class TaskDeploymentInfoDownload(TaskInfoFileMixIn, base.BaseCommand):
 
 
 class TaskClusterSettingsDownload(TaskInfoFileMixIn, base.BaseCommand):
+    """Save task settings to a file."""
 
     entity_name = 'cluster-settings'
     info_type = 'cluster_settings'

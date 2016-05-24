@@ -24,7 +24,7 @@ class NetworkTemplateMixin(object):
         parser.add_argument(
             'env',
             type=int,
-            help='Upload network template for specified environment'
+            help='Id of the environment'
         )
 
     @staticmethod
@@ -32,7 +32,7 @@ class NetworkTemplateMixin(object):
         parser.add_argument(
             '-d', '--dir',
             type=str,
-            help='Directory with network data'
+            help='Directory for the network template'
         )
 
     @staticmethod
@@ -40,15 +40,12 @@ class NetworkTemplateMixin(object):
         parser.add_argument(
             '-f', '--file',
             type=str,
-            help='Yaml file containing network template'
+            help='Yaml file containing the network template'
         )
 
 
 class NetworkTemplateUpload(NetworkTemplateMixin, base.BaseCommand):
-    """To upload network configuration for specified environment:
-
-        fuel2 network-template upload --file path/to/file_name.yaml 1
-    """
+    """Upload network configuration for specified environment."""
 
     def get_parser(self, prog_name):
         parser = super(NetworkTemplateUpload, self).get_parser(prog_name)
@@ -67,10 +64,7 @@ class NetworkTemplateUpload(NetworkTemplateMixin, base.BaseCommand):
 
 
 class NetworkTemplateDownload(NetworkTemplateMixin, base.BaseCommand):
-    """To download network configuration for environment to the specified
-    directory:
-        fuel2 network-template download --dir path/to/directory 1
-    """
+    """Download network configuration for specified environment."""
 
     def get_parser(self, prog_name):
         parser = super(NetworkTemplateDownload, self).get_parser(prog_name)
@@ -91,6 +85,7 @@ class NetworkTemplateDownload(NetworkTemplateMixin, base.BaseCommand):
 
 
 class NetworkTemplateDelete(NetworkTemplateMixin, base.BaseCommand):
+    """Delete the network template of the specified environment."""
 
     def get_parser(self, prog_name):
         parser = super(NetworkTemplateDelete, self).get_parser(prog_name)
