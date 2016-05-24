@@ -64,9 +64,12 @@ class Client(object):
         if self._auth_required is None:
             url = self.api_root + 'version'
             resp = requests.get(url)
-            resp.raise_for_status()
+            if resp.status_code == 401:
+                self._auth_required = True
+            else:
+                resp.raise_for_status()
+                self._auth_required = resp.json().get('auth_required', False)
 
-            self._auth_required = resp.json().get('auth_required', False)
         return self._auth_required
 
     @property
