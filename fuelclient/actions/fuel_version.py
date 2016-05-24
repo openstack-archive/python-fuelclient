@@ -26,6 +26,10 @@ class FuelVersionAction(argparse._VersionAction):
     """
     def __call__(self, parser, namespace, values, option_string=None):
         serializer = serializers.Serializer.from_params(namespace)
-        version = client.APIClient.get_fuel_version()
-        print(serializer.serialize(version))
-        sys.exit(0)
+        api_client = client.APIClient
+        api_client.password = namespace.password or api_client.password
+        api_client.user = namespace.user or api_client.user
+        api_client.tenant = namespace.tenant or api_client.tenant
+
+        version = api_client.get_fuel_version()
+        parser.exit(message=serializer.serialize(version))
