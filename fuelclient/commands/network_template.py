@@ -91,6 +91,7 @@ class NetworkTemplateDownload(NetworkTemplateMixin, base.BaseCommand):
 
 
 class NetworkTemplateDelete(NetworkTemplateMixin, base.BaseCommand):
+    """Delete the network template of the specified environment."""
 
     def get_parser(self, prog_name):
         parser = super(NetworkTemplateDelete, self).get_parser(prog_name)
