@@ -210,24 +210,15 @@ class EnvDeploy(EnvMixIn, base.BaseCommand):
                               'data in the db and ask the task executor ' \
                               'to dump the resulting graph into a dot file'
 
-        noop_help_string = 'Perform noop run of the deployment by asking the' \
-                           'task executor to run noop drivers of each task'
-
-        dryrun_noop_group = parser.add_mutually_exclusive_group(required=False)
-
-        dryrun_noop_group.add_argument(
+        parser.add_argument(
             '-d', '--dry-run', dest="dry_run",
             action='store_true', help=dry_run_help_string)
-        dryrun_noop_group.add_argument(
-            '-n', '--noop', action='store_true',
-            help=noop_help_string)
 
         return parser
 
     def take_action(self, parsed_args):
         task_id = self.client.deploy_changes(parsed_args.id,
-                                             dry_run=parsed_args.dry_run,
-                                             noop=parsed_args.noop)
+                                             dry_run=parsed_args.dry_run)
 
         msg = 'Deployment task with id {t} for the environment {e} '\
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
@@ -240,8 +231,7 @@ class EnvRedeploy(EnvDeploy):
 
     def take_action(self, parsed_args):
         task_id = self.client.redeploy_changes(parsed_args.id,
-                                               dry_run=parsed_args.dry_run,
-                                               noop=parsed_args.noop)
+                                               dry_run=parsed_args.dry_run)
 
         msg = 'Deployment task with id {t} for the environment {e} '\
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
