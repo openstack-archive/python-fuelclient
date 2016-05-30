@@ -258,6 +258,14 @@ def get_sync_deployment_tasks_arg():
         help="Update tasks for each release.")
 
 
+def get_dry_run_deployment_arg():
+    return get_boolean_arg(
+        "dry-run",
+        dest='dry_run',
+        help="Specifies to dry-run a deployment by configuring task executor"
+             "to dump the deployment graph to a dot file.")
+
+
 def get_file_pattern_arg():
     return get_str_arg(
         "filepattern",

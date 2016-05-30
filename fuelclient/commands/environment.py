@@ -203,10 +203,22 @@ class EnvDeploy(EnvMixIn, base.BaseCommand):
                             type=int,
                             help='Id of the environment to be deployed.')
 
+        dry_run_help_string = 'Specifies to dry-run a deployment by' \
+                              'configuring task executor to dump the' \
+                              'deployment graph to a dot file.' \
+                              'Store cluster settings and serialized ' \
+                              'data in the db and ask the task executor ' \
+                              'to dump the resulting graph into a dot file'
+
+        parser.add_argument(
+            '-d', '--dry-run', dest="dry_run",
+            action='store_true', help=dry_run_help_string)
+
         return parser
 
     def take_action(self, parsed_args):
-        task_id = self.client.deploy_changes(parsed_args.id)
+        task_id = self.client.deploy_changes(parsed_args.id,
+                                             dry_run=parsed_args.dry_run)
 
         msg = 'Deployment task with id {t} for the environment {e} '\
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
@@ -214,20 +226,12 @@ class EnvDeploy(EnvMixIn, base.BaseCommand):
         self.app.stdout.write(msg)
 
 
-class EnvRedeploy(EnvMixIn, base.BaseCommand):
+class EnvRedeploy(EnvDeploy):
     """Redeploys changes on the specified environment."""
 
-    def get_parser(self, prog_name):
-        parser = super(EnvRedeploy, self).get_parser(prog_name)
-
-        parser.add_argument('id',
-                            type=int,
-                            help='Id of the environment to be redeployed.')
-
-        return parser
-
     def take_action(self, parsed_args):
-        task_id = self.client.redeploy_changes(parsed_args.id)
+        task_id = self.client.redeploy_changes(parsed_args.id,
+                                               dry_run=parsed_args.dry_run)
 
         msg = 'Deployment task with id {t} for the environment {e} '\
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
