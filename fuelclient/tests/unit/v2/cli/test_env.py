@@ -90,7 +90,6 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
     def test_env_deploy(self):
         dry_run = False
-        noop = False
         args = 'env deploy'
 
         args += ' 42'
@@ -99,15 +98,13 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         calls = list()
         calls.append(mock.call.deploy_changes(42,
-                                              dry_run=dry_run,
-                                              noop=noop))
+                                              dry_run=dry_run))
 
         self.m_get_client.assert_called_with('environment', mock.ANY)
         self.m_client.assert_has_calls(calls)
 
     def test_env_deploy_dry_run(self):
         dry_run = True
-        noop = False
 
         args = 'env deploy -d'
         args += ' 42'
@@ -116,39 +113,13 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         calls = list()
         calls.append(mock.call.deploy_changes(42,
-                                              dry_run=dry_run,
-                                              noop=noop))
+                                              dry_run=dry_run))
 
         self.m_get_client.assert_called_with('environment', mock.ANY)
         self.m_client.assert_has_calls(calls)
-
-    def test_env_deploy_noop(self):
-        dry_run = False
-        noop = True
-        args = 'env deploy -n'
-
-        args += ' 42'
-
-        self.exec_command(args)
-
-        calls = list()
-        calls.append(mock.call.deploy_changes(42,
-                                              dry_run=dry_run,
-                                              noop=noop))
-
-        self.m_get_client.assert_called_with('environment', mock.ANY)
-        self.m_client.assert_has_calls(calls)
-
-    def test_env_deploy_noop_dry_run(self):
-        args = 'env deploy -d -n'
-
-        args += ' 42'
-
-        self.assertRaises(SystemExit, self.exec_command, args)
 
     def test_env_redeploy(self):
         dry_run = False
-        noop = False
         args = 'env redeploy'
 
         args += ' 42'
@@ -157,15 +128,13 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         calls = list()
         calls.append(mock.call.redeploy_changes(42,
-                                                dry_run=dry_run,
-                                                noop=noop))
+                                                dry_run=dry_run))
 
         self.m_get_client.assert_called_with('environment', mock.ANY)
         self.m_client.assert_has_calls(calls)
 
     def test_env_redeploy_dry_run(self):
         dry_run = True
-        noop = False
         args = 'env redeploy -d'
 
         args += ' 42'
@@ -174,35 +143,10 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         calls = list()
         calls.append(mock.call.redeploy_changes(42,
-                                                dry_run=dry_run,
-                                                noop=noop))
+                                                dry_run=dry_run))
 
         self.m_get_client.assert_called_with('environment', mock.ANY)
         self.m_client.assert_has_calls(calls)
-
-    def test_env_redeploy_noop(self):
-        dry_run = False
-        noop = True
-        args = 'env redeploy -n'
-
-        args += ' 42'
-
-        self.exec_command(args)
-
-        calls = list()
-        calls.append(mock.call.redeploy_changes(42,
-                                                dry_run=dry_run,
-                                                noop=noop))
-
-        self.m_get_client.assert_called_with('environment', mock.ANY)
-        self.m_client.assert_has_calls(calls)
-
-    def test_env_redeploy_noop_dry_run(self):
-        args = 'env redeploy -d -n'
-
-        args += ' 42'
-
-        self.assertRaises(SystemExit, self.exec_command, args)
 
     def test_env_add_nodes(self):
         args = 'env add nodes -e 42 -n 24 25 -r compute cinder'
