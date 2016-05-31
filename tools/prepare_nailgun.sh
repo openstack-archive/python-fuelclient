@@ -14,7 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-set -eu
+set -eux
+
+export NAILGUN_DB=${NAILGUN_DB:-'nailgun'}
+export NAILGUN_DB_USER=${NAILGUN_DB_USER:-'nailgun'}
+export NAILGUN_DB_USERPW=${NAILGUN_DB_USERPW:-'nailgun'}
 
 NAILGUN_CONFIG=$ARTIFACTS/test.yaml
 
@@ -26,93 +30,20 @@ msg() {
     printf "%s\n" "$1"
 }
 
-# Synchronizes the schema of the database and loads default data.
-setup_db() {
-    msg "Setting up database."
-
-    pushd $NAILGUN_ROOT > /dev/null
-    tox -e venv -- python manage.py syncdb > /dev/null
-    tox -e venv -- python manage.py loaddefault > /dev/null
-
-    popd > /dev/null
-}
-
 
 # Returns: a server pid, that you have to close manually
 run_server() {
 
-    local run_server_cmd="\
-        python manage.py run \
-        --port=$NAILGUN_PORT \
-        --config=$NAILGUN_CONFIG \
-        --fake-tasks \
-        --fake-tasks-tick-count=80 \
-        --fake-tasks-tick-interval=1"
-    local server_log=$(mktemp $ARTIFACTS/test_nailgun_cli_server.XXXX)
-    local check_url="http://0.0.0.0:${NAILGUN_PORT}${NAILGUN_CHECK_PATH}"
-
     # run new server instance
-    pushd $NAILGUN_ROOT > /dev/null
-    tox -e venv -- $run_server_cmd >> $server_log 2>&1 &
+    pushd $FUEL_WEB_ROOT > /dev/null
+    tox -e start
     popd > /dev/null
-
-    # Wait for server's availability
-    which curl > /dev/null
-
-    if [[ $? -eq 0 ]]; then
-        local num_retries=$((NAILGUN_START_MAX_WAIT_TIME * 10))
-        local i=0
-
-        while true; do
-            # Fail if number of retries exeeded
-            if [[ $i -gt $((num_retries + 1)) ]]; then return 1; fi
-
-            local http_code=$(curl -s -w %{http_code} -o /dev/null $check_url)
-
-            if [[ "$http_code" = "200" ]]; then return 0; fi
-
-            sleep 0.1
-            i=$((i + 1))
-        done
-    else
-        err "Failed to start Nailgun in ${NAILGUN_START_MAX_WAIT_TIME} seconds."
-        exit 1
-    fi
 }
 
 
 # Set up test environment
 prepare_env() {
     mkdir -p $ARTIFACTS
-}
-
-
-# Generates server configuration file
-create_settings_yaml() {
-    cat > $NAILGUN_CONFIG <<EOL
-DEVELOPMENT: 1
-STATIC_DIR: ${ARTIFACTS}/static_compressed
-TEMPLATE_DIR: ${ARTIFACTS}/static_compressed
-DATABASE:
-  name: ${TEST_NAILGUN_DB}
-  engine: "postgresql"
-  host: "localhost"
-  port: "5432"
-  user: "nailgun"
-  passwd: "nailgun"
-API_LOG: ${ARTIFACTS}/api.log
-APP_LOG: ${ARTIFACTS}/app.log
-EOL
-
-    # Create appropriate Fuel Client config
-    cat > $FUELCLIENT_CUSTOM_SETTINGS <<EOL
-# Connection settings
-SERVER_ADDRESS: "127.0.0.1"
-SERVER_PORT: "${NAILGUN_PORT}"
-OS_USERNAME: "admin"
-OS_PASSWORD: "admin"
-OS_TENANT_NAME: "admin"
-EOL
 }
 
 
@@ -150,6 +81,4 @@ obtain_nailgun() {
 
 prepare_env
 obtain_nailgun
-create_settings_yaml
-setup_db
 run_server
