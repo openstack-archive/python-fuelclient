@@ -123,3 +123,23 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
         self.m_client.execute.assert_called_once_with(
             cluster_id=self.CLUSTER_ID, node_ids=[self.NODE_ID],
             node_role=None, force=True)
+
+    def test_config_delete(self):
+        cmd = 'openstack-config delete 1'
+        self.exec_command(cmd)
+
+        self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
+        self.m_client.delete.assert_called_once_with(1)
+
+    @mock.patch('sys.stderr')
+    def test_config_delete_fail(self, mocked_stderr):
+        cmd = 'openstack-config delete not_int_value'
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+        self.assertIn('invalid int value',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+        mocked_stderr.reset_mock()
+
+        cmd = 'openstack-config delete'
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+        self.assertIn('too few arguments',
+                      mocked_stderr.write.call_args_list[-1][0][0])
