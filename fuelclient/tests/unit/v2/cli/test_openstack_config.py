@@ -18,7 +18,6 @@ from fuelclient.tests.unit.v2.cli import test_engine
 
 
 class TestOpenstackConfig(test_engine.BaseCLITest):
-
     CLUSTER_ID = 42
     NODE_ID = 64
 
@@ -123,3 +122,10 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
         self.m_client.execute.assert_called_once_with(
             cluster_id=self.CLUSTER_ID, node_ids=[self.NODE_ID],
             node_role=None, force=True)
+
+    def test_config_delete(self):
+        cmd = 'openstack-config delete 1'
+        self.exec_command(cmd)
+
+        self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
+        self.m_client.delete.assert_called_once_with(1)
