@@ -68,7 +68,7 @@ class DeploymentTasksAction(Action):
 
         """
         client = DeploymentHistoryClient()
-        tasks_names = getattr(params, 'task-name')
+        tasks_names = getattr(params, 'task-name', None)
         group_by_tasks = bool(tasks_names)
         statuses = params.status.split(',') if params.status else []
         nodes = params.node.split(',') if params.node else []

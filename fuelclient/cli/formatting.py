@@ -98,7 +98,7 @@ def format_table(data, acceptable_keys=None, column_to_join=None):
         for cell_line_no in range(max_cell_lines):
             output_lines.append(
                 row_template.format(
-                    *list(
+                    *(
                         cell[cell_line_no] if len(cell) > cell_line_no else u""
                         for cell in row
                     )
