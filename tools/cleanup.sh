@@ -14,33 +14,37 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-set -eu
+set -eux
 
 NAILGUN_CONFIG=$ARTIFACTS/test.yaml
 
 
 # Sends SIGING to the running instance of Nailgun, if it exists
 kill_server() {
-    echo "Stopping Nailgun and waiting $NAILGUN_START_MAX_WAIT_TIME seconds."
+    echo "Stopping Nailgun."
 
-    local pid=$(lsof -ti tcp:$NAILGUN_PORT)
-    if [[ -n "$pid" ]]; then
-        kill $pid
-        sleep $NAILGUN_START_MAX_WAIT_TIME
+    if [[ -d $NAILGUN_ROOT ]]; then
+        pushd $FUEL_WEB_ROOT > /dev/null
+        tox -e venv testenv:stop
+        popd > /dev/null
+    else
+        local pid=$(lsof -ti tcp:$NAILGUN_PORT)
+        if [[ -n "$pid" ]]; then
+            kill $pid
+            sleep $NAILGUN_START_MAX_WAIT_TIME
+        fi
     fi
 }
 
+cleanup_server() {
+    echo "Cleaning up server."
 
-drop_database () {
-    echo "Dropping the database."
-
-    if [[ -f "$NAILGUN_CONFIG" ]] && [[ -d $NAILGUN_ROOT ]]; then
-        pushd $NAILGUN_ROOT > /dev/null
-        tox -e venv -- python manage.py dropdb > /dev/null
+    if [[ -d $NAILGUN_ROOT ]]; then
+        pushd $FUEL_WEB_ROOT > /dev/null
+        tox -e venv testenv:cleanup
         popd > /dev/null
     fi
 }
-
 
 delete_files() {
     echo "Deleting the files."
@@ -55,6 +59,6 @@ delete_files() {
 echo "Doing a clean up to ensure clean environment."
 
 kill_server
-drop_database
+cleanup_server
 delete_files
 
