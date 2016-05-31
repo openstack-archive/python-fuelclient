@@ -45,6 +45,10 @@ class OpenstackConfigClient(base_v1.BaseV1Client):
             cluster_id=cluster_id, node_ids=node_ids,
             node_role=node_role, is_active=is_active)
 
+    def delete(self, config_id):
+        config = self._entity_wrapper(config_id)
+        config.delete()
+
 
 def get_client():
     return OpenstackConfigClient()
