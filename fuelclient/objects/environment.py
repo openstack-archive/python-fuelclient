@@ -202,14 +202,14 @@ class Environment(BaseObject):
         self._check_dir(directory)
         network_template_file_path = self.get_network_template_data_path(
             directory)
-        return self.read_network_template_data_from_file(
-            network_template_file_path, serializer)
+        return (serializer or self.serializer).\
+            read_from_file(network_template_file_path)
 
     def read_network_template_data_from_file(self, file_path=None,
                                              serializer=None):
         """Used by 'fuel2' command line utility."""
         return (serializer or self.serializer).\
-            read_from_file(file_path)
+            read_from_full_path(file_path)
 
     @property
     def status(self):

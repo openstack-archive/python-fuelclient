@@ -46,8 +46,12 @@ class TestNetworkTemplateFacade(test_api.BaseLibTest):
         m_open = mock.mock_open(read_data=common_net_template.YAML_TEMPLATE)
         with mock.patch('fuelclient.cli.serializers.open',
                         m_open, create=True):
-            self.client.upload_network_template(self.env_id)
+            self.client.upload_network_template(
+                self.env_id,
+                'fake_network_template_1.yaml'
+            )
 
+        m_open.assert_called_with('fake_network_template_1.yaml', 'r')
         self.assertTrue(matcher.called)
         self.assertEqual(expected_body, matcher.last_request.json())
 
