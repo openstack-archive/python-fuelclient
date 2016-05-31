@@ -17,7 +17,6 @@ from fuelclient.common import data_utils
 
 
 class OpenstackConfigMixin(object):
-
     entity_name = 'openstack-config'
 
     columns = (
@@ -160,4 +159,23 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
             force=args.force)
 
         msg = "OpenStack configuration execution started.\n"
+        self.app.stdout.write(msg)
+
+
+class OpenstackConfigDelete(OpenstackConfigMixin, base.BaseCommand):
+    """Delete configuration with given id.
+    """
+
+    def get_parser(self, prog_name):
+        parser = super(OpenstackConfigDelete, self).get_parser(prog_name)
+
+        self.add_config_id_arg(parser)
+
+        return parser
+
+    def take_action(self, args):
+        self.client.delete(args.config)
+
+        msg = ("Openstack configuration '{0}' "
+               "has been deleted.".format(args.config))
         self.app.stdout.write(msg)
