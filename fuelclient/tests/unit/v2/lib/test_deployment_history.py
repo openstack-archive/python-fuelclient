@@ -50,20 +50,52 @@ class TestDeploymentHistoryFacade(test_api.BaseLibTest):
 
         self.assertTrue(matcher.called)
 
+    def test_deployment_history(self):
+
+        matcher = self.m_request.get(
+            self.get_url(
+                nodes='1,2',
+                statuses='ready,error,pending',
+                tasks_names='controller-remaining-tasks,'
+                            'ironic-compute,pending-task'
+            ), json=self.fake_history)
+
+        tasks_after_facade = self.client.get_all(
+            transaction_id=self.transaction_id,
+            nodes=['1', '2'],
+            statuses=['ready', 'error', 'pending'],
+            tasks_names=['controller-remaining-tasks',
+                         'ironic-compute', 'pending-task'],
+            show_parameters=False
+        )
+
+        self.assertTrue(matcher.called)
+        self.assertItemsEqual(
+            utils.get_fake_deployment_history(convert_legacy_fields=True),
+            tasks_after_facade)
+
     def test_deployment_history_parameters(self):
 
         matcher = self.m_request.get(
             self.get_url(
                 nodes='1,2',
-                statuses='ready,error',
-                tasks_names='custom_task1,custom_task12'
-            ), json=self.fake_history)
+                statuses='ready,error,pending',
+                tasks_names='controller-remaining-tasks,'
+                            'ironic-compute,pending-task'
+            ),
+            json=utils.get_fake_deployment_history(add_task_data=True),
+        )
 
-        self.client.get_all(
+        tasks_after_facade = self.client.get_all(
             transaction_id=self.transaction_id,
             nodes=['1', '2'],
-            statuses=['ready', 'error'],
-            tasks_names=['custom_task1', 'custom_task12']
+            statuses=['ready', 'error', 'pending'],
+            tasks_names=['controller-remaining-tasks',
+                         'ironic-compute', 'pending-task'],
+            show_parameters=True
         )
 
         self.assertTrue(matcher.called)
+        self.assertItemsEqual(
+            utils.get_fake_deployment_history_w_params(),
+            tasks_after_facade)
