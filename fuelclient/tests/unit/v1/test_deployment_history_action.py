@@ -44,7 +44,7 @@ class TestDeploymentTasksAction(base.UnitTestCase):
                 acceptable_keys=DeploymentHistoryClient.history_records_keys))
 
     @patch.object(Serializer, 'print_to_output')
-    def test_show_tasks_history(self, print_mock):
+    def test_show_tasks_history_with_parameters(self, print_mock):
         tasks_after_facade = [
             {
                 'task_name': 'controller-remaining-tasks',
@@ -83,7 +83,8 @@ class TestDeploymentTasksAction(base.UnitTestCase):
             ['fuel', 'deployment-tasks',
              '--tid', '1',
              '--task-name', 'controller-remaining-tasks,pending-task',
-             '--node', '1,2']
+             '--node', '1,2',
+             '--show-parameters']
         )
         print_mock.assert_called_once_with(
             tasks_after_facade,

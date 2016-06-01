@@ -14,9 +14,9 @@
 
 import os
 
+from fuelclient.cli.formatting import format_table
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
-from fuelclient.common import data_utils
 
 
 class TaskMixIn(object):
@@ -148,12 +148,7 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
 
     entity_name = 'deployment_history'
 
-    columns = (
-        'task_name',
-        'node_id',
-        'status',
-        'time_start',
-        'time_end')
+    columns = ()
 
     def get_parser(self, prog_name):
         parser = super(TaskHistoryShow, self).get_parser(prog_name)
@@ -182,18 +177,35 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
             nargs='+',
             help='Show deployment history for specific deployment tasks names')
 
+        parser.add_argument(
+            '-p',
+            '--show-parameters',
+            action='store_true',
+            default=False,
+            help='Show deployment tasks parameters')
         return parser
 
     def take_action(self, parsed_args):
+        # print parser
+        group_by_tasks = parsed_args.show_parameters
         data = self.client.get_all(
             transaction_id=parsed_args.id,
             nodes=parsed_args.nodes,
             statuses=parsed_args.statuses,
-            tasks_names=parsed_args.tasks_names)
+            tasks_names=parsed_args.tasks_names,
+            group_by_tasks=group_by_tasks
+        )
+        if group_by_tasks:
+            table_keys = self.client.tasks_records_keys
+        else:
+            table_keys = self.client.history_records_keys
 
-        data = data_utils.get_display_data_multi(self.columns, data)
-
-        return self.columns, data
+        self.app.stdout.write(
+            format_table(
+                data,
+                acceptable_keys=table_keys
+            )
+        )
 
 
 class TaskNetworkConfigurationDownload(TaskInfoFileMixIn, base.BaseCommand):
