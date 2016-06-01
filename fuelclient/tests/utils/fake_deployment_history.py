@@ -111,3 +111,42 @@ def get_fake_deployment_history(
                 record['task_name'] = record['deployment_graph_task_name']
                 record.pop('deployment_graph_task_name', None)
         return result
+
+
+def get_fake_deployment_history_w_params():
+    return [
+        {
+            'task_name': 'controller-remaining-tasks',
+            'task_parameters': 'parameters: {puppet_manifest: /etc/puppet/'
+                               'modules/osnailyfacter/modular/globals/'
+                               'globals.pp,\n  puppet_modules: /etc/'
+                               'puppet/modules, timeout: 3600}\nrole: '
+                               '[controller]\ntype: puppet\nversion: 2.0.0'
+                               '\n',
+            'status_by_node': '1 - ready - 2016-03-25T17:22:10 - '
+                              '2016-03-25T17:22:30\n'
+                              '2 - ready - 2016-03-25T17:22:10 - '
+                              '2016-03-25T17:22:30'
+        },
+        {
+            'task_name': 'pending-task',
+            'task_parameters': 'parameters: {puppet_manifest: /etc/puppet/'
+                               'modules/osnailyfacter/modular/globals/'
+                               'globals.pp,\n  puppet_modules: /etc/puppet'
+                               '/modules, timeout: 3600}\nrole: '
+                               '[controller]\ntype: puppet\nversion: 2.0.0'
+                               '\n',
+            'status_by_node': '1 - pending - not started - not ended\n'
+                              '2 - pending - not started - not ended'
+        },
+        {
+            'task_name': 'ironic-compute',
+            'status_by_node': '1 - skipped - 2016-03-25T17:23:37 - '
+                              '2016-03-25T17:23:37\n2 - skipped - '
+                              '2016-03-25T17:23:37 - 2016-03-25T17:23:37',
+            'task_parameters': 'parameters: {puppet_manifest: /etc/puppet/'
+                               'modules/osnailyfacter/modular/globals/'
+                               'globals.pp,\n  puppet_modules: /etc/'
+                               'puppet/modules, timeout: 3600}\nrole: '
+                               '[controller]\ntype: puppet\nversion: 2.0.0\n'},
+    ]
