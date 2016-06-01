@@ -40,21 +40,21 @@ class OpenstackConfigMixin(object):
     def add_config_id_arg(parser):
         parser.add_argument(
             'config',
-            type=int, help='Openstack configuration ID.'
+            type=int, help='Id of the OpenStack configuration..'
         )
 
     @staticmethod
     def add_node_ids_arg(parser):
         parser.add_argument(
             '-n', '--node',
-            type=int, nargs='+', default=None, help='Node IDs.'
+            type=int, nargs='+', default=None, help='Ids of the nodes.'
         )
 
     @staticmethod
     def add_node_role_arg(parser):
         parser.add_argument(
             '-r', '--role',
-            type=str, default=None, help='Node role.'
+            type=str, default=None, help='Role of the nodes.'
         )
 
     @staticmethod
@@ -68,13 +68,12 @@ class OpenstackConfigMixin(object):
     def add_force_arg(parser):
         parser.add_argument(
             '-f', '--force',
-            action='store_true', help='Force configuration update.'
+            action='store_true', help='Force the update of the configuration.'
         )
 
 
 class OpenstackConfigList(OpenstackConfigMixin, base.BaseListCommand):
-    """List all openstack configurations.
-    """
+    """List all OpenStack configurations."""
 
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigList, self).get_parser(prog_name)
@@ -96,8 +95,7 @@ class OpenstackConfigList(OpenstackConfigMixin, base.BaseListCommand):
 
 
 class OpenstackConfigDownload(OpenstackConfigMixin, base.BaseCommand):
-    """Download specified configuration file.
-    """
+    """Download specified configuration file."""
 
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigDownload, self).get_parser(prog_name)
@@ -110,14 +108,14 @@ class OpenstackConfigDownload(OpenstackConfigMixin, base.BaseCommand):
     def take_action(self, args):
         file_path = self.client.download(args.config, args.file)
 
-        msg = ("OpenStack configuration with id={0} "
-               "downloaded to {1}\n").format(args.config, file_path)
+        msg = 'OpenStack configuration with id={c} '\
+              'downloaded to {p}.\n'.format(c=args.config, p=file_path)
+
         self.app.stdout.write(msg)
 
 
 class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseListCommand):
-    """Upload new opesntack configuration from file.
-    """
+    """Upload new OpenStack configuration from file."""
 
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigUpload, self).get_parser(prog_name)
@@ -140,8 +138,7 @@ class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseListCommand):
 
 
 class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
-    """Execute openstack configuration deployment.
-    """
+    """Execute OpenStack configuration deployment."""
 
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigExecute, self).get_parser(prog_name)
@@ -158,13 +155,14 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
             cluster_id=args.env, node_ids=args.node, node_role=args.role,
             force=args.force)
 
-        msg = "OpenStack configuration execution started.\n"
+        msg = 'Started deployment of the OpenStack configuration ' \
+              'with id {c}.\n'.format(c=args.config)
+
         self.app.stdout.write(msg)
 
 
 class OpenstackConfigDelete(OpenstackConfigMixin, base.BaseCommand):
-    """Delete configuration with given id.
-    """
+    """Delete OpenStack configuration with given id."""
 
     def get_parser(self, prog_name):
         parser = super(OpenstackConfigDelete, self).get_parser(prog_name)
@@ -176,6 +174,7 @@ class OpenstackConfigDelete(OpenstackConfigMixin, base.BaseCommand):
     def take_action(self, args):
         self.client.delete(args.config)
 
-        msg = ("Openstack configuration '{0}' "
-               "has been deleted.".format(args.config))
+        msg = 'Openstack configuration with id {c} '\
+              'was deleted.\n'.format(c=args.config)
+
         self.app.stdout.write(msg)
