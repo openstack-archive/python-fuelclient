@@ -13,13 +13,16 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import io
 
 import mock
 import os
 import yaml
 
+from fuelclient.cli.formatting import format_table
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests import utils
+from fuelclient.v1.deployment_history import DeploymentHistoryClient
 
 
 class TestTaskCommand(test_engine.BaseCLITest):
@@ -61,7 +64,8 @@ class TestTaskCommand(test_engine.BaseCLITest):
         self.m_client.get_all.assert_called_once_with(transaction_id=task_id,
                                                       nodes=None,
                                                       statuses=None,
-                                                      tasks_names=None)
+                                                      tasks_names=None,
+                                                      group_by_tasks=False)
 
     def test_task_history_parameters(self):
         task_id = 42
@@ -76,7 +80,8 @@ class TestTaskCommand(test_engine.BaseCLITest):
                                                   mock.ANY)
         self.m_client.get_all.assert_called_once_with(
             transaction_id=task_id, nodes=['1', '2'],
-            statuses=['ready', 'error'], tasks_names=['task1', 'task2'])
+            statuses=['ready', 'error'], tasks_names=['task1', 'task2'],
+            group_by_tasks=True)
 
     def _test_cmd(self, cmd, method, cmd_line, client,
                   return_data, expected_file_path, expected_kwargs):
@@ -121,3 +126,65 @@ class TestTaskCommand(test_engine.BaseCLITest):
                        "{0}/network_configuration_1.yaml".format(
                            self.current_path),
                        dict(transaction_id=1))
+
+
+class TestDeploymentTasksAction(test_engine.BaseCLITest):
+
+    def test_show_tasks_history(self):
+        tasks_after_facade = [
+            {
+                'task_name': 'controller-remaining-tasks',
+                'task_parameters': 'parameters: {puppet_manifest: /etc/puppet/'
+                                   'modules/osnailyfacter/modular/globals/'
+                                   'globals.pp,\n  puppet_modules: /etc/'
+                                   'puppet/modules, timeout: 3600}\nrole: '
+                                   '[controller]\ntype: puppet\nversion: 2.0.0'
+                                   '\n',
+                'status_by_node': '1 - ready - 2016-03-25T17:22:10 - '
+                                  '2016-03-25T17:22:30\n'
+                                  '2 - ready - 2016-03-25T17:22:10 - '
+                                  '2016-03-25T17:22:30'
+            },
+            {
+                'task_name': 'pending-task',
+                'task_parameters': 'parameters: {puppet_manifest: /etc/puppet/'
+                                   'modules/osnailyfacter/modular/globals/'
+                                   'globals.pp,\n  puppet_modules: /etc/puppet'
+                                   '/modules, timeout: 3600}\nrole: '
+                                   '[controller]\ntype: puppet\nversion: 2.0.0'
+                                   '\n',
+                'status_by_node': '1 - pending - not started - not ended\n'
+                                  '2 - pending - not started - not ended'
+            }
+        ]
+        self.m_client.get_all.return_value = tasks_after_facade
+        self.m_client.tasks_records_keys = \
+            DeploymentHistoryClient.tasks_records_keys
+        self.m_client.history_records_keys = \
+            DeploymentHistoryClient.history_records_keys
+
+        with mock.patch('sys.stdout', new=io.StringIO()) as mstdout:
+
+            self.exec_command(
+                ' '.join((
+                    'task history show', '1',
+                    '--nodes', '1 2',
+                    '--statuses', 'ready',
+                    '--tasks-names', 'taskname1 taskname2'
+                ))
+            )
+
+            self.m_client.get_all.assert_called_with(
+                nodes=['1', '2'],
+                statuses=['ready'],
+                tasks_names=['taskname1', 'taskname2'],
+                transaction_id=1,
+                group_by_tasks=True)
+
+            self.assertIn(
+                format_table(
+                    tasks_after_facade,
+                    acceptable_keys=DeploymentHistoryClient.tasks_records_keys
+                ),
+                mstdout.getvalue()
+            )

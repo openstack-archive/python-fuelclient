@@ -79,7 +79,7 @@ class Serializer(object):
             self.print_formatted(formatted_data)
         else:
             if six.PY2 and isinstance(arg, six.text_type):
-                arg = arg.encode('utf-8')
+                arg = arg.decode('utf-8')
             print_method(arg)
 
     def prepare_path(self, path):
