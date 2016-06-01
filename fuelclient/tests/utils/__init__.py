@@ -23,6 +23,8 @@ from fuelclient.tests.utils.fake_additional_info \
     import get_fake_yaml_network_conf
 from fuelclient.tests.utils.fake_deployment_history \
     import get_fake_deployment_history
+from fuelclient.tests.utils.fake_deployment_history \
+    import get_fake_deployment_history_w_params
 from fuelclient.tests.utils.fake_net_conf import get_fake_interface_config
 from fuelclient.tests.utils.fake_net_conf import get_fake_network_config
 from fuelclient.tests.utils.fake_network_group import get_fake_network_group
@@ -37,6 +39,7 @@ from fuelclient.tests.utils.fake_openstack_config  \
 
 
 __all__ = (get_fake_deployment_history,
+           get_fake_deployment_history_w_params,
            get_fake_yaml_cluster_settings,
            get_fake_yaml_deployment_info,
            get_fake_yaml_network_conf,

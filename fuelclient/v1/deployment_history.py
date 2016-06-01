@@ -34,7 +34,7 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
     _entity_wrapper = objects.Environment
 
     def get_all(self, transaction_id, nodes=None, statuses=None,
-                tasks_names=None, group_by_tasks=False):
+                tasks_names=None, show_parameters=False):
         parameters = {
             'statuses': statuses,
             'nodes': nodes,
@@ -78,7 +78,7 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
             history_records.append(history_record)
             history_records_by_task[task_name].append(history_record)
 
-        if group_by_tasks:
+        if show_parameters:
             result = []
             for task_name, value in sorted(six.iteritems(tasks_parameters)):
                 statuses_by_node = []
