@@ -736,3 +736,11 @@ def get_tasks_names_arg(help_msg):
         "help": help_msg
     }
     return get_arg("task-name", **default_kwargs)
+
+
+def get_show_parameters_arg(help_msg):
+    default_kwargs = {
+        "flags": ("-p", "--show-parameters",),
+        "help": help_msg
+    }
+    return get_boolean_arg("show-parameters", **default_kwargs)

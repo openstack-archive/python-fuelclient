@@ -41,6 +41,9 @@ class DeploymentTasksAction(Action):
             Args.get_tasks_names_arg(
                 "Show deployment history for specific deployment tasks names "
                 "and group output by task"
+            ),
+            Args.get_show_parameters_arg(
+                "Show deployment tasks parameters"
             )
         ]
         self.flag_func_map = (
@@ -66,10 +69,13 @@ class DeploymentTasksAction(Action):
                 fuel deployment-tasks --task-id 5
                     --task-name task-name1,task-name2
 
+            To display tasks parameters use:
+                fuel deployment-tasks --task-id 5 --show-parameters
+
         """
         client = DeploymentHistoryClient()
         tasks_names = getattr(params, 'task-name', None)
-        group_by_tasks = bool(tasks_names)
+        show_parameters = getattr(params, 'show-parameters')
         statuses = params.status.split(',') if params.status else []
         nodes = params.node.split(',') if params.node else []
         tasks_names = tasks_names.split(',') if tasks_names else []
@@ -79,10 +85,10 @@ class DeploymentTasksAction(Action):
             nodes=nodes,
             statuses=statuses,
             tasks_names=tasks_names,
-            group_by_tasks=group_by_tasks
+            show_parameters=show_parameters
         )
 
-        if group_by_tasks:
+        if show_parameters:
             table_keys = client.tasks_records_keys
         else:
             table_keys = client.history_records_keys
