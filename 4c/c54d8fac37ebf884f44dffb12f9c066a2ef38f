@@ -1,0 +1,11 @@
+Code-Review+1: Vitalii Kulanov <vitaliy@kulanov.org.ua>
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Code-Review+2: Roman Prykhodchenko <me@romcheg.me>
+Code-Review+2: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Workflow+1: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 03 Jun 2016 16:13:20 +0000
+Reviewed-on: https://review.openstack.org/323876
+Project: openstack/python-fuelclient
+Branch: refs/heads/master
