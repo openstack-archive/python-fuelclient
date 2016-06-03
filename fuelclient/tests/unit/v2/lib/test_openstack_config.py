@@ -139,3 +139,13 @@ class TestOpenstackConfigClient(test_api.BaseLibTest):
         self.assertEqual(body['cluster_id'], cluster_id)
         self.assertEqual(body['node_ids'], [42, 44])
         self.assertNotIn('node_role', body)
+
+    def test_config_delete(self):
+        config_id = 42
+        uri = self.uri + '{0}/'.format(config_id)
+        fake_config = utils.get_fake_openstack_config(id=config_id)
+
+        m_del = self.m_request.delete(uri, json=fake_config)
+
+        self.client.delete(config_id)
+        self.assertTrue(m_del.called)
