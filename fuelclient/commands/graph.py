@@ -59,7 +59,7 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
 
     def get_parser(self, prog_name):
         parser = super(GraphUpload, self).get_parser(prog_name)
-        graph_class = parser.add_mutually_exclusive_group()
+        graph_class = parser.add_mutually_exclusive_group(required=True)
 
         graph_class.add_argument('-e',
                                  '--env',

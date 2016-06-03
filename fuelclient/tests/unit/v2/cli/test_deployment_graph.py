@@ -77,6 +77,13 @@ class TestGraphActions(test_engine.BaseCLITest):
             )
         )
 
+    @mock.patch('sys.stderr')
+    def test_upload_fail(self, mocked_stderr):
+        cmd = 'graph upload --file new_graph.yaml'
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+        self.assertIn('-e/--env -r/--release -p/--plugin',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+
     def test_execute(self):
         self._test_cmd(
             'execute',
