@@ -314,6 +314,33 @@ def get_check_arg(help_msg):
     return get_set_type_arg("check", help=help_msg)
 
 
+def get_ostf_username_arg():
+    return get_str_arg(
+        "ostf_username",
+        dest="ostf_username",
+        help="OSTF username",
+        required=False
+    )
+
+
+def get_ostf_password_arg():
+    return get_str_arg(
+        "ostf_password",
+        dest="ostf_password",
+        help="OSTF password",
+        required=False
+    )
+
+
+def get_ostf_tenant_name_arg():
+    return get_str_arg(
+        "ostf_tenant_name",
+        dest="ostf_tenant_name",
+        help="OSTF tenant name",
+        required=False
+    )
+
+
 def get_change_password_arg(help_msg):
     return get_boolean_arg("change-password", help=help_msg)
 
