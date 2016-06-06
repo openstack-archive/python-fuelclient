@@ -84,7 +84,20 @@ class TestGraphActions(test_engine.BaseCLITest):
             dict(
                 env_id=1,
                 graph_type='custom_graph',
-                nodes=[1, 2, 3]
+                nodes=[1, 2, 3],
+                dry_run=False
+            )
+        )
+
+    def test_execute_w_dry_run(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --type custom_graph --nodes 1 2 3 --dry-run',
+            dict(
+                env_id=1,
+                graph_type='custom_graph',
+                nodes=[1, 2, 3],
+                dry_run=True
             )
         )
 
