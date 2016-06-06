@@ -1,0 +1,11 @@
+Code-Review+1: Liubov Efremova <le656m@att.com>
+Code-Review+2: Roman Prykhodchenko <me@romcheg.me>
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Code-Review+2: Aleksey Kasatkin <akasatkin@mirantis.com>
+Workflow+1: Roman Prykhodchenko <me@romcheg.me>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 06 Jun 2016 20:23:22 +0000
+Reviewed-on: https://review.openstack.org/325971
+Project: openstack/python-fuelclient
+Branch: refs/heads/stable/mitaka
