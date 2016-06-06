@@ -103,7 +103,8 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
 
     def test_new_graph_run(self):
         matcher_put = self.m_request.put(
-            '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph',
+            '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
+            '&dry_run=',
             json=fake_task.get_fake_task(cluster=370))
         # this is required to form running task info
         self.m_request.get(
@@ -114,6 +115,24 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             env_id=1,
             nodes=[1, 2, 3],
             graph_type="custom_graph")
+        self.assertTrue(matcher_put.called)
+
+    def test_new_graph_dry_run(self):
+        matcher_put = self.m_request.put(
+            '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
+            '&dry_run=1',
+            json=fake_task.get_fake_task(cluster=370))
+        # this is required to form running task info
+        self.m_request.get(
+            '/api/v1/nodes/?cluster_id=370',
+            json={}
+        )
+        self.client.execute(
+            env_id=1,
+            nodes=[1, 2, 3],
+            graph_type="custom_graph",
+            dry_run=True
+        )
         self.assertTrue(matcher_put.called)
 
     def test_graphs_list(self):

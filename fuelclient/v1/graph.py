@@ -79,7 +79,7 @@ class GraphClient(base_v1.BaseV1Client):
                 self.create_graph_for_model(
                     {'tasks': data}, related_model, related_id, graph_type)
 
-    def execute(self, env_id, nodes, graph_type=None):
+    def execute(self, env_id, nodes, graph_type=None, dry_run=False):
         put_args = []
 
         if nodes:
@@ -88,6 +88,8 @@ class GraphClient(base_v1.BaseV1Client):
         if graph_type:
             put_args.append(("graph_type=" + graph_type))
 
+        if dry_run:
+            put_args.append("dry_run=1")
         url = "".join([
             self.cluster_deploy_api_path.format(env_id=env_id),
             '?',

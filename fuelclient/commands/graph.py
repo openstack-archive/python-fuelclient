@@ -138,13 +138,22 @@ class GraphExecute(base.BaseCommand):
                             nargs='+',
                             required=False,
                             help='Ids of the nodes to use for deployment.')
+        parser.add_argument('-d',
+                            '--dry-run',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Specifies to dry-run a deployment by '
+                                 'configuring task executor to dump the '
+                                 'deployment graph to a dot file.')
         return parser
 
     def take_action(self, args):
         self.client.execute(
             env_id=args.env,
             graph_type=args.type,
-            nodes=args.nodes
+            nodes=args.nodes,
+            dry_run=args.dry_run
         )
         self.app.stdout.write(
             "Deployment was executed\n"
