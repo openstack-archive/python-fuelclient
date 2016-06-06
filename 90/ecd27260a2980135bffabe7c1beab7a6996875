@@ -1,0 +1,10 @@
+Code-Review+1: Liubov Efremova <le656m@att.com>
+Code-Review+2: Aleksey Kasatkin <akasatkin@mirantis.com>
+Code-Review+2: Roman Prykhodchenko <me@romcheg.me>
+Workflow+1: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 06 Jun 2016 14:13:35 +0000
+Reviewed-on: https://review.openstack.org/323545
+Project: openstack/python-fuelclient
+Branch: refs/heads/master
