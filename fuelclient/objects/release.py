@@ -30,6 +30,10 @@ class Release(BaseObject):
         url = self.networks_path.format(self.id)
         return self.connection.put_request(url, data)
 
+    def update_release(self, data):
+        url = self.instance_api_path.format(self.id)
+        self.connection.put_request(url, data)
+
     def get_deployment_tasks(self):
         url = self.deployment_tasks_path.format(self.id)
         return self.connection.get_request(url)
