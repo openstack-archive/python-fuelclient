@@ -422,10 +422,8 @@ class TestDeployChanges(base.CLIv1TestCase):
     cmd_deploy_changes = "deploy-changes --env 1"
     cmd_redeploy_changes = "redeploy-changes --env 1"
 
-    messages_success = [
-        "Deploying changes to environment with id=1\n",
-        "Finished deployment!\n"
-    ]
+    pattern_success = (r"^Deployment task with id (\d{1,}) "
+                       r"for the environment 1 has been started.\n$")
 
     def setUp(self):
         super(TestDeployChanges, self).setUp()
@@ -438,13 +436,16 @@ class TestDeployChanges(base.CLIv1TestCase):
         ))
 
     def test_deploy_changes(self):
-        self.check_all_in_msg(self.cmd_deploy_changes,
-                              self.messages_success)
+        self.check_for_stdout_by_regexp(self.cmd_deploy_changes,
+                                        self.pattern_success)
 
     def test_redeploy_changes(self):
-        self.run_cli_command(self.cmd_deploy_changes)
-        self.check_all_in_msg(self.cmd_redeploy_changes,
-                              self.messages_success)
+        result = self.check_for_stdout_by_regexp(self.cmd_deploy_changes,
+                                                 self.pattern_success)
+        task_id = result.group(1)
+        self.wait_task_ready(task_id)
+        self.check_for_stdout_by_regexp(self.cmd_redeploy_changes,
+                                        self.pattern_success)
 
 
 class TestDirectoryDoesntExistErrorMessages(base.CLIv1TestCase):
