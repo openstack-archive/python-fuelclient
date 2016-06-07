@@ -57,9 +57,12 @@ run_server() {
     popd > /dev/null
 
     # Wait for server's availability
-    which curl > /dev/null
+    set +e
 
-    if [[ $? -eq 0 ]]; then
+    which curl > /dev/null
+    err=$?
+
+    if [[ $err -eq 0 ]]; then
         local num_retries=$((NAILGUN_START_MAX_WAIT_TIME * 10))
         local i=0
 
@@ -75,9 +78,11 @@ run_server() {
             i=$((i + 1))
         done
     else
-        err "Failed to start Nailgun in ${NAILGUN_START_MAX_WAIT_TIME} seconds."
-        exit 1
+        echo "ERROR: curl is not installed."
+        exit $err
     fi
+
+    set -e
 }
 
 
