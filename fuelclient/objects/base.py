@@ -11,7 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+from fuelclient.cli.error import HTTPError
 from fuelclient.cli.serializers import Serializer
 from fuelclient.client import DefaultAPIClient
 
@@ -43,6 +43,13 @@ class BaseObject(object):
     @classmethod
     def get_by_ids(cls, ids):
         return map(cls, ids)
+
+    def exists(self):
+        try:
+            self.update()
+        except HTTPError:
+            return False
+        return True
 
     def update(self):
         self._data = self.connection.get_request(
