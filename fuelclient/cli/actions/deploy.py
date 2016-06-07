@@ -11,11 +11,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+import six
 
 from fuelclient.cli.actions.base import Action
 import fuelclient.cli.arguments as Args
-from fuelclient.cli.formatting import print_deploy_progress
 from fuelclient.objects.environment import Environment
 
 
@@ -34,6 +33,12 @@ class ChangesAction(Action):
             (None, self.deploy_changes),
         )
 
+    def print_deploy_info(self, deploy_task):
+        six.print_("Deployment task with id {t} for the environment {e} "
+                   "has been started.\n".format(t=deploy_task.id,
+                                                e=deploy_task.env.id)
+                   )
+
     def deploy_changes(self, params):
         """To apply all changes to some environment:
             fuel --env 1 {action_name}
@@ -46,7 +51,7 @@ class ChangesAction(Action):
         self.serializer.print_to_output(
             deploy_task.data,
             deploy_task,
-            print_method=print_deploy_progress)
+            print_method=self.print_deploy_info)
 
 
 class DeployChangesAction(ChangesAction):
