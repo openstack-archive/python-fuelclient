@@ -194,10 +194,21 @@ def print_deploy_progress_with_terminal(deploy_task, terminal_screen):
                 )
             )
             for index, node in enumerate(nodes):
+                data = {
+                    'id': node.id,
+                    'status': 'removed',
+                    'progress': 100
+                }
+                if node.exists():
+                    # method exists calls update, so we can use data property
+                    data.update({
+                        'status': node.data['status'],
+                        'progress': node.data['progress']
+                    })
                 terminal_screen.addstr(
                     index + 2, 0,
                     "Node{id:3} {status:13}: {bar} {progress:3}%"
-                    .format(bar=node_bar(node.progress), **node.data)
+                    .format(bar=node_bar(data['progress']), **data)
                 )
     except DeployProgressError as de:
         close_curses()
