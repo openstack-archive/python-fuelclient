@@ -194,11 +194,12 @@ def print_deploy_progress_with_terminal(deploy_task, terminal_screen):
                 )
             )
             for index, node in enumerate(nodes):
-                terminal_screen.addstr(
-                    index + 2, 0,
-                    "Node{id:3} {status:13}: {bar} {progress:3}%"
-                    .format(bar=node_bar(node.progress), **node.data)
-                )
+                if node.exists():
+                    terminal_screen.addstr(
+                        index + 2, 0,
+                        "Node{id:3} {status:13}: {bar} {progress:3}%"
+                        .format(bar=node_bar(node.progress), **node.data)
+                    )
     except DeployProgressError as de:
         close_curses()
         print(de.message)
