@@ -104,7 +104,9 @@ class InvalidFileException(FuelClientException):
 
 
 class HTTPError(FuelClientException):
-    pass
+    def __init__(self, *args, **kwargs):
+        self.status_code = kwargs.pop('status_code', None)
+        super(HTTPError, self).__init__(*args, **kwargs)
 
 
 class EnvironmentException(Exception):

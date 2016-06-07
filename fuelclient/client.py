@@ -242,7 +242,8 @@ class APIClient(object):
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            raise error.HTTPError(error.get_full_error_message(e))
+            raise error.HTTPError(error.get_full_error_message(e),
+                                  status_code=e.response.status_code)
 
 # This line is single point of instantiation for 'APIClient' class,
 # which intended to implement Singleton design pattern.
