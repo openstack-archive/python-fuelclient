@@ -38,6 +38,7 @@ from fuelclient.tests.utils.fake_openstack_config  \
     import get_fake_openstack_config
 from fuelclient.tests.utils.fake_plugin import get_fake_plugin
 from fuelclient.tests.utils.fake_plugin import get_fake_plugins
+from fuelclient.tests.utils.fake_release import get_fake_release
 
 
 __all__ = (get_fake_deployment_history,
@@ -46,6 +47,7 @@ __all__ = (get_fake_deployment_history,
            get_fake_yaml_deployment_info,
            get_fake_yaml_network_conf,
            get_fake_env,
+           get_fake_release,
            get_fake_fuel_version,
            get_fake_interface_config,
            get_fake_network_group,
