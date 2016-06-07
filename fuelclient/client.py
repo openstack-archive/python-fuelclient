@@ -186,7 +186,6 @@ class APIClient(object):
 
         self.print_debug('PUT {0} data={1}'.format(resp.url, data_json))
         self._raise_for_status_with_info(resp)
-
         return resp.json()
 
     def get_request_raw(self, api, ostf=False, params=None):
