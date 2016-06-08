@@ -177,5 +177,5 @@ class OpenstackConfigDelete(OpenstackConfigMixin, base.BaseCommand):
         self.client.delete(args.config)
 
         msg = ("Openstack configuration '{0}' "
-               "has been deleted.".format(args.config))
+               "has been deleted.\n".format(args.config))
         self.app.stdout.write(msg)
