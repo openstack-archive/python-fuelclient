@@ -16,7 +16,6 @@ import argparse
 import sys
 
 from fuelclient.cli.actions import actions
-from fuelclient.cli.arguments import get_fuel_version_arg
 from fuelclient.cli.arguments import get_version_arg
 from fuelclient.cli.arguments import substitutions
 from fuelclient.cli.error import exceptions_decorator
@@ -177,8 +176,8 @@ class Parser(object):
         )
 
     def add_version_args(self):
-        for args in (get_version_arg(), get_fuel_version_arg()):
-            self.parser.add_argument(*args["args"], **args["params"])
+        arg = get_version_arg()
+        self.parser.add_argument(*arg["args"], **arg["params"])
 
     def prepare_args(self):
         # replace some args from dict substitutions
