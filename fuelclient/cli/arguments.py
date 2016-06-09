@@ -17,7 +17,6 @@ from itertools import chain
 import os
 
 from fuelclient import __version__
-from fuelclient.actions import fuel_version
 from fuelclient.cli.error import ArgumentException
 from fuelclient.client import DefaultAPIClient
 
@@ -127,18 +126,6 @@ def get_version_arg():
         "params": {
             "action": "version",
             "version": __version__
-        }
-    }
-
-
-def get_fuel_version_arg():
-    return {
-        "args": ["--fuel-version"],
-        "params": {
-            "action": fuel_version.FuelVersionAction,
-            "help": "show Fuel server's version number and exit. "
-                    "WARNING: deprecated since 7.0 release. "
-                    "Please use fuel-version command instead"
         }
     }
 
