@@ -221,7 +221,7 @@ run_cleanup() {
     local config=$1
 
     msg "Doing a clean up."
-
+    pip freeze
     kill_server
 
     find . -type f -name "*.pyc" -delete
