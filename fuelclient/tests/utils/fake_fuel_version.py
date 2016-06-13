@@ -22,37 +22,8 @@ def get_fake_fuel_version():
     environment. Represents the average amount of data.
 
     """
-    return {
-        "astute_sha": "16b252d93be6aaa73030b8100cf8c5ca6a970a91",
-        "release": "6.0",
-        "build_id": "2014-12-26_14-25-46",
-        "build_number": "58",
-        "auth_required": True,
-        "fuellib_sha": "fde8ba5e11a1acaf819d402c645c731af450aff0",
-        "production": "docker",
-        "nailgun_sha": "5f91157daa6798ff522ca9f6d34e7e135f150a90",
-        "release_versions": {
-            "2014.2-6.0": {
-                "VERSION": {
-                    "ostf_sha": "a9afb68710d809570460c29d6c3293219d3624d4",
-                    "astute_sha": "16b252d93be6aaa73030b8100cf8c5ca6a970a91",
-                    "release": "6.0",
-                    "build_id": "2014-12-26_14-25-46",
-                    "build_number": "58",
-                    "fuellib_sha": "fde8ba5e11a1acaf819d402c645c731af450aff0",
-                    "production": "docker",
-                    "nailgun_sha": "5f91157daa6798ff522ca9f6d34e7e135f150a90",
-                    "api": "1.0",
-                    "fuelmain_sha": "81d38d6f2903b5a8b4bee79ca45a54b76c1361b8",
-                    "feature_groups": [
-                        "mirantis"
-                    ]
-                }
-            }
-        },
-        "api": "1.0",
-        "fuelmain_sha": "81d38d6f2903b5a8b4bee79ca45a54b76c1361b8",
-        "feature_groups": [
-            "mirantis"
-        ]
-    }
+    return {"api": "1",
+            "auth_required": True,
+            "feature_groups": [],
+            "openstack_version": "newton-10.0",
+            "release": "10.0"}
