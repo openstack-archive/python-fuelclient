@@ -16,13 +16,23 @@ from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 
 
-class FuelVersion(base.BaseCommand):
+class FuelVersion(base.BaseShowCommand):
     """Show fuel version."""
 
     entity_name = 'fuel-version'
+    columns = ('api',
+               'auth_required',
+               'build_id',
+               'build_number',
+               'feature_groups'
+               'fuellib_sha',
+               'fuelmain_sha',
+               'nailgun_sha',
+               'production')
 
     def take_action(self, parsed_args):
         version = self.client.get_all()
-        serializer = Serializer.from_params(parsed_args)
-        msg = serializer.serialize(version)
-        self.app.stdout.write(msg)
+
+        import pdb; pdb.set_trace()
+
+        return version, self.columns
