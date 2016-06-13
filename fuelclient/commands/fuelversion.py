@@ -12,17 +12,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
+from fuelclient.common import data_utils
 
 
-class FuelVersion(base.BaseCommand):
+class FuelVersion(base.BaseShowCommand):
     """Show fuel version."""
 
     entity_name = 'fuel-version'
+    columns = ('api',
+               'auth_required',
+               'feature_groups',
+               'openstack_version',
+               'release')
+
+    def get_parser(self, prog_name):
+        """Does not allow to add Id argument."""
+
+        return super(base.BaseShowCommand, self).get_parser(prog_name)
 
     def take_action(self, parsed_args):
-        version = self.client.get_all()
-        serializer = Serializer.from_params(parsed_args)
-        msg = serializer.serialize(version)
-        self.app.stdout.write(msg)
+        data = self.client.get_all()
+        data = data_utils.get_display_data_single(self.columns, data)
+
+        return (self.columns, data)
