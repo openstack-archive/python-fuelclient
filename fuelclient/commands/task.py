@@ -143,6 +143,28 @@ class TaskShow(TaskMixIn, base.BaseShowCommand):
                'message')
 
 
+class TaskDelete(TaskMixIn, base.BaseDeleteCommand):
+    """Delete task with given id."""
+
+    def get_parser(self, prog_name):
+        parser = super(TaskDelete, self).get_parser(prog_name)
+
+        parser.add_argument('-f',
+                            '--force',
+                            action='store_true',
+                            default=False,
+                            help='Force deletion of a task without '
+                                 'considering its state.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.client.delete_by_id(parsed_args.id, parser)
+
+        msg = 'Task with id {ent_id} was deleted\n'
+        self.app.stdout.write(msg.format(ent_id=parsed_args.id))
+
+
 class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
     """Show deployment history about task with given ID."""
 
