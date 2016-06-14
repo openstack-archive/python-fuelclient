@@ -13,7 +13,6 @@
 #    under the License.
 
 import json
-import logging
 import requests
 
 from keystoneclient.v2_0 import client as auth_client
@@ -21,13 +20,6 @@ from six.moves.urllib import parse as urlparse
 
 from fuelclient.cli import error
 from fuelclient import fuelclient_settings
-from fuelclient.logs import NullHandler
-
-
-# configure logging to silent all logs
-# and prevent issues in keystoneclient logging
-logger = logging.getLogger()
-logger.addHandler(NullHandler())
 
 
 class APIClient(object):
