@@ -20,6 +20,18 @@ class TaskClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.Task
 
+    def delete_by_id(self, task_id, force=False):
+        """Delete a given task by its id
+
+        :param task_id: Id of a task to delete.
+        :type task_id: int
+        :param force: Force deletion of a task without
+                      concidering its state
+
+        """
+        env_obj = self._entity_wrapper(obj_id=task_id)
+        env_obj.delete(force=force)
+
 
 def get_client(connection):
     return TaskClient(connection)

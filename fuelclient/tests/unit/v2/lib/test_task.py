@@ -50,3 +50,23 @@ class TestTaskFacade(test_api.BaseLibTest):
         self.client.get_by_id(task_id)
 
         self.assertTrue(matcher.called)
+
+    def test_task_delete(self):
+        task_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, task_id)
+        matcher = self.m_request.delete(expected_uri, json=self.fake_tasks)
+
+        self.client.delete_by_id(task_id, force=False)
+
+        self.assertTrue(matcher.called)
+        self.assertEqual(['0'], matcher.last_request.qs.get('force'))
+
+    def test_task_delete_force(self):
+        task_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, task_id)
+        matcher = self.m_request.delete(expected_uri, json=self.fake_tasks)
+
+        self.client.delete_by_id(task_id, force=True)
+
+        self.assertTrue(matcher.called)
+        self.assertEqual(['1'], matcher.last_request.qs.get('force'))
