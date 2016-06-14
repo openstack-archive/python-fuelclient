@@ -49,6 +49,24 @@ class TestTaskCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('task', mock.ANY)
         self.m_client.get_by_id.assert_called_once_with(task_id)
 
+    def test_task_delete(self):
+        task_id = 42
+        args = 'task delete {task_id}'.format(task_id=task_id)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('task', mock.ANY)
+        self.m_client.delete_by_id.assert_called_once_with(task_id, False)
+
+    def test_task_delete_force(self):
+        task_id = 42
+        args = 'task delete --force {task_id}'.format(task_id=task_id)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('task', mock.ANY)
+        self.m_client.delete_by_id.assert_called_once_with(task_id, True)
+
     def test_task_history_show(self):
         task_id = 42
         args = 'task history show {task_id} '.format(task_id=task_id)
