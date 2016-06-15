@@ -244,9 +244,22 @@ class APIClient(object):
         except requests.exceptions.HTTPError as e:
             raise error.HTTPError(error.get_full_error_message(e))
 
-# This line is single point of instantiation for 'APIClient' class,
-# which intended to implement Singleton design pattern.
-DefaultAPIClient = APIClient.default_client()
-"""
-.. deprecated:: Use fuelclient.client.APIClient instead
-"""
+
+class DefaultApiClientClass(object):
+    """DEPRECATION WARNING:
+    Default client guarantees compatibility with the old
+    CLI and WILL BE REMOVED in the next version. DO NOT USE THIS!
+    """
+    def __init__(self):
+        self.__api_client = None
+
+    @property
+    def _api_client(self):
+        if not self.__api_client:
+            self.__api_client = APIClient.default_client()
+        return self.__api_client
+
+    def __getattr__(self, item):
+        return self._api_client.__getattribute__(item)
+
+DefaultAPIClient = DefaultApiClientClass()
