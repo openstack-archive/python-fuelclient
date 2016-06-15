@@ -51,6 +51,7 @@ class BaseTestCase(oslo_base.BaseTestCase):
 
     handler = ''
     nailgun_root = os.environ.get('NAILGUN_ROOT', '/tmp/fuel_web/nailgun')
+    fuel_web_root = os.environ.get('FUEL_WEB_ROOT', '/tmp/fuel_web')
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
@@ -82,16 +83,17 @@ class BaseTestCase(oslo_base.BaseTestCase):
     @classmethod
     def reload_nailgun_server(cls):
         for action in ("dropdb", "syncdb", "loaddefault"):
-            cmd = 'tox -evenv -- manage.py %s' % action
-            cls.run_command(cmd, cwd=cls.nailgun_root)
+            cmd = 'tox -evenv -- {0}/manage.py {1}'.format(
+                cls.nailgun_root, action)
+            cls.run_command(cmd, cwd=cls.fuel_web_root)
 
     @classmethod
     def load_data_to_nailgun_server(cls):
         file_path = os.path.join(cls.nailgun_root,
                                  'nailgun/fixtures/sample_environment.json')
-
-        cmd = 'tox -evenv -- manage.py loaddata %s' % file_path
-        cls.run_command(cmd, cwd=cls.nailgun_root)
+        cmd = 'tox -evenv -- {0}/manage.py loaddata {1}'.format(
+            cls.nailgun_root, file_path)
+        cls.run_command(cmd, cwd=cls.fuel_web_root)
 
     def run_cli_command(self, command_line,
                         check_errors=True, env=os.environ.copy()):
