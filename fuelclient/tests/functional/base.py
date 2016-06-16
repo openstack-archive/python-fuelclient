@@ -93,10 +93,10 @@ class BaseTestCase(oslo_base.BaseTestCase):
         cmd = 'tox -evenv -- manage.py loaddata %s' % file_path
         cls.run_command(cmd, cwd=cls.nailgun_root)
 
-    def run_cli_command(self, command_line,
+    def run_cli_command(self, command_line, handler=None,
                         check_errors=True, env=os.environ.copy()):
 
-        command_args = [" ".join((self.handler, command_line))]
+        command_args = [" ".join((handler or self.handler, command_line))]
         process_handle = subprocess.Popen(
             command_args,
             stdout=subprocess.PIPE,
@@ -201,9 +201,9 @@ class CLIv1TestCase(BaseTestCase):
     handler = 'fuel'
 
     def _get_task_info(self, task_id):
-        command = "task --task {0} --json".format(str(task_id))
-        call = self.run_cli_command(command)
-        return json.loads(call.stdout)[0]
+        command = "task show -f json {0}".format(str(task_id))
+        call = self.run_cli_command(command, handler='fuel2')
+        return json.loads(call.stdout)
 
 
 class CLIv2TestCase(BaseTestCase):
