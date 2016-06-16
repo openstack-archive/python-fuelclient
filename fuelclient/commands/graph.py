@@ -257,7 +257,7 @@ class GraphDownload(base.BaseCommand):
 
 
 class GraphList(base.BaseListCommand):
-    """Upload deployment graph configuration."""
+    """List deployment graphs."""
     entity_name = 'graph'
     columns = ("id",
                "name",
