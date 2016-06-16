@@ -40,7 +40,6 @@ from fuelclient.cli.actions.role import RoleAction
 from fuelclient.cli.actions.settings import SettingsAction
 from fuelclient.cli.actions.settings import VmwareSettingsAction
 from fuelclient.cli.actions.snapshot import SnapshotAction
-from fuelclient.cli.actions.task import TaskAction
 from fuelclient.cli.actions.user import UserAction
 from fuelclient.cli.actions.plugins import PluginAction
 from fuelclient.cli.actions.fuelversion import FuelVersionAction
@@ -71,7 +70,6 @@ actions_tuple = (
     SettingsAction,
     SnapshotAction,
     StopAction,
-    TaskAction,
     TokenAction,
     UserAction,
     VIPAction,
