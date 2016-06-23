@@ -60,13 +60,18 @@ class BaseListCommand(lister.Lister, BaseCommand):
 
         group = next(matching_groups, None) or parser
 
+        if not self.columns or 'id' in self.columns:
+            default_sort_columns = ['id']
+        else:
+            default_sort_columns = self.columns[:1]
+
         group.add_argument('-s',
                            '--sort-columns',
                            type=str,
                            nargs='+',
                            choices=self.columns,
                            metavar='SORT_COLUMN',
-                           default=['id'],
+                           default=default_sort_columns,
                            help='Space separated list of keys for sorting '
                                 'the data. Defaults to id. Wrong values '
                                 'are ignored.')

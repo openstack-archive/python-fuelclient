@@ -36,7 +36,9 @@ class ReleaseList(ReleaseMixIn, base.BaseListCommand):
 class ReleaseReposList(ReleaseMixIn, base.BaseListCommand):
     """Show repos for a given release."""
 
-    def columns(self, repos):
+    columns = ()
+
+    def _repo_columns(self, repos):
         if repos:
             return tuple(repos[0])
         return ()
@@ -50,9 +52,8 @@ class ReleaseReposList(ReleaseMixIn, base.BaseListCommand):
     def take_action(self, parsed_args):
         data = self.client.get_attributes_metadata_by_id(parsed_args.id)
         repos = data["editable"]["repo_setup"]["repos"]["value"]
-        columns = self.columns(repos)
-        repos = data_utils.get_display_data_multi(columns, repos)
-        return columns, repos
+        repos = data_utils.get_display_data_multi(self._repo_columns(repos), repos)
+        return self._repo_columns(repos), repos
 
 
 class ReleaseReposUpdate(ReleaseMixIn, base.BaseCommand):
