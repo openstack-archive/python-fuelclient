@@ -20,7 +20,7 @@ from fuelclient.cli.actions import PluginAction
 from fuelclient.cli import error
 from fuelclient.cli.formatting import format_table
 from fuelclient.cli.serializers import Serializer
-from fuelclient.objects.plugins import Plugins
+from fuelclient.objects.plugins import BasePlugin
 from fuelclient.tests.unit.v1 import base
 
 
@@ -28,10 +28,9 @@ class TestPluginsActions(base.UnitTestCase):
 
     def setUp(self):
         super(TestPluginsActions, self).setUp()
-        self.file_name = '/tmp/path/plugin.fp'
-        self.attr_name = 'plugin_name==version'
+        self.path = '/tmp/path/plugin.fp'
         self.name = 'plugin_name'
-        self.version = 'version'
+        self.version = 'plugin_version'
 
     def exec_plugins(self, actions):
         plugins_cmd = ['fuel', 'plugins']
@@ -48,7 +47,7 @@ class TestPluginsActions(base.UnitTestCase):
         print_mock.assert_called_once_with(result, msg)
 
     @patch.object(Serializer, 'print_to_output')
-    @patch.object(Plugins, 'get_all_data')
+    @patch.object(BasePlugin, 'get_all_data')
     def test_list_default(self, get_mock, print_mock):
         plugins = [
             {'id': 1,
@@ -72,7 +71,7 @@ class TestPluginsActions(base.UnitTestCase):
         self.assert_print_table(print_mock, plugins)
 
     @patch.object(Serializer, 'print_to_output')
-    @patch.object(Plugins, 'get_all_data')
+    @patch.object(BasePlugin, 'get_all_data')
     def test_list(self, get_mock, print_mock):
         plugins = [
             {'id': 1,
@@ -97,90 +96,59 @@ class TestPluginsActions(base.UnitTestCase):
 
     @patch.object(Serializer, 'print_to_output')
     @patch.object(PluginAction, 'check_file')
-    @patch.object(Plugins, 'install', return_value='some_result')
+    @patch.object(BasePlugin, 'install', return_value={'action': 'installed'})
     def test_install(self, install_mock, check_mock, print_mock):
-        self.exec_plugins(['--install', self.file_name])
+        self.exec_plugins(['--install', self.path])
         self.assert_print(
             print_mock,
-            'some_result',
-            'Plugin /tmp/path/plugin.fp was successfully installed.')
-        install_mock.assert_called_once_with(self.file_name, force=False)
-        check_mock.assert_called_once_with(self.file_name)
+            {'action': 'installed'},
+            "Plugin 'plugin.fp' was successfully installed.")
+        install_mock.assert_called_once_with(self.path, force=False)
+        check_mock.assert_called_once_with(self.path)
 
     @patch.object(Serializer, 'print_to_output')
-    @patch.object(Plugins, 'remove', return_value='some_result')
+    @patch.object(PluginAction, 'check_file')
+    @patch.object(BasePlugin, 'install',
+                  return_value={'action': 'reinstalled'})
+    def test_install_with_force(self, install_mock, check_mock, print_mock):
+        self.exec_plugins(['--install', self.path, '--force'])
+        self.assert_print(
+            print_mock,
+            {'action': 'reinstalled'},
+            "Plugin 'plugin.fp' was successfully reinstalled.")
+        install_mock.assert_called_once_with(self.path, force=True)
+        check_mock.assert_called_once_with(self.path)
+
+    @patch.object(Serializer, 'print_to_output')
+    @patch.object(BasePlugin, 'remove', return_value='some_result')
     def test_remove(self, remove_mock, print_mock):
-        self.exec_plugins(['--remove', self.attr_name])
+        attrs = '{0}=={1}'.format(self.name, self.version)
+        self.exec_plugins(['--remove', attrs])
         self.assert_print(
             print_mock,
             'some_result',
-            'Plugin plugin_name==version was successfully removed.')
+            "Plugin '{0}' was successfully removed.".format(attrs))
         remove_mock.assert_called_once_with(self.name, self.version)
 
     @patch.object(Serializer, 'print_to_output')
-    @patch.object(PluginAction, 'check_file')
-    @patch.object(Plugins, 'update', return_value='some_result')
-    def test_update(self, update_mock, check_mock, print_mock):
-        self.exec_plugins(['--update', self.file_name])
-        self.assert_print(
-            print_mock,
-            'some_result',
-            'Plugin /tmp/path/plugin.fp was successfully updated.')
-        update_mock.assert_called_once_with(self.file_name)
-        check_mock.assert_called_once_with(self.file_name)
-
-    @patch.object(Serializer, 'print_to_output')
-    @patch.object(PluginAction, 'check_file')
-    @patch.object(Plugins, 'downgrade', return_value='some_result')
-    def test_downgrade(self, downgrade_mock, check_mock, print_mock):
-        self.exec_plugins(['--downgrade', self.file_name])
-        self.assert_print(
-            print_mock,
-            'some_result',
-            'Plugin /tmp/path/plugin.fp was successfully downgraded.')
-        downgrade_mock.assert_called_once_with(self.file_name)
-        check_mock.assert_called_once_with(self.file_name)
-
-    @patch.object(Serializer, 'print_to_output')
-    @patch.object(Plugins, 'sync')
+    @patch.object(BasePlugin, 'sync')
     def test_sync(self, sync_mock, print_mock):
         self.exec_plugins(['--sync'])
         self.assert_print(
             print_mock,
             None,
-            'Plugins were successfully synchronized.')
+            "Plugins were successfully synchronized.")
         self.assertTrue(sync_mock.called)
 
     @patch.object(Serializer, 'print_to_output')
-    @patch.object(Plugins, 'sync')
+    @patch.object(BasePlugin, 'sync')
     def test_sync_with_specific_plugins(self, sync_mock, print_mock):
         self.exec_plugins(['--sync', '--plugin-id=1,2,3'])
         self.assert_print(
             print_mock,
             None,
-            'Plugins were successfully synchronized.')
+            "Plugins were successfully synchronized.")
         sync_mock.assert_called_once_with(plugin_ids=[1, 2, 3])
-
-    @patch.object(Serializer, 'print_to_output')
-    @patch.object(Plugins, 'register', return_value='some_result')
-    def test_register(self, register_mock, print_mock):
-        self.exec_plugins(['--register', 'plugin_name==version'])
-        self.assert_print(
-            print_mock,
-            'some_result',
-            'Plugin plugin_name==version was successfully registered.')
-        register_mock.assert_called_once_with(
-            self.name, self.version, force=False)
-
-    @patch.object(Serializer, 'print_to_output')
-    @patch.object(Plugins, 'unregister', return_value='some_result')
-    def test_unregister(self, unregister_mock, print_mock):
-        self.exec_plugins(['--unregister', 'plugin_name==version'])
-        self.assert_print(
-            print_mock,
-            'some_result',
-            'Plugin plugin_name==version was successfully unregistered.')
-        unregister_mock.assert_called_once_with(self.name, self.version)
 
     def test_parse_name_version(self):
         plugin = PluginAction()
@@ -198,7 +166,7 @@ class TestPluginsActions(base.UnitTestCase):
     @patch('fuelclient.utils.file_exists', return_value=True)
     def test_check_file(self, _):
         plugin = PluginAction()
-        plugin.check_file(self.file_name)
+        plugin.check_file(self.path)
 
     @patch('fuelclient.utils.file_exists', return_value=False)
     def test_check_file_raises_error(self, _):
@@ -206,4 +174,4 @@ class TestPluginsActions(base.UnitTestCase):
         self.assertRaisesRegexp(
             error.ArgumentException,
             'File "/tmp/path/plugin.fp" does not exists',
-            plugin.check_file, self.file_name)
+            plugin.check_file, self.path)
