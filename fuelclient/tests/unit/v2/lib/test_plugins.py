@@ -14,7 +14,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
+import os
+import tempfile
+
 import fuelclient
+from fuelclient.objects.plugins import BasePlugin
 from fuelclient.tests.unit.v2.lib import test_api
 from fuelclient.tests import utils
 
@@ -25,7 +30,7 @@ class TestPluginsFacade(test_api.BaseLibTest):
         super(TestPluginsFacade, self).setUp()
 
         self.version = 'v1'
-        self.res_uri = '/api/{version}/plugins/'.format(version=self.version)
+        self.res_uri = '/api/{version}/plugins'.format(version=self.version)
 
         self.fake_plugins = utils.get_fake_plugins(10)
 
@@ -36,8 +41,45 @@ class TestPluginsFacade(test_api.BaseLibTest):
         self.client.get_all()
         self.assertTrue(self.res_uri, matcher.called)
 
+    def exec_install(self, force=False):
+        expected_uri = '/api/{version}/plugins/upload'.format(
+            version=self.version
+        )
+        matcher = self.m_request.post(expected_uri, json={})
+        path = tempfile.mkstemp(suffix='.fp')[1]
+        self.client.install(path, force=force)
+        self.assertTrue(matcher.called)
+
+        body = ' '.join(matcher.last_request.body.decode().split())
+
+        uploaded = 'Content-Disposition: form-data; name="uploaded"; ' \
+                   'filename="{0}"'.format(os.path.basename(path))
+        self.assertTrue(uploaded in body)
+
+        force = 'Content-Disposition: form-data; name="force" {}'.format(
+            str(force))
+        self.assertTrue(force in body)
+
+    def test_install_plugin(self):
+        self.exec_install()
+
+    def test_install_plugin_with_force(self):
+        self.exec_install(force=True)
+
+    def test_remove_plugin(self):
+        plugin = self.fake_plugins[3]
+        expected_uri = '/api/{version}/plugins/{id}'.format(
+            version=self.version, id=plugin['id']
+        )
+        matcher = self.m_request.delete(expected_uri, json={})
+        with mock.patch.object(
+                BasePlugin, '_get_plugin', return_value={'id': plugin['id']}):
+            self.client.remove(plugin['name'], plugin['version'])
+        self.assertTrue(matcher.called)
+        self.assertIsNone(matcher.last_request.body)
+
     def test_sync_plugins(self):
-        expected_uri = '/api/{version}/plugins/sync/'.format(
+        expected_uri = '/api/{version}/plugins/sync'.format(
             version=self.version
         )
         matcher = self.m_request.post(expected_uri, json={})
@@ -46,7 +88,7 @@ class TestPluginsFacade(test_api.BaseLibTest):
         self.assertIsNone(matcher.last_request.body)
 
     def test_sync_plugins_empty_ids(self):
-        expected_uri = '/api/{version}/plugins/sync/'.format(
+        expected_uri = '/api/{version}/plugins/sync'.format(
             version=self.version
         )
         matcher = self.m_request.post(expected_uri, json={})
@@ -55,7 +97,7 @@ class TestPluginsFacade(test_api.BaseLibTest):
         self.assertEqual([], matcher.last_request.json()['ids'])
 
     def test_sync_specified_plugins(self):
-        expected_uri = '/api/{version}/plugins/sync/'.format(
+        expected_uri = '/api/{version}/plugins/sync'.format(
             version=self.version
         )
         ids = [1, 2]

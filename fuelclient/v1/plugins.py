@@ -35,7 +35,7 @@ class PluginsClient(base_v1.BaseV1Client):
         # Replace original nested 'releases' dictionary (from plugins meta
         # dictionary) to a new user-friendly form with releases info, i.e.
         # 'os', 'version' that specific plugin supports
-        plugins = self._entity_wrapper.get_all_data()
+        plugins = self._entity_wrapper().get_all_data()
         for plugin in plugins:
             releases = collections.defaultdict(list)
             for key in plugin['releases']:
@@ -44,6 +44,24 @@ class PluginsClient(base_v1.BaseV1Client):
                                            for k, v in six.iteritems(releases))
         return plugins
 
+    def install(self, path, force=False):
+        """Installs a plugin package and updates data in API service.
+
+        :param str path: Path to plugin file
+        :param bool force: Updates existent plugin even if it is not updatable
+        :return: Plugin information
+        :rtype: dict
+        """
+        return self._entity_wrapper().install(path, force=force)
+
+    def remove(self, name, version):
+        """Removes a plugin package and updates data in API service.
+
+        :param str name: Plugin name
+        :param str version: Plugin version
+        """
+        self._entity_wrapper().remove(name, version)
+
     def sync(self, ids):
         """Synchronise plugins on file system with plugins in API service.
 
@@ -51,7 +69,7 @@ class PluginsClient(base_v1.BaseV1Client):
         :type ids: list
         """
 
-        self._entity_wrapper.sync(plugin_ids=ids)
+        self._entity_wrapper().sync(plugin_ids=ids)
 
 
 def get_client(connection):
