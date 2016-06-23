@@ -17,14 +17,13 @@ import abc
 import six
 
 from fuelclient import client
+from fuelclient import objects
 
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseV1Client(object):
 
-    @abc.abstractproperty
-    def _entity_wrapper(self):
-        pass
+    _entity_wrapper = objects.BaseObject
 
     def __init__(self, connection=None):
         if connection is None:

@@ -177,6 +177,13 @@ class APIClient(object):
         self._raise_for_status_with_info(resp)
         return self._decode_content(resp)
 
+    def put_upload_file_raw(self, api, path, **kwargs):
+        """Sends a PUT request to upload file."""
+        resp = self._upload_file('PUT', api, path, data=kwargs.get('data'))
+        self._raise_for_status_with_info(resp)
+
+        return resp.json()
+
     def get_request_raw(self, api, ostf=False, params=None):
         """Make a GET request to specific API and return raw response
 
@@ -204,9 +211,8 @@ class APIClient(object):
         """Make a POST request to specific API and return raw response.
 
         :param api: API endpoint (path)
-        :param data: data send in request, will be serialzied to JSON
+        :param data: data send in request, will be serialized to JSON
         :param ostf: is this a call to OSTF API
-
         """
         url = (self.ostf_root if ostf else self.api_root) + api
         data_json = None if data is None else json.dumps(data)
@@ -222,10 +228,41 @@ class APIClient(object):
         self._raise_for_status_with_info(resp)
         return self._decode_content(resp)
 
+    def post_upload_file_raw(self, api, path, **kwargs):
+        """Sends a POST request to upload file."""
+        resp = self._upload_file('POST', api, path, data=kwargs.get('data'))
+        self._raise_for_status_with_info(resp)
+
+        return resp.json()
+
     def get_fuel_version(self):
         return self.get_request("version")
 
-    def _raise_for_status_with_info(self, response):
+    def _upload_file(self, method, api, path, data=None):
+        """Sends a request to upload Multipart-encoded files.
+
+        :param str method: Method of request (POST, PUT)
+        :param str api: API endpoint (path)
+        :param str path: Path to file for uploading
+        :param dict data: Data send in request, will be serialized to JSON
+        :rtype: requests.Response
+        """
+        self.session.headers.pop('Content-Type', None)
+        self.session.headers.pop('Accept', None)
+
+        method = method.upper()
+        action = {'POST': self.session.post, 'PUT': self.session.put}
+        url = urlparse.urljoin(self.api_root, api)
+        files = {'uploaded': open(path, 'rb')}
+        resp = action[method](url, files=files, data=data)
+
+        self.print_debug('UPLOAD {0} {1} file={2} data={3}'.format(
+            method, resp.url, path, data))
+
+        return resp
+
+    @staticmethod
+    def _raise_for_status_with_info(response):
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:

@@ -12,12 +12,32 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import argparse
+import os
+import re
+
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient import utils
 
 
 class PluginsMixIn(object):
     entity_name = 'plugins'
+
+    @staticmethod
+    def plugin_file(path):
+        if not utils.file_exists(path):
+            raise argparse.ArgumentTypeError(
+                'File "{0}" does not exist'.format(path))
+        return path
+
+    @staticmethod
+    def plugin_attrs(string):
+        attrs = string.split('==')
+        if len(attrs) != 2 or not re.search('^\d+\.\d+\.\d+$', attrs[1]):
+            raise argparse.ArgumentTypeError(
+                "Wrong format. Please set it as 'fuel_plugin==1.0.0'")
+        return attrs
 
 
 class PluginsList(PluginsMixIn, base.BaseListCommand):
@@ -36,11 +56,68 @@ class PluginsList(PluginsMixIn, base.BaseListCommand):
         return self.columns, data
 
 
+class PluginsInstall(PluginsMixIn, base.BaseCommand):
+    """Install, upgrade or downgrade plugin and register it in API service.
+
+        Upgrade or downgrade plugin is allowed from one minor version
+        to another (is supported beginning from package version 2.0.0):
+          2.0.0 -> 2.0.1 - allowed
+          2.0.0 -> 2.1.0 - cannot be used to perform upgrade,
+            a new version of a plugin will be installed
+          2.0.1 -> 2.0.0 - allowed
+          2.0.1 -> 1.0.0 - cannot be used to perform downgrade,
+            a new version of a plugin will be installed
+    """
+
+    def get_parser(self, prog_name):
+        parser = super(PluginsInstall, self).get_parser(prog_name)
+        parser.formatter_class = argparse.RawTextHelpFormatter
+
+        parser.add_argument(
+            'path',
+            metavar='file',
+            type=self.plugin_file,
+            help='Path to plugin file')
+
+        parser.add_argument(
+            '-f', '--force',
+            action='store_true',
+            help='Used for reinstall plugin with the same version')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        result = self.client.install(parsed_args.path, force=parsed_args.force)
+        self.app.stdout.write("Plugin '{0}' was successfully {1}.\n".format(
+            os.path.basename(parsed_args.path), result.get('action')))
+
+
+class PluginsRemove(PluginsMixIn, base.BaseCommand):
+    """Remove plugin from file system and from API service."""
+
+    def get_parser(self, prog_name):
+        parser = super(PluginsRemove, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'plugin',
+            type=self.plugin_attrs,
+            help="Plugin to remove in format 'name==version'")
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.client.remove(*parsed_args.plugin)
+        self.app.stdout.write(
+            "Plugin '{0}=={1}' was removed successfully.\n".format(
+                *parsed_args.plugin))
+
+
 class PluginsSync(PluginsMixIn, base.BaseCommand):
     """Synchronise plugins on file system with plugins in API service."""
 
     def get_parser(self, prog_name):
         parser = super(PluginsSync, self).get_parser(prog_name)
+
         parser.add_argument(
             'ids',
             type=int,

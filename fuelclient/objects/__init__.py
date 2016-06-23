@@ -29,5 +29,4 @@ from fuelclient.objects.task import SnapshotTask
 from fuelclient.objects.task import Task
 from fuelclient.objects.fuelversion import FuelVersion
 from fuelclient.objects.network_group import NetworkGroup
-from fuelclient.objects.plugins import Plugins
 from fuelclient.objects.sequence import Sequence

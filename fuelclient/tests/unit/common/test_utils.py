@@ -20,6 +20,7 @@ import six
 import subprocess
 import yaml
 
+import fixtures
 import mock
 import requests
 
@@ -329,3 +330,24 @@ class TestUtils(base.UnitTestCase):
             self.assertRaises(ValueError,
                               data_utils.safe_load,
                               'bad', stream)
+
+    @mock.patch('os.access')
+    @mock.patch('os.path.isfile')
+    def test_find_exec(self, misf, macc):
+        misf.side_effect = [False, True, True]
+        macc.side_effect = [False, True]
+        # The combination will be like:
+        # 1) /foo/program does not exist
+        # 2) /bar/program does exist but isn't executable
+        # 3) /baz/program does exist and is executable
+        # So the function is to search 'program' in paths /foo, /bar, /baz
+        # and return /baz/program
+        self.useFixture(fixtures.EnvironmentVariable('PATH', '/foo:/bar:/baz'))
+        self.assertEqual('/baz/program', utils.find_exec('program'))
+
+    @mock.patch('os.access')
+    @mock.patch('os.path.isfile')
+    def test_find_exec_not_found(self, misf, macc):
+        misf.return_value = False
+        self.useFixture(fixtures.EnvironmentVariable('PATH', '/foo'))
+        self.assertIsNone(utils.find_exec('program'))

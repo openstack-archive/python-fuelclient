@@ -15,19 +15,21 @@
 #    under the License.
 
 import mock
+import tempfile
 
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_plugin
 
 
 class TestPluginsCommand(test_engine.BaseCLITest):
-    """Tests for fuel2 node * commands."""
+    """Tests for fuel2 plugins * commands."""
 
     def setUp(self):
         super(TestPluginsCommand, self).setUp()
+        self.name = 'fuel_plugin'
+        self.version = '1.0.0'
 
         get_fake_plugins = fake_plugin.get_fake_plugins
-
         self.m_client.get_modified.return_value = get_fake_plugins(10)
 
     def test_plugin_list(self):
@@ -36,6 +38,28 @@ class TestPluginsCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('plugins', mock.ANY)
         self.m_client.get_all.assert_called_once_with()
+
+    def exec_install(self, ext='rpm', force=False):
+        path = tempfile.mkstemp(suffix='.{}'.format(ext))[1]
+        args = 'plugins install {0} {1}'.format(path,
+                                                '--force' if force else '')
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('plugins', mock.ANY)
+        self.m_client.install.assert_called_once_with(path, force=force)
+
+    def test_plugin_install(self):
+        self.exec_install()
+
+    def test_plugin_install_with_force(self):
+        self.exec_install(force=True)
+
+    def test_plugin_remove(self):
+        args = 'plugins remove {0}=={1}'.format(self.name, self.version)
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('plugins', mock.ANY)
+        self.m_client.remove.assert_called_once_with(self.name, self.version)
 
     def test_plugins_sync_all(self):
         args = 'plugins sync'
