@@ -41,7 +41,6 @@ from fuelclient.cli.actions.settings import SettingsAction
 from fuelclient.cli.actions.settings import VmwareSettingsAction
 from fuelclient.cli.actions.snapshot import SnapshotAction
 from fuelclient.cli.actions.user import UserAction
-from fuelclient.cli.actions.plugins import PluginAction
 from fuelclient.cli.actions.fuelversion import FuelVersionAction
 from fuelclient.cli.actions.vip import VIPAction
 
@@ -61,7 +60,6 @@ actions_tuple = (
     NotificationsAction,
     NotifyAction,
     OpenstackConfigAction,
-    PluginAction,
     ProvisioningAction,
     RedeployChangesAction,
     ReleaseAction,
