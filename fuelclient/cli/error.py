@@ -12,13 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import wraps
 import json
 import os
 import sys
 
 from keystoneclient.exceptions import Unauthorized
 import requests
+import six
 import textwrap
 
 
@@ -27,6 +27,11 @@ def exit_with_error(message):
     """
     sys.stderr.write("{}{}".format(message, os.linesep))
     exit(1)
+
+
+def print_deprecation_warning(message):
+    """Writes a deprecation message to stderr."""
+    six.print_("DEPRECATION WARNING: {}".format(message), file=sys.stderr)
 
 
 class FuelClientException(Exception):
@@ -111,11 +116,21 @@ class EnvironmentException(Exception):
     pass
 
 
+def deprecated_decorator(msg):
+    def decorator(func):
+        @six.wraps(func)
+        def wrapper(*args, **kwargs):
+            print_deprecation_warning(msg)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
 def exceptions_decorator(func):
     """Handles HTTP errors and expected exceptions that may occur
     in methods of DefaultAPIClient class
     """
-    @wraps(func)
+    @six.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
