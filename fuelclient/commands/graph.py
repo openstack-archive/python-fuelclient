@@ -20,6 +20,7 @@ from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient import consts
 
 
 class FileMethodsMixin(object):
@@ -101,9 +102,15 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
 
         for parameter, graph_class in parameters_to_graph_class:
             model_id = getattr(args, parameter)
+
+            tasks_data = self.read_tasks_data_from_file(args.file)
+            for task in tasks_data:
+                if 'version' not in task:
+                    task['version'] = consts.DEFAULT_TASK_VERSION
+
             if model_id:
                 self.client.upload(
-                    data=self.read_tasks_data_from_file(args.file),
+                    data=tasks_data,
                     related_model=graph_class,
                     related_id=model_id,
                     graph_type=args.type

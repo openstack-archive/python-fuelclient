@@ -18,6 +18,7 @@ import mock
 import six
 import yaml
 
+from fuelclient import consts
 from fuelclient.tests.unit.v2.cli import test_engine
 
 
@@ -26,6 +27,7 @@ TASKS_YAML = '''- id: custom-task-1
   parameters:
     param: value
 - id: custom-task-2
+  version: 2.0.0
   type: puppet
   parameters:
     param: value
@@ -48,20 +50,24 @@ class TestGraphActions(test_engine.BaseCLITest):
                 **expected_kwargs)
 
     def test_upload(self):
+        expected_tasks = yaml.load(TASKS_YAML)
+
+        expected_tasks[0]['version'] = consts.DEFAULT_TASK_VERSION
+
         self._test_cmd('upload', '--env 1 --file new_graph.yaml', dict(
-            data=yaml.load(TASKS_YAML),
+            data=expected_tasks,
             related_model='clusters',
             related_id=1,
             graph_type=None
         ))
         self._test_cmd('upload', '--release 1 --file new_graph.yaml', dict(
-            data=yaml.load(TASKS_YAML),
+            data=expected_tasks,
             related_model='releases',
             related_id=1,
             graph_type=None
         ))
         self._test_cmd('upload', '--plugin 1 --file new_graph.yaml', dict(
-            data=yaml.load(TASKS_YAML),
+            data=expected_tasks,
             related_model='plugins',
             related_id=1,
             graph_type=None
@@ -70,7 +76,7 @@ class TestGraphActions(test_engine.BaseCLITest):
             'upload',
             '--plugin 1 --file new_graph.yaml --type custom_type',
             dict(
-                data=yaml.load(TASKS_YAML),
+                data=expected_tasks,
                 related_model='plugins',
                 related_id=1,
                 graph_type='custom_type'

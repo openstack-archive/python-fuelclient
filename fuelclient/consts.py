@@ -32,3 +32,9 @@ TASK_STATUSES = Enum(
     'ready',
     'running'
 )
+
+
+# This version will be used if deployment graph tasks are uploaded without
+# version specified otherwise Fuel default version will be used
+# and for Fuel v9.0 it is 1.0.0
+DEFAULT_TASK_VERSION = '2.1.0'
