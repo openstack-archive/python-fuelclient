@@ -143,8 +143,6 @@ class TestGraphActions(test_engine.BaseCLITest):
             self.exec_command('graph list --env 1')
             self.m_get_client.assert_called_once_with('graph', mock.ANY)
             self.m_client.list.assert_called_once_with(env_id=1)
-
-            self.assertIn('1', m_stdout.getvalue())
             self.assertIn('updated-graph-name', m_stdout.getvalue())
             self.assertIn('custom-graph', m_stdout.getvalue())
             self.assertIn('test-task2', m_stdout.getvalue())
