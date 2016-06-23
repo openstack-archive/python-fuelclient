@@ -257,10 +257,9 @@ class GraphDownload(base.BaseCommand):
 
 
 class GraphList(base.BaseListCommand):
-    """Upload deployment graph configuration."""
+    """Show deployment graphs list."""
     entity_name = 'graph'
-    columns = ("id",
-               "name",
+    columns = ("name",
                "tasks",
                "relations")
 
@@ -277,6 +276,10 @@ class GraphList(base.BaseListCommand):
         data = self.client.list(
             env_id=parsed_args.env
         )
+        # remove default sorting by id
+        if 'id' in parsed_args.sort_columns:
+            parsed_args.sort_columns.remove('id')
+
         # format fields
         for d in data:
             d['relations'] = "\n".join(
