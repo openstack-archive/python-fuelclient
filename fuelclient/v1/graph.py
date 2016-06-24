@@ -134,7 +134,10 @@ class GraphClient(base_v1.BaseV1Client):
                 env_id=env_id,
                 graph_type=graph_type)
         }
-        return tasks_levels[level]()
+        result = tasks_levels[level]()
+        for task in result:
+            task.pop('task_name', None)
+        return result
 
     def list(self, env_id):
         # todo(ikutukov): extend lists to support all models
