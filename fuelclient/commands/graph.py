@@ -149,15 +149,16 @@ class GraphExecute(base.BaseCommand):
         return parser
 
     def take_action(self, args):
-        self.client.execute(
+        result = self.client.execute(
             env_id=args.env,
             graph_type=args.type,
             nodes=args.nodes,
             dry_run=args.dry_run
         )
-        self.app.stdout.write(
-            "Deployment was executed\n"
-        )
+        msg = 'Deployment task with id {t} for the environment {e} ' \
+              'has been started.\n'.format(t=result.data['id'],
+                                           e=result.data['cluster'])
+        self.app.stdout.write(msg)
 
 
 class GraphDownload(base.BaseCommand):
