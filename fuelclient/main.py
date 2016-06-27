@@ -18,7 +18,6 @@ import sys
 from cliff import app
 from cliff.commandmanager import CommandManager
 
-from fuelclient.actions import fuel_version
 from fuelclient import fuelclient_settings
 from fuelclient import utils
 
@@ -41,13 +40,6 @@ class FuelClient(app.App):
         parser = p_inst.build_option_parser(description=description,
                                             version=version,
                                             argparse_kwargs=argparse_kwargs)
-
-        parser.add_argument(
-            '--fuel-version',
-            action=fuel_version.FuelVersionAction,
-            help=("show Fuel server's version number and exit. "
-                  "WARNING: deprecated since 7.0 release. "
-                  "Please use fuel-version command instead"))
 
         utils.add_os_cli_parameters(parser)
 

@@ -14,16 +14,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
 import mock
 from six import moves
-import yaml
 
 from fuelclient.cli.actions import base
 from fuelclient.cli import error
 from fuelclient.tests.unit.v1 import base as base_tests
-from fuelclient.tests.utils import fake_fuel_version
 
 
 class TestBaseAction(base_tests.UnitTestCase):
@@ -67,35 +63,6 @@ class TestBaseAction(base_tests.UnitTestCase):
         m_os.path.exists.return_value = True
         self.action.full_path_directory('/base/path', 'subdir')
         self.assertEqual(m_os.mkdir.call_count, 0)
-
-
-class TestFuelVersion(base_tests.UnitTestCase):
-
-    VERSION = fake_fuel_version.get_fake_fuel_version()
-
-    def test_return_yaml(self):
-        self.m_request.get('/api/v1/version', json=self.VERSION)
-
-        with mock.patch('sys.stdout') as mstdout:
-            self.assertRaises(SystemExit,
-                              self.execute,
-                              ['fuel', '--fuel-version', '--yaml'])
-        args, _ = mstdout.write.call_args_list[0]
-        regex = ('No JSON object could be decoded'
-                 '|Expecting value: line 1 column 1')
-        with self.assertRaisesRegexp(ValueError, regex):
-            json.loads(args[0])
-        self.assertEqual(self.VERSION, yaml.load(args[0]))
-
-    def test_return_json(self):
-        self.m_request.get('/api/v1/version', json=self.VERSION)
-
-        with mock.patch('sys.stdout') as mstdout:
-            self.assertRaises(SystemExit,
-                              self.execute,
-                              ['fuel', '--fuel-version', '--json'])
-        args, _ = mstdout.write.call_args_list[0]
-        self.assertEqual(self.VERSION, json.loads(args[0]))
 
 
 class TestExtraArguments(base_tests.UnitTestCase):
