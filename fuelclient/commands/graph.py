@@ -332,23 +332,53 @@ class GraphList(base.BaseListCommand):
         parser.add_argument('-e',
                             '--env',
                             type=int,
-                            required=True,
+                            required=False,
+                            default=None,
                             help='Id of the environment')
+        parser.add_argument('--cluster',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Show cluster-related graphs')
+        parser.add_argument('--plugins',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Show plugins-related graphs')
+        parser.add_argument('--release',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Show release-related graphs')
+
         return parser
 
-    def take_action(self, parsed_args):
+    def take_action(self, args):
         data = self.client.list(
-            env_id=parsed_args.env
+            env_id=args.env,
+            release=args.release,
+            plugins=args.plugins,
+            cluster=args.cluster
         )
-        # format fields
+
+        # make table context applying special formatting to data copy
+        display_data = []
         for d in data:
-            d['relations'] = "\n".join(
-                'as "{type}" to {model}(ID={model_id})'
-                .format(**r) for r in d['relations']
-            )
-            d['tasks'] = ', '.join(sorted(t['id'] for t in d['tasks']))
-        data = data_utils.get_display_data_multi(self.columns, data)
-        scolumn_ids = [self.columns.index(col)
-                       for col in parsed_args.sort_columns]
-        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
+            d = d.copy()
+            d.update({
+                'relations': "\n".join(
+                    'as "{type}" to {model}(ID={model_id})'.format(**r)
+                    for r in d['relations']
+                ),
+                'tasks': ', '.join(sorted(t['id'] for t in d['tasks']))
+            })
+            display_data.append(d)
+        data = data_utils.get_display_data_multi(self.columns, display_data)
+        scolumn_ids = [
+            self.columns.index(col)
+            for col in args.sort_columns
+        ]
+        data.sort(
+            key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids]
+        )
         return self.columns, data

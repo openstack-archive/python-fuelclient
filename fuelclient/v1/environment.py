@@ -15,6 +15,7 @@
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
+from fuelclient.v1.plugins import PluginsClient
 
 
 class EnvironmentClient(base_v1.BaseV1Client):
@@ -192,6 +193,31 @@ class EnvironmentClient(base_v1.BaseV1Client):
     def stop(self, env_id):
         env = self._entity_wrapper(obj_id=env_id)
         return env.stop()
+
+    @classmethod
+    def get_enabled_plugins(cls, environment_id):
+        """Get list of enabled plugins ids.
+
+        :param environment_id: environment id
+        :type environment_id: int
+        :returns: plugins ids list
+        :rtype: list[int]
+        """
+        # fixme(ikutukov): code is taken from
+        # https://review.openstack.org/#/c/332886/6/
+        # fuelweb_test/models/fuel_web_client.py
+        # Actually, for now there is no elegant way to get all enabled plugins
+        env = objects.Environment(environment_id)
+        cl_attrib = env.get_attributes()
+        all_plugins_data = PluginsClient().get_all()
+        enabled_plugins_ids = []
+        for plugin in all_plugins_data:
+            plugin_name = plugin['name']
+            if plugin_name in cl_attrib['editable']:
+                if cl_attrib['editable'][plugin_name] \
+                        .get('metadata', {}).get('enabled', False):
+                    enabled_plugins_ids.append(plugin['id'])
+        return enabled_plugins_ids
 
 
 def get_client(connection):
