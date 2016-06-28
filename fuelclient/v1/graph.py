@@ -16,7 +16,9 @@
 
 from fuelclient.cli import error
 from fuelclient import objects
+from fuelclient.objects import Environment
 from fuelclient.v1 import base_v1
+from fuelclient.v1.plugins import PluginsClient
 
 
 class GraphClient(base_v1.BaseV1Client):
@@ -136,12 +138,70 @@ class GraphClient(base_v1.BaseV1Client):
         }
         return tasks_levels[level]()
 
-    def list(self, env_id):
-        # todo(ikutukov): extend lists to support all models
+    def get_env_release_graphs_list(self, env_id):
+        data = self.get_by_id(env_id)
+        release_id = data['release_id']
+        return self.connection.get_request(
+            self.related_graphs_list_api_path.format(
+                related_model='releases',
+                related_model_id=release_id)
+        )
+
+    def get_env_cluster_graphs_list(self, env_id):
         return self.connection.get_request(
             self.related_graphs_list_api_path.format(
                 related_model='clusters',
-                related_model_id=env_id))
+                related_model_id=env_id)
+        )
+
+    def get_env_plugins_graphs_list(self, env_id):
+        # fixme(ikutukov): code is taken from
+        # https://review.openstack.org/#/c/332886/6/
+        # fuelweb_test/models/fuel_web_client.py
+        # Actually, for now there is no elegant way to get all enabled plugins
+        cl_attrib = Environment(env_id).get_attributes()
+        all_plugins_data = PluginsClient().get_all()
+        enabled_plugins_ids = []
+        for plugin in all_plugins_data:
+            plugin_name = plugin['name']
+            if plugin_name in cl_attrib['editable']:
+                if cl_attrib['editable'][plugin_name]\
+                        .get('metadata', {}).get('enabled', False):
+                    enabled_plugins_ids.append(plugin['id'])
+
+        result = []
+        for plugin_id in enabled_plugins_ids:
+            result += self.connection.get_request(
+                self.related_graphs_list_api_path.format(
+                    related_model='plugins',
+                    related_model_id=plugin_id
+                )
+            )
+        return result
+
+    def get_env_all_graphs_list(self, env_id):
+        return (
+            self.get_env_release_graphs_list(env_id) +
+            self.get_env_plugins_graphs_list(env_id) +
+            self.get_env_cluster_graphs_list(env_id)
+        )
+
+    def list(self, env_id, level='all'):
+        graph_levels = {
+            'release': lambda: self.get_env_release_graphs_list(env_id=env_id),
+            'plugins': lambda: self.get_env_plugins_graphs_list(env_id=env_id),
+            'cluster': lambda: self.get_env_cluster_graphs_list(env_id=env_id),
+            'all': lambda: self.get_env_all_graphs_list(env_id=env_id)
+        }
+
+        if level in graph_levels:
+            return graph_levels[level]()
+        else:
+            raise error.BadDataException(
+                'Graph level value {} not among valid: {}'.format(
+                    level, ", ".join(list(graph_levels))
+                )
+            )
 
 
 def get_client(connection):
