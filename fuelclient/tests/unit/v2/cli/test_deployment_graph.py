@@ -140,11 +140,30 @@ class TestGraphActions(test_engine.BaseCLITest):
                     'id': 1
                 }
             ]
-            self.exec_command('graph list --env 1')
+            self.exec_command(
+                'graph list --env 1 --release --plugins --cluster')
             self.m_get_client.assert_called_once_with('graph', mock.ANY)
-            self.m_client.list.assert_called_once_with(env_id=1)
 
             self.assertIn('1', m_stdout.getvalue())
             self.assertIn('updated-graph-name', m_stdout.getvalue())
             self.assertIn('custom-graph', m_stdout.getvalue())
             self.assertIn('test-task2', m_stdout.getvalue())
+
+            self.exec_command('graph list --release')
+            self.exec_command('graph list --plugins')
+            self.exec_command('graph list --cluster')
+
+            self.m_client.list.assert_has_calls([
+                mock.call(
+                    env_id=1, release=True, plugins=True, cluster=True
+                ),
+                mock.call(
+                    env_id=None, release=True, plugins=False, cluster=False
+                ),
+                mock.call(
+                    env_id=None, release=False, plugins=True, cluster=False
+                ),
+                mock.call(
+                    env_id=None, release=False, plugins=False, cluster=True
+                )
+            ])

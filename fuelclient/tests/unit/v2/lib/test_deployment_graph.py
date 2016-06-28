@@ -19,7 +19,7 @@ import yaml
 
 import fuelclient
 from fuelclient.tests.unit.v2.lib import test_api
-from fuelclient.tests.utils import fake_task
+from fuelclient.tests import utils
 
 TASKS_YAML = '''- id: custom-task-1
   type: puppet
@@ -105,7 +105,7 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
         matcher_put = self.m_request.put(
             '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
             '&dry_run=',
-            json=fake_task.get_fake_task(cluster=370))
+            json=utils.fake_task.get_fake_task(cluster=370))
         # this is required to form running task info
         self.m_request.get(
             '/api/v1/nodes/?cluster_id=370',
@@ -121,7 +121,7 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
         matcher_put = self.m_request.put(
             '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
             '&dry_run=1',
-            json=fake_task.get_fake_task(cluster=370))
+            json=utils.fake_task.get_fake_task(cluster=370))
         # this is required to form running task info
         self.m_request.get(
             '/api/v1/nodes/?cluster_id=370',
@@ -135,13 +135,167 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
         )
         self.assertTrue(matcher_put.called)
 
-    def test_graphs_list(self):
-        matcher_get = self.m_request.get(
-            '/api/v1/clusters/1/deployment_graphs/',
-            json=[]
+    def test_env_graphs_list(self):
+        release_id = 101
+        env_id = 11
+        fake_env = utils.get_fake_env(release_id=release_id, env_id=env_id)
+        enabled_plugin_id = 331
+        disabled_plugin_id = 332
+        self.m_request.get(
+            '/api/v1/clusters/{}/'.format(env_id),
+            json=fake_env
         )
-        self.client.list(1)
-        self.assertTrue(matcher_get.called)
+
+        self.m_request.get(
+            '/api/v1/plugins/',
+            json=[
+                {
+                    'name': 'test-plugin-1',
+                    'id': enabled_plugin_id,
+                    'releases': {}
+                },
+                {
+                    'name': 'test-plugin-2',
+                    'id': disabled_plugin_id,
+                    'releases': {}
+                }
+            ]
+        )
+
+        self.m_request.get(
+            '/api/v1/clusters/{}/attributes'.format(env_id),
+            json={
+                'editable': {
+                    'test-plugin-1': {
+                        'metadata': {
+                            'enabled': True
+                        }
+                    },
+                    'test-plugin-2': {
+                        'metadata': {
+                            'enabled': False
+                        }
+                    }
+                }
+            }
+        )
+
+        release_graphs = [
+            {
+                "tasks": [],
+                "id": 1,
+                "relations": [
+                    {
+                        "model_id": release_id,
+                        "model": "release",
+                        "type": "default"
+                    }
+                ],
+                "name": None
+            }
+        ]
+        enabled_plugin_graphs = [
+            {
+                "tasks": [],
+                "id": 2,
+                "relations": [
+                    {
+                        "model_id": enabled_plugin_id,
+                        "model": "plugin",
+                        "type": "default"
+                    }
+                ],
+                "name": None
+            }
+        ]
+        cluster_graphs = [
+            {
+                "tasks": [],
+                "id": 3,
+                "relations": [
+                    {
+                        "model_id": env_id,
+                        "model": "cluster",
+                        "type": "default"
+                    }
+                ],
+                "name": None
+            }
+        ]
+
+        all_env_graphs = \
+            release_graphs + cluster_graphs + enabled_plugin_graphs
+
+        not_this_env_cluster_graphs = [
+            {
+                "tasks": [],
+                "id": 4,
+                "relations": [
+                    {
+                        "model_id": env_id + 1,
+                        "model": "cluster",
+                        "type": "default"
+                    }
+                ],
+                "name": None
+            }
+        ]
+
+        self.m_request.get(
+            '/api/v1/releases/{}/deployment_graphs/'.format(release_id),
+            json=release_graphs
+        )
+
+        self.m_request.get(
+            '/api/v1/plugins/{}/deployment_graphs/'.format(enabled_plugin_id),
+            json=enabled_plugin_graphs
+        )
+
+        self.m_request.get(
+            '/api/v1/clusters/{}/deployment_graphs/'.format(env_id),
+            json=cluster_graphs
+        )
+
+        self.m_request.get(
+            '/api/v1/graphs/'.format(env_id),
+            json=all_env_graphs + not_this_env_cluster_graphs
+        )
+
+        graphs_list = self.client.list(env_id)
+        self.assertItemsEqual(
+            all_env_graphs,
+            graphs_list
+        )
+
+        graphs_list = self.client.list(env_id, release=True)
+        self.assertItemsEqual(
+            release_graphs,
+            graphs_list
+        )
+
+        graphs_list = self.client.list(env_id, plugins=True)
+        self.assertItemsEqual(
+            enabled_plugin_graphs,
+            graphs_list
+        )
+
+        graphs_list = self.client.list(env_id, cluster=True)
+        self.assertItemsEqual(
+            cluster_graphs,
+            graphs_list
+        )
+
+        graphs_list = self.client.list()
+        self.assertItemsEqual(
+            all_env_graphs + not_this_env_cluster_graphs,
+            graphs_list
+        )
+
+        graphs_list = self.client.list(cluster=True, release=True)
+        self.assertItemsEqual(
+            cluster_graphs + not_this_env_cluster_graphs + release_graphs,
+            graphs_list
+        )
 
     def test_graphs_download_all(self):
         matcher_get = self.m_request.get(
