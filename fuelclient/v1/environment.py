@@ -15,6 +15,7 @@
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
+from fuelclient.v1.plugins import PluginsClient
 
 
 class EnvironmentClient(base_v1.BaseV1Client):
