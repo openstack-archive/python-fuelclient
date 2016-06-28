@@ -18,18 +18,24 @@ import six
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
+from fuelclient.v1.environment import EnvironmentClient
 
 
 class GraphClient(base_v1.BaseV1Client):
     _entity_wrapper = objects.Environment
 
     related_graphs_list_api_path = "{related_model}/{related_model_id}" \
-                                   "/deployment_graphs/"
+                                   "/deployment_graphs/?" \
+                                   "fetch_related={fetch_related}"
 
     related_graph_api_path = "{related_model}/{related_model_id}" \
                              "/deployment_graphs/{graph_type}"
 
+    graphs_list_api = "graphs/"
     cluster_deploy_api_path = "graphs/execute/"
+
+    cluster_own_tasks_api_path = "clusters/{env_id}/deployment_tasks" \
+                                 "/own/?graph_type={graph_type}"
 
     merged_cluster_tasks_api_path = "clusters/{env_id}/deployment_tasks" \
                                     "/?graph_type={graph_type}"
@@ -128,32 +134,127 @@ class GraphClient(base_v1.BaseV1Client):
                 env_id=env_id,
                 graph_type=graph_type or ""))
 
+    def get_own_tasks_for_cluster(self, env_id, graph_type=None):
+        return self.connection.get_request(
+            self.cluster_own_tasks_api_path.format(
+                env_id=env_id,
+                graph_type=graph_type or ""))
+
     def download(self, env_id, level, graph_type):
         tasks_levels = {
             'all': lambda: self.get_merged_cluster_tasks(
                 env_id=env_id, graph_type=graph_type),
 
-            'cluster': lambda: self.get_graph_for_model(
-                related_model='clusters',
-                related_model_id=env_id,
-                graph_type=graph_type)[0].get('tasks', []),
+            'cluster': lambda: self.get_own_tasks_for_cluster(
+                env_id=env_id, graph_type=graph_type),
 
             'plugins': lambda: self.get_merged_plugins_tasks(
-                env_id=env_id,
-                graph_type=graph_type),
+                env_id=env_id, graph_type=graph_type),
 
             'release': lambda: self.get_release_tasks_for_cluster(
-                env_id=env_id,
-                graph_type=graph_type)
+                env_id=env_id, graph_type=graph_type)
         }
         return tasks_levels[level]()
 
-    def list(self, env_id):
-        # todo(ikutukov): extend lists to support all models
+    def get_env_release_graphs_list(self, env_id):
+        """Get list of graphs related to the environment's release.
+
+        :param env_id: environment ID
+        :type env_id: int
+        :return: list of graphs records
+        :rtype: list[dict]
+        """
+        data = self.get_by_id(env_id)
+        release_id = data['release_id']
+        return self.connection.get_request(
+            self.related_graphs_list_api_path.format(
+                related_model='releases',
+                related_model_id=release_id,
+                fetch_related='0'
+            )
+        )
+
+    def get_env_cluster_graphs_list(self, env_id, fetch_related=True):
+        """Get list of graphs related to the environment.
+
+        :param env_id: environment ID
+        :type env_id: int
+        :param fetch_related: fetch graphs related to
+                              cluster plugins and release
+        :type fetch_related: bool
+
+        :return: list of graphs records
+        :rtype: list[dict]
+        """
         return self.connection.get_request(
             self.related_graphs_list_api_path.format(
                 related_model='clusters',
-                related_model_id=env_id))
+                related_model_id=env_id,
+                fetch_related='1' if fetch_related else '0'
+            )
+        )
+
+    def get_env_plugins_graphs_list(self, env_id):
+        """Get list of graphs related to plugins active for the
+
+        given environment.
+
+        :param env_id: environment ID
+        :type env_id: int
+        :return: list of graphs records
+        :rtype: list[dict]
+        """
+        enabled_plugins_ids = EnvironmentClient.get_enabled_plugins(env_id)
+        result = []
+        for plugin_id in enabled_plugins_ids:
+            result += self.connection.get_request(
+                self.related_graphs_list_api_path.format(
+                    related_model='plugins',
+                    related_model_id=plugin_id,
+                    fetch_related='0'
+                )
+            )
+        return result
+
+    def get_all_graphs_list(self):
+        return self.connection.get_request(self.graphs_list_api)
+
+    def list(self, env_id=None, filters=None):
+        """Get graphs list.
+
+        If all filter flags are set to False, then it fill be considered as
+        'show all' and all filter flags will be toggled to True.
+
+        :param env_id: environment ID
+        :type env_id: int
+        :param filters: the name of models which graphs will be included
+                        to result
+        :return: list of graphs records
+        :rtype: list[dict]
+        """
+        # we cannot use dict here, because order is important
+        handlers = (
+            ('release', self.get_env_release_graphs_list),
+            ('plugins', self.get_env_plugins_graphs_list),
+            ('cluster', self.get_env_cluster_graphs_list)
+        )
+
+        graphs_list = []
+        filters = filters and set(filters)
+
+        if env_id:
+            for relation, handler in handlers:
+                if not filters or relation in filters:
+                    graphs_list.extend(handler(env_id=env_id))
+        else:
+            all_graphs_list = self.get_all_graphs_list()
+            for graph in all_graphs_list:
+                for relation in graph['relations']:
+                    if not filters or relation['model'] in filters:
+                        graphs_list.append(graph)
+                        break
+
+        return graphs_list
 
 
 def get_client(connection):

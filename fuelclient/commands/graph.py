@@ -303,26 +303,52 @@ class GraphList(base.BaseListCommand):
 
     def get_parser(self, prog_name):
         parser = super(GraphList, self).get_parser(prog_name)
-        parser.add_argument('-e',
-                            '--env',
-                            type=int,
-                            required=True,
-                            help='Id of the environment')
+        parser.add_argument(
+            '-e',
+            '--env',
+            type=int,
+            help='Id of the environment'
+        )
+        parser.add_argument(
+            '--cluster',
+            dest='filters',
+            action='append_const',
+            const='cluster',
+            help='Include cluster-specific graphs'
+        )
+        parser.add_argument(
+            '--plugins',
+            dest='filters',
+            action='append_const',
+            const='plugins',
+            help='Include plugins-specific graphs'
+        )
+        parser.add_argument(
+            '--release',
+            dest='filters',
+            action='append_const',
+            const='release',
+            help='Include release-specific graphs'
+        )
         return parser
 
-    def take_action(self, parsed_args):
-        data = self.client.list(
-            env_id=parsed_args.env
-        )
-        # format fields
+    def take_action(self, args):
+        data = self.client.list(env_id=args.env, filters=args.filters)
+
+        # make table context applying special formatting to data copy
+        display_data = []
         for d in data:
-            d['relations'] = "\n".join(
-                'as "{type}" to {model}(ID={model_id})'
-                .format(**r) for r in d['relations']
-            )
-            d['tasks'] = ', '.join(sorted(t['id'] for t in d['tasks']))
-        data = data_utils.get_display_data_multi(self.columns, data)
-        scolumn_ids = [self.columns.index(col)
-                       for col in parsed_args.sort_columns]
+            d = d.copy()
+            d.update({
+                'relations': "\n".join(
+                    'as "{type}" to {model}(ID={model_id})'.format(**r)
+                    for r in d['relations']
+                ),
+                'tasks': ', '.join(sorted(t['id'] for t in d['tasks']))
+            })
+            display_data.append(d)
+
+        data = data_utils.get_display_data_multi(self.columns, display_data)
+        scolumn_ids = [self.columns.index(col) for col in args.sort_columns]
         data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
         return self.columns, data
