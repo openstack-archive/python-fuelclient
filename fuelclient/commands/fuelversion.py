@@ -12,17 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient.cli.serializers import Serializer
+from cliff import show
+
 from fuelclient.commands import base
+from fuelclient.common import data_utils
 
 
-class FuelVersion(base.BaseCommand):
-    """Show fuel version."""
+class FuelVersion(show.ShowOne, base.BaseCommand):
+    """Show the version of Fuel."""
 
     entity_name = 'fuel-version'
+    columns = ('api',
+               'auth_required',
+               'feature_groups',
+               'openstack_version',
+               'release')
 
     def take_action(self, parsed_args):
-        version = self.client.get_all()
-        serializer = Serializer.from_params(parsed_args)
-        msg = serializer.serialize(version)
-        self.app.stdout.write(msg)
+        data = self.client.get_all()
+        data = data_utils.get_display_data_single(self.columns, data)
+
+        return (self.columns, data)

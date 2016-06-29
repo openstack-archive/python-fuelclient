@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import mock
 from six import moves
 import yaml
@@ -30,10 +31,18 @@ class TestFuelVersionCommand(test_engine.BaseCLITest):
         self.m_client.get_all.return_value = \
             fake_fuel_version.get_fake_fuel_version()
 
-    def test_fuel_version(self):
-        args = 'fuel-version'
+    def test_fuel_version_yaml(self):
+        args = 'fuel-version -f yaml'
 
         with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
             self.exec_command(args)
             self.assertEqual(fake_fuel_version.get_fake_fuel_version(),
                              yaml.safe_load(m_stdout.getvalue()))
+
+    def test_fuel_version_json(self):
+        args = 'fuel-version -f json'
+
+        with mock.patch('sys.stdout', new=moves.cStringIO()) as m_stdout:
+            self.exec_command(args)
+            self.assertEqual(fake_fuel_version.get_fake_fuel_version(),
+                             json.loads(m_stdout.getvalue()))
