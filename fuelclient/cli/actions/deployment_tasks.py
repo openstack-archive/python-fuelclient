@@ -55,7 +55,7 @@ class DeploymentTasksAction(Action):
                 fuel deployment-tasks --task-id 5
 
             To display deployment tasks for some nodes:
-                fuel deployment-tasks --task-id 5 --nodes 1,2
+                fuel deployment-tasks --task-id 5 --node 1,2
 
             To display deployment tasks for some statuses(pending, error,
             ready, running):
@@ -63,7 +63,7 @@ class DeploymentTasksAction(Action):
 
             To display deployment tasks for some statuses(pending, error,
             ready, running) on some nodes:
-                fuel deployment-tasks --task-id 5 --status error --nodes 1,2
+                fuel deployment-tasks --task-id 5 --status error --node 1,2
 
             To display certain deployment tasks results only:
                 fuel deployment-tasks --task-id 5
