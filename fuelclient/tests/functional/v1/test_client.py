@@ -180,46 +180,12 @@ class TestHandlers(base.CLIv1TestCase):
 
     def test_for_examples_in_action_help(self):
         actions = (
-            "node", "stop", "deployment", "reset", "task", "network",
+            "node", "stop", "deployment", "reset", "network",
             "settings", "provisioning", "environment", "deploy-changes",
             "role", "release", "snapshot", "health", "vip"
         )
         for action in actions:
             self.check_all_in_msg("{0} -h".format(action), ("Examples",))
-
-    def test_task_action_urls(self):
-        self.check_all_in_msg(
-            "task --task-id 1 --debug",
-            [
-                "GET http://127.0.0.1",
-                "/api/v1/transactions/1/"
-            ],
-            check_errors=False
-        )
-        self.check_all_in_msg(
-            "task --task-id 1 --delete --debug",
-            [
-                "DELETE http://127.0.0.1",
-                "/api/v1/transactions/1/?force=0"
-            ],
-            check_errors=False
-        )
-        self.check_all_in_msg(
-            "task --task-id 1 --delete --force --debug",
-            [
-                "DELETE http://127.0.0.1",
-                "/api/v1/transactions/1/?force=1"
-            ],
-            check_errors=False
-        )
-        self.check_all_in_msg(
-            "task --tid 1 --delete --debug",
-            [
-                "DELETE http://127.0.0.1",
-                "/api/v1/transactions/1/?force=0"
-            ],
-            check_errors=False
-        )
 
     def test_get_release_list_without_errors(self):
         cmd = 'release --list'
