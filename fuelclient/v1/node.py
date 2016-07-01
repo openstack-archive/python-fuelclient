@@ -37,7 +37,8 @@ class NodeClient(base_v1.BaseV1Client):
         :type labels: list
         :returns: list -- filtered list of nodes
         """
-        result = self._entity_wrapper.get_all_data()
+        result = sorted(self._entity_wrapper.get_all_data(),
+                        key=lambda node: node['id'])
 
         if environment_id is not None:
             result = [item for item in result

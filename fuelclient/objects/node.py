@@ -177,7 +177,8 @@ class NodeCollection(object):
 
     @property
     def data(self):
-        return map(attrgetter("data"), self.collection)
+        return sorted(map(attrgetter("data"), self.collection),
+                      key=lambda node: node['id'])
 
     @classmethod
     def get_all(cls):
