@@ -181,6 +181,22 @@ class APIClient(object):
 
         return resp.json()
 
+    def patch_request(self, api, data, **params):
+        """Make PATCH request to specific API with some data.
+
+        :param api: API endpoint (path)
+        :param data: Data send in request, will be serialized to JSON
+        :param params: Params of query string
+        """
+        url = self.api_root + api
+        data_json = json.dumps(data)
+        resp = self.session.patch(url, data=data_json, params=params)
+
+        self.print_debug('PUT {0} data={1}'.format(resp.url, data_json))
+        self._raise_for_status_with_info(resp)
+
+        return resp.json()
+
     def get_request_raw(self, api, ostf=False, params=None):
         """Make a GET request to specific API and return raw response
 

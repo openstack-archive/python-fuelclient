@@ -23,6 +23,10 @@ class Release(BaseObject):
     attributes_metadata_path = 'releases/{0}/attributes_metadata'
     deployment_tasks_path = 'releases/{0}/deployment_tasks'
 
+    def get_release(self):
+        url = self.instance_api_path.format(self.id)
+        return self.connection.get_request(url)
+
     def get_networks(self):
         url = self.networks_path.format(self.id)
         return self.connection.get_request(url)

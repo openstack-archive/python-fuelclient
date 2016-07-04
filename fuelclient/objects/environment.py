@@ -29,6 +29,7 @@ class Environment(BaseObject):
     instance_api_path = "clusters/{0}/"
     deployment_tasks_path = 'clusters/{0}/deployment_tasks'
     deployment_tasks_graph_path = 'clusters/{0}/deploy_tasks/graph.gv'
+    generated_attributes_path = 'clusters/{0}/generated'
     attributes_path = 'clusters/{0}/attributes'
     network_template_path = 'clusters/{0}/network_configuration/template'
 
@@ -218,6 +219,10 @@ class Environment(BaseObject):
     @property
     def settings_url(self):
         return self.attributes_path.format(self.id)
+
+    @property
+    def generated_settings_url(self):
+        return self.generated_attributes_path.format(self.id)
 
     @property
     def default_settings_url(self):
@@ -520,8 +525,20 @@ class Environment(BaseObject):
         url = self.deployment_tasks_path.format(self.id)
         return self.connection.put_request(url, data)
 
+    def get_generated_attributes(self):
+        return self.connection.get_request(self.generated_settings_url)
+
     def get_attributes(self):
         return self.connection.get_request(self.settings_url)
+
+    def patch_attributes(self, data, force=False):
+        if force:
+            result = self.connection.patch_request(
+                self.settings_url, data, force=1)
+        else:
+            result = self.connection.patch_request(
+                self.settings_url, data)
+        return result
 
     def update_attributes(self, data, force=False):
         if force:
