@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import curses
 from functools import partial
 from itertools import chain
 import math
@@ -23,7 +22,6 @@ from time import sleep
 
 import six
 
-from fuelclient.cli.error import DeployProgressError
 from fuelclient.cli.error import InvalidDirectoryException
 from six.moves import urllib
 
@@ -136,82 +134,6 @@ def download_snapshot_with_progress_bar(
             sys.stdout.flush()
             sleep(1 / 10)
         print()
-
-
-def print_deploy_progress(deploy_task):
-    """Receives 'deploy_task' and depending on terminal availability
-    starts progress printing routines with or without curses.
-    """
-    try:
-        terminal_screen = curses.initscr()
-        print_deploy_progress_with_terminal(deploy_task, terminal_screen)
-    except curses.error:
-        print_deploy_progress_without_terminal(deploy_task)
-
-
-def print_deploy_progress_without_terminal(deploy_task):
-    print("Deploying changes to environment with id={0}".format(
-        deploy_task.env.id
-    ))
-    message_len = 0
-    try:
-        for progress, nodes in deploy_task:
-            sys.stdout.write("\r" * message_len)
-            message_len = 0
-            deployment_message = "[Deployment: {0:3}%]".format(progress)
-            sys.stdout.write(deployment_message)
-            message_len += len(deployment_message)
-            for index, node in enumerate(nodes):
-                node_message = "[Node{id:2} {progress:3}%]".format(
-                    **node.data
-                )
-                message_len += len(node_message)
-                sys.stdout.write(node_message)
-        print("\nFinished deployment!")
-    except DeployProgressError as de:
-        print(de.message)
-
-
-def print_deploy_progress_with_terminal(deploy_task, terminal_screen):
-    scr_width = terminal_screen.getmaxyx()[1]
-    curses.noecho()
-    curses.cbreak()
-    total_progress_bar = partial(get_bar_for_progress, scr_width - 17)
-    node_bar = partial(get_bar_for_progress, scr_width - 28)
-    env_id = deploy_task.env.id
-    try:
-        for progress, nodes in deploy_task:
-            terminal_screen.refresh()
-            terminal_screen.addstr(
-                0, 0,
-                "Deploying changes to environment with id={0}".format(
-                    env_id
-                )
-            )
-            terminal_screen.addstr(
-                1, 0,
-                "Deployment: {0} {1:3}%".format(
-                    total_progress_bar(progress),
-                    progress
-                )
-            )
-            for index, node in enumerate(nodes):
-                terminal_screen.addstr(
-                    index + 2, 0,
-                    "Node{id:3} {status:13}: {bar} {progress:3}%"
-                    .format(bar=node_bar(node.progress), **node.data)
-                )
-    except DeployProgressError as de:
-        close_curses()
-        print(de.message)
-    finally:
-        close_curses()
-
-
-def close_curses():
-    curses.echo()
-    curses.nocbreak()
-    curses.endwin()
 
 
 def print_health_check(env):

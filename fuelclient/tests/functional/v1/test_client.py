@@ -416,13 +416,17 @@ class TestDownloadUploadNodeAttributes(base.BaseTestCase):
 
 class TestDeployChanges(base.BaseTestCase):
 
+    pattern_success = (r"^Deployment task with id (\d{1,}) "
+                       r"for the environment 1 has been started.\n$")
+
     def test_deploy_changes_no_failure(self):
         self.load_data_to_nailgun_server()
         release_id = self.get_first_deployable_release_id()
         env_create = "env create --name=test --release={0}".format(release_id)
         add_node = "--env-id=1 node set --node 1 --role=controller"
         deploy_changes = "deploy-changes --env 1"
-        self.run_cli_commands((env_create, add_node, deploy_changes))
+        self.run_cli_commands((env_create, add_node))
+        self.check_for_stdout_by_regexp(deploy_changes, self.pattern_success)
 
 
 class TestDirectoryDoesntExistErrorMessages(base.BaseTestCase):
