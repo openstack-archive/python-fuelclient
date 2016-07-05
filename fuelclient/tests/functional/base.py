@@ -14,6 +14,7 @@
 
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -129,6 +130,12 @@ class BaseTestCase(oslo_base.BaseTestCase):
     def check_for_stdout(self, command, msg, check_errors=True):
         call = self.run_cli_command(command, check_errors=check_errors)
         self.assertEqual(call.stdout, msg)
+
+    def check_for_stdout_by_regexp(self, command, pattern, check_errors=True):
+        call = self.run_cli_command(command, check_errors=check_errors)
+        result = re.search(pattern, call.stdout)
+        self.assertIsNotNone(result)
+        return result
 
     def check_for_stderr(self, command, msg, check_errors=True):
         call = self.run_cli_command(command, check_errors=check_errors)
