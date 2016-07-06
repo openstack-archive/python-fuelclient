@@ -35,40 +35,58 @@ TASKS_YAML = '''- id: custom-task-1
 class TestGraphActions(test_engine.BaseCLITest):
 
     @mock.patch('fuelclient.commands.graph.os')
-    def _test_cmd(self, method, cmd_line, expected_kwargs, os_m):
+    def _test_graph_cmd(self, cmd_line, client_method, expected_kwargs, os_m):
+        return_tasks = yaml.safe_load(TASKS_YAML)
+        self.m_client.get_graph_for_model.return_value = return_tasks
+        self.m_client.get_merged_cluster_tasks.return_value = return_tasks
+        self.m_client.get_merged_plugins_tasks.return_value = return_tasks
+        self.m_client.get_merged_release_tasks.return_value = return_tasks
+
         os_m.exists.return_value = True
         self.m_get_client.reset_mock()
         self.m_client.get_filtered.reset_mock()
         m_open = mock.mock_open(read_data=TASKS_YAML)
         with mock.patch(
                 'fuelclient.cli.serializers.open', m_open, create=True):
-            self.exec_command('graph {0} {1}'.format(method, cmd_line))
+            self.exec_command('graph {}'.format(cmd_line))
             self.m_get_client.assert_called_once_with('graph', mock.ANY)
-            self.m_client.__getattr__(method).assert_called_once_with(
+            self.m_client.__getattr__(client_method).assert_called_once_with(
                 **expected_kwargs)
 
     def test_upload(self):
-        self._test_cmd('upload', '--env 1 --file new_graph.yaml', dict(
-            data=yaml.load(TASKS_YAML),
-            related_model='clusters',
-            related_id=1,
-            graph_type=None
-        ))
-        self._test_cmd('upload', '--release 1 --file new_graph.yaml', dict(
-            data=yaml.load(TASKS_YAML),
-            related_model='releases',
-            related_id=1,
-            graph_type=None
-        ))
-        self._test_cmd('upload', '--plugin 1 --file new_graph.yaml', dict(
-            data=yaml.load(TASKS_YAML),
-            related_model='plugins',
-            related_id=1,
-            graph_type=None
-        ))
-        self._test_cmd(
+        self._test_graph_cmd(
+            'upload --env 1 --file new_graph.yaml',
             'upload',
-            '--plugin 1 --file new_graph.yaml --type custom_type',
+            dict(
+                data=yaml.load(TASKS_YAML),
+                related_model='clusters',
+                related_id=1,
+                graph_type=None
+            )
+        )
+        self._test_graph_cmd(
+            'upload --release 1 --file new_graph.yaml',
+            'upload',
+            dict(
+                data=yaml.load(TASKS_YAML),
+                related_model='releases',
+                related_id=1,
+                graph_type=None
+            )
+        )
+        self._test_graph_cmd(
+            'upload --plugin 1 --file new_graph.yaml',
+            'upload',
+            dict(
+                data=yaml.load(TASKS_YAML),
+                related_model='plugins',
+                related_id=1,
+                graph_type=None
+            )
+        )
+        self._test_graph_cmd(
+            'upload --plugin 1 --file new_graph.yaml --type custom_type',
+            'upload',
             dict(
                 data=yaml.load(TASKS_YAML),
                 related_model='plugins',
@@ -85,9 +103,9 @@ class TestGraphActions(test_engine.BaseCLITest):
                       mocked_stderr.write.call_args_list[-1][0][0])
 
     def test_execute(self):
-        self._test_cmd(
+        self._test_graph_cmd(
+            'execute --env 1 --type custom_graph --nodes 1 2 3',
             'execute',
-            '--env 1 --type custom_graph --nodes 1 2 3',
             dict(
                 env_id=1,
                 graph_type='custom_graph',
@@ -97,9 +115,9 @@ class TestGraphActions(test_engine.BaseCLITest):
         )
 
     def test_execute_w_dry_run(self):
-        self._test_cmd(
+        self._test_graph_cmd(
+            'execute --env 1 --type custom_graph --nodes 1 2 3 --dry-run',
             'execute',
-            '--env 1 --type custom_graph --nodes 1 2 3 --dry-run',
             dict(
                 env_id=1,
                 graph_type='custom_graph',
@@ -108,16 +126,58 @@ class TestGraphActions(test_engine.BaseCLITest):
             )
         )
 
-    def test_download(self):
-        self.m_client.download.return_value = yaml.safe_load(TASKS_YAML)
+    def test_download_env(self):
+        self._test_graph_cmd(
+            'download --env 1 --file existing_graph.yaml --type custype',
+            'get_graph_for_model',
+            dict(
+                related_model='clusters',
+                related_model_id=1,
+                graph_type='custype'
+            )
+        )
 
-        self._test_cmd(
-            'download',
-            '--env 1 --all --file existing_graph.yaml --type custom_graph',
+    def test_download_env_all(self):
+        self._test_graph_cmd(
+            'download --env 1 --file existing_graph.yaml --type custype '
+            '--merged-all',
+            'get_merged_cluster_tasks',
             dict(
                 env_id=1,
-                level='all',
-                graph_type='custom_graph'
+                graph_type='custype'
+            )
+        )
+
+    def test_download_env_plugins(self):
+        self._test_graph_cmd(
+            'download --env 1 --file existing_graph.yaml --type custype '
+            '--merged-plugins',
+            'get_merged_plugins_tasks',
+            dict(
+                env_id=1,
+                graph_type='custype'
+            )
+        )
+
+    def test_download_plugin(self):
+        self._test_graph_cmd(
+            'download --plugin 1 --file existing_graph.yaml --type custype',
+            'get_graph_for_model',
+            dict(
+                related_model='plugins',
+                related_model_id=1,
+                graph_type='custype'
+            )
+        )
+
+    def test_download_release(self):
+        self._test_graph_cmd(
+            'download --release 1 --file existing_graph.yaml --type custype',
+            'get_graph_for_model',
+            dict(
+                related_model='releases',
+                related_model_id=1,
+                graph_type='custype'
             )
         )
 

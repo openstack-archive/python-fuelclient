@@ -16,10 +16,13 @@
 
 import os
 
+import six
+
 from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient import consts
 
 
 class FileMethodsMixin(object):
@@ -59,19 +62,19 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
 
     def get_parser(self, prog_name):
         parser = super(GraphUpload, self).get_parser(prog_name)
-        graph_class = parser.add_mutually_exclusive_group(required=True)
+        graph_level = parser.add_mutually_exclusive_group(required=True)
 
-        graph_class.add_argument('-e',
+        graph_level.add_argument('-e',
                                  '--env',
                                  type=int,
                                  required=False,
                                  help='Id of the environment')
-        graph_class.add_argument('-r',
+        graph_level.add_argument('-r',
                                  '--release',
                                  type=int,
                                  required=False,
                                  help='Id of the release')
-        graph_class.add_argument('-p',
+        graph_level.add_argument('-p',
                                  '--plugin',
                                  type=int,
                                  required=False,
@@ -93,18 +96,14 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
         return parser
 
     def take_action(self, args):
-        parameters_to_graph_class = (
-            ('env', 'clusters'),
-            ('release', 'releases'),
-            ('plugin', 'plugins'),
-        )
 
-        for parameter, graph_class in parameters_to_graph_class:
+        for parameter, graph_level in six.iteritems(
+                consts.PARAMS_TO_GRAPH_CLASS_MAPPING):
             model_id = getattr(args, parameter)
             if model_id:
                 self.client.upload(
                     data=self.read_tasks_data_from_file(args.file),
-                    related_model=graph_class,
+                    related_model=graph_level,
                     related_id=model_id,
                     graph_type=args.type
                 )
@@ -167,38 +166,40 @@ class GraphDownload(base.BaseCommand):
 
     def get_parser(self, prog_name):
         parser = super(GraphDownload, self).get_parser(prog_name)
-        tasks_level = parser.add_mutually_exclusive_group()
-        parser.add_argument('-e',
-                            '--env',
-                            type=int,
-                            required=True,
-                            help='Id of the environment')
+        graph_level = parser.add_mutually_exclusive_group(required=True)
 
-        tasks_level.add_argument('-a',
-                                 '--all',
-                                 action="store_true",
+        graph_level.add_argument('-e',
+                                 '--env',
+                                 type=int,
                                  required=False,
-                                 default=False,
-                                 help='Download merged graph for the '
-                                      'environment')
-        tasks_level.add_argument('-c',
-                                 '--cluster',
-                                 action="store_true",
-                                 required=False,
-                                 default=False,
-                                 help='Download cluster-specific tasks')
-        tasks_level.add_argument('-p',
-                                 '--plugins',
-                                 action="store_true",
-                                 required=False,
-                                 default=False,
-                                 help='Download plugins-specific tasks')
-        tasks_level.add_argument('-r',
+                                 help='Id of the environment')
+
+        graph_level.add_argument('-r',
                                  '--release',
-                                 action="store_true",
+                                 type=int,
                                  required=False,
-                                 default=False,
-                                 help='Download release-specific tasks')
+                                 help='Id of the release')
+
+        graph_level.add_argument('-p',
+                                 '--plugin',
+                                 type=int,
+                                 required=False,
+                                 help='Id of the plugin')
+
+        # additional params for the env option
+        cluster_level = parser.add_mutually_exclusive_group(required=False)
+        cluster_level.add_argument('--merged-all',
+                                   action="store_true",
+                                   required=False,
+                                   default=False,
+                                   help='Download merged graph for the '
+                                        'environment')
+        cluster_level.add_argument('--merged-plugins',
+                                   action="store_true",
+                                   required=False,
+                                   default=False,
+                                   help='Download merged plugins graph for the'
+                                        'environment')
 
         parser.add_argument('-t',
                             '--type',
@@ -215,42 +216,54 @@ class GraphDownload(base.BaseCommand):
         return parser
 
     @classmethod
-    def get_default_tasks_data_path(cls):
-        return os.path.join(
-            os.path.abspath(os.curdir),
-            "cluster_graph"
-        )
-
-    @classmethod
-    def write_tasks_to_file(cls, tasks_data, serializer=None, file_path=None):
+    def write_tasks_to_file(cls, tasks_data, file_path, serializer):
         serializer = serializer or Serializer()
-        if file_path:
-            return serializer.write_to_full_path(
-                file_path,
-                tasks_data
-            )
-        else:
-            return serializer.write_to_path(
-                cls.get_default_tasks_data_path(),
-                tasks_data
-            )
+        return serializer.write_to_full_path(
+            file_path,
+            tasks_data
+        )
 
     def take_action(self, args):
         tasks_data = []
-        for tasks_level_name in ('all', 'cluster', 'release', 'plugins'):
-            if getattr(args, tasks_level_name):
-                tasks_data = self.client.download(
+        default_file_name = 'graph'
+        if args.env and (args.merged_all or args.merged_plugins):
+            # if there is additional params for the env graph download
+            if args.merged_plugins:
+                default_file_name = 'graph_cluster_merged_plugins'
+                self.app.stdout.write('WARNING: This tasks are merged from '
+                                      'several graphs and not supposed to '
+                                      'be uploaded back after editing until '
+                                      'you are completely sure about what '
+                                      'you are doing!\n')
+                tasks_data = self.client.get_merged_plugins_tasks(
                     env_id=args.env,
-                    level=tasks_level_name,
-                    graph_type=args.type
-                )
-                break
+                    graph_type=args.type)
+            # args.merged_all flag is defined
+            else:
+                default_file_name = 'graph_cluster_merged_all'
+                tasks_data = self.client.get_merged_cluster_tasks(
+                    env_id=args.env,
+                    graph_type=args.type)
+        else:
+            # get the tasks for the given model
+            for parameter, graph_level in six.iteritems(
+                    consts.PARAMS_TO_GRAPH_CLASS_MAPPING):
+                model_id = getattr(args, parameter)
+                if model_id:
+                    default_file_name = 'graph_{}'.format(graph_level)
+                    tasks_data = self.client.get_graph_for_model(
+                        related_model=graph_level,
+                        related_model_id=model_id,
+                        graph_type=args.type
+                    )[0].get('tasks', [])
+                    break
 
         # write to file
         graph_data_file_path = self.write_tasks_to_file(
             tasks_data=tasks_data,
-            serializer=Serializer(),
-            file_path=args.file)
+            file_path=args.file or default_file_name,
+            serializer=Serializer()
+        )
 
         self.app.stdout.write(
             "Tasks were downloaded to {0}\n".format(graph_data_file_path)
