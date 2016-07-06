@@ -32,3 +32,9 @@ TASK_STATUSES = Enum(
     'ready',
     'running'
 )
+
+PARAMS_TO_GRAPH_CLASS_MAPPING = {
+    'env': 'clusters',
+    'release': 'releases',
+    'plugin': 'plugins'
+}
