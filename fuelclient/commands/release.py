@@ -79,3 +79,56 @@ class ReleaseReposUpdate(ReleaseMixIn, base.BaseCommand):
                 file=parsed_args.file
             )
         )
+
+
+class ReleaseComponentList(ReleaseMixIn, base.BaseListCommand):
+    """Show list of components for a given release."""
+
+    columns = ("name",
+               "requires",
+               "compatible",
+               "incompatible",
+               "default")
+
+    @staticmethod
+    def retrieve_predicates(statement):
+        """Retrieve predicates with respective 'items' components
+
+        :param statement: the dictionary to extract predicate values from
+        :return: retrieval result as a string
+        """
+        predicates = ('any_of', 'all_of', 'one_of', 'none_of')
+        for predicate in predicates:
+            if predicate in statement:
+                result = ', '.join(statement[predicate].get('items'))
+                return "{0} ({1})".format(predicate, result)
+        raise ValueError('Predicates not found.')
+
+    @classmethod
+    def retrieve_data(cls, value):
+        """Retrieve names of components or predicates from nested data
+
+        :param value: data to extract name or to retrieve predicates from
+        :return: names of components or predicates as a string
+        """
+        if isinstance(value, list):
+            # get only "name" of components otherwise retrieve predicates
+            return ', '.join([v['name'] if 'name' in v
+                              else cls.retrieve_predicates(v)
+                              for v in value])
+        return value
+
+    def get_parser(self, prog_name):
+        parser = super(ReleaseComponentList, self).get_parser(prog_name)
+        parser.add_argument('id', type=int,
+                            help='Id of the {0}.'.format(self.entity_name))
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.get_components_by_id(parsed_args.id)
+        # some keys (columns) can be missed in origin data
+        # then create them with respective '-' value
+        data = [{k: self.retrieve_data(d.get(k, '-')) for k in self.columns}
+                for d in data]
+        data = data_utils.get_display_data_multi(self.columns, data)
+        return self.columns, data

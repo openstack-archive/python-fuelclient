@@ -41,6 +41,8 @@ from fuelclient.tests.utils.fake_plugin import get_fake_plugins
 from fuelclient.tests.utils.fake_release import get_fake_release
 from fuelclient.tests.utils.fake_release import get_fake_releases
 from fuelclient.tests.utils.fake_release import get_fake_attributes_metadata
+from fuelclient.tests.utils.fake_release import get_fake_release_component
+from fuelclient.tests.utils.fake_release import get_fake_release_components
 
 
 __all__ = (get_fake_deployment_history,
@@ -52,6 +54,8 @@ __all__ = (get_fake_deployment_history,
            get_fake_release,
            get_fake_releases,
            get_fake_attributes_metadata,
+           get_fake_release_component,
+           get_fake_release_components,
            get_fake_fuel_version,
            get_fake_interface_config,
            get_fake_network_group,
