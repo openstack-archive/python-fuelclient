@@ -22,6 +22,7 @@ class Release(BaseObject):
     networks_path = 'releases/{0}/networks'
     attributes_metadata_path = 'releases/{0}/attributes_metadata'
     deployment_tasks_path = 'releases/{0}/deployment_tasks'
+    components_path = 'releases/{0}/components'
 
     def get_networks(self):
         url = self.networks_path.format(self.id)
@@ -46,3 +47,7 @@ class Release(BaseObject):
     def update_deployment_tasks(self, data):
         url = self.deployment_tasks_path.format(self.id)
         return self.connection.put_request(url, data)
+
+    def get_components(self):
+        url = self.components_path.format(self.id)
+        return self.connection.get_request(url)
