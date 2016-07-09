@@ -28,6 +28,10 @@ class ReleaseClient(base_v1.BaseV1Client):
         release_obj = self._entity_wrapper(obj_id=release_id)
         return release_obj.get_attributes_metadata()
 
+    def get_components_by_id(self, release_id):
+        release_obj = self._entity_wrapper(obj_id=release_id)
+        return release_obj.get_components()
+
 
 def get_client(connection):
     return ReleaseClient(connection)
