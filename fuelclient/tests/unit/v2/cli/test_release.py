@@ -16,6 +16,7 @@
 
 import mock
 
+from fuelclient.tests import utils
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_release
 
@@ -28,6 +29,8 @@ class TestReleaseCommand(test_engine.BaseCLITest):
         self.m_client.get_by_id.return_value = fake_release.get_fake_release()
         self.m_client.get_attributes_metadata_by_id.return_value = \
             fake_release.get_fake_attributes_metadata()
+        self.m_client.get_components_by_id.return_value = \
+            fake_release.get_fake_release_component()
 
     def test_release_list(self):
         args = 'release list'
@@ -62,4 +65,13 @@ class TestReleaseCommand(test_engine.BaseCLITest):
         self.m_client.get_attributes_metadata_by_id.assert_called_once_with(1)
         self.m_client.update_attributes_metadata_by_id \
             .assert_called_once_with(1, data)
+        self.m_get_client.assert_called_once_with('release', mock.ANY)
+
+    def test_release_component_list(self):
+        release_id = 42
+        args = 'release component list {0}'.format(release_id)
+        fake_components = utils.get_fake_release_components(10)
+        self.m_client.get_components_by_id.return_value = fake_components
+        self.exec_command(args)
+        self.m_client.get_components_by_id.assert_called_once_with(release_id)
         self.m_get_client.assert_called_once_with('release', mock.ANY)
