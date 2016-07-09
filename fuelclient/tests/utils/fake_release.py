@@ -60,3 +60,48 @@ def get_fake_release(release_id=None, name=None, state=None,
         'version': version or 'mitaka-9.0',
         'attributes_metadata': get_fake_attributes_metadata(repos=repos),
     }
+
+
+def get_fake_release_component(name=None, requires=None, incompatible=None,
+                               compatible=None, default=None):
+    """Create a random fake component of release
+
+    Returns the serialized and parametrized representation of a dumped Fuel
+    component of release. Represents the average amount of data.
+
+    """
+    return {
+        'name': name or 'network:neutron:ml2:vlan',
+        'description':
+            'dialog.create_cluster_wizard.network.neutron_vlan_description',
+        'weight': 5,
+        'requires': requires or [
+            {'name': 'network:neutron:core:ml2'}
+        ],
+        'incompatible': incompatible or [
+            {'message': 'dialog.create_cluster_wizard.network.vlan_tun_alert',
+             'name': 'network:neutron:ml2:tun'}
+        ],
+        'compatible': compatible or [
+            {'name': 'network:neutron:core:ml2'},
+            {'name': 'hypervisor:qemu'},
+            {'name': 'hypervisor:vmware'},
+            {'name': 'storage:block:lvm'},
+            {'name': 'storage:block:ceph'},
+            {'name': 'storage:object:ceph'},
+            {'name': 'storage:ephemeral:ceph'},
+            {'name': 'storage:image:ceph'},
+            {'name': 'additional_service:sahara'},
+            {'name': 'additional_service:murano'},
+            {'name': 'additional_service:ceilometer'},
+            {'name': 'additional_service:ironic'}
+        ],
+        'default': default or True,
+        'label': 'common.network.neutron_vlan',
+    }
+
+
+def get_fake_release_components(component_count, **kwargs):
+    """Create a random fake list of release components."""
+    return [get_fake_release(release_id=i, **kwargs)
+            for i in range(1, component_count + 1)]
