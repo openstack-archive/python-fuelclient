@@ -79,3 +79,35 @@ class ReleaseReposUpdate(ReleaseMixIn, base.BaseCommand):
                 file=parsed_args.file
             )
         )
+
+
+class ReleaseComponentList(ReleaseMixIn, base.BaseListCommand):
+    """Show list of components for a given release."""
+
+    columns = ("name",
+               "requires",
+               "compatible",
+               "incompatible")
+
+    def get_parser(self, prog_name):
+        parser = super(ReleaseComponentList, self).get_parser(prog_name)
+        parser.add_argument('id', type=int,
+                            help='Id of the {0}.'.format(self.entity_name))
+        return parser
+
+    def take_action(self, parsed_args):
+
+        # get only "name" of components
+        def reformat(value):
+            if isinstance(value, list):
+                return ', '.join([v.get(k, None) for k in ("name",)
+                                  for v in value])
+            return value
+
+        data = self.client.get_components_by_id(parsed_args.id)
+        # some keys (columns) can be missed in origin data
+        # then create them with respective 'None' value
+        data = [{k: reformat(d.get(k, None)) for k in self.columns}
+                for d in data]
+        data = data_utils.get_display_data_multi(self.columns, data)
+        return self.columns, data
