@@ -29,6 +29,7 @@ class TestReleaseFacade(test_api.BaseLibTest):
         self.version = 'v1'
         self.res_uri = '/api/{version}/releases/'.format(version=self.version)
         self.fake_releases = utils.get_fake_releases(10)
+        self.fake_release_components = utils.get_fake_release_components(10)
         self.fake_attributes_metadata = utils.get_fake_attributes_metadata()
         self.client = fuelclient.get_client('release', self.version)
 
@@ -63,3 +64,12 @@ class TestReleaseFacade(test_api.BaseLibTest):
         self.assertTrue(m_put.called)
         self.assertEqual(m_put.last_request.json(),
                          self.fake_attributes_metadata)
+
+    def test_release_component_list(self):
+        release_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, release_id,
+                                           '/components')
+        matcher = self.m_request.get(expected_uri,
+                                     json=self.fake_release_components)
+        self.client.get_components_by_id(release_id)
+        self.assertTrue(matcher.called)
