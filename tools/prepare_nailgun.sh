@@ -140,7 +140,7 @@ obtain_nailgun() {
         git fetch "$FETCH_REPO" "$FETCH_REFSPEC" || \
             { err "Failed to pull changes"; exit 1; }
     fi
-
+    git branch -a
     git checkout "$FUEL_COMMIT" || \
         { err "Failed to checkout to $FUEL_COMMIT"; exit 1; }
 
