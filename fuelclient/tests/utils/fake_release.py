@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from six import moves as six_moves
+
 
 def get_fake_attributes_metadata(repos=None):
     return {
@@ -60,3 +62,9 @@ def get_fake_release(release_id=None, name=None, state=None,
         'version': version or 'mitaka-9.0',
         'attributes_metadata': get_fake_attributes_metadata(repos=repos),
     }
+
+
+def get_fake_releases(release_count, **kwargs):
+    """Create a random fake release list."""
+    return [get_fake_release(release_id=i, **kwargs)
+            for i in six_moves.range(1, release_count + 1)]
