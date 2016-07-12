@@ -168,10 +168,72 @@ class NodeClient(base_v1.BaseV1Client):
         return node.write_attribute(
             'attributes', attributes, directory=directory)
 
+    def get_disks(self, node_id):
+        """Download configuration of diskss for a node
+
+        :param node_id: Id of a node.
+        :return:        dict with the configuration of disks for the node.
+
+        """
+        node = self._entity_wrapper(node_id)
+        return node.get_attribute('disks')
+
+    def get_default_disks(self, node_id):
+        """Download default configuration of disks for a node
+
+        :param node_id: Id of a node.
+        :return:        dict with the configuration of disks for the node.
+
+        """
+        node = self._entity_wrapper(node_id)
+        return node.get_default_attribute('disks')
+
+    def set_disks(self, node_id, disks):
+        """Upload and set configuration of disks for a node
+
+        :param node_id:    Id of a node.
+        :param interfaces: dict that contains valid configuration
+                           for disks
+
+        """
+        node = self._entity_wrapper(node_id)
+        return node.upload_node_attribute('disks', disks)
+
     def upload_attributes(self, node_id, directory=None):
         node = self._entity_wrapper(node_id)
         attributes = node.read_attribute('attributes', directory=directory)
         node.update_node_attributes(attributes)
+
+    def get_interfaces(self, node_id):
+        """Download configuration of interfaces for a node
+
+        :param node_id: Id of a node.
+        :return:        dict with the configuration of interfaces for the node.
+
+        """
+        node = self._entity_wrapper(node_id)
+        return node.get_attribute('interfaces')
+
+    def get_default_interfaces(self, node_id):
+        """Download default configuration of interfaces for a node
+
+        :param node_id: Id of a node.
+        :return:        dict with the configuration of interfaces for the node.
+
+        """
+        node = self._entity_wrapper(node_id)
+        return node.get_default_attribute('interfaces')
+
+    def set_interfaces(self, node_id, interfaces):
+        """Upload and set configuration of interfaces for a node
+
+        :param node_id:    Id of a node.
+        :param interfaces: dict that contains valid configuration
+                           for interfaces
+
+        """
+        node = self._entity_wrapper(node_id)
+        return node.upload_node_attribute('interfaces', interfaces)
 
     def _check_label(self, labels, item):
         checking_list = []

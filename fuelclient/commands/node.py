@@ -12,11 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
 import collections
 import json
 import operator
 import os
 
+from oslo_utils import fileutils
 import six
 
 from fuelclient.cli import error
@@ -43,6 +45,122 @@ class NodeMixIn(object):
         for key in cls.numa_fields:
             numa_topology_info[key] = numa_topology.get(key)
         return numa_topology_info
+
+
+@six.add_metaclass(abc.ABCMeta)
+class BaseUploadCommand(NodeMixIn, base.BaseCommand):
+    """Base class for uploading attributes of a node."""
+
+    @abc.abstractproperty
+    def attribute(self):
+        """Name of the attribute."""
+        pass
+
+    @abc.abstractproperty
+    def uploader(self):
+        pass
+
+    def get_parser(self, prog_name):
+        parser = super(BaseUploadCommand, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized '
+                                 '{} data.'.format(self.attribute))
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            default=os.curdir,
+                            help='Source directory. Defaults to '
+                                 'the current directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory
+
+        file_path = self.get_attributes_path(self.attribute,
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            with open(file_path, 'r') as stream:
+                attributes = data_utils.safe_load(parsed_args.format,
+                                                  stream)
+                self.uploader(parsed_args.id, attributes)
+        except (OSError, IOError):
+            msg = 'Could not read configuration of {} at {}.'
+            raise error.InvalidFileException(msg.format(self.attribute,
+                                                        file_path))
+
+        msg = ('Configuration of {t} for node with id '
+               '{node} was loaded from {path}\n')
+        self.app.stdout.write(msg.format(t=self.attribute,
+                                         node=parsed_args.id,
+                                         path=file_path))
+
+
+@six.add_metaclass(abc.ABCMeta)
+class BaseDownloadCommand(NodeMixIn, base.BaseCommand):
+    """Base class for downloading attributes of a node."""
+
+    @abc.abstractproperty
+    def attribute(self):
+        """Name of the attribute."""
+        pass
+
+    @abc.abstractproperty
+    def downloader(self):
+        pass
+
+    def get_parser(self, prog_name):
+        parser = super(BaseDownloadCommand, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized '
+                                 '{} data.'.format(self.attribute))
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            default=os.curdir,
+                            help='Destination directory. Defaults to '
+                                 'the current directory.')
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory
+        attributes = self.downloader(parsed_args.id)
+        file_path = self.get_attributes_path(self.attribute,
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            fileutils.ensure_tree(os.path.dirname(file_path))
+            fileutils.delete_if_exists(file_path)
+
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format, stream, attributes)
+        except (OSError, IOError):
+            msg = 'Could not store configuration of {} at {}.'
+            raise error.InvalidFileException(msg.format(self.attribute,
+                                                        file_path))
+
+        msg = ('Configuration of {t} for node with id '
+               '{node} was stored in {path}\n')
+        self.app.stdout.write(msg.format(t=self.attribute,
+                                         node=parsed_args.id,
+                                         path=file_path))
 
 
 class NodeList(NodeMixIn, base.BaseListCommand):
@@ -388,3 +506,63 @@ class NodeAnsibleInventory(NodeMixIn, base.BaseCommand):
                 )
             )
             self.app.stdout.write(u'\n\n')
+
+
+class NodeInterfacesDownload(BaseDownloadCommand):
+    """Download and store configuration of interfaces for a node to a file."""
+
+    attribute = 'interfaces'
+
+    @property
+    def downloader(self):
+        return self.client.get_interfaces
+
+
+class NodeInterfacesGetDefault(BaseDownloadCommand):
+    """Download default configuration of interfaces for a node to a file."""
+
+    attribute = 'interfaces'
+
+    @property
+    def downloader(self):
+        return self.client.get_default_interfaces
+
+
+class NodeInterfacesUpload(BaseUploadCommand):
+    """Upload stored configuration of interfaces for a node from a file."""
+
+    attribute = 'interfaces'
+
+    @property
+    def uploader(self):
+        return self.client.set_interfaces
+
+
+class NodeDisksDownload(BaseDownloadCommand):
+    """Download and store configuration of disks for a node to a file."""
+
+    attribute = 'disks'
+
+    @property
+    def downloader(self):
+        return self.client.get_disks
+
+
+class NodeDisksGetDefault(BaseDownloadCommand):
+    """Download default configuration of disks for a node to a file."""
+
+    attribute = 'disks'
+
+    @property
+    def downloader(self):
+        return self.client.get_default_disks
+
+
+class NodeDisksUpload(BaseUploadCommand):
+    """Upload stored configuration of disks for a node from a file."""
+
+    attribute = 'disks'
+
+    @property
+    def uploader(self):
+        return self.client.set_disks
