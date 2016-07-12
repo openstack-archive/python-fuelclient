@@ -17,6 +17,7 @@ import json
 import operator
 import os
 
+from oslo_utils import fileutils
 import six
 
 from fuelclient.cli import error
@@ -388,3 +389,135 @@ class NodeAnsibleInventory(NodeMixIn, base.BaseCommand):
                 )
             )
             self.app.stdout.write(u'\n\n')
+
+
+class NodeInterfacesDownload(NodeMixIn, base.BaseCommand):
+    """Download and store configuration of interfaces for a node to a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeInterfacesDownload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized interfaces data.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Destination directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        interfaces_conf = self.client.get_interfaces(parsed_args.id)
+        file_path = self.get_attributes_path('interfaces',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            fileutils.ensure_tree(os.path.dirname(file_path))
+            fileutils.delete_if_exists(file_path)
+
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format,
+                                     stream,
+                                     interfaces_conf)
+        except (OSError, IOError):
+            msg = 'Could not store configuration of interfaces at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        msg = ('Configuration of interfaces for node with id '
+               '{node} was stored in {path}\n')
+        self.app.stdout.write(msg.format(node=parsed_args.id, path=file_path))
+
+
+class NodeInterfacesGetDefault(NodeMixIn, base.BaseCommand):
+    """Download default configuration of interfaces for a node to a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeInterfacesGetDefault, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized interfaces data.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Destination directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        interfaces_conf = self.client.get_default_interfaces(parsed_args.id)
+        file_path = self.get_attributes_path('interfaces',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            fileutils.ensure_tree(os.path.dirname(file_path))
+            fileutils.delete_if_exists(file_path)
+
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format,
+                                     stream,
+                                     interfaces_conf)
+        except (OSError, IOError):
+            msg = 'Could not store default configuration of interfaces at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        msg = ('Default configuration of interfaces for node with id '
+               '{node} was stored in {path}\n')
+        self.app.stdout.write(msg.format(node=parsed_args.id, path=file_path))
+
+
+class NodeInterfacesUpload(NodeMixIn, base.BaseCommand):
+    """Upload stored configuration of interfaces for a node from a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeInterfacesUpload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized interfaces data.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Source directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+
+        file_path = self.get_attributes_path('interfaces',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            with open(file_path, 'r') as stream:
+                interfaces_conf = data_utils.safe_load(parsed_args.format,
+                                                       stream)
+                self.client.set_interfaces(parsed_args.id, interfaces_conf)
+        except (OSError, IOError):
+            msg = 'Could not read configuration of interfaces at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        msg = ('Configuration of interfaces for node with id '
+               '{node} was loaded from {path}\n')
+        self.app.stdout.write(msg.format(node=parsed_args.id, path=file_path))
