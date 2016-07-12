@@ -12,11 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
 import collections
 import json
 import operator
 import os
 
+from oslo_utils import fileutils
 import six
 
 from fuelclient.cli import error
@@ -388,3 +390,173 @@ class NodeAnsibleInventory(NodeMixIn, base.BaseCommand):
                 )
             )
             self.app.stdout.write(u'\n\n')
+
+
+class BaseNodeAttributesUpload(NodeMixIn, base.BaseCommand):
+    """Base class for uploading attributes of a node."""
+
+    @abc.abstractproperty
+    def attr_type(self):
+        """Name of the attribute."""
+        pass
+
+    @abc.abstractproperty
+    def uploader(self):
+        pass
+
+    def get_parser(self, prog_name):
+        parser = super(BaseNodeAttributesUpload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized '
+                                 '{} data.'.format(self.attr_type))
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Source directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+
+        file_path = self.get_attributes_path(self.attr_type,
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            with open(file_path, 'r') as stream:
+                attributes = data_utils.safe_load(parsed_args.format,
+                                                  stream)
+                self.uploader(parsed_args.id, attributes)
+        except (OSError, IOError):
+            msg = 'Could not read configuration of {} at {}.'
+            raise error.InvalidFileException(msg.format(self.attr_type,
+                                                        file_path))
+
+        msg = ('Configuration of {t} for node with id '
+               '{node} was loaded from {path}\n')
+        self.app.stdout.write(msg.format(t=self.attr_type,
+                                         node=parsed_args.id,
+                                         path=file_path))
+
+
+class BaseNodeAttributesDownload(NodeMixIn, base.BaseCommand):
+    """Base class for downloading attributes of a node."""
+
+    @abc.abstractproperty
+    def attr_type(self):
+        """Name of the attribute."""
+        pass
+
+    @abc.abstractproperty
+    def downloader(self):
+        pass
+
+    def get_parser(self, prog_name):
+        parser = super(BaseNodeAttributesDownload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized '
+                                 '{} data.'.format(self.attr_type))
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Destination directory.')
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        attributes = self.downloader(parsed_args.id)
+        file_path = self.get_attributes_path(self.attr_type,
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            fileutils.ensure_tree(os.path.dirname(file_path))
+            fileutils.delete_if_exists(file_path)
+
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format, stream, attributes)
+        except (OSError, IOError):
+            msg = 'Could not store configuration of {} at {}.'
+            raise error.InvalidFileException(msg.format(self.attr_type,
+                                                        file_path))
+
+        msg = ('Configuration of {t} for node with id '
+               '{node} was stored in {path}\n')
+        self.app.stdout.write(msg.format(t=self.attr_type,
+                                         node=parsed_args.id,
+                                         path=file_path))
+
+
+class NodeInterfacesDownload(BaseNodeAttributesDownload):
+    """Download and store configuration of interfaces for a node to a file."""
+
+    attr_type = 'interfaces'
+
+    @property
+    def downloader(self):
+        return self.client.get_interfaces
+
+
+class NodeInterfacesGetDefault(BaseNodeAttributesDownload):
+    """Download default configuration of interfaces for a node to a file."""
+
+    attr_type = 'interfaces'
+
+    @property
+    def downloader(self):
+        return self.client.get_default_interfaces
+
+
+class NodeInterfacesUpload(BaseNodeAttributesUpload):
+    """Upload stored configuration of interfaces for a node from a file."""
+
+    attr_type = 'interfaces'
+
+    @property
+    def uploader(self):
+        return self.client.set_interfaces
+
+
+class NodeDisksDownload(BaseNodeAttributesDownload):
+    """Download and store configuration of disks for a node to a file."""
+
+    attr_type = 'disks'
+
+    @property
+    def downloader(self):
+        return self.client.get_disks
+
+
+class NodeDisksGetDefault(BaseNodeAttributesDownload):
+    """Download default configuration of disks for a node to a file."""
+
+    attr_type = 'disks'
+
+    @property
+    def downloader(self):
+        return self.client.get_default_disks
+
+
+class NodeDisksUpload(BaseNodeAttributesUpload):
+    """Upload stored configuration of disks for a node from a file."""
+
+    attr_type = 'disks'
+
+    @property
+    def uploader(self):
+        return self.client.set_disks
