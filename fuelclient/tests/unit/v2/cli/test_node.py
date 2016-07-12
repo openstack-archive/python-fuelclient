@@ -15,9 +15,12 @@
 #    under the License.
 
 import io
+import json
+
 
 import mock
 import six
+import yaml
 
 from fuelclient.commands import node as cmd_node
 from fuelclient import main as main_mod
@@ -375,6 +378,108 @@ node-4 ansible_host=10.20.0.5
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.upload_attributes.assert_called_once_with(42, None)
+
+    @mock.patch('json.dump')
+    def test_node_interfaces_download_json(self, m_dump):
+        args = 'node interfaces download --format json -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.json'
+
+        self.m_client.get_interfaces.return_value = test_data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_dump.assert_called_once_with(test_data, mock.ANY, indent=4)
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_interfaces.assert_called_once_with(42)
+
+    def test_node_interfaces_upload_json(self):
+        args = 'node interfaces upload --format json -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.json'
+
+        self.m_client.get_interfaces.return_value = test_data
+
+        m_open = mock.mock_open(read_data=json.dumps(test_data))
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.set_interfaces.assert_called_once_with(42, test_data)
+
+    @mock.patch('json.dump')
+    def test_node_interfaces_getdefault_json(self, m_dump):
+        args = 'node interfaces get-default --format json -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.json'
+
+        self.m_client.get_default_interfaces.return_value = test_data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_dump.assert_called_once_with(test_data, mock.ANY, indent=4)
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_default_interfaces.assert_called_once_with(42)
+
+    @mock.patch('yaml.safe_dump')
+    def test_node_interfaces_download_yaml(self, m_safe_dump):
+        args = 'node interfaces download --format yaml -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.yaml'
+
+        self.m_client.get_interfaces.return_value = test_data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_safe_dump.assert_called_once_with(test_data, mock.ANY,
+                                            default_flow_style=False)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_interfaces.assert_called_once_with(42)
+
+    def test_node_interfaces_upload_yaml(self):
+        args = 'node interfaces upload --format yaml -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.yaml'
+
+        self.m_client.get_interfaces.return_value = test_data
+
+        m_open = mock.mock_open(read_data=yaml.dump(test_data))
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.set_interfaces.assert_called_once_with(42, test_data)
+
+    @mock.patch('yaml.safe_dump')
+    def test_node_interfaces_getdefault_yaml(self, m_safe_dump):
+        args = 'node interfaces get-default --format yaml -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.yaml'
+
+        self.m_client.get_default_interfaces.return_value = test_data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_safe_dump.assert_called_once_with(test_data, mock.ANY,
+                                            default_flow_style=False)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_default_interfaces.assert_called_once_with(42)
 
 
 class TestNodeMixIn(test_engine.BaseCLITest):
