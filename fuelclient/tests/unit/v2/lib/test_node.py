@@ -15,6 +15,7 @@
 #    under the License.
 
 import mock
+import os
 import yaml
 
 import fuelclient
@@ -360,6 +361,58 @@ class TestNodeFacade(test_api.BaseLibTest):
         m_open().write.assert_called_once_with(
             serializer.serialize(fake_attributes))
 
+    def test_node_disks_upload(self):
+        node_id = 42
+        new_disks = {'test_key': u'test ☃ value'}
+
+        node_uri = self.get_object_uri(self.res_uri, node_id)
+        disks_uri = os.path.join(node_uri, 'disks/')
+
+        get_matcher = self.m_request.get(node_uri, json=self.fake_node)
+        upd_matcher = self.m_request.put(disks_uri, json={})
+
+        self.client.set_disks(node_id, new_disks)
+
+        self.assertTrue(node_uri, get_matcher.called)
+        self.assertTrue(disks_uri, upd_matcher.called)
+
+        req_data = upd_matcher.last_request.json()
+        self.assertEqual(new_disks, req_data)
+
+    def test_node_disks_download(self):
+        node_id = 42
+        fake_resp = {'test_key': u'test ☃ value'}
+
+        node_uri = self.get_object_uri(self.res_uri, node_id)
+        disks_uri = os.path.join(node_uri, 'disks/')
+
+        node_matcher = self.m_request.get(node_uri, json=self.fake_node)
+        disks_matcher = self.m_request.get(disks_uri, json=fake_resp)
+
+        disks = self.client.get_disks(node_id)
+
+        self.assertTrue(node_uri, node_matcher.called)
+        self.assertTrue(disks_uri, disks_matcher.called)
+
+        self.assertEqual(disks, fake_resp)
+
+    def test_node_disks_defaults(self):
+        node_id = 42
+        fake_resp = {'test_key': u'test ☃ value'}
+
+        node_uri = self.get_object_uri(self.res_uri, node_id)
+        disks_uri = os.path.join(node_uri, 'disks/defaults')
+
+        node_matcher = self.m_request.get(node_uri, json=self.fake_node)
+        disks_matcher = self.m_request.get(disks_uri, json=fake_resp)
+
+        disks = self.client.get_default_disks(node_id)
+
+        self.assertTrue(node_uri, node_matcher.called)
+        self.assertTrue(disks_uri, disks_matcher.called)
+
+        self.assertEqual(disks, fake_resp)
+
     @mock.patch('fuelclient.objects.node.os.path.exists',
                 mock.Mock(return_value=True))
     def test_node_attribute_upload(self):
@@ -382,3 +435,56 @@ class TestNodeFacade(test_api.BaseLibTest):
             '/fake/dir/node_{0}/attributes.yaml'.format(node_id), mock.ANY)
         self.assertEqual(m_put.last_request.json(), fake_attributes)
         m_open().read.assert_called_once_with()
+
+    def test_node_interfaces_upload(self):
+        node_id = 42
+        new_interfaces = {'test_key': u'test ☃ value'}
+
+        node_uri = self.get_object_uri(self.res_uri, node_id)
+        interfaces_uri = os.path.join(node_uri, 'interfaces/')
+
+        get_matcher = self.m_request.get(node_uri, json=self.fake_node)
+        upd_matcher = self.m_request.put(interfaces_uri, json={})
+
+        self.client.set_interfaces(node_id, new_interfaces)
+
+        self.assertTrue(node_uri, get_matcher.called)
+        self.assertTrue(interfaces_uri, upd_matcher.called)
+
+        req_data = upd_matcher.last_request.json()
+        self.assertEqual(new_interfaces, req_data)
+
+    def test_node_interfaces_download(self):
+        node_id = 42
+        fake_resp = {'test_key': u'test ☃ value'}
+
+        node_uri = self.get_object_uri(self.res_uri, node_id)
+        interfaces_uri = os.path.join(node_uri, 'interfaces/')
+
+        node_matcher = self.m_request.get(node_uri, json=self.fake_node)
+        interfaces_matcher = self.m_request.get(interfaces_uri, json=fake_resp)
+
+        interfaces = self.client.get_interfaces(node_id)
+
+        self.assertTrue(node_uri, node_matcher.called)
+        self.assertTrue(interfaces_uri, interfaces_matcher.called)
+
+        self.assertEqual(interfaces, fake_resp)
+
+    def test_node_interfaces_default(self):
+        node_id = 42
+        fake_resp = {'test_key': u'test ☃ value'}
+
+        node_uri = self.get_object_uri(self.res_uri, node_id)
+        interfaces_uri = os.path.join(node_uri,
+                                      'interfaces/default_assignment')
+
+        node_matcher = self.m_request.get(node_uri, json=self.fake_node)
+        interfaces_matcher = self.m_request.get(interfaces_uri, json=fake_resp)
+
+        interfaces = self.client.get_default_interfaces(node_id)
+
+        self.assertTrue(node_uri, node_matcher.called)
+        self.assertTrue(interfaces_uri, interfaces_matcher.called)
+
+        self.assertEqual(interfaces, fake_resp)
