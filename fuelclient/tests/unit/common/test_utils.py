@@ -18,6 +18,7 @@ import json
 import os
 import six
 import subprocess
+import yaml
 
 import mock
 import requests
@@ -258,3 +259,71 @@ class TestUtils(base.UnitTestCase):
         self.assertRaisesRegexp(
             TypeError, 'A dict or list instance expected',
             utils.parse_to_list_of_dicts, [42])
+
+    def test_safe_load_json(self):
+        test_data = {'test_key': 'test_val'}
+
+        m_open = mock.mock_open(read_data=json.dumps(test_data))
+        with mock.patch('fuelclient.tests.unit.common.test_utils.open',
+                        m_open):
+            stream = open('/a/random/file', 'r')
+            loaded = data_utils.safe_load('json', stream)
+
+        self.assertEqual(test_data, loaded)
+
+    def test_safe_load_yaml(self):
+        test_data = {'test_key': 'test_val'}
+
+        m_open = mock.mock_open(read_data=yaml.dump(test_data))
+        with mock.patch('fuelclient.tests.unit.common.test_utils.open',
+                        m_open):
+            stream = open('/a/random/file', 'r')
+            loaded = data_utils.safe_load('yaml', stream)
+
+        self.assertEqual(test_data, loaded)
+
+    @mock.patch('json.dump')
+    def test_safe_dump_json(self, m_dump):
+        test_data = {'test_key': 'test_val'}
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.tests.unit.common.test_utils.open',
+                        m_open):
+            stream = open('/a/random/file', 'w')
+            data_utils.safe_dump('json', stream, test_data)
+
+        m_dump.assert_called_once_with(test_data, stream, indent=4)
+
+    @mock.patch('yaml.safe_dump')
+    def test_safe_dump_yaml(self, m_dump):
+        test_data = {'test_key': 'test_val'}
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.tests.unit.common.test_utils.open',
+                        m_open):
+            stream = open('/a/random/file', 'w')
+            data_utils.safe_dump('yaml', stream, test_data)
+
+        m_dump.assert_called_once_with(test_data,
+                                       stream,
+                                       default_flow_style=False)
+
+    def test_safe_dump_wrong_format(self):
+        test_data = {'test_key': 'test_val'}
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.tests.unit.common.test_utils.open',
+                        m_open):
+            stream = open('/a/random/file', 'w')
+            self.assertRaises(ValueError,
+                              data_utils.safe_dump,
+                              'bad', stream, test_data)
+
+    def test_safe_load_wrong_format(self):
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.tests.unit.common.test_utils.open',
+                        m_open):
+            stream = open('/a/random/file', 'w')
+            self.assertRaises(ValueError,
+                              data_utils.safe_load,
+                              'bad', stream)
