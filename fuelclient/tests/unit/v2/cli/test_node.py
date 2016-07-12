@@ -16,6 +16,7 @@
 
 import io
 
+import json
 import mock
 import six
 
@@ -375,6 +376,38 @@ node-4 ansible_host=10.20.0.5
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.upload_attributes.assert_called_once_with(42, None)
+
+    @mock.patch('json.dump')
+    def test_node_interfaces_download(self, m_dump):
+        args = 'node interfaces download --format json -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.json'
+
+        self.m_client.get_interfaces.return_value = test_data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_dump.assert_called_once_with(test_data, mock.ANY)
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.get_interfaces.assert_called_once_with(42)
+
+    def test_node_interfaces_upload(self):
+        args = 'node interfaces upload --format json -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/node_42/interfaces.json'
+
+        self.m_client.get_interfaces.return_value = test_data
+
+        m_open = mock.mock_open(read_data=json.dumps(test_data))
+        with mock.patch('fuelclient.commands.node.open', m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.set_interfaces.assert_called_once_with(42, test_data)
 
 
 class TestNodeMixIn(test_engine.BaseCLITest):
