@@ -158,6 +158,22 @@ class TestEnvCommand(test_engine.BaseCLITest):
                                                         roles=['compute',
                                                                'cinder'])
 
+    def test_env_remove_nodes_by_id(self):
+        args = 'env remove nodes -e 42 -n 24 25'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.remove_nodes.assert_called_once_with(environment_id=42,
+                                                           nodes=[24, 25])
+
+    def test_env_remove_nodes_all(self):
+        args = 'env remove nodes -e 42 --nodes-all'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.remove_nodes.assert_called_once_with(environment_id=42,
+                                                           nodes=None)
+
     def test_env_update(self):
         self.m_client._updatable_attributes = \
             environment.EnvironmentClient._updatable_attributes

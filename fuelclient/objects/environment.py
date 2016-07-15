@@ -79,7 +79,7 @@ class Environment(BaseObject):
             self.connection.get_request(
                 "nodes/?cluster_id={0}".format(self.id)
             )
-        ), key=attrgetter)
+        ), key=attrgetter('id'))
 
     def unassign_all(self):
         nodes = self.get_all_nodes()
