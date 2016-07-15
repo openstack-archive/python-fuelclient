@@ -193,6 +193,43 @@ class EnvAddNodes(EnvMixIn, base.BaseCommand):
                                          r=parsed_args.roles))
 
 
+class EnvRemoveNodes(EnvMixIn, base.BaseCommand):
+    """Removes nodes from an environment."""
+
+    def get_parser(self, prog_name):
+
+        parser = super(EnvRemoveNodes, self).get_parser(prog_name)
+
+        parser.add_argument('-e',
+                            '--env',
+                            type=int,
+                            required=True,
+                            help='Id of the environment to remove nodes from')
+
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('-n',
+                           '--nodes',
+                           type=int,
+                           nargs='+',
+                           help='Ids of the nodes to add.')
+
+        group.add_argument('--nodes-all',
+                           action='store_true',
+                           help='Remove all nodes from environment')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        nodes = None if parsed_args.nodes_all else parsed_args.nodes
+        self.client.remove_nodes(environment_id=parsed_args.env,
+                                 nodes=nodes)
+
+        msg = 'Nodes were removed from the environment {e}\n'.format(
+            e=parsed_args.env)
+
+        self.app.stdout.write(msg)
+
+
 class EnvDeploy(EnvMixIn, base.BaseCommand):
     """Deploys changes on the specified environment."""
 

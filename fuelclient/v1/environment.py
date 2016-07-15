@@ -65,6 +65,21 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
         env.assign(nodes, roles)
 
+    def remove_nodes(self, environment_id, nodes=None):
+        """Remove nodes from environment. If nodes are empty list then
+         all nodes will be removed
+
+        :param environment_id: Id of specific environment (cluster)
+        :type environment_id: int
+        :param nodes: List of node ids that should be removed
+        :type nodes: list
+        """
+        env = self._entity_wrapper(obj_id=environment_id)
+        if nodes is not None:
+            env.unassign(nodes)
+        else:
+            env.unassign_all()
+
     def deploy_changes(self, environment_id, dry_run=False):
         env = self._entity_wrapper(obj_id=environment_id)
 

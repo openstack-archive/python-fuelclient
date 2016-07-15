@@ -212,3 +212,51 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.client.spawn_vms(env_id)
 
         self.assertTrue(matcher.called)
+
+    def test_env_remove_nodes_by_id(self):
+        nodes = [25, 26]
+        env_id = 42
+
+        expected_body = []
+        for n in nodes:
+            expected_body.append({'id': n})
+
+        expected_uri = self.get_object_uri(self.res_uri,
+                                           env_id, '/unassignment/')
+
+        matcher = self.m_request.post(expected_uri, json={})
+
+        self.client.remove_nodes(env_id, nodes=nodes)
+
+        self.assertTrue(matcher.called)
+
+        for unassignment in matcher.last_request.json():
+            # Check whether all unassignments are expected
+            self.assertIn(unassignment, expected_body)
+
+    def test_env_remove_nodes_all(self):
+        nodes = [24, 25, 26]
+        env_id = 42
+
+        expected_body = []
+        for n in nodes:
+            expected_body.append({'id': n})
+
+        fake_nodes = [utils.get_fake_node(node_name='node_'+str(n),
+                                          node_id=n,
+                                          cluster=env_id) for n in nodes]
+
+        expected_uri = self.get_object_uri(self.res_uri,
+                                           env_id, '/unassignment/')
+        matcher_get = self.m_request.get(
+            '/api/v1/nodes/?cluster_id={}'.format(env_id),
+            json=fake_nodes
+        )
+        matcher_post = self.m_request.post(expected_uri, json={})
+        self.client.remove_nodes(env_id)
+        self.assertTrue(matcher_get.called)
+        self.assertTrue(matcher_post.called)
+
+        for unassignment in matcher_post.last_request.json():
+            # Check whether all unassignments are expected
+            self.assertIn(unassignment, expected_body)
