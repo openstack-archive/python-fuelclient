@@ -15,6 +15,7 @@
 #    under the License.
 
 import mock
+from mock import patch
 
 import fuelclient
 from fuelclient.cli import error
@@ -206,9 +207,12 @@ class TestEnvFacade(test_api.BaseLibTest):
             # Check whether all assignments are expected
             self.assertIn(assignment, expected_body)
 
-    def test_env_spawn_vms(self):
+    @patch('fuelclient.objects.fuelversion.FuelVersion.get_feature_groups')
+    def test_env_spawn_vms(self, m_feature_groups):
         env_id = 10
         expected_uri = '/api/v1/clusters/{0}/spawn_vms/'.format(env_id)
+        m_feature_groups.return_value = \
+            utils.get_fake_fuel_version()['feature_groups']
 
         matcher = self.m_request.put(expected_uri, json={})
 

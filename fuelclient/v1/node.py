@@ -90,10 +90,16 @@ class NodeClient(base_v1.BaseV1Client):
 
     def get_node_vms_conf(self, node_id):
         node = self._entity_wrapper(node_id)
+        if 'advanced' not in objects.FuelVersion.get_feature_groups():
+            msg = "Advanced feature should be enabled in feature groups"
+            raise error.ActionException(msg)
         return node.get_node_vms_conf()
 
     def node_vms_create(self, node_id, config):
         node = self._entity_wrapper(node_id)
+        if 'advanced' not in objects.FuelVersion.get_feature_groups():
+            msg = "Advanced feature should be enabled in feature groups"
+            raise error.ActionException(msg)
         return node.node_vms_create(config)
 
     def update(self, node_id, **updated_attributes):
