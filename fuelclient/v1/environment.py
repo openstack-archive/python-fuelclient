@@ -116,6 +116,9 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
     def spawn_vms(self, environment_id):
         env = self._entity_wrapper(obj_id=environment_id)
+        if 'advanced' not in objects.FuelVersion.get_feature_groups():
+            msg = "Advanced feature should be enabled in feature groups"
+            raise error.ActionException(msg)
         return env.spawn_vms()
 
     def upload_network_template(self, environment_id,
