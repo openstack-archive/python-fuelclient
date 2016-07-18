@@ -530,3 +530,33 @@ class NodeInterfacesUpload(BaseNodeAttributesUpload):
     @property
     def uploader(self):
         return self.client.set_interfaces
+
+
+class NodeDisksDownload(BaseNodeAttributesDownload):
+    """Download and store configuration of disks for a node to a file."""
+
+    attr_type = 'disks'
+
+    @property
+    def downloader(self):
+        return self.client.get_disks
+
+
+class NodeDisksGetDefault(BaseNodeAttributesDownload):
+    """Download default configuration of disks for a node to a file."""
+
+    attr_type = 'disks'
+
+    @property
+    def downloader(self):
+        return self.client.get_default_disks
+
+
+class NodeDisksUpload(BaseNodeAttributesUpload):
+    """Upload stored configuration of disks for a node from a file."""
+
+    attr_type = 'disks'
+
+    @property
+    def uploader(self):
+        return self.client.set_disks
