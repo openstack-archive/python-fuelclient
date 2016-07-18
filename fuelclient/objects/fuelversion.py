@@ -18,3 +18,7 @@ from fuelclient.objects.base import BaseObject
 class FuelVersion(BaseObject):
 
     class_api_path = "version/"
+
+    @classmethod
+    def get_feature_groups(cls):
+        return cls.get_all_data()['feature_groups']
