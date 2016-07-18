@@ -17,6 +17,7 @@ import json
 import operator
 import os
 
+from oslo_utils import fileutils
 import six
 
 from fuelclient.cli import error
@@ -322,6 +323,133 @@ class NodeAttributesDownload(NodeMixIn, base.BaseCommand):
         self.app.stdout.write(
             "Attributes for node {0} were written to {1}"
             .format(parsed_args.id, file_path) + os.linesep)
+
+
+class NodeDisksDownload(NodeMixIn, base.BaseCommand):
+    """Download and store configuration of disks for a node to a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeDisksDownload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized disks data.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Destination directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        disks_conf = self.client.get_disks(parsed_args.id)
+        file_path = self.get_attributes_path('disks',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            fileutils.ensure_tree(os.path.dirname(file_path))
+            fileutils.delete_if_exists(file_path)
+
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format, stream, disks_conf)
+        except (IOError, OSError):
+            msg = 'Could not store disk configuration at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        msg = ('Configuration of disks for node with id '
+               '{node} was stored in {path}\n')
+        self.app.stdout.write(msg.format(node=parsed_args.id, path=file_path))
+
+
+class NodeDisksGetDefault(NodeMixIn, base.BaseCommand):
+    """Download default configuration of disks for a node to a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeDisksGetDefault, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized disks data.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Destination directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        disks_conf = self.client.get_default_disks(parsed_args.id)
+        file_path = self.get_attributes_path('disks',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        fileutils.ensure_tree(os.path.dirname(file_path))
+        fileutils.delete_if_exists(file_path)
+
+        try:
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format, stream, disks_conf)
+        except (IOError, OSError):
+            msg = 'Could not store default disk configuration at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        msg = ('Default configuration of disks for node with id '
+               '{node} was stored in {path}\n')
+        self.app.stdout.write(msg.format(node=parsed_args.id, path=file_path))
+
+
+class NodeDisksUpload(NodeMixIn, base.BaseCommand):
+    """Upload stored configuration of disks for a node from a file."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeDisksUpload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of a node.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized disks data.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Source directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+
+        file_path = self.get_attributes_path('disks',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            with open(file_path, 'r') as stream:
+                disks_conf = data_utils.safe_load(parsed_args.format, stream)
+                self.client.set_disks(parsed_args.id, disks_conf)
+        except (IOError, OSError):
+            msg = 'Could not read disk configuration at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        msg = ('Configuration of disks for node with id '
+               '{node} was loaded from {path}\n')
+        self.app.stdout.write(msg.format(node=parsed_args.id, path=file_path))
 
 
 class NodeAttributesUpload(NodeMixIn, base.BaseCommand):
