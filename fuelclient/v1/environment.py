@@ -15,6 +15,7 @@
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
+from fuelclient.v1 import fuelversion
 
 
 class EnvironmentClient(base_v1.BaseV1Client):
@@ -116,6 +117,7 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
     def spawn_vms(self, environment_id):
         env = self._entity_wrapper(obj_id=environment_id)
+        fuelversion.FuelVersionClient.check_advanced_feature()
         return env.spawn_vms()
 
     def upload_network_template(self, environment_id,
