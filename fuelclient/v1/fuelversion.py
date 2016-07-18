@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
 
@@ -19,6 +20,12 @@ from fuelclient.v1 import base_v1
 class FuelVersionClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.FuelVersion
+
+    @classmethod
+    def check_advanced_feature(cls):
+        if 'advanced' not in cls._entity_wrapper.get_feature_groups():
+            msg = "Advanced feature should be enabled in feature groups"
+            raise error.ActionException(msg)
 
 
 def get_client(connection):

@@ -18,6 +18,7 @@ import copy
 from fuelclient.cli import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
+from fuelclient.v1 import fuelversion
 
 
 SplittedLabel = namedtuple('SplittedLabel', ['key', 'value', 'has_separator'])
@@ -90,10 +91,12 @@ class NodeClient(base_v1.BaseV1Client):
 
     def get_node_vms_conf(self, node_id):
         node = self._entity_wrapper(node_id)
+        fuelversion.FuelVersionClient.check_advanced_feature()
         return node.get_node_vms_conf()
 
     def node_vms_create(self, node_id, config):
         node = self._entity_wrapper(node_id)
+        fuelversion.FuelVersionClient.check_advanced_feature()
         return node.node_vms_create(config)
 
     def update(self, node_id, **updated_attributes):
