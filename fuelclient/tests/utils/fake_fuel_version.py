@@ -24,6 +24,6 @@ def get_fake_fuel_version():
     """
     return {"api": "1",
             "auth_required": True,
-            "feature_groups": [],
+            "feature_groups": ['advanced'],
             "openstack_version": "newton-10.0",
             "release": "10.0"}

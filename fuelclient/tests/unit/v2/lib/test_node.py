@@ -17,6 +17,8 @@
 import mock
 import yaml
 
+from mock import patch
+
 import fuelclient
 from fuelclient.cli import error
 from fuelclient.cli import serializers
@@ -74,9 +76,12 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         self.assertTrue(matcher.called)
 
-    def test_node_vms_list(self):
+    @patch('fuelclient.objects.fuelversion.FuelVersion.get_feature_groups')
+    def test_node_vms_list(self, m_feature_groups):
         node_id = 42
         expected_uri = "/api/v1/nodes/{0}/vms_conf/".format(node_id)
+        m_feature_groups.return_value = \
+            utils.get_fake_fuel_version()['feature_groups']
 
         fake_vms = [{'id': 1, 'opt2': 'val2'},
                     {'id': 2, 'opt4': 'val4'}]
@@ -86,10 +91,13 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         self.assertTrue(matcher.called)
 
-    def test_node_vms_create(self):
+    @patch('fuelclient.objects.fuelversion.FuelVersion.get_feature_groups')
+    def test_node_vms_create(self, m_feature_groups):
         config = [{'id': 1, 'opt2': 'val2'},
                   {'id': 2, 'opt4': 'val4'}]
         node_id = 42
+        m_feature_groups.return_value = \
+            utils.get_fake_fuel_version()['feature_groups']
 
         expected_uri = "/api/v1/nodes/{0}/vms_conf/".format(node_id)
         expected_body = {'vms_conf': config}
