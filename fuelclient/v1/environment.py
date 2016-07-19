@@ -119,6 +119,28 @@ class EnvironmentClient(base_v1.BaseV1Client):
         env = self._entity_wrapper(environment_id)
         env.delete_network_template_data()
 
+    def get_network_configuration(self, environment_id):
+        env = self._entity_wrapper(environment_id)
+        return env.get_network_data()
+
+    def set_network_configuration(self, environment_id, new_configuration):
+        env = self._entity_wrapper(environment_id)
+        env.set_network_data(new_configuration)
+
+    def verify_network(self, environment_id):
+        """Start network verification for an environment."""
+
+        env = self._entity_wrapper(environment_id)
+        return env.verify_network()
+
+    def get_settings(self, environment_id):
+        env = self._entity_wrapper(environment_id)
+        return env.get_settings_data()
+
+    def set_settings(self, environment_id, new_configuration, force=False):
+        env = self._entity_wrapper(environment_id)
+        env.set_settings_data(new_configuration, force=force)
+
 
 def get_client(connection):
     return EnvironmentClient(connection)
