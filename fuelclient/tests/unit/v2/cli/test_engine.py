@@ -22,6 +22,7 @@ from oslotest import base as oslo_base
 
 import fuelclient
 from fuelclient.commands import environment as env
+from fuelclient.commands import node as node
 from fuelclient import main as main_mod
 from fuelclient.tests import utils
 
@@ -129,3 +130,42 @@ class BaseCLITest(oslo_base.BaseTestCase):
         self.assertEqual('tname', passed_settings.os_username)
         self.assertEqual('tpass', passed_settings.os_password)
         self.assertEqual('tten', passed_settings.os_tenant_name)
+
+    def test_get_attribute_path(self):
+        cmd = node.NodeShow(None, None)
+
+        attr_types = ('attributes', 'interfaces', 'disks')
+        file_format = 'json'
+        node_id = 42
+        directory = '/test'
+
+        for attr_type in attr_types:
+            expected_path = '/test/node_42/{t}.json'.format(t=attr_type)
+            real_path = cmd.get_attributes_path(attr_type, file_format,
+                                                node_id, directory)
+
+        self.assertEqual(expected_path, real_path)
+
+    def test_get_attribute_path_wrong_attr_type(self):
+        cmd = node.NodeShow(None, None)
+
+        attr_type = 'wrong'
+        file_format = 'json'
+        node_id = 42
+        directory = '/test'
+
+        self.assertRaises(ValueError,
+                          cmd.get_attributes_path,
+                          attr_type, file_format, node_id, directory)
+
+    def test_get_attribute_path_wrong_file_format(self):
+        cmd = node.NodeShow(None, None)
+
+        attr_type = 'interfaces'
+        file_format = 'wrong'
+        node_id = 42
+        directory = '/test'
+
+        self.assertRaises(ValueError,
+                          cmd.get_attributes_path,
+                          attr_type, file_format, node_id, directory)
