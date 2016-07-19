@@ -12,14 +12,137 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cliff import show
+import abc
+import functools
+import os
 
+from cliff import show
+from oslo_utils import fileutils
+import six
+
+from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 
 
 class EnvMixIn(object):
     entity_name = 'environment'
+
+    supported_file_formats = ('json', 'yaml')
+    allowed_attr_types = ('network', 'settings')
+
+
+@six.add_metaclass(abc.ABCMeta)
+class BaseUploadCommand(EnvMixIn, base.BaseCommand):
+
+    @abc.abstractproperty
+    def uploader(self):
+        pass
+
+    @abc.abstractproperty
+    def attribute(self):
+        pass
+
+    def get_parser(self, prog_name):
+        parser = super(BaseUploadCommand, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of environment.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized '
+                                 '{}.'.format(self.attribute))
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            default=os.curdir,
+                            help='Source directory. Defaults to the '
+                                 'current directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory
+        file_path = self.get_attributes_path(self.attribute,
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+        try:
+            with open(file_path, 'r') as stream:
+                attribute = data_utils.safe_load(parsed_args.format, stream)
+        except (IOError, OSError):
+            msg = 'Could not read configuration of {} at {}.'
+            raise error.InvalidFileException(msg.format(self.attribute,
+                                                        file_path))
+
+        self.uploader(parsed_args.id, attribute)
+
+        msg = ('Configuration of {t} for the environment with id '
+               '{env} was loaded from {path}\n')
+
+        self.app.stdout.write(msg.format(t=self.attribute,
+                                         env=parsed_args.id,
+                                         path=file_path))
+
+
+@six.add_metaclass(abc.ABCMeta)
+class BaseDownloadCommand(EnvMixIn, base.BaseCommand):
+
+    @abc.abstractproperty
+    def downloader(self):
+        pass
+
+    @abc.abstractproperty
+    def attribute(self):
+        pass
+
+    def get_parser(self, prog_name):
+        parser = super(BaseDownloadCommand, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of an environment.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized '
+                                 '{}.'.format(self.attribute))
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            default=os.curdir,
+                            help='Destination directory. Defaults to the '
+                                 'current directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        attributes = self.downloader(parsed_args.id)
+
+        file_path = self.get_attributes_path(self.attribute,
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        try:
+            fileutils.ensure_tree(os.path.dirname(file_path))
+            fileutils.delete_if_exists(file_path)
+
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format, stream, attributes)
+        except (IOError, OSError):
+            msg = 'Could not store configuration of {} at {}.'
+            raise error.InvalidFileException(msg.format(self.attribute,
+                                                        file_path))
+
+        msg = ('Configuration of {t} for the environment with id '
+               '{env} was stored in {path}\n')
+        self.app.stdout.write(msg.format(t=self.attribute,
+                                         env=parsed_args.id,
+                                         path=file_path))
 
 
 class EnvList(EnvMixIn, base.BaseListCommand):
@@ -355,3 +478,77 @@ class EnvSpawnVms(EnvMixIn, base.BaseCommand):
 
     def take_action(self, parsed_args):
         return self.client.spawn_vms(parsed_args.id)
+
+
+class EnvNetworkVerify(EnvMixIn, base.BaseCommand):
+    """Run network verification for specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvNetworkVerify, self).get_parser(prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the environment to verify network.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        task = self.client.verify_network(parsed_args.id)
+        msg = 'Network verification task with id {t} for the environment {e} '\
+              'has been started.\n'.format(t=task['id'], e=parsed_args.id)
+
+        self.app.stdout.write(msg)
+
+
+class EnvNetworkUpload(BaseUploadCommand):
+    """Upload network configuration and apply it to an environment."""
+
+    attribute = 'network'
+
+    @property
+    def uploader(self):
+        return self.client.set_network_configuration
+
+
+class EnvNetworkDownload(BaseDownloadCommand):
+    """Download and store network configuration of an environment."""
+
+    attribute = 'network'
+
+    @property
+    def downloader(self):
+        return self.client.get_network_configuration
+
+
+class EnvSettingsUpload(BaseUploadCommand):
+    """Upload and apply environment settings."""
+
+    attribute = 'settings'
+
+    @property
+    def uploader(self):
+        return functools.partial(self.client.set_settings,
+                                 force=self.force_flag)
+
+    def get_parser(self, prog_name):
+        parser = super(EnvSettingsUpload, self).get_parser(prog_name)
+        parser.add_argument('--force',
+                            action='store_true',
+                            help='Force applying the settings.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.force_flag = parsed_args.force
+
+        super(EnvSettingsUpload, self).take_action(parsed_args)
+
+
+class EnvSettingsDownload(BaseDownloadCommand):
+    """Download and store environment settings."""
+
+    attribute = 'settings'
+
+    @property
+    def downloader(self):
+        return self.client.get_settings

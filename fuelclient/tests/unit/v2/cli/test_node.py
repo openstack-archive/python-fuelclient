@@ -19,7 +19,6 @@ import io
 import mock
 import six
 
-from fuelclient.commands import node as cmd_node
 from fuelclient import main as main_mod
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_node
@@ -363,44 +362,3 @@ node-4 ansible_host=10.20.0.5
 
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.upload_attributes.assert_called_once_with(42, None)
-
-
-class TestNodeMixIn(test_engine.BaseCLITest):
-    def test_get_attribute_path(self):
-        mixin = cmd_node.NodeMixIn()
-
-        attr_types = ('attributes', 'interfaces', 'disks')
-        file_format = 'json'
-        node_id = 42
-        directory = '/test'
-
-        for attr_type in attr_types:
-            expected_path = '/test/node_42/{t}.json'.format(t=attr_type)
-            real_path = mixin.get_attributes_path(attr_type, file_format,
-                                                  node_id, directory)
-
-        self.assertEqual(expected_path, real_path)
-
-    def test_get_attribute_path_wrong_attr_type(self):
-        mixin = cmd_node.NodeMixIn()
-
-        attr_type = 'wrong'
-        file_format = 'json'
-        node_id = 42
-        directory = '/test'
-
-        self.assertRaises(ValueError,
-                          mixin.get_attributes_path,
-                          attr_type, file_format, node_id, directory)
-
-    def test_get_attribute_path_wrong_file_format(self):
-        mixin = cmd_node.NodeMixIn()
-
-        attr_type = 'interfaces'
-        file_format = 'wrong'
-        node_id = 42
-        directory = '/test'
-
-        self.assertRaises(ValueError,
-                          mixin.get_attributes_path,
-                          attr_type, file_format, node_id, directory)
