@@ -13,6 +13,7 @@
 #    under the License.
 
 import abc
+import os
 
 from cliff import command
 from cliff import lister
@@ -30,6 +31,29 @@ VERSION = 'v1'
 class BaseCommand(command.Command):
     """Base Fuel Client command."""
 
+    def get_attributes_path(self, attr_type, file_format, ent_id, directory):
+        """Returnes a path for attributes of an entity
+
+        :param attr_type:   Type of the attribute, e. g., disks, networks.
+        :param file_format: The format of the file that contains or will
+                            contain the attributes, e. g.,  json or yaml.
+        :param ent_id:      Id of an entity
+        :param directory:   Directory that is used to store attributes.
+
+        """
+        if attr_type not in self.allowed_attr_types:
+            raise ValueError('attr_type must be '
+                             'one of {}'.format(self.allowed_attr_types))
+
+        if file_format not in self.supported_file_formats:
+            raise ValueError('file_format must be '
+                             'one of {}'.format(self.supported_file_formats))
+
+        return os.path.join(os.path.abspath(directory),
+                            '{ent}_{id}'.format(ent=self.entity_name,
+                                                id=ent_id),
+                            '{}.{}'.format(attr_type, file_format))
+
     def __init__(self, *args, **kwargs):
         super(BaseCommand, self).__init__(*args, **kwargs)
         self.client = fuelclient.get_client(self.entity_name, VERSION)
@@ -38,6 +62,14 @@ class BaseCommand(command.Command):
     def entity_name(self):
         """Name of the Fuel entity."""
         pass
+
+    @property
+    def supported_file_formats(self):
+        raise NotImplemented()
+
+    @property
+    def allowed_attr_types(self):
+        raise NotImplemented()
 
 
 @six.add_metaclass(abc.ABCMeta)
