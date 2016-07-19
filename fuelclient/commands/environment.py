@@ -12,14 +12,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from cliff import show
+import os
 
+from cliff import show
+from oslo_utils import fileutils
+
+from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 
 
 class EnvMixIn(object):
     entity_name = 'environment'
+
+    supported_file_formats = ('json', 'yaml')
+
+    def get_network_config_path(self, env_id, directory, file_format):
+        """Get full path for a network configuration file."""
+
+        file_name = 'network_{env_id}.{fmt}'.format(env_id=env_id,
+                                                    fmt=file_format)
+        return os.path.join(os.path.abspath(directory), file_name)
 
 
 class EnvList(EnvMixIn, base.BaseListCommand):
@@ -290,3 +303,104 @@ class EnvSpawnVms(EnvMixIn, base.BaseCommand):
 
     def take_action(self, parsed_args):
         return self.client.spawn_vms(parsed_args.id)
+
+
+class EnvNetworkVerify(EnvMixIn, base.BaseCommand):
+    """Runs network verification for specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvNetworkVerify, self).get_parser(prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the environment to verify network.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        task = self.client.verify_network(parsed_args.id)['id']
+        msg = 'Network verification task with id {t} for the environment {e} '\
+              'has been started.\n'.format(t=task['id'], e=parsed_args.id)
+
+        self.app.stdout.write(msg)
+
+
+class EnvNetworkUpload(EnvMixIn, base.BaseCommand):
+    """Upload network configuration and apply it to an environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvNetworkUpload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of environment.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized network configuration.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Source directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+
+        file_path = self.get_network_config_path(parsed_args.id,
+                                                 directory,
+                                                 parsed_args.format)
+
+        try:
+            with open(file_path, 'r') as stream:
+                net_config = data_utils.safe_load(parsed_args.format, stream)
+        except (IOError, OSError):
+            msg = 'Could not read network configuration at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        self.client.set_network_configuration(parsed_args.id, net_config)
+
+        msg = ('Network configuration for the environment with id '
+               '{env} was loaded from {path}\n')
+
+        self.app.stdout.write(msg.format(env=parsed_args.id, path=file_path))
+
+
+class EnvNetworkDownload(EnvMixIn, base.BaseCommand):
+    """Download and store network configuration of an environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvNetworkDownload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of an environment.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized network configuration.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Destination directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        net_config = self.client.get_network_configuration(parsed_args.id)
+
+        file_path = self.get_network_config_path(parsed_args.id,
+                                                 directory,
+                                                 parsed_args.format)
+
+        fileutils.ensure_tree(os.path.dirname(file_path))
+        fileutils.delete_if_exists(file_path)
+
+        with open(file_path, 'w') as stream:
+            data_utils.safe_dump(parsed_args.format, stream, net_config)
+
+        msg = ('Network configuration for the environment with id '
+               '{env} was loaded from {path}\n')
+        self.app.stdout.write(msg.format(env=parsed_args.id, path=file_path))
