@@ -44,29 +44,6 @@ class NodeMixIn(object):
             numa_topology_info[key] = numa_topology.get(key)
         return numa_topology_info
 
-    def get_attributes_path(self, attr_type, file_format, node_id, directory):
-        """Returnes a path for attributes of a node
-
-        :param attr_type:   Attribute type.
-                            Should be one of {attributes, disks, interfaces}
-        :param file_format: The format of the file that contains or will
-                            contain the attributes. Must be json or yaml.
-        :param node_id:     Id of a node
-        :param directory:   Directory that is used to store attributes.
-
-        """
-        if attr_type not in self.allowed_attr_types:
-            raise ValueError('attr_type must be '
-                             'one of {}'.format(self.allowed_attr_types))
-
-        if file_format not in self.supported_file_formats:
-            raise ValueError('file_format must be '
-                             'one of {}'.format(self.supported_file_formats))
-
-        return os.path.join(os.path.abspath(directory),
-                            'node_{0}'.format(node_id),
-                            '{}.{}'.format(attr_type, file_format))
-
 
 class NodeList(NodeMixIn, base.BaseListCommand):
     """Show list of all available nodes."""
