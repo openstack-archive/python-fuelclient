@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from cliff import show
 
 from fuelclient.commands import base
@@ -20,6 +22,10 @@ from fuelclient.common import data_utils
 
 class EnvMixIn(object):
     entity_name = 'environment'
+
+    def get_network_config_path(self, directory):
+        return os.path.join(os.path.abspath(directory),
+                            'network_{0}'.format(self.id))
 
 
 class EnvList(EnvMixIn, base.BaseListCommand):
