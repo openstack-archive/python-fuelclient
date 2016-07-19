@@ -21,6 +21,8 @@ from fuelclient.tests.utils.fake_additional_info \
     import get_fake_yaml_deployment_info
 from fuelclient.tests.utils.fake_additional_info \
     import get_fake_yaml_network_conf
+from fuelclient.tests.utils.fake_additional_info \
+    import get_fake_env_network_conf
 from fuelclient.tests.utils.fake_deployment_history \
     import get_fake_deployment_history
 from fuelclient.tests.utils.fake_deployment_history \
@@ -51,6 +53,7 @@ __all__ = (get_fake_deployment_history,
            get_fake_yaml_deployment_info,
            get_fake_yaml_network_conf,
            get_fake_env,
+           get_fake_env_network_conf,
            get_fake_release,
            get_fake_releases,
            get_fake_attributes_metadata,
