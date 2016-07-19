@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from cliff import show
 
 from fuelclient.commands import base
@@ -20,6 +22,10 @@ from fuelclient.common import data_utils
 
 class EnvMixIn(object):
     entity_name = 'environment'
+
+    def get_network_config_path(self, directory):
+        return os.path.join(os.path.abspath(directory),
+                            'network_{0}'.format(self.id))
 
 
 class EnvList(EnvMixIn, base.BaseListCommand):
@@ -290,3 +296,22 @@ class EnvSpawnVms(EnvMixIn, base.BaseCommand):
 
     def take_action(self, parsed_args):
         return self.client.spawn_vms(parsed_args.id)
+
+class EnvNetworkVerify(EnvMixIn, base.BaseCommand):
+    """Runs network verification for specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvNetworkVerify, self).get_parser(prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the environment to verify network.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        task = self.client.verify_network(parsed_args.id)['id']
+        msg = 'Network verification task with id {t} for the environment {e} '\
+              'has been started.\n'.format(t=task['id'], e=parsed_args.id)
+
+        self.app.stdout.write(msg)

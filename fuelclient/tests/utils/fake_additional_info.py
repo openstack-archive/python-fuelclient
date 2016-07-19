@@ -14,6 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import yaml
+
+
 CLUSTER_SETTINGS = '''---
   editable:
     service_user:
@@ -88,3 +91,7 @@ def get_fake_yaml_network_conf():
 
     """
     return NETWORK_CONF
+
+
+def get_fake_env_network_conf():
+    return yaml.load(get_fake_yaml_network_conf())
