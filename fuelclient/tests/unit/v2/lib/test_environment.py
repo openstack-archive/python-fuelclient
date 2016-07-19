@@ -32,6 +32,9 @@ class TestEnvFacade(test_api.BaseLibTest):
 
         self.version = 'v1'
         self.res_uri = '/api/{version}/clusters/'.format(version=self.version)
+        self.net_conf_uri = '/network_configuration/neutron'
+        self.settings_uri = '/attributes'
+        self.net_verify_uri = '/network_configuration/neutron/verify'
 
         self.fake_env = utils.get_fake_env()
         self.fake_envs = [utils.get_fake_env() for i in range(10)]
@@ -286,3 +289,106 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.assertTrue(matcher.called)
         self.assertEqual([','.join(str(i) for i in node_ids)],
                          matcher.last_request.qs['nodes'])
+
+    def test_env_network_verify(self):
+        env_id = 42
+        fake_env = utils.get_fake_env(env_id=env_id)
+        test_conf = utils.get_fake_env_network_conf()
+
+        env_uri = self.get_object_uri(self.res_uri, env_id)
+        download_uri = self.get_object_uri(self.res_uri,
+                                           env_id,
+                                           self.net_conf_uri)
+        verify_uri = self.get_object_uri(self.res_uri,
+                                         env_id,
+                                         self.net_verify_uri)
+
+        m_get = self.m_request.get(env_uri, json=fake_env)
+        m_download = self.m_request.get(download_uri, json=test_conf)
+        m_verify = self.m_request.put(verify_uri, json=utils.get_fake_task())
+
+        self.client.verify_network(env_id)
+
+        self.assertTrue(m_get.called)
+        self.assertTrue(m_download.called)
+        self.assertTrue(m_verify.called)
+        self.assertEqual(test_conf, m_verify.last_request.json())
+
+    def test_env_network_download(self):
+        env_id = 42
+        fake_env = utils.get_fake_env(env_id=env_id)
+        env_uri = self.get_object_uri(self.res_uri, env_id)
+        download_uri = self.get_object_uri(self.res_uri,
+                                           env_id,
+                                           self.net_conf_uri)
+        test_conf = utils.get_fake_env_network_conf()
+
+        m_get = self.m_request.get(env_uri, json=fake_env)
+        m_download = self.m_request.get(download_uri, json=test_conf)
+
+        net_conf = self.client.get_network_configuration(env_id)
+
+        self.assertEqual(test_conf, net_conf)
+        self.assertTrue(m_get.called)
+        self.assertTrue(m_download.called)
+
+    def test_env_network_upload(self):
+        env_id = 42
+        fake_env = utils.get_fake_env(env_id=env_id)
+        env_uri = self.get_object_uri(self.res_uri, env_id)
+        upload_uri = self.get_object_uri(self.res_uri,
+                                         env_id,
+                                         self.net_conf_uri)
+        test_conf = utils.get_fake_env_network_conf()
+
+        m_get = self.m_request.get(env_uri, json=fake_env)
+        m_upload = self.m_request.put(upload_uri, json={})
+
+        self.client.set_network_configuration(env_id, test_conf)
+
+        self.assertTrue(m_get.called)
+        self.assertTrue(m_upload.called)
+        self.assertEqual(test_conf, m_upload.last_request.json())
+
+    def test_env_settings_download(self):
+        env_id = 42
+        download_uri = self.get_object_uri(self.res_uri,
+                                           env_id,
+                                           self.settings_uri)
+        test_settings = {'test-data': 42}
+
+        m_download = self.m_request.get(download_uri, json=test_settings)
+
+        settings = self.client.get_settings(env_id)
+
+        self.assertEqual(test_settings, settings)
+        self.assertTrue(m_download.called)
+
+    def test_env_settings_upload(self):
+        env_id = 42
+        upload_uri = self.get_object_uri(self.res_uri,
+                                         env_id,
+                                         self.settings_uri)
+        test_settings = {'test-data': 42}
+
+        m_upload = self.m_request.put(upload_uri, json={})
+
+        self.client.set_settings(env_id, test_settings)
+
+        self.assertTrue(m_upload.called)
+        self.assertEqual(test_settings, m_upload.last_request.json())
+
+    def test_env_settings_upload_force(self):
+        env_id = 42
+        upload_uri = self.get_object_uri(self.res_uri,
+                                         env_id,
+                                         self.settings_uri)
+        test_settings = {'test-data': 42}
+
+        m_upload = self.m_request.put(upload_uri, json={})
+
+        self.client.set_settings(env_id, test_settings, force=True)
+
+        self.assertTrue(m_upload.called)
+        self.assertEqual(test_settings, m_upload.last_request.json())
+        self.assertEqual(['1'], m_upload.last_request.qs.get('force'))
