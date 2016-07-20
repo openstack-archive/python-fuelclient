@@ -24,6 +24,7 @@ import fuelclient
 from fuelclient.commands import environment as env
 from fuelclient.commands import node as node
 from fuelclient import main as main_mod
+from fuelclient.tests import utils
 
 
 class BaseCLITest(oslo_base.BaseTestCase):
@@ -48,8 +49,11 @@ class BaseCLITest(oslo_base.BaseTestCase):
 
     def exec_command(self, command=''):
         """Executes fuelclient with the specified arguments."""
+        argv = shlex.split(command)
+        if '--debug' not in argv:
+            argv = ['--debug'] + argv
 
-        return main_mod.main(argv=shlex.split(command))
+        return main_mod.main(argv=argv)
 
     def exec_command_interactive(self, commands):
         """Executes specified commands in one sesstion of interactive mode
@@ -115,6 +119,8 @@ class BaseCLITest(oslo_base.BaseTestCase):
     def test_settings_override_called(self, m_update):
         cmd = ('--os-password tpass --os-username tname --os-tenant-name tten '
                'node list')
+        self.m_client.get_all.return_value = [utils.get_fake_node()
+                                              for _ in range(10)]
 
         self.exec_command(cmd)
 

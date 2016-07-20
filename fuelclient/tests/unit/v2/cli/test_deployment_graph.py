@@ -252,6 +252,8 @@ class TestGraphActions(test_engine.BaseCLITest):
         )
 
     def test_download(self):
+        self.m_client.download.return_value = yaml.safe_load(TASKS_YAML)
+
         self._test_cmd(
             'download',
             '--env 1 --all --file existing_graph.yaml --type custom_graph',

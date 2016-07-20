@@ -130,12 +130,12 @@ class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseListCommand):
         return parser
 
     def take_action(self, args):
-        configs = self.client.upload(
-            path=args.file, cluster_id=args.env,
-            node_ids=args.node, node_role=args.role)
+        configs = self.client.upload(path=args.file,
+                                     cluster_id=args.env,
+                                     node_ids=args.node,
+                                     node_role=args.role)
 
-        data = [c.data for c in configs]
-        data = data_utils.get_display_data_multi(self.columns, data)
+        data = data_utils.get_display_data_multi(self.columns, configs)
         return self.columns, data
 
 
@@ -154,11 +154,14 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
         return parser
 
     def take_action(self, args):
-        self.client.execute(
-            cluster_id=args.env, node_ids=args.node, node_role=args.role,
-            force=args.force)
+        task = self.client.execute(cluster_id=args.env,
+                                   node_ids=args.node,
+                                   node_role=args.role,
+                                   force=args.force)
 
-        msg = "OpenStack configuration execution started.\n"
+        msg = ('Deployment of the OpenStack configuration was started within '
+               'task with id {task_id}.\n').format(task_id=task['id'])
+
         self.app.stdout.write(msg)
 
 
