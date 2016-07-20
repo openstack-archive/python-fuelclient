@@ -47,8 +47,11 @@ class BaseCLITest(oslo_base.BaseTestCase):
 
     def exec_command(self, command=''):
         """Executes fuelclient with the specified arguments."""
+        argv = shlex.split(command)
+        if '--debug' not in argv:
+            argv = ['--debug'] + argv
 
-        return main_mod.main(argv=shlex.split(command))
+        return main_mod.main(argv=argv)
 
     def exec_command_interactive(self, commands):
         """Executes specified commands in one sesstion of interactive mode
