@@ -382,3 +382,57 @@ class TestNodeFacade(test_api.BaseLibTest):
             '/fake/dir/node_{0}/attributes.yaml'.format(node_id), mock.ANY)
         self.assertEqual(m_put.last_request.json(), fake_attributes)
         m_open().read.assert_called_once_with()
+
+    def test_undiscover_nodes_all_w_force(self):
+        node_ids = ['42', '43', '44']
+        expected_uri = '/api/v1/nodes/?ids={node_ids}'.format(
+            node_ids=','.join(node_ids))
+        fake_nodes = [utils.get_fake_node(node_name='node_' + n_id,
+                                          node_id=n_id) for n_id in node_ids]
+
+        nodes_matcher = self.m_request.get(self.res_uri, json=fake_nodes)
+        matcher = self.m_request.delete(expected_uri, json={})
+
+        self.client.undiscover_nodes(node_ids=None, force=True)
+
+        self.assertTrue(matcher.called)
+        self.assertTrue(nodes_matcher.called)
+        self.assertEqual([','.join(node_ids)],
+                         matcher.last_request.qs.get('ids'))
+
+    def test_undiscover_nodes_all_wo_force(self):
+        node_ids = ['42', '43', '44']
+        fake_nodes = [utils.get_fake_node(node_name='node_' + n_id,
+                                          node_id=n_id) for n_id in node_ids]
+        nodes_matcher = self.m_request.get(self.res_uri, json=fake_nodes)
+
+        self.assertRaises(error.ActionException,
+                          self.client.undiscover_nodes,
+                          node_ids=None, force=False)
+        self.assertTrue(nodes_matcher.called)
+
+    def test_undiscover_nodes_by_ids_w_force(self):
+        node_ids = ['42']
+        expected_uri = '/api/v1/nodes/?ids={node_ids}'.format(
+            node_ids=','.join(node_ids))
+        request_url = self.get_object_uri(self.res_uri, node_ids[0])
+
+        node_matcher = self.m_request.get(request_url, json=self.fake_node)
+        matcher = self.m_request.delete(expected_uri, json={})
+
+        self.client.undiscover_nodes(node_ids=node_ids, force=True)
+
+        self.assertTrue(matcher.called)
+        self.assertTrue(node_matcher.called)
+        self.assertEqual([','.join(node_ids)],
+                         matcher.last_request.qs.get('ids'))
+
+    def test_undiscover_nodes_by_ids_wo_force(self):
+        node_ids = ['42']
+        expected_uri = self.get_object_uri(self.res_uri, node_ids[0])
+        node_matcher = self.m_request.get(expected_uri, json=self.fake_node)
+
+        self.assertRaises(error.ActionException,
+                          self.client.undiscover_nodes,
+                          node_ids=node_ids, force=False)
+        self.assertTrue(node_matcher.called)

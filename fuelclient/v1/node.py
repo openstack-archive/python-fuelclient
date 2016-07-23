@@ -49,6 +49,34 @@ class NodeClient(base_v1.BaseV1Client):
 
         return result
 
+    def undiscover_nodes(self, node_ids=None, force=False):
+        """Remove nodes from database. If nodes are empty list then
+         all nodes will be removed
+
+        :param node_ids: Ids of nodes to remove
+        :type node_ids: list
+        :param force: Forces deletion of nodes regardless of their state
+        :type force: bool
+        """
+        if node_ids is not None:
+            nodes = [self._entity_wrapper(obj_id=n_id).data
+                     for n_id in node_ids]
+        else:
+            nodes = self._entity_wrapper.get_all_data()
+
+        if not force:
+            online_nodes = [node for node in nodes if node['online']]
+            if online_nodes:
+                raise error.ActionException(
+                    "Nodes with ids {0} cannot be deleted from database "
+                    "because they are online. You might want to use the "
+                    "--force option.".format(
+                        [node['id'] for node in online_nodes]))
+
+        node_ids = [node['id'] for node in nodes]
+        objects.NodeCollection.delete_by_ids(node_ids)
+        return node_ids
+
     def get_node_vms_conf(self, node_id):
         node = self._entity_wrapper(node_id)
         return node.get_node_vms_conf()
