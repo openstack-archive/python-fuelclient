@@ -375,6 +375,71 @@ node-4 ansible_host=10.20.0.5
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.upload_attributes.assert_called_once_with(42, None)
 
+    def test_undiscover_nodes_all(self):
+        args = 'node undiscover --nodes-all'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=None, node_ids=None, force=False)
+
+    def test_undiscover_nodes_all_force(self):
+        args = 'node undiscover --nodes-all --force'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=None, node_ids=None, force=True)
+
+    def test_undiscover_nodes_by_ids(self):
+        args = 'node undiscover -n 24 25'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=None, node_ids=[24, 25], force=False)
+
+    def test_undiscover_nodes_by_ids_force(self):
+        args = 'node undiscover -n 24 25 --force'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=None, node_ids=[24, 25], force=True)
+
+    def test_undiscover_nodes_by_cluster_id(self):
+        args = 'node undiscover -e 45'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=45, node_ids=None, force=False)
+
+    def test_undiscover_nodes_by_cluster_id_force(self):
+        args = 'node undiscover -e 45 --force'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=45, node_ids=None, force=True)
+
+    @mock.patch('sys.stderr')
+    def test_undiscover_nodes_w_wrong_params(self, mocked_stderr):
+        args = 'node undiscover -e 45 -n 24 25'
+        self.assertRaises(SystemExit, self.exec_command, args)
+        self.assertIn('argument -n/--nodes: not allowed with argument '
+                      '-e/--env', mocked_stderr.write.call_args_list[-1][0][0])
+        mocked_stderr.reset_mock()
+        args = 'node undiscover -n 24 25 --nodes-all'
+        self.assertRaises(SystemExit, self.exec_command, args)
+        self.assertIn('--nodes-all: not allowed with argument -n/--nodes',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+        mocked_stderr.reset_mock()
+        args = 'node undiscover -e 45 --nodes-all'
+        self.assertRaises(SystemExit, self.exec_command, args)
+        self.assertIn('--nodes-all: not allowed with argument -e/--env',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+
 
 class TestNodeMixIn(test_engine.BaseCLITest):
     def test_get_attribute_path(self):
