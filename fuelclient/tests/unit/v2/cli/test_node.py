@@ -376,6 +376,38 @@ node-4 ansible_host=10.20.0.5
         self.m_get_client.assert_called_once_with('node', mock.ANY)
         self.m_client.upload_attributes.assert_called_once_with(42, None)
 
+    def test_undiscover_nodes_by_ids(self):
+        args = 'node undiscover -n 24 25'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=None, node_ids=[24, 25], force=False)
+
+    def test_undiscover_nodes_by_ids_force(self):
+        args = 'node undiscover -n 24 25 --force'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=None, node_ids=[24, 25], force=True)
+
+    def test_undiscover_nodes_by_cluster_id(self):
+        args = 'node undiscover -e 45'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=45, node_ids=None, force=False)
+
+    def test_undiscover_nodes_by_cluster_id_force(self):
+        args = 'node undiscover -e 45 --force'
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_client.undiscover_nodes.assert_called_once_with(
+            env_id=45, node_ids=None, force=True)
+
 
 class TestNodeMixIn(test_engine.BaseCLITest):
     def test_get_attribute_path(self):
