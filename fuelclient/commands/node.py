@@ -411,3 +411,43 @@ class NodeAnsibleInventory(NodeMixIn, base.BaseCommand):
                 )
             )
             self.app.stdout.write(u'\n\n')
+
+
+class NodeUndiscover(NodeMixIn, base.BaseCommand):
+    """Remove nodes from database."""
+
+    def get_parser(self, prog_name):
+        parser = super(NodeUndiscover, self).get_parser(prog_name)
+
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('-e',
+                           '--env',
+                           type=int,
+                           help='Id of environment to remove all nodes '
+                                'from database')
+        group.add_argument('-n',
+                           '--nodes',
+                           type=int,
+                           nargs='+',
+                           help='Ids of the nodes to remove from database')
+
+        group.add_argument('--nodes-all',
+                           action='store_true',
+                           help='Delete all nodes from database')
+
+        parser.add_argument(
+            '-f',
+            '--force',
+            action='store_true',
+            help='Forces deletion of nodes from db regardless of their state')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        nodes_id = self.client.undiscover_nodes(env_id=parsed_args.env,
+                                                node_ids=parsed_args.nodes,
+                                                force=parsed_args.force)
+
+        self.app.stdout.write(
+            'Nodes {0} were deleted from the database\n'.format(nodes_id)
+        )
