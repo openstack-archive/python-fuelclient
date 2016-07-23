@@ -37,17 +37,56 @@ class NodeClient(base_v1.BaseV1Client):
         :type labels: list
         :returns: list -- filtered list of nodes
         """
-        result = self._entity_wrapper.get_all_data()
-
         if environment_id is not None:
-            result = [item for item in result
-                      if item['cluster'] == environment_id]
+            result = self._entity_wrapper.get_by_env_id(
+                cluster_id=environment_id)
+        else:
+            result = self._entity_wrapper.get_all_data()
 
         if labels:
             result = [item for item in result
                       if self._check_label(labels, item)]
 
         return result
+
+    def undiscover_nodes(self, env_id=None, node_id=None, force=False):
+        """Delete nodes from database. If node_id is None then all nodes
+         from specified environment will be deleted.
+
+        :param env_id: Id of env to delete nodes from database
+        :type env_id: int
+        :param node_id: Id of node to delete from database
+        :type node_id: int
+        :param force: Forces deletion of nodes regardless of their state
+        :type force: bool
+        :returns: list -- ids of nodes that were deleted from database
+        """
+        nodes = []
+        if node_id is not None:
+            nodes.append(self._entity_wrapper(obj_id=node_id).data)
+        elif env_id is not None:
+            nodes.extend(self.get_all(environment_id=env_id))
+            if not nodes:
+                raise error.ActionException(
+                    "Cluster with id {0} does not exist or "
+                    "does not contain any nodes".format(env_id)
+                )
+        else:
+            raise ValueError('Expected either env_id or node_id args')
+
+        # If 'force' flag is not specified then check nodes status
+        if not force:
+            online_nodes = [node for node in nodes if node['online']]
+            if online_nodes:
+                raise error.ActionException(
+                    "Nodes with ids {0} cannot be deleted from database "
+                    "because they are online. You might want to use the "
+                    "--force option.".format(
+                        [node['id'] for node in online_nodes]))
+
+        node_ids = [node['id'] for node in nodes]
+        objects.NodeCollection.delete_by_ids(node_ids)
+        return node_ids
 
     def get_node_vms_conf(self, node_id):
         node = self._entity_wrapper(node_id)
