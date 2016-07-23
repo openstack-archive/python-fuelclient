@@ -488,3 +488,67 @@ class TestNodeFacade(test_api.BaseLibTest):
         self.assertTrue(interfaces_uri, interfaces_matcher.called)
 
         self.assertEqual(interfaces, fake_resp)
+
+    def test_undiscover_nodes_by_id_force(self):
+        node_id = 42
+        expected_uri = '/api/v1/nodes/?ids={node_id}'.format(node_id=node_id)
+        request_url = self.get_object_uri(self.res_uri, node_id)
+
+        node_matcher = self.m_request.get(request_url, json=self.fake_node)
+        matcher = self.m_request.delete(expected_uri, json={})
+
+        self.client.undiscover_nodes(node_id=node_id, force=True)
+
+        self.assertTrue(matcher.called)
+        self.assertTrue(node_matcher.called)
+        self.assertEqual([str(node_id)], matcher.last_request.qs.get('ids'))
+
+    def test_undiscover_nodes_by_id(self):
+        node_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, node_id)
+        node_matcher = self.m_request.get(expected_uri, json=self.fake_node)
+
+        self.assertRaises(error.ActionException,
+                          self.client.undiscover_nodes,
+                          node_id=node_id, force=False)
+        self.assertTrue(node_matcher.called)
+
+    def test_undiscover_nodes_by_env_force(self):
+        env_id = 24
+        node_ids = ['42', '43', '44']
+        expected_uri = '/api/v1/nodes/?ids={node_ids}'.format(
+            node_ids=','.join(node_ids))
+        fake_nodes = [utils.get_fake_node(node_name='node_' + n_id,
+                                          node_id=n_id,
+                                          cluster=env_id) for n_id in node_ids]
+
+        nodes_matcher = self.m_request.get(self.res_uri, json=fake_nodes)
+        matcher = self.m_request.delete(expected_uri, json={})
+
+        self.client.undiscover_nodes(env_id=env_id, node_id=None, force=True)
+
+        self.assertTrue(matcher.called)
+        self.assertTrue(nodes_matcher.called)
+        self.assertEqual([','.join(node_ids)],
+                         matcher.last_request.qs.get('ids'))
+
+    def test_undiscover_nodes_by_env(self):
+        env_id = 24
+        node_ids = ['42', '43', '44']
+        fake_nodes = [utils.get_fake_node(node_name='node_' + n_id,
+                                          node_id=n_id,
+                                          cluster=env_id) for n_id in node_ids]
+        nodes_matcher = self.m_request.get(self.res_uri, json=fake_nodes)
+
+        self.assertRaises(error.ActionException,
+                          self.client.undiscover_nodes,
+                          env_id=env_id, node_id=None, force=False)
+        self.assertTrue(nodes_matcher.called)
+
+    def test_undiscover_nodes_w_wrong_params(self):
+        env_id = None
+        node_id = None
+
+        self.assertRaises(ValueError,
+                          self.client.undiscover_nodes,
+                          env_id=env_id, node_id=node_id, force=False)
