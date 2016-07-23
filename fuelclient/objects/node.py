@@ -151,6 +151,11 @@ class Node(BaseObject):
             data
         )
 
+    @classmethod
+    def get_by_env_id(cls, cluster_id):
+        params = {'cluster_id': cluster_id}
+        return cls.connection.get_request(cls.class_api_path, params=params)
+
 
 class NodeCollection(object):
 
