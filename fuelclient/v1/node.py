@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import defaultdict
 from collections import namedtuple
 import copy
+import six
 
 from fuelclient.cli import error
 from fuelclient import objects
@@ -48,6 +50,54 @@ class NodeClient(base_v1.BaseV1Client):
                       if self._check_label(labels, item)]
 
         return result
+
+    def undiscover_nodes(self, env_id=None, node_ids=None, force=False):
+        """Delete nodes from database. If nodes are empty list then
+         all nodes from specified environment will be deleted. If environment
+         is not specified then all nodes from all environments will be deleted
+
+        :param env_id: Id of env to delete nodes from database
+        :type env_id: int
+        :param node_ids: Ids of nodes to delete from database
+        :type node_ids: list
+        :param force: Forces deletion of nodes regardless of their state
+        :type force: bool
+        :returns: list -- ids of nodes that were deleted from database
+        """
+        if node_ids is not None:
+            nodes = [self._entity_wrapper(obj_id=n_id).data
+                     for n_id in node_ids]
+        else:
+            if env_id is not None:
+                nodes = self._entity_wrapper.get_by_env_id(cluster_id=env_id)
+                if not nodes:
+                    raise error.ActionException(
+                        "Cluster with id {0} does not exist or "
+                        "does not contain any nodes".format(env_id)
+                    )
+            else:
+                # Get all nodes from database
+                nodes = self._entity_wrapper.get_all_data()
+
+        if not force:
+            online_nodes = [node for node in nodes if node['online']]
+            if online_nodes:
+                raise error.ActionException(
+                    "Nodes with ids {0} cannot be deleted from database "
+                    "because they are online. You might want to use the "
+                    "--force option.".format(
+                        [node['id'] for node in online_nodes]))
+
+        # Group nodes ids by cluster, because Nailgun allows deleting
+        # nodes by ids at once only if they belong to the same cluster
+        nodes_ids_by_cluster = defaultdict(list)
+        for node in nodes:
+            nodes_ids_by_cluster[node['cluster']].append(node['id'])
+        removed_node_ids = []
+        for node_ids in six.itervalues(nodes_ids_by_cluster):
+            objects.NodeCollection.delete_by_ids(node_ids)
+            removed_node_ids.extend(node_ids)
+        return removed_node_ids
 
     def get_node_vms_conf(self, node_id):
         node = self._entity_wrapper(node_id)
