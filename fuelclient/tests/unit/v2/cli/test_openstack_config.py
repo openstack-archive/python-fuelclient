@@ -15,6 +15,7 @@
 import mock
 
 from fuelclient.tests.unit.v2.cli import test_engine
+from fuelclient.tests import utils
 
 
 class TestOpenstackConfig(test_engine.BaseCLITest):
@@ -61,7 +62,8 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
                       mocked_stderr.write.call_args_list[-1][0][0])
 
     def test_config_upload(self):
-        self.m_client.upload.return_value = 'config.yaml'
+        self.m_client.upload.return_value = [utils.get_fake_openstack_config()
+                                             for i in range(10)]
 
         cmd = 'openstack-config upload --env {0} --node {1} --file ' \
               'config.yaml'.format(self.CLUSTER_ID, self.NODE_ID)
@@ -114,8 +116,14 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
             node_role=None, force=False)
 
     def test_config_force_execute(self):
-        cmd = 'openstack-config execute --env {0} --node {1} --force' \
-              ''.format(self.CLUSTER_ID, self.NODE_ID)
+        task_id = 42
+        test_task = utils.get_fake_task(task_id=task_id)
+
+        self.m_client.execute.return_value = test_task
+
+        cmd = ('openstack-config execute --env {0}'
+               ' --node {1} --force ').format(self.CLUSTER_ID, self.NODE_ID)
+
         self.exec_command(cmd)
 
         self.m_get_client.assert_called_once_with('openstack-config', mock.ANY)
