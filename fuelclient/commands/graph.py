@@ -127,17 +127,24 @@ class GraphExecute(base.BaseCommand):
                             required=True,
                             help='Id of the environment')
         parser.add_argument('-t',
-                            '--type',
+                            '--types',
                             type=str,
-                            default=None,
+                            nargs='+',
                             required=False,
-                            help='Type of the deployment graph')
+                            help='Types of the deployment graph in order '
+                                 'of execution')
         parser.add_argument('-n',
                             '--nodes',
                             type=int,
                             nargs='+',
                             required=False,
                             help='Ids of the nodes to use for deployment.')
+        parser.add_argument('-T',
+                            '--task-names',
+                            type=str,
+                            nargs='+',
+                            required=False,
+                            help='List of deployment tasks to run.')
         parser.add_argument('-d',
                             '--dry-run',
                             action="store_true",
@@ -146,14 +153,23 @@ class GraphExecute(base.BaseCommand):
                             help='Specifies to dry-run a deployment by '
                                  'configuring task executor to dump the '
                                  'deployment graph to a dot file.')
+        parser.add_argument('-f',
+                            '--force',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Force run all deployment tasks without '
+                                 'skipping.')
         return parser
 
     def take_action(self, args):
         result = self.client.execute(
             env_id=args.env,
-            graph_type=args.type,
+            graph_types=args.types,
             nodes=args.nodes,
-            dry_run=args.dry_run
+            task_names=args.task_names,
+            dry_run=args.dry_run,
+            force=args.force
         )
         msg = 'Deployment task with id {t} for the environment {e} ' \
               'has been started.\n'.format(t=result.data['id'],
