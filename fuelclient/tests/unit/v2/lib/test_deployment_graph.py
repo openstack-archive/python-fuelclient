@@ -101,26 +101,26 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             matcher_put.last_request.json()
         )
 
-    def test_new_graph_run(self):
-        matcher_put = self.m_request.put(
-            '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
-            '&dry_run=',
+    def test_new_graph_run_wo_params(self):
+        matcher_execute = self.m_request.post(
+            '/api/v1/graphs/execute/',
             json=fake_task.get_fake_task(cluster=370))
         # this is required to form running task info
         self.m_request.get(
             '/api/v1/nodes/?cluster_id=370',
             json={}
         )
-        self.client.execute(
-            env_id=1,
-            nodes=[1, 2, 3],
-            graph_type="custom_graph")
-        self.assertTrue(matcher_put.called)
+        self.client.execute(env_id=1)
+        self.assertEqual(
+            matcher_execute.last_request.json(),
+            {
+                'cluster': 1
+            }
+        )
 
-    def test_new_graph_dry_run(self):
-        matcher_put = self.m_request.put(
-            '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
-            '&dry_run=1',
+    def test_new_graph_run_with_parameters(self):
+        matcher_execute = self.m_request.post(
+            '/api/v1/graphs/execute/',
             json=fake_task.get_fake_task(cluster=370))
         # this is required to form running task info
         self.m_request.get(
@@ -130,10 +130,25 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
         self.client.execute(
             env_id=1,
             nodes=[1, 2, 3],
-            graph_type="custom_graph",
-            dry_run=True
+            graph_types=["custom_graph", "another_custom_graph"],
+            task_names=["rsync_core_puppet"],
+            dry_run=True,
+            force=True
         )
-        self.assertTrue(matcher_put.called)
+        self.assertEqual(
+            {
+                'cluster': 1,
+                'dry_run': True,
+                'graphs': [
+                    {'nodes': [1, 2, 3], 'type': 'custom_graph',
+                     'tasks': ['rsync_core_puppet']},
+                    {'nodes': [1, 2, 3], 'type': 'another_custom_graph',
+                     'tasks': ['rsync_core_puppet']}
+                ],
+                'force': True
+            },
+            matcher_execute.last_request.json()
+        )
 
     def test_graphs_list(self):
         matcher_get = self.m_request.get(

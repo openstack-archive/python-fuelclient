@@ -13,6 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import six
 
 from fuelclient.cli import error
 from fuelclient import objects
@@ -28,7 +29,7 @@ class GraphClient(base_v1.BaseV1Client):
     related_graph_api_path = "{related_model}/{related_model_id}" \
                              "/deployment_graphs/{graph_type}"
 
-    cluster_deploy_api_path = "clusters/{env_id}/deploy/"
+    cluster_deploy_api_path = "graphs/execute/"
 
     merged_cluster_tasks_api_path = "clusters/{env_id}/deployment_tasks" \
                                     "/?graph_type={graph_type}"
@@ -79,23 +80,33 @@ class GraphClient(base_v1.BaseV1Client):
                 self.create_graph_for_model(
                     {'tasks': data}, related_model, related_id, graph_type)
 
-    def execute(self, env_id, nodes, graph_type=None, dry_run=False):
-        put_args = []
+    def execute(self, env_id, nodes=None, graph_types=None, task_names=None,
+                dry_run=False, force=False):
+        request_data = {'cluster': env_id}
 
-        if nodes:
-            put_args.append("nodes={0}".format(",".join(map(str, nodes))))
+        def map_args_to_graph_types(graph):
+            result = dict()
+            result['type'] = graph
+            if nodes:
+                result['nodes'] = nodes
+            if task_names:
+                result['tasks'] = task_names
+            return result
 
-        if graph_type:
-            put_args.append(("graph_type=" + graph_type))
+        if graph_types:
+            request_data['graphs'] = list(six.moves.map(map_args_to_graph_types,
+                                                   graph_types))
 
         if dry_run:
-            put_args.append("dry_run=1")
-        url = "".join([
-            self.cluster_deploy_api_path.format(env_id=env_id),
-            '?',
-            '&'.join(put_args)])
+            request_data['dry_run'] = True
 
-        deploy_data = self.connection.put_request(url, {})
+        if force:
+            request_data['force'] = True
+
+        deploy_data = self.connection.post_request(
+            self.cluster_deploy_api_path,
+            request_data
+        )
         return objects.DeployTask.init_with_data(deploy_data)
 
     def get_merged_cluster_tasks(self, env_id, graph_type=None):
