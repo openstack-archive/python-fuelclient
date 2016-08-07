@@ -133,6 +133,14 @@ class EnvironmentClient(base_v1.BaseV1Client):
         env = self._entity_wrapper(environment_id)
         return env.verify_network()
 
+    def get_settings(self, environment_id):
+        env = self._entity_wrapper(environment_id)
+        return env.get_settings_data()
+
+    def set_settings(self, environment_id, new_configuration, force=False):
+        env = self._entity_wrapper(environment_id)
+        env.set_settings_data(new_configuration, force=force)
+
 
 def get_client(connection):
     return EnvironmentClient(connection)

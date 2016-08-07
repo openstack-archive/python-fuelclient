@@ -33,6 +33,7 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.version = 'v1'
         self.res_uri = '/api/{version}/clusters/'.format(version=self.version)
         self.net_conf_uri = '/network_configuration/neutron'
+        self.settings_uri = '/attributes'
         self.net_verify_uri = '/network_configuration/neutron/verify'
 
         self.fake_env = utils.get_fake_env()
@@ -322,3 +323,46 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.assertTrue(m_get.called)
         self.assertTrue(m_upload.called)
         self.assertEqual(test_conf, m_upload.last_request.json())
+
+    def test_env_settings_download(self):
+        env_id = 42
+        download_uri = self.get_object_uri(self.res_uri,
+                                           env_id,
+                                           self.settings_uri)
+        test_settings = {'test-data': 42}
+
+        m_download = self.m_request.get(download_uri, json=test_settings)
+
+        settings = self.client.get_settings(env_id)
+
+        self.assertEqual(test_settings, settings)
+        self.assertTrue(m_download.called)
+
+    def test_env_settings_upload(self):
+        env_id = 42
+        upload_uri = self.get_object_uri(self.res_uri,
+                                         env_id,
+                                         self.settings_uri)
+        test_settings = {'test-data': 42}
+
+        m_upload = self.m_request.put(upload_uri, json={})
+
+        self.client.set_settings(env_id, test_settings)
+
+        self.assertTrue(m_upload.called)
+        self.assertEqual(test_settings, m_upload.last_request.json())
+
+    def test_env_settings_upload_force(self):
+        env_id = 42
+        upload_uri = self.get_object_uri(self.res_uri,
+                                         env_id,
+                                         self.settings_uri)
+        test_settings = {'test-data': 42}
+
+        m_upload = self.m_request.put(upload_uri, json={})
+
+        self.client.set_settings(env_id, test_settings, force=True)
+
+        self.assertTrue(m_upload.called)
+        self.assertEqual(test_settings, m_upload.last_request.json())
+        self.assertEqual(['1'], m_upload.last_request.qs.get('force'))
