@@ -276,6 +276,61 @@ class EnvRedeploy(EnvDeploy):
         self.app.stdout.write(msg)
 
 
+class EnvProvisionNodes(EnvMixIn, base.BaseCommand):
+    """Provision specified nodes for a specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvProvisionNodes, self).get_parser(prog_name)
+
+        parser.add_argument('-e',
+                            '--env',
+                            required=True,
+                            type=int,
+                            help='Id of the environment.')
+        parser.add_argument('-n',
+                            '--nodes',
+                            required=True,
+                            type=int,
+                            nargs='+')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        task = self.client.provision_nodes(parsed_args.env, parsed_args.nodes)
+
+        msg = 'Provisioning task with id {t} for the environment {e} '\
+              'has been started.\n'.format(t=task['id'], e=parsed_args.env)
+
+        self.app.stdout.write(msg)
+
+
+class EnvDeployNodes(EnvMixIn, base.BaseCommand):
+    """Deploy specified nodes for a specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvDeployNodes, self).get_parser(prog_name)
+
+        parser.add_argument('-e',
+                            '--env',
+                            required=True,
+                            type=int,
+                            help='Id of the environment.')
+        parser.add_argument('-n',
+                            '--nodes',
+                            required=True,
+                            type=int,
+                            nargs='+')
+        return parser
+
+    def take_action(self, parsed_args):
+        task = self.client.deploy_nodes(parsed_args.env, parsed_args.nodes)
+
+        msg = 'Deployment task with id {t} for the environment {e} '\
+              'has been started.\n'.format(t=task['id'], e=parsed_args.env)
+
+        self.app.stdout.write(msg)
+
+
 class EnvSpawnVms(EnvMixIn, base.BaseCommand):
     """Provision specified environment."""
 

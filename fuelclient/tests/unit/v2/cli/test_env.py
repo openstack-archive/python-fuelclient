@@ -20,6 +20,7 @@ from six import moves
 
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_env
+from fuelclient.tests.utils import fake_task
 from fuelclient.v1 import environment
 
 
@@ -192,3 +193,29 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.spawn_vms.assert_called_once_with(env_id)
+
+    def test_env_nodes_deploy(self):
+        env_id = 42
+        node_ids = [43, 44]
+        args = ('env nodes deploy '
+                '--nodes {n[0]} {n[1]} --env {e}').format(e=env_id, n=node_ids)
+
+        self.m_client.deploy_nodes.return_value = fake_task.get_fake_task()
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.deploy_nodes.assert_called_once_with(env_id, node_ids)
+
+    def test_env_nodes_provision(self):
+        env_id = 42
+        node_ids = [43, 44]
+        args = ('env nodes provision '
+                '--nodes {n[0]} {n[1]} --env {e}').format(e=env_id, n=node_ids)
+
+        self.m_client.provision_nodes.return_value = fake_task.get_fake_task()
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.provision_nodes.assert_called_once_with(env_id, node_ids)
