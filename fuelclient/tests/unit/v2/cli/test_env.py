@@ -271,3 +271,89 @@ class TestEnvCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.set_network_configuration.assert_called_once_with(42,
                                                                         config)
+
+    @mock.patch('json.dump')
+    def test_env_settings_download_json(self, m_dump):
+        args = 'env settings download --format json -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/environment_42/settings.json'
+
+        self.m_client.get_settings.return_value = test_data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.commands.environment.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_dump.assert_called_once_with(test_data, mock.ANY, indent=4)
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.get_settings.assert_called_once_with(42)
+
+    def test_env_settings_upload_json(self):
+        args = 'env settings upload --format json -d /tmp 42'
+        config = {'foo': 'bar'}
+        expected_path = '/tmp/environment_42/settings.json'
+
+        m_open = mock.mock_open(read_data=json.dumps(config))
+        with mock.patch('fuelclient.commands.environment.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.set_settings.assert_called_once_with(42,
+                                                           config,
+                                                           force=False)
+
+    @mock.patch('yaml.safe_dump')
+    def test_env_settings_download_yaml(self, m_safe_dump):
+        args = 'env settings download --format yaml -d /tmp 42'
+        test_data = {'foo': 'bar'}
+        expected_path = '/tmp/environment_42/settings.yaml'
+
+        self.m_client.get_settings.return_value = test_data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.commands.environment.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_safe_dump.assert_called_once_with(test_data, mock.ANY,
+                                            default_flow_style=False)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.get_settings.assert_called_once_with(42)
+
+    def test_env_settings_upload_yaml(self):
+        args = 'env settings upload --format yaml -d /tmp 42'
+        config = {'foo': 'bar'}
+        expected_path = '/tmp/environment_42/settings.yaml'
+
+        m_open = mock.mock_open(read_data=yaml.dump(config))
+        with mock.patch('fuelclient.commands.environment.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.set_settings.assert_called_once_with(42,
+                                                           config,
+                                                           force=False)
+
+    def test_env_settings_upload_force(self):
+        args = 'env settings upload --format yaml -d /tmp --force 42'
+        config = {'foo': 'bar'}
+        expected_path = '/tmp/environment_42/settings.yaml'
+
+        m_open = mock.mock_open(read_data=yaml.dump(config))
+        with mock.patch('fuelclient.commands.environment.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.set_settings.assert_called_once_with(42,
+                                                           config,
+                                                           force=True)
