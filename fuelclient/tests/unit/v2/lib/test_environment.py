@@ -260,3 +260,29 @@ class TestEnvFacade(test_api.BaseLibTest):
         for unassignment in matcher_post.last_request.json():
             # Check whether all unassignments are expected
             self.assertIn(unassignment, expected_body)
+
+    def test_env_deploy_nodes(self):
+        env_id = 42
+        node_ids = [43, 44]
+
+        expected_url = self.get_object_uri(self.res_uri, env_id, '/deploy/')
+        matcher = self.m_request.put(expected_url, json=utils.get_fake_task())
+
+        self.client.deploy_nodes(env_id, node_ids)
+
+        self.assertTrue(matcher.called)
+        self.assertEqual([','.join(str(i) for i in node_ids)],
+                         matcher.last_request.qs['nodes'])
+
+    def test_env_provision_nodes(self):
+        env_id = 42
+        node_ids = [43, 44]
+
+        expected_url = self.get_object_uri(self.res_uri, env_id, '/provision/')
+        matcher = self.m_request.put(expected_url, json=utils.get_fake_task())
+
+        self.client.provision_nodes(env_id, node_ids)
+
+        self.assertTrue(matcher.called)
+        self.assertEqual([','.join(str(i) for i in node_ids)],
+                         matcher.last_request.qs['nodes'])

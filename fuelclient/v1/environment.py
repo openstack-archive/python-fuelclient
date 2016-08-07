@@ -23,6 +23,9 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
     _updatable_attributes = ('name',)
 
+    provision_nodes_url = 'clusters/{env_id}/provision/?nodes={nodes}'
+    deploy_nodes_url = 'clusters/{env_id}/deploy/?nodes={nodes}'
+
     def create(self, name, release_id, net_segment_type):
 
         supported_nst = ('gre', 'vlan', 'tun')
@@ -85,6 +88,22 @@ class EnvironmentClient(base_v1.BaseV1Client):
 
         deploy_task = env.deploy_changes(dry_run=dry_run)
         return deploy_task.id
+
+    def provision_nodes(self, environment_id, node_ids):
+        """Provision specified nodes for the specified environment."""
+
+        nodes = ','.join(str(i) for i in node_ids)
+        uri = self.provision_nodes_url.format(env_id=environment_id,
+                                              nodes=nodes)
+        return self.connection.put_request(uri, {})
+
+    def deploy_nodes(self, environment_id, node_ids):
+        """Deploy specified nodes for the specified environment."""
+
+        nodes = ','.join(str(i) for i in node_ids)
+        uri = self.deploy_nodes_url.format(env_id=environment_id,
+                                           nodes=nodes)
+        return self.connection.put_request(uri, {})
 
     def redeploy_changes(self, environment_id, dry_run=False):
         env = self._entity_wrapper(obj_id=environment_id)
