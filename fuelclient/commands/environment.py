@@ -399,3 +399,85 @@ class EnvNetworkDownload(EnvMixIn, base.BaseCommand):
         msg = ('Network configuration for the environment with id '
                '{env} was loaded from {path}\n')
         self.app.stdout.write(msg.format(env=parsed_args.id, path=file_path))
+
+
+class EnvSettingsUpload(EnvMixIn, base.BaseCommand):
+    """Upload and applyenvironment settings."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvSettingsUpload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of environment.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized settings.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Source directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+
+        file_path = self.get_attributes_path('settings',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+        try:
+            with open(file_path, 'r') as stream:
+                settings = data_utils.safe_load(parsed_args.format, stream)
+        except (IOError, OSError):
+            msg = 'Could not read settings at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        self.client.set_settings(parsed_args.id, settings)
+
+        msg = ('Settings for the environment with id '
+               '{env} were loaded from {path}.\n')
+
+        self.app.stdout.write(msg.format(env=parsed_args.id, path=file_path))
+
+
+class EnvSettingsDownload(EnvMixIn, base.BaseCommand):
+    """Download and store network environment settings."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvSettingsDownload, self).get_parser(prog_name)
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of an environment.')
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized settings.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            help='Destination directory.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        directory = parsed_args.directory or os.curdir
+        settings = self.client.get_network_configuration(parsed_args.id)
+
+        file_path = self.get_attributes_path('settings',
+                                             parsed_args.format,
+                                             parsed_args.id,
+                                             directory)
+
+        fileutils.ensure_tree(os.path.dirname(file_path))
+        fileutils.delete_if_exists(file_path)
+
+        with open(file_path, 'w') as stream:
+            data_utils.safe_dump(parsed_args.format, stream, settings)
+
+        msg = ('Settings for the environment with id '
+               '{env} were loaded from {path}\n')
+        self.app.stdout.write(msg.format(env=parsed_args.id, path=file_path))
