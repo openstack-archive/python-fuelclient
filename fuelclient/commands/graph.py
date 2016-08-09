@@ -178,6 +178,15 @@ class GraphExecute(base.BaseTasksExecuteCommand):
             nargs='+',
             help='List of deployment tasks to run.'
         )
+        parser.add_argument('-S',
+                            '--subgraphs',
+                            type=str,
+                            nargs='+',
+                            required=False,
+                            help='List of subgraphs to execute'
+                                 'Format is: '
+                                 '[<start_task>[/<node_ids>]]\
+                                 [:<end_task>/[<node_ids>]]')
         return parser
 
     def take_action(self, args):
@@ -188,8 +197,9 @@ class GraphExecute(base.BaseTasksExecuteCommand):
             task_names=args.task_names,
             dry_run=args.dry_run,
             noop_run=args.noop,
-            force=args.force,
-            debug=args.trace
+            debug=args.trace,
+            subgraphs=args.subgraphs,
+            force=args.force
         )
         msg = 'Deployment task with id {t} for the environment {e} ' \
               'has been started.\n'.format(t=result.data['id'],
