@@ -286,3 +286,48 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.assertTrue(matcher.called)
         self.assertEqual([','.join(str(i) for i in node_ids)],
                          matcher.last_request.qs['nodes'])
+
+    def test_delete_facts(self):
+        env_id = 42
+        fact_type = 'deployment'
+        expected_uri = self.get_object_uri(
+            self.res_uri,
+            env_id,
+            '/orchestrator/{fact_type}'.format(fact_type=fact_type))
+
+        matcher = self.m_request.delete(expected_uri, json={})
+        self.client.delete_facts(env_id, fact_type)
+        self.assertTrue(matcher.called)
+        self.assertIsNone(matcher.last_request.body)
+
+    def test_download_facts(self):
+        env_id = 42
+        fact_type = 'deployment'
+        nodes = [2, 5]
+        expected_uri = self.get_object_uri(
+            self.res_uri,
+            env_id,
+            "/orchestrator/{fact_type}/?nodes={nodes}".format(
+                fact_type=fact_type, nodes=",".join(map(str, nodes))))
+        fake_resp = {'foo': 'bar'}
+
+        matcher = self.m_request.get(expected_uri, json=fake_resp)
+        facts = self.client.download_facts(
+            env_id, fact_type, nodes=nodes, default=False)
+        self.assertTrue(matcher.called)
+        self.assertIsNone(matcher.last_request.body)
+        self.assertEqual(facts, fake_resp)
+
+    def test_upload_facts(self):
+        env_id = 42
+        fact_type = 'deployment'
+        facts = {'foo': 'bar'}
+        expected_uri = self.get_object_uri(
+            self.res_uri,
+            env_id,
+            "/orchestrator/{fact_type}".format(fact_type=fact_type))
+
+        matcher = self.m_request.put(expected_uri, json={})
+        self.client.upload_facts(env_id, fact_type, facts)
+        self.assertTrue(matcher.called)
+        self.assertEqual(facts, matcher.last_request.json())
