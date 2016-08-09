@@ -90,9 +90,11 @@ class TestGraphActions(test_engine.BaseCLITest):
             '--env 1 --type custom_graph --nodes 1 2 3',
             dict(
                 env_id=1,
+                force=False,
                 graph_type='custom_graph',
                 nodes=[1, 2, 3],
-                dry_run=False
+                dry_run=False,
+                subgraphs=None
             )
         )
 
@@ -102,9 +104,28 @@ class TestGraphActions(test_engine.BaseCLITest):
             '--env 1 --type custom_graph --nodes 1 2 3 --dry-run',
             dict(
                 env_id=1,
+                force=False,
                 graph_type='custom_graph',
                 nodes=[1, 2, 3],
-                dry_run=True
+                dry_run=True,
+                subgraphs=None
+            )
+        )
+
+    def test_execute_w_dry_run_subgraph(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --type custom_graph --nodes 1 2 3 '
+            '--dry-run --subgraphs primary-database/1,3:keystone-db/1-2,5'
+            ' openstack-controller',
+            dict(
+                env_id=1,
+                force=False,
+                graph_type='custom_graph',
+                nodes=[1, 2, 3],
+                dry_run=True,
+                subgraphs=['primary-database/1,3:keystone-db/1-2,5',
+                           'openstack-controller']
             )
         )
 

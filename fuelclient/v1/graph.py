@@ -79,8 +79,10 @@ class GraphClient(base_v1.BaseV1Client):
                 self.create_graph_for_model(
                     {'tasks': data}, related_model, related_id, graph_type)
 
-    def execute(self, env_id, nodes, graph_type=None, dry_run=False):
+    def execute(self, env_id, nodes, graph_type=None, dry_run=False,
+                subgraphs=None, force=False):
         put_args = []
+        subgraphs_converted = []
 
         if nodes:
             put_args.append("nodes={0}".format(",".join(map(str, nodes))))
@@ -90,12 +92,36 @@ class GraphClient(base_v1.BaseV1Client):
 
         if dry_run:
             put_args.append("dry_run=1")
+
+        if force:
+            put_args.append("force=1")
+
+        import six
+
+        def munge_subgraphs(subgraph):
+            import re
+            "^(\w+(?:/?\d+(?:,|-)?)+)?$"
+            regexp = re.compile("^([\w\-,]+(?:\/(?:(?:\d+(?:,|-)?)+))?)"
+                                "?(:[\w\-,]+(?:\/(?:(?:\d+(?:,|-)?)+))?)?$")
+            result = regexp.match(subgraph)
+            start_vertex = None
+            end_vertex = None
+            if result:
+                if result.group(1):
+                    start_vertex = result.group(1)
+                if result.group(2):
+                    end_vertex = result.group(2)[1:]
+            return {'start': [start_vertex], 'end': [end_vertex]}
+        if subgraphs:
+            subgraphs_converted = list(
+                six.moves.map(lambda s: munge_subgraphs(s), list(subgraphs)))
         url = "".join([
             self.cluster_deploy_api_path.format(env_id=env_id),
             '?',
             '&'.join(put_args)])
 
-        deploy_data = self.connection.put_request(url, {})
+        deploy_data = self.connection.put_request(
+            url, {'subgraphs': subgraphs_converted})
         return objects.DeployTask.init_with_data(deploy_data)
 
     def get_merged_cluster_tasks(self, env_id, graph_type=None):
