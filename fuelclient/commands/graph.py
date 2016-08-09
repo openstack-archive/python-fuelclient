@@ -205,6 +205,15 @@ class GraphExecute(base.BaseCommand):
                             'tasks executor to run puppet and shell tasks in '
                             'noop mode and skip all other. Stores noop-run '
                             'result summary in nailgun database.')
+        parser.add_argument('-S',
+                            '--subgraphs',
+                            type=str,
+                            nargs='+',
+                            required=False,
+                            help='List of subgraphs to execute'
+                                 'Format is: '
+                                 '[<start_task>[/<node_ids>]]\
+                                 [:<end_task>/[<node_ids>]]')
         return parser
 
     def take_action(self, args):
@@ -215,6 +224,7 @@ class GraphExecute(base.BaseCommand):
             task_names=args.task_names,
             dry_run=args.dry_run,
             noop_run=args.noop,
+            subgraphs=args.subgraphs,
             force=args.force
         )
         msg = 'Deployment task with id {t} for the environment {e} ' \
