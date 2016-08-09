@@ -13,6 +13,7 @@
 #    under the License.
 
 import json
+import os
 import yaml
 
 from fuelclient.cli import error
@@ -56,7 +57,7 @@ def safe_load(data_format, stream):
 
 
 def safe_dump(data_format, stream, data):
-    # The reason these dumpers are assigned to indivisual variables is
+    # The reason these dumpers are assigned to individual variables is
     # making PEP8 check happy.
     yaml_dumper = lambda data, stream: yaml.safe_dump(data,
                                                       stream,
@@ -70,3 +71,15 @@ def safe_dump(data_format, stream, data):
 
     dumper = dumpers[data_format]
     dumper(data, stream)
+
+
+def read_from_file(file_path):
+    data_format = os.path.splitext(file_path)[1].lstrip('.')
+    with open(file_path, 'r') as stream:
+        return safe_load(data_format, stream)
+
+
+def write_to_file(file_path, data):
+    data_format = os.path.splitext(file_path)[1].lstrip('.')
+    with open(file_path, 'w') as stream:
+        safe_dump(data_format, stream, data)
