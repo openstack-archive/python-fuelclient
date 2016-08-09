@@ -178,6 +178,15 @@ class GraphExecute(base.BaseTasksExecuteCommand):
             nargs='+',
             help='List of deployment tasks to run.'
         )
+        parser.add_argument('-S',
+                            '--subgraphs',
+                            type=str,
+                            nargs='+',
+                            required=False,
+                            help='List of subgraphs to execute'
+                                 'Format is: '
+                                 '[<start_task>[/<node_ids>]]\
+                                 [:<end_task>/[<node_ids>]]')
         return parser
 
     def get_options(self, parsed_args):
@@ -187,6 +196,7 @@ class GraphExecute(base.BaseTasksExecuteCommand):
             'task_names': parsed_args.task_names,
 
         }
+            subgraphs=args.subgraphs,
 
 
 class GraphDownload(base.BaseCommand):
