@@ -13,6 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import re
 import six
 
 from fuelclient.cli import error
@@ -86,7 +87,7 @@ class GraphClient(base_v1.BaseV1Client):
         method(data, related_model, related_id, graph_type)
 
     def execute(self, env_id, nodes=None, graph_types=None, task_names=None,
-                dry_run=False, noop_run=False, force=False):
+                dry_run=False, noop_run=False, force=False, subgraphs=None):
         request_data = {'cluster': env_id}
 
         def map_args_to_graph_types(graph):
@@ -97,6 +98,19 @@ class GraphClient(base_v1.BaseV1Client):
             if task_names:
                 result['tasks'] = task_names
             return result
+
+        def munge_subgraphs(subgraph):
+            regexp = re.compile("^([\w\-,]+(?:\/(?:(?:\d+(?:,|-)?)+))?)"
+                                "?(:[\w\-,]+(?:\/(?:(?:\d+(?:,|-)?)+))?)?$")
+            result = regexp.match(subgraph)
+            start_vertex = None
+            end_vertex = None
+            if result:
+                if result.group(1):
+                    start_vertex = result.group(1)
+                if result.group(2):
+                    end_vertex = result.group(2)[1:]
+            return {'start': [start_vertex], 'end': [end_vertex]}
 
         if graph_types:
             request_data['graphs'] = list(six.moves.map(
@@ -111,6 +125,10 @@ class GraphClient(base_v1.BaseV1Client):
 
         if force:
             request_data['force'] = True
+
+        if subgraphs:
+            request_data['subgraphs'] = list(
+                six.moves.map(lambda s: munge_subgraphs(s), list(subgraphs)))
 
         deploy_data = self.connection.post_request(
             self.cluster_deploy_api_path,
