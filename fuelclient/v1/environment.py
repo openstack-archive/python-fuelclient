@@ -20,7 +20,6 @@ from fuelclient.v1 import base_v1
 class EnvironmentClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.Environment
-
     _updatable_attributes = ('name',)
 
     def create(self, name, release_id, net_segment_type):
@@ -118,6 +117,27 @@ class EnvironmentClient(base_v1.BaseV1Client):
     def delete_network_template(self, environment_id):
         env = self._entity_wrapper(environment_id)
         env.delete_network_template_data()
+
+    @staticmethod
+    def _get_fact_url(env_id, fact_type, nodes=None, default=False):
+        return "clusters/{0}/orchestrator/{1}{2}{3}".format(
+            env_id,
+            fact_type,
+            "/defaults" if default else '',
+            "/?nodes={}".format(",".join(map(str, nodes))) if nodes else ''
+        )
+
+    def delete_facts(self, env_id, fact_type):
+        return self.connection.delete_request(
+            self._get_fact_url(env_id, fact_type))
+
+    def get_facts(self, env_id, fact_type, nodes=None, default=False):
+        return self.connection.get_request(self._get_fact_url(
+            env_id, fact_type, nodes=nodes, default=default))
+
+    def set_facts(self, env_id, fact_type, facts):
+        return self.connection.put_request(
+            self._get_fact_url(env_id, fact_type), facts)
 
 
 def get_client(connection):

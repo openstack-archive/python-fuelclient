@@ -15,7 +15,10 @@
 #    under the License.
 
 
+import json
 import mock
+import yaml
+
 from six import moves
 
 from fuelclient.tests.unit.v2.cli import test_engine
@@ -192,3 +195,188 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.spawn_vms.assert_called_once_with(env_id)
+
+    def test_env_deployment_facts_delete(self):
+        args = "env deployment-facts delete 42"
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.delete_facts.assert_called_once_with(42, 'deployment')
+
+    def test_env_provisioning_facts_delete(self):
+        args = "env provisioning-facts delete 42"
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.delete_facts.assert_called_once_with(42, 'provisioning')
+
+    @mock.patch('json.dump')
+    def test_env_deployment_facts_download_json(self, m_dump):
+        args = "env deployment-facts download" \
+               " --env 42 --dir /tmp --nodes 2 --default --format json"
+        data = [{'uid': 2, 'name': 'node'}]
+        expected_path = '/tmp/deployment_42/2.json'
+
+        self.m_client.get_facts.return_value = data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.common.data_utils.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.get_facts.assert_called_once_with(
+            42, 'deployment', nodes=[2], default=True)
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_dump.assert_called_once_with(data[0], mock.ANY, indent=4)
+
+    @mock.patch('yaml.safe_dump')
+    def test_env_deployment_facts_download_yaml(self, m_safe_dump):
+        args = "env deployment-facts download" \
+               " --env 42 --dir /tmp --nodes 2 --format yaml"
+        data = [{'uid': 2, 'name': 'node'}]
+        expected_path = '/tmp/deployment_42/2.yaml'
+
+        self.m_client.get_facts.return_value = data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.common.data_utils.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.get_facts.assert_called_once_with(
+            42, 'deployment', nodes=[2], default=False)
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_safe_dump.assert_called_once_with(data[0], mock.ANY,
+                                            default_flow_style=False)
+
+    def test_env_deployment_facts_upload_json(self):
+        args = 'env deployment-facts upload --env 42 --dir /tmp --format json'
+        data = [{'uid': 2, 'name': 'node'}]
+        expected_path = '/tmp/deployment_42/2.json'
+
+        m_open = mock.mock_open(read_data=json.dumps(data[0]))
+        with mock.patch('os.listdir', return_value=['2.json']):
+            with mock.patch('fuelclient.common.data_utils.open',
+                            m_open, create=True):
+                self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_client.set_facts.assert_called_once_with(42, 'deployment', data)
+
+    def test_env_deployment_facts_upload_yaml(self):
+        args = 'env deployment-facts upload --env 42 --dir /tmp --format yaml'
+        data = [{'uid': 2, 'name': 'node'}]
+        expected_path = '/tmp/deployment_42/2.yaml'
+
+        m_open = mock.mock_open(read_data=yaml.dump(data[0]))
+        with mock.patch('os.listdir', return_value=['2.yaml']):
+            with mock.patch('fuelclient.common.data_utils.open',
+                            m_open, create=True):
+                self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        m_open.assert_called_once_with(expected_path, 'r')
+        self.m_client.set_facts.assert_called_once_with(42, 'deployment', data)
+
+    @mock.patch('json.dump')
+    def test_env_provisioning_facts_download_json(self, m_dump):
+        args = "env provisioning-facts download" \
+               " --env 42 --dir /tmp --nodes 2 --default --format json"
+        data = {
+            'engine': {'foo': 'bar'},
+            'nodes': [{'uid': 2, 'name': 'node-2'}]
+        }
+        expected_path_engine = '/tmp/provisioning_42/engine.json'
+        expected_path_node = '/tmp/provisioning_42/node-2.json'
+
+        self.m_client.get_facts.return_value = data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.common.data_utils.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.get_facts.assert_called_once_with(
+            42, 'provisioning', nodes=[2], default=True)
+        m_open.assert_any_call(expected_path_engine, 'w')
+        m_dump.assert_any_call(data['engine'], mock.ANY, indent=4)
+        m_open.assert_any_call(expected_path_node, 'w')
+        m_dump.assert_any_call(data['nodes'][0], mock.ANY, indent=4)
+
+    @mock.patch('yaml.safe_dump')
+    def test_env_provisioning_facts_download_yaml(self, m_dump):
+        args = "env provisioning-facts download" \
+               " --env 42 --dir /tmp --nodes 2 --format yaml"
+        data = {
+            'engine': {'foo': 'bar'},
+            'nodes': [{'uid': 2, 'name': 'node-2'}]
+        }
+        expected_path_engine = '/tmp/provisioning_42/engine.yaml'
+        expected_path_node = '/tmp/provisioning_42/node-2.yaml'
+
+        self.m_client.get_facts.return_value = data
+
+        m_open = mock.mock_open()
+        with mock.patch('fuelclient.common.data_utils.open',
+                        m_open, create=True):
+            self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.get_facts.assert_called_once_with(
+            42, 'provisioning', nodes=[2], default=False)
+        m_open.assert_any_call(expected_path_engine, 'w')
+        m_dump.assert_any_call(data['engine'], mock.ANY,
+                               default_flow_style=False)
+        m_open.assert_any_call(expected_path_node, 'w')
+        m_dump.assert_any_call(data['nodes'][0], mock.ANY,
+                               default_flow_style=False)
+
+    def test_env_provisioning_facts_upload_json(self):
+        args = 'env provisioning-facts upload' \
+               ' --env 42 --dir /tmp --format json'
+        expected_data = {
+            'engine': {'foo': 'bar'},
+            'nodes': [{'foo': 'bar'}]
+        }
+        expected_path_engine = '/tmp/provisioning_42/engine.json'
+        expected_path_node = '/tmp/provisioning_42/node-2.json'
+
+        m_open = mock.mock_open(read_data=json.dumps({'foo': 'bar'}))
+        with mock.patch('os.listdir',
+                        return_value=['engine.json', 'node-2.json']):
+            with mock.patch('fuelclient.common.data_utils.open',
+                            m_open, create=True):
+                self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        m_open.assert_any_call(expected_path_engine, 'r')
+        m_open.assert_any_call(expected_path_node, 'r')
+        self.m_client.set_facts.assert_called_once_with(
+            42, 'provisioning', expected_data)
+
+    def test_env_provisioning_facts_upload_yaml(self):
+        args = 'env provisioning-facts upload' \
+               ' --env 42 --dir /tmp --format yaml'
+        expected_data = {
+            'engine': {'foo': 'bar'},
+            'nodes': [{'foo': 'bar'}]
+        }
+        expected_path_engine = '/tmp/provisioning_42/engine.yaml'
+        expected_path_node = '/tmp/provisioning_42/node-2.yaml'
+
+        m_open = mock.mock_open(read_data=json.dumps({'foo': 'bar'}))
+        with mock.patch('os.listdir',
+                        return_value=['engine.yaml', 'node-2.yaml']):
+            with mock.patch('fuelclient.common.data_utils.open',
+                            m_open, create=True):
+                self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        m_open.assert_any_call(expected_path_engine, 'r')
+        m_open.assert_any_call(expected_path_node, 'r')
+        self.m_client.set_facts.assert_called_once_with(
+            42, 'provisioning', expected_data)

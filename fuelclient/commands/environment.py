@@ -12,14 +12,43 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import argparse
+import os
+import shutil
+
 from cliff import show
 
+from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
 
 
 class EnvMixIn(object):
     entity_name = 'environment'
+
+    supported_file_formats = ('json', 'yaml')
+
+    @staticmethod
+    def srs_dir(directory=os.path.curdir):
+        path = os.path.abspath(directory)
+        if not os.path.isdir(path):
+            raise argparse.ArgumentTypeError(
+                '"{0}" is not a directory.'.format(path))
+        if not os.access(path, os.R_OK):
+            raise argparse.ArgumentTypeError(
+                'directory "{0}" is not readable'.format(path))
+        return path
+
+    @staticmethod
+    def dst_dir(directory=os.path.curdir):
+        path = os.path.abspath(directory)
+        if not os.path.isdir(path):
+            raise argparse.ArgumentTypeError(
+                '"{0}" is not a directory.'.format(path))
+        if not os.access(path, os.W_OK):
+            raise argparse.ArgumentTypeError(
+                'directory "{0}" is not writable'.format(path))
+        return path
 
 
 class EnvList(EnvMixIn, base.BaseListCommand):
@@ -290,3 +319,306 @@ class EnvSpawnVms(EnvMixIn, base.BaseCommand):
 
     def take_action(self, parsed_args):
         return self.client.spawn_vms(parsed_args.id)
+
+
+class FactsMixIn(object):
+
+    @staticmethod
+    def _get_fact_dir(env_id, fact_type, directory):
+        return os.path.join(directory, "{0}_{1}".format(fact_type, env_id))
+
+    @staticmethod
+    def _read_deployment_facts(directory, data_format):
+        return map(
+            lambda f: data_utils.read_from_file(f),
+            [os.path.join(directory, file_name)
+             for file_name in os.listdir(directory)
+             if data_format == os.path.splitext(file_name)[1].lstrip('.')]
+        )
+
+    @staticmethod
+    def _read_provisioning_facts(directory, data_format):
+        node_facts = map(
+            lambda f: data_utils.read_from_file(f),
+            [os.path.join(directory, file_name)
+             for file_name in os.listdir(directory)
+             if data_format == os.path.splitext(file_name)[1].lstrip('.')
+             and 'engine' != os.path.splitext(file_name)[0]]
+        )
+        engine_facts = data_utils.read_from_file(
+            os.path.join(directory, "{}.{}".format('engine', data_format)))
+
+        return {'engine': engine_facts, 'nodes': node_facts}
+
+    @staticmethod
+    def _write_deployment_facts(facts, directory, data_format):
+        # from 9.0 the deployment info is serialized only per node
+        for _fact in facts:
+            file_name = "{role}_{uid}." if 'role' in _fact else "{uid}."
+            file_name += data_format
+            data_utils.write_to_file(
+                os.path.join(directory, file_name.format(**_fact)),
+                _fact)
+
+    @staticmethod
+    def _write_provisioning_facts(facts, directory, data_format):
+        file_name = "{}.{}"
+        data_utils.write_to_file(
+            os.path.join(directory, file_name.format('engine', data_format)),
+            facts['engine'])
+
+        for _fact in facts['nodes']:
+            data_utils.write_to_file(
+                os.path.join(directory,
+                             file_name.format(_fact['name'], data_format)),
+                _fact)
+
+    def download_facts(self, env_id, fact_type, dst_dir, data_format,
+                       nodes=None, default=False):
+        facts = self.client.get_facts(
+            env_id, fact_type, nodes=nodes, default=default)
+        if not facts:
+            raise error.ServerDataException(
+                "There are no {} facts for this environment!".format(
+                    fact_type))
+
+        facts_dir = self._get_fact_dir(env_id, fact_type, dst_dir)
+        if os.path.exists(facts_dir):
+            shutil.rmtree(facts_dir)
+        os.makedirs(facts_dir)
+
+        getattr(self, "_write_{0}_facts".format(fact_type))(
+            facts, facts_dir, data_format)
+
+        return facts_dir
+
+    def upload_facts(self, env_id, fact_type, srs_dir, data_format):
+        facts_dir = self._get_fact_dir(env_id, fact_type, srs_dir)
+        facts = getattr(self, "_read_{0}_facts".format(fact_type))(
+            facts_dir, data_format)
+
+        if not facts:
+            raise error.ServerDataException(
+                "There are no {} facts for this environment!".format(
+                    fact_type))
+
+        return self.client.set_facts(env_id, fact_type, facts)
+
+
+class EnvDeploymentFactsDelete(EnvMixIn, base.BaseCommand):
+    """Delete current deployment facts."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvDeploymentFactsDelete, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'id',
+            type=int,
+            help='ID of the environment to delete the deployment facts')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.client.delete_facts(parsed_args.id, 'deployment')
+        self.app.stdout.write(
+            "Deployment facts for environment {} were deleted "
+            "successfully.\n".format(parsed_args.id))
+
+
+class EnvDeploymentFactsDownload(FactsMixIn, EnvMixIn, base.BaseCommand):
+    """Download computed deployment facts for orchestrator."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvDeploymentFactsDownload, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-e', '--env',
+            type=int,
+            required=True,
+            help='ID of the environment')
+
+        parser.add_argument(
+            '-d', '--dir',
+            type=self.dst_dir,
+            help='Path to directory to save deployment facts')
+
+        parser.add_argument(
+            '-n', '--nodes',
+            type=int,
+            nargs='+',
+            help='Get deployment facts for nodes with given IDs')
+
+        parser.add_argument(
+            '--default',
+            action='store_true',
+            help='Get default deployment facts')
+
+        parser.add_argument(
+            '-f', '--format',
+            choices=self.supported_file_formats,
+            default='yaml',
+            help='Format of serialized deployment facts (default: yaml)')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        facts_dir = self.download_facts(
+            parsed_args.env,
+            'deployment',
+            parsed_args.dir,
+            parsed_args.format,
+            nodes=parsed_args.nodes,
+            default=parsed_args.default
+        )
+        self.app.stdout.write(
+            "{0}deployment facts were downloaded to {1}\n".format(
+                'Default ' if parsed_args.default else '',
+                facts_dir
+            ).capitalize())
+
+
+class EnvDeploymentFactsUpload(FactsMixIn, EnvMixIn, base.BaseCommand):
+    """Upload deployment facts."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvDeploymentFactsUpload, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-e', '--env',
+            type=int,
+            required=True,
+            help='ID of the environment')
+
+        parser.add_argument(
+            '-d', '--dir',
+            type=self.srs_dir,
+            help='Path to directory to read deployment facts')
+
+        parser.add_argument(
+            '-f', '--format',
+            choices=self.supported_file_formats,
+            default='yaml',
+            help='Format of serialized deployment facts (default: yaml)')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.upload_facts(
+            parsed_args.env,
+            'deployment',
+            parsed_args.dir,
+            parsed_args.format
+        )
+        self.app.stdout.write(
+            "Deployment facts were uploaded successfully "
+            "into environment {}.\n".format(parsed_args.env))
+
+
+class EnvProvisioningFactsDelete(EnvMixIn, base.BaseCommand):
+    """Delete current provisioning facts."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvProvisioningFactsDelete, self).get_parser(prog_name)
+
+        parser.add_argument(
+            'id',
+            type=int,
+            help='ID of the environment to delete the provisioning facts')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.client.delete_facts(parsed_args.id, 'provisioning')
+        self.app.stdout.write(
+            "Provisioning facts for environment {} were deleted "
+            "successfully.\n".format(parsed_args.id))
+
+
+class EnvProvisioningFactsDownload(FactsMixIn, EnvMixIn, base.BaseCommand):
+    """Download computed provisioning facts for orchestrator."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvProvisioningFactsDownload, self).get_parser(
+            prog_name)
+
+        parser.add_argument(
+            '-e', '--env',
+            type=int,
+            required=True,
+            help='ID of the environment')
+
+        parser.add_argument(
+            '-d', '--dir',
+            type=self.dst_dir,
+            help='Path to directory to save provisioning facts')
+
+        parser.add_argument(
+            '-n', '--nodes',
+            type=int,
+            nargs='+',
+            help='Get provisioning facts for nodes with given IDs')
+
+        parser.add_argument(
+            '--default',
+            action='store_true',
+            help='Get default provisioning facts')
+
+        parser.add_argument(
+            '-f', '--format',
+            choices=self.supported_file_formats,
+            default='yaml',
+            help='Format of serialized provisioning facts (default: yaml)')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        facts_dir = self.download_facts(
+            parsed_args.env,
+            'provisioning',
+            parsed_args.dir,
+            parsed_args.format,
+            nodes=parsed_args.nodes,
+            default=parsed_args.default
+        )
+        self.app.stdout.write(
+            "{0}provisioning facts were downloaded to {1}\n".format(
+                'Default ' if parsed_args.default else '',
+                facts_dir
+            ).capitalize())
+
+
+class EnvProvisioningFactsUpload(FactsMixIn, EnvMixIn, base.BaseCommand):
+    """Upload provisioning facts."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvProvisioningFactsUpload, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-e', '--env',
+            type=int,
+            required=True,
+            help='ID of the environment')
+
+        parser.add_argument(
+            '-d', '--dir',
+            type=self.srs_dir,
+            help='Path to directory to read provisioning facts')
+
+        parser.add_argument(
+            '-f', '--format',
+            choices=self.supported_file_formats,
+            default='yaml',
+            help='Format of serialized provisioning facts (default: yaml)')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.upload_facts(
+            parsed_args.env,
+            'provisioning',
+            parsed_args.dir,
+            parsed_args.format
+        )
+        self.app.stdout.write(
+            "Provisioning facts were uploaded successfully "
+            "into environment {}.\n".format(parsed_args.env))
