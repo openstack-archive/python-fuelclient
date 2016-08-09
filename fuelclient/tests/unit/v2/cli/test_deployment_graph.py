@@ -166,7 +166,8 @@ class TestGraphActions(test_engine.BaseCLITest):
                 task_names=None,
                 dry_run=False,
                 noop_run=False,
-                force=False
+                force=False,
+                subgraphs=None
             )
         )
 
@@ -182,7 +183,8 @@ class TestGraphActions(test_engine.BaseCLITest):
                 task_names=None,
                 dry_run=True,
                 noop_run=False,
-                force=False
+                force=False,
+                subgraphs=None
             )
         )
 
@@ -198,7 +200,8 @@ class TestGraphActions(test_engine.BaseCLITest):
                 task_names=None,
                 dry_run=False,
                 noop_run=True,
-                force=False
+                force=False,
+                subgraphs=None
             )
         )
 
@@ -213,7 +216,8 @@ class TestGraphActions(test_engine.BaseCLITest):
                 task_names=None,
                 dry_run=False,
                 noop_run=False,
-                force=True
+                force=True,
+                subgraphs=None
             )
         )
 
@@ -228,7 +232,27 @@ class TestGraphActions(test_engine.BaseCLITest):
                 task_names=['task1', 'task2'],
                 dry_run=False,
                 noop_run=False,
-                force=False
+                force=False,
+                subgraphs=None
+            )
+        )
+
+    def test_execute_w_dry_run_subgraph(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --types custom_graph --nodes 1 2 3 '
+            '--dry-run --subgraphs primary-database/1,3:keystone-db/1-2,5'
+            ' openstack-controller',
+            dict(
+                env_id=1,
+                force=False,
+                graph_types=['custom_graph'],
+                nodes=[1, 2, 3],
+                noop_run=False,
+                dry_run=True,
+                subgraphs=['primary-database/1,3:keystone-db/1-2,5',
+                           'openstack-controller'],
+                task_names=None
             )
         )
 
