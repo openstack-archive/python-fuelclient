@@ -134,6 +134,34 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             dry_run=True
         )
         self.assertTrue(matcher_put.called)
+        self.assertEqual(matcher_put.last_request.json(), {'subgraphs': []})
+
+    def test_new_graph_dry_run_subgraph(self):
+        matcher_put = self.m_request.put(
+            '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
+            '&dry_run=1',
+            json=fake_task.get_fake_task(cluster=370))
+        # this is required to form running task info
+        self.m_request.get(
+            '/api/v1/nodes/?cluster_id=370',
+            json={}
+        )
+        self.client.execute(
+            env_id=1,
+            nodes=[1, 2, 3],
+            graph_type="custom_graph",
+            dry_run=True,
+            subgraphs=['primary-database/1,3:keystone-db/1-2,5',
+                       'openstack-controller']
+        )
+        self.assertTrue(matcher_put.called)
+        expected_body = {'subgraphs': [{'start': ['primary-database/1,3'],
+                                        'end': ['keystone-db/1-2,5']},
+                                       {'start': ['openstack-controller'],
+                                        'end': [None]}
+                                       ]
+                         }
+        self.assertItemsEqual(matcher_put.last_request.json(), expected_body)
 
     def test_graphs_list(self):
         matcher_get = self.m_request.get(

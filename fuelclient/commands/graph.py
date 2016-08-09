@@ -146,6 +146,21 @@ class GraphExecute(base.BaseCommand):
                             help='Specifies to dry-run a deployment by '
                                  'configuring task executor to dump the '
                                  'deployment graph to a dot file.')
+        parser.add_argument('-S',
+                            '--subgraphs',
+                            type=str,
+                            nargs='+',
+                            required=False,
+                            help='List of subgraphs to execute'
+                                 'Format is: '
+                                 '[<start_task/[1-5,7]>]:[end_task/[2-3,5]]')
+        parser.add_argument('-f',
+                            '--force',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Force run all deployment tasks without '
+                                 'skipping.')
         return parser
 
     def take_action(self, args):
@@ -153,7 +168,9 @@ class GraphExecute(base.BaseCommand):
             env_id=args.env,
             graph_type=args.type,
             nodes=args.nodes,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
+            subgraphs=args.subgraphs,
+            force=args.force
         )
         msg = 'Deployment task with id {t} for the environment {e} ' \
               'has been started.\n'.format(t=result.data['id'],
