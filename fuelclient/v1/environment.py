@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
 

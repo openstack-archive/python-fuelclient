@@ -18,8 +18,24 @@ import mock
 import yaml
 
 import fuelclient
-from fuelclient.tests.unit.v1.test_vip_action import MANY_VIPS_YAML
 from fuelclient.tests.unit.v2.lib import test_api
+
+
+MANY_VIPS_YAML = '''- id: 5
+  network: 3
+  node: null
+  ip_addr: 192.169.1.33
+  vip_name: public
+  vip_namespace: haproxy
+  is_user_defined: false
+- id: 6
+  network: 3
+  node: null
+  ip_addr: 192.169.1.34
+  vip_namespace: null
+  vip_name: private
+  is_user_defined: true
+'''
 
 
 class TestVipFacade(test_api.BaseLibTest):

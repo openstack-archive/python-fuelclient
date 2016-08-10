@@ -15,7 +15,7 @@
 from collections import namedtuple
 import copy
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient import objects
 from fuelclient.v1 import base_v1
 
