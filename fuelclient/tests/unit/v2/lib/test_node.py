@@ -18,8 +18,8 @@ import mock
 import yaml
 
 import fuelclient
-from fuelclient.cli import error
 from fuelclient.cli import serializers
+from fuelclient import error
 from fuelclient.objects import base as base_object
 from fuelclient.tests.unit.v2.lib import test_api
 from fuelclient.tests import utils

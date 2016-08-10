@@ -19,8 +19,8 @@ import os
 import six
 import yaml
 
-from fuelclient.cli import error
 from fuelclient import consts
+from fuelclient import error
 from fuelclient import utils
 
 

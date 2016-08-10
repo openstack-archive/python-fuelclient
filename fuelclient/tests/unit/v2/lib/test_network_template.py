@@ -19,9 +19,87 @@ import yaml
 from oslo_serialization import jsonutils as json
 
 import fuelclient
-from fuelclient.tests.unit.common import \
-    test_network_template as common_net_template
 from fuelclient.tests.unit.v2.lib import test_api
+
+
+YAML_TEMPLATE = """adv_net_template:
+  default:
+    network_assignments:
+      fuelweb_admin:
+        ep: br-fw-admin
+      management:
+        ep: br-mgmt
+      private:
+        ep: br-prv
+      public:
+        ep: br-ex
+      storage:
+        ep: br-storage
+    nic_mapping:
+      default:
+        if1: eth0
+    templates_for_node_role:
+      ceph-osd:
+      - common
+      - storage
+      compute:
+      - common
+      - private
+      - storage
+      controller:
+      - public
+      - private
+      - storage
+      - common
+"""
+
+
+JSON_TEMPLATE = """{
+  "adv_net_template": {
+    "default": {
+      "nic_mapping": {
+        "default": {
+          "if1": "eth0"
+        }
+      },
+      "templates_for_node_role": {
+        "controller": [
+          "public",
+          "private",
+          "storage",
+          "common"
+        ],
+        "compute": [
+          "common",
+          "private",
+          "storage"
+        ],
+        "ceph-osd": [
+          "common",
+          "storage"
+        ]
+      },
+      "network_assignments": {
+        "storage": {
+          "ep": "br-storage"
+        },
+        "private": {
+          "ep": "br-prv"
+        },
+        "public": {
+          "ep": "br-ex"
+        },
+        "management": {
+          "ep": "br-mgmt"
+        },
+        "fuelweb_admin": {
+          "ep": "br-fw-admin"
+        }
+      }
+    }
+  }
+}
+"""
 
 
 class TestNetworkTemplateFacade(test_api.BaseLibTest):
@@ -39,11 +117,11 @@ class TestNetworkTemplateFacade(test_api.BaseLibTest):
         self.client = fuelclient.get_client('environment', self.version)
 
     def test_network_template_upload(self):
-        expected_body = json.loads(common_net_template.JSON_TEMPLATE)
+        expected_body = json.loads(JSON_TEMPLATE)
         matcher = self.m_request.put(
             self.res_uri, json=expected_body)
 
-        m_open = mock.mock_open(read_data=common_net_template.YAML_TEMPLATE)
+        m_open = mock.mock_open(read_data=YAML_TEMPLATE)
         with mock.patch('fuelclient.cli.serializers.open',
                         m_open, create=True):
             self.client.upload_network_template(
@@ -56,7 +134,7 @@ class TestNetworkTemplateFacade(test_api.BaseLibTest):
         self.assertEqual(expected_body, matcher.last_request.json())
 
     def test_network_template_download(self):
-        expected_body = json.loads(common_net_template.JSON_TEMPLATE)
+        expected_body = json.loads(JSON_TEMPLATE)
         matcher = self.m_request.get(self.res_uri, json=expected_body)
 
         m_open = mock.mock_open()
@@ -67,7 +145,7 @@ class TestNetworkTemplateFacade(test_api.BaseLibTest):
         self.assertTrue(matcher.called)
 
         written_yaml = yaml.safe_load(m_open().write.mock_calls[0][1][0])
-        expected_yaml = yaml.safe_load(common_net_template.YAML_TEMPLATE)
+        expected_yaml = yaml.safe_load(YAML_TEMPLATE)
         self.assertEqual(written_yaml, expected_yaml)
 
     def test_network_template_delete(self):
