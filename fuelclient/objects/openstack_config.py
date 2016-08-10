@@ -16,8 +16,8 @@ import os
 
 import six
 
-from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
+from fuelclient import error
 from fuelclient.objects.base import BaseObject
 
 

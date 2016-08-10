@@ -15,7 +15,7 @@
 from operator import methodcaller
 from time import sleep
 
-from fuelclient.cli.error import DeployProgressError
+from fuelclient.error import DeployProgressError
 from fuelclient.objects.base import BaseObject
 
 
