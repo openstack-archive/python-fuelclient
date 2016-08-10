@@ -21,9 +21,9 @@ import os
 from oslo_utils import fileutils
 import six
 
-from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient import error
 from fuelclient import utils
 
 

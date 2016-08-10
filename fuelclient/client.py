@@ -18,7 +18,7 @@ import requests
 from keystoneclient.v2_0 import client as auth_client
 from six.moves.urllib import parse as urlparse
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient import fuelclient_settings
 
 

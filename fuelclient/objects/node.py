@@ -15,7 +15,7 @@
 from operator import attrgetter
 import os
 
-from fuelclient.cli.error import InvalidDirectoryException
+from fuelclient.error import InvalidDirectoryException
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.environment import Environment
 

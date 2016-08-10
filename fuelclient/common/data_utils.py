@@ -16,7 +16,7 @@ import json
 import os
 import yaml
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient import utils
 
 
