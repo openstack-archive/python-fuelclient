@@ -22,7 +22,7 @@ import sys
 import six
 import yaml
 
-from fuelclient.cli import error
+from fuelclient import error
 
 
 _SETTINGS = None

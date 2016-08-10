@@ -16,14 +16,14 @@
 import json
 
 import mock
+from oslotest import base as oslo_base
 import yaml
 
-from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
-from fuelclient.tests.unit.v1 import base
+from fuelclient import error
 
 
-class TestSerializers(base.UnitTestCase):
+class TestSerializers(oslo_base.BaseTestCase):
 
     DATA = {
         'a': 1,
