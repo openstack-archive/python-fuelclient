@@ -13,7 +13,7 @@
 #    under the License.
 
 import fuelclient
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient.tests.unit.v2.lib import test_api
 from fuelclient.tests import utils
 

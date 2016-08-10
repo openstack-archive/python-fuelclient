@@ -19,13 +19,13 @@ import sys
 
 import fixtures
 import mock
+from oslotest import base as oslo_base
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient import fuelclient_settings
-from fuelclient.tests.unit.v1 import base
 
 
-class TestSettings(base.UnitTestCase):
+class TestSettings(oslo_base.BaseTestCase):
 
     def setUp(self):
         super(TestSettings, self).setUp()
