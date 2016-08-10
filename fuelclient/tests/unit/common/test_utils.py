@@ -23,14 +23,14 @@ import yaml
 import mock
 import requests
 
-from fuelclient.cli import error
 from fuelclient import client
 from fuelclient.common import data_utils
-from fuelclient.tests.unit.v1 import base
+from fuelclient import error
+from fuelclient.tests.unit.v2.lib import test_api as base
 from fuelclient import utils
 
 
-class TestUtils(base.UnitTestCase):
+class TestUtils(base.BaseLibTest):
 
     @mock.patch('fuelclient.utils.os.walk')
     def test_iterfiles(self, mwalk):
@@ -118,7 +118,7 @@ class TestUtils(base.UnitTestCase):
                     self.assertTrue(line.startswith('Stdout line '))
 
     def test_parse_yaml_file(self):
-        mock_open = self.mock_open("key: value")
+        mock_open = mock.mock_open(read_data="key: value")
 
         with mock.patch('fuelclient.utils.io.open', mock_open):
             self.assertEqual(
