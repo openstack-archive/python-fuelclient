@@ -26,7 +26,7 @@ import yaml
 from distutils.version import StrictVersion
 from fnmatch import fnmatch
 
-from fuelclient.cli import error
+from fuelclient import error
 
 
 def _wait_and_check_exit_code(cmd, child):

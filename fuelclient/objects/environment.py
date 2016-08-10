@@ -16,8 +16,8 @@ from operator import attrgetter
 import os
 import shutil
 
-from fuelclient.cli import error
 from fuelclient.cli.serializers import listdir_without_extensions
+from fuelclient import error
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.task import DeployTask
 from fuelclient.objects.task import Task
