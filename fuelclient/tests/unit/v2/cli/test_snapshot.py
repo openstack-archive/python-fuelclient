@@ -18,7 +18,7 @@ import json
 import mock
 import yaml
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient.tests.unit.v2.cli import test_engine
 
 

@@ -25,7 +25,7 @@ from distutils.version import StrictVersion
 import six
 import yaml
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient.objects import base
 from fuelclient import utils
 

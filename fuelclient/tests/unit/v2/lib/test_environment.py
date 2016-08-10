@@ -17,7 +17,7 @@
 import mock
 
 import fuelclient
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient.objects import base as base_object
 from fuelclient.objects import environment as env_object
 from fuelclient.objects import task as task_object
