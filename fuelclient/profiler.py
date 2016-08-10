@@ -19,7 +19,7 @@ import os
 from pstats import Stats
 import time
 
-from fuelclient.cli import error
+from fuelclient import error
 from fuelclient import fuelclient_settings
 
 

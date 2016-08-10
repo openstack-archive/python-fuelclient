@@ -16,10 +16,10 @@
 
 import os
 
-from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient import error
 
 
 class FileMethodsMixin(object):
