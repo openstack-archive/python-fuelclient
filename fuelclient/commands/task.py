@@ -12,11 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import argparse
 import os
 
+from oslo_utils import fileutils
+
+from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient import utils
 
 
 class TaskMixIn(object):
@@ -265,3 +270,90 @@ class TaskClusterSettingsDownload(TaskInfoFileMixIn, base.BaseCommand):
             " downloaded to {1}\n".format(parsed_args.id,
                                           self.download_info(parsed_args))
         )
+
+
+class TaskSnapshotMixIn(object):
+
+    entity_name = 'snapshot'
+    supported_file_formats = ('json', 'yaml')
+
+    @staticmethod
+    def config_file(file_path):
+        if not utils.file_exists(file_path):
+            raise argparse.ArgumentTypeError(
+                'File "{0}" does not exist'.format(file_path))
+        return file_path
+
+    @staticmethod
+    def get_conf_dir(directory, file_format):
+        return os.path.join(os.path.abspath(directory),
+                            'snapshot_conf.{}'.format(file_format))
+
+
+class TaskSnapshotGenerate(TaskSnapshotMixIn, base.BaseCommand):
+    """Generate diagnostic snapshot."""
+
+    def get_parser(self, prog_name):
+        parser = super(TaskSnapshotGenerate, self).get_parser(prog_name)
+        parser.add_argument('-c',
+                            '--config_file',
+                            required=False,
+                            type=self.config_file,
+                            help='Configuration file.')
+        return parser
+
+    def take_action(self, parsed_args):
+        file_path = parsed_args.config_file
+
+        config = dict()
+        if file_path:
+            file_format = os.path.splitext(file_path)[1].lstrip('.')
+            try:
+                with open(file_path, 'r') as stream:
+                    config = data_utils.safe_load(file_format, stream)
+            except (OSError, IOError):
+                msg = 'Could not read configuration at {}.'
+                raise error.InvalidFileException(msg.format(file_path))
+
+        result = self.client.create_snapshot(config)
+
+        msg = "Diagnostic snapshot generation task with id {id} was started\n"
+        self.app.stdout.write(msg.format(id=result.id))
+
+
+class TaskSnapshotConfigGetDefault(TaskSnapshotMixIn, base.BaseCommand):
+    """Download default config to generate custom diagnostic snapshot."""
+
+    def get_parser(self, prog_name):
+        parser = super(TaskSnapshotConfigGetDefault, self).get_parser(prog_name)
+        parser.add_argument('-f',
+                            '--format',
+                            required=True,
+                            choices=self.supported_file_formats,
+                            help='Format of serialized diagnostic snapshot '
+                                 'configuration data.')
+        parser.add_argument('-d',
+                            '--directory',
+                            required=False,
+                            default=os.path.curdir,
+                            help='Destination directory. Defaults to '
+                                 'the current directory.')
+        return parser
+
+    def take_action(self, parsed_args):
+        file_path = self.get_conf_dir(parsed_args.directory,
+                                      parsed_args.format)
+        config = self.client.get_default_config()
+
+        try:
+            fileutils.ensure_tree(os.path.dirname(file_path))
+            fileutils.delete_if_exists(file_path)
+
+            with open(file_path, 'w') as stream:
+                data_utils.safe_dump(parsed_args.format, stream, config)
+        except (OSError, IOError):
+            msg = 'Could not store configuration at {}.'
+            raise error.InvalidFileException(msg.format(file_path))
+
+        msg = "Configuration was stored in {path}\n"
+        self.app.stdout.write(msg.format(path=file_path))
