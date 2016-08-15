@@ -95,9 +95,7 @@ class TestDeploymentTasksAction(base.UnitTestCase):
     def test_show_history_for_special_nodes(self):
         self.m_history_api = self.m_request.get(
             '/api/v1/transactions/1/deployment_history/?'
-            'nodes=1,2&'
-            'statuses=&'
-            'tasks_names=',
+            'nodes=1,2',
             json={})
 
         self.execute(
@@ -110,8 +108,6 @@ class TestDeploymentTasksAction(base.UnitTestCase):
     def test_show_history_for_special_tasks(self):
         self.m_history_api = self.m_request.get(
             '/api/v1/transactions/1/deployment_history/?'
-            'nodes=&'
-            'statuses=&'
             'tasks_names=test1,test2',
             json={})
 
@@ -125,9 +121,7 @@ class TestDeploymentTasksAction(base.UnitTestCase):
     def test_show_history_with_special_statuses(self):
         self.m_history_api = self.m_request.get(
             '/api/v1/transactions/1/deployment_history/?'
-            'nodes=&'
-            'statuses=ready,skipped&'
-            'tasks_names=',
+            'statuses=ready,skipped',
             json={})
         self.execute(
             ['fuel', 'deployment-tasks', '--tid', '1',
