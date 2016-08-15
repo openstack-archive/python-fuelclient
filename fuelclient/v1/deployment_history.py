@@ -22,9 +22,7 @@ from fuelclient.v1 import base_v1
 
 class DeploymentHistoryClient(base_v1.BaseV1Client):
 
-    class_api_path = "transactions/{transaction_id}/deployment_history/" \
-                     "?nodes={nodes}&statuses={statuses}" \
-                     "&tasks_names={tasks_names}"
+    class_api_path = "transactions/{transaction_id}/deployment_history/"
 
     history_records_keys = ("task_name", "node_id", "status",
                             "time_start", "time_end")
@@ -36,9 +34,13 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
                 tasks_names=None, show_parameters=False):
         parameters = {
             'statuses': statuses,
-            'nodes': nodes,
+            'nodes_ids': nodes,
             'tasks_names': tasks_names
         }
+
+        parameters = dict((k, v) for k, v in six.iteritems(parameters)
+                          if v is not None)
+
         for k in parameters:
             parameters[k] = ",".join(str(s) for s in parameters[k]) \
                 if parameters[k] else ""
@@ -46,8 +48,7 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
         history_with_tasks = self.connection.get_request(
             self.class_api_path.format(
                 transaction_id=transaction_id,
-                **parameters
-            )
+            ), params=parameters
         )
         # rename legacy field for Fuel 9.0
         for record in history_with_tasks:
