@@ -39,7 +39,7 @@ class TestOpenstackConfigClient(test_api.BaseLibTest):
 
         uri = self.uri + '?cluster_id={0}&is_active=True'.format(cluster_id)
         m_get = self.m_request.get(uri, complete_qs=True, json=fake_configs)
-        data = self.client.get_filtered(cluster_id=1)
+        data = self.client.get_all(cluster_id=1)
 
         self.assertTrue(m_get.called)
         self.assertEqual(data[0]['cluster_id'], cluster_id)
@@ -54,7 +54,7 @@ class TestOpenstackConfigClient(test_api.BaseLibTest):
         uri = self.uri + '?cluster_id={0}&node_ids=22' \
                          '&is_active=True'.format(cluster_id)
         m_get = self.m_request.get(uri, complete_qs=True, json=fake_configs)
-        data = self.client.get_filtered(cluster_id=1, node_ids=[22])
+        data = self.client.get_all(cluster_id=1, node_ids=[22])
 
         self.assertTrue(m_get.called)
         self.assertEqual(data[0]['cluster_id'], cluster_id)
@@ -71,7 +71,7 @@ class TestOpenstackConfigClient(test_api.BaseLibTest):
         uri = self.uri + '?cluster_id={0}&node_ids=22,44' \
                          '&is_active=True'.format(cluster_id)
         m_get = self.m_request.get(uri, complete_qs=True, json=fake_configs)
-        data = self.client.get_filtered(cluster_id=1, node_ids=[22, 44])
+        data = self.client.get_all(cluster_id=1, node_ids=[22, 44])
 
         self.assertTrue(m_get.called)
         self.assertEqual(data[0]['cluster_id'], cluster_id)

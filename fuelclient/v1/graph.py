@@ -156,12 +156,22 @@ class GraphClient(base_v1.BaseV1Client):
         }
         return tasks_levels[level]()
 
-    def list(self, env_id):
+    def get_all(self, env_id):
         # todo(ikutukov): extend lists to support all models
-        return self.connection.get_request(
+        data = self.connection.get_request(
             self.related_graphs_list_api_path.format(
                 related_model='clusters',
                 related_model_id=env_id))
+
+        # format fields
+        for d in data:
+            d['relations'] = "\n".join(
+                'as "{type}" to {model}(ID={model_id})'
+                .format(**r) for r in d['relations']
+            )
+            d['tasks'] = ', '.join(sorted(t['id'] for t in d['tasks']))
+
+        return data
 
 
 def get_client(connection):

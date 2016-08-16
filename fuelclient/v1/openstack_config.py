@@ -47,8 +47,8 @@ class OpenstackConfigClient(base_v1.BaseV1Client):
 
         return task.data
 
-    def get_filtered(self, cluster_id, node_ids=None,
-                     node_role=None, is_active=True):
+    def get_all(self, cluster_id, node_ids=None,
+                node_role=None, is_active=True):
         return self._entity_wrapper.get_filtered_data(
             cluster_id=cluster_id, node_ids=node_ids,
             node_role=node_role, is_active=is_active)

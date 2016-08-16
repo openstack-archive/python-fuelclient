@@ -13,7 +13,6 @@
 #    under the License.
 
 from fuelclient.commands import base
-from fuelclient.common import data_utils
 
 
 class OpenstackConfigMixin(object):
@@ -85,11 +84,12 @@ class OpenstackConfigList(OpenstackConfigMixin, base.BaseListCommand):
 
         return parser
 
-    def take_action(self, args):
-        data = self.client.get_filtered(
-            cluster_id=args.env, node_ids=args.node,
-            node_role=args.role, is_active=(not args.deleted))
-        data = data_utils.get_display_data_multi(self.columns, data)
+    def take_action(self, parsed_args):
+        data = self.get_sorted_data(parsed_args.sort_columns,
+                                    cluster_id=parsed_args.env,
+                                    node_ids=parsed_args.node,
+                                    node_role=parsed_args.role,
+                                    is_active=(not parsed_args.deleted))
 
         return self.columns, data
 
@@ -105,11 +105,11 @@ class OpenstackConfigDownload(OpenstackConfigMixin, base.BaseCommand):
 
         return parser
 
-    def take_action(self, args):
-        file_path = self.client.download(args.config, args.file)
+    def take_action(self, parsed_args):
+        file_path = self.client.download(parsed_args.config, parsed_args.file)
 
         msg = 'OpenStack configuration with id={c} '\
-              'downloaded to {p}.\n'.format(c=args.config, p=file_path)
+              'downloaded to {p}.\n'.format(c=parsed_args.config, p=file_path)
 
         self.app.stdout.write(msg)
 
@@ -127,13 +127,14 @@ class OpenstackConfigUpload(OpenstackConfigMixin, base.BaseListCommand):
 
         return parser
 
-    def take_action(self, args):
-        configs = self.client.upload(path=args.file,
-                                     cluster_id=args.env,
-                                     node_ids=args.node,
-                                     node_role=args.role)
+    def take_action(self, parsed_args):
+        configs = self.client.upload(path=parsed_args.file,
+                                     cluster_id=parsed_args.env,
+                                     node_ids=parsed_args.node,
+                                     node_role=parsed_args.role)
 
-        data = data_utils.get_display_data_multi(self.columns, configs)
+        data = self.sort_data_by_columns(parsed_args.sort_columns, configs)
+
         return self.columns, data
 
 
@@ -150,11 +151,11 @@ class OpenstackConfigExecute(OpenstackConfigMixin, base.BaseCommand):
 
         return parser
 
-    def take_action(self, args):
-        task = self.client.execute(cluster_id=args.env,
-                                   node_ids=args.node,
-                                   node_role=args.role,
-                                   force=args.force)
+    def take_action(self, parsed_args):
+        task = self.client.execute(cluster_id=parsed_args.env,
+                                   node_ids=parsed_args.node,
+                                   node_role=parsed_args.role,
+                                   force=parsed_args.force)
 
         msg = ('Deployment of the OpenStack configuration was started within '
                'task with id {task_id}.\n').format(task_id=task['id'])
@@ -172,10 +173,10 @@ class OpenstackConfigDelete(OpenstackConfigMixin, base.BaseCommand):
 
         return parser
 
-    def take_action(self, args):
-        self.client.delete(args.config)
+    def take_action(self, parsed_args):
+        self.client.delete(parsed_args.config)
 
         msg = 'Openstack configuration with id {c} '\
-              'was deleted.\n'.format(c=args.config)
+              'was deleted.\n'.format(c=parsed_args.config)
 
         self.app.stdout.write(msg)

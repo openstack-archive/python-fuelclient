@@ -198,11 +198,11 @@ class NodeList(NodeMixIn, base.BaseListCommand):
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.get_all(
-            environment_id=parsed_args.env, labels=parsed_args.labels)
-        data = data_utils.get_display_data_multi(self.columns, data)
+        data = self.get_sorted_data(parsed_args.sort_columns,
+                                    env_id=parsed_args.env,
+                                    labels=parsed_args.labels)
 
-        return (self.columns, data)
+        return self.columns, data
 
 
 class NodeShow(NodeMixIn, base.BaseShowCommand):
@@ -340,11 +340,10 @@ class NodeLabelList(NodeMixIn, base.BaseListCommand):
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.get_all_labels_for_nodes(
-            node_ids=parsed_args.nodes)
-        data = data_utils.get_display_data_multi(self.columns, data)
+        data = self.client.get_all_labels_for_nodes(node_ids=parsed_args.nodes)
+        data = self.sort_data_by_columns(parsed_args.sort_columns, data)
 
-        return (self.columns, data)
+        return self.columns, data
 
 
 class NodeLabelSet(NodeMixIn, base.BaseCommand):
@@ -489,7 +488,7 @@ class NodeAnsibleInventory(NodeMixIn, base.BaseCommand):
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.get_all(environment_id=parsed_args.env,
+        data = self.client.get_all(env_id=parsed_args.env,
                                    labels=parsed_args.labels)
 
         nodes_by_role = collections.defaultdict(list)
