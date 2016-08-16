@@ -15,7 +15,6 @@
 #    under the License.
 
 from fuelclient.commands import base
-from fuelclient.common import data_utils
 from fuelclient import utils
 
 
@@ -36,10 +35,12 @@ class ReleaseList(ReleaseMixIn, base.BaseListCommand):
 class ReleaseReposList(ReleaseMixIn, base.BaseListCommand):
     """Show repos for a given release."""
 
-    def columns(self, repos):
-        if repos:
-            return tuple(repos[0])
-        return ()
+    columns = ("name",
+               "section",
+               "uri",
+               "priority",
+               "suite",
+               "type")
 
     def get_parser(self, prog_name):
         parser = super(ReleaseReposList, self).get_parser(prog_name)
@@ -50,9 +51,13 @@ class ReleaseReposList(ReleaseMixIn, base.BaseListCommand):
     def take_action(self, parsed_args):
         data = self.client.get_attributes_metadata_by_id(parsed_args.id)
         repos = data["editable"]["repo_setup"]["repos"]["value"]
-        columns = self.columns(repos)
-        repos = data_utils.get_display_data_multi(columns, repos)
-        return columns, repos
+
+        columns = tuple(repos[0]) if repos else ()
+        self.columns = tuple(name for name in self.columns if name in columns)
+
+        repos = self.sort_data_by_columns(parsed_args.sort_columns, repos)
+
+        return self.columns, repos
 
 
 class ReleaseReposUpdate(ReleaseMixIn, base.BaseCommand):
@@ -130,5 +135,7 @@ class ReleaseComponentList(ReleaseMixIn, base.BaseListCommand):
         # then create them with respective '-' value
         data = [{k: self.retrieve_data(d.get(k, '-')) for k in self.columns}
                 for d in data]
-        data = data_utils.get_display_data_multi(self.columns, data)
+
+        data = self.sort_data_by_columns(parsed_args.sort_columns, data)
+
         return self.columns, data

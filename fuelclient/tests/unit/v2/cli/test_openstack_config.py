@@ -24,11 +24,11 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
 
     def _test_config_list(self, cmd_line, expected_kwargs):
         self.m_get_client.reset_mock()
-        self.m_client.get_filtered.reset_mock()
+        self.m_client.get_all.reset_mock()
         self.exec_command('openstack-config list {0}'.format(cmd_line))
         self.m_get_client.assert_called_once_with('openstack-config',
                                                   mock.ANY)
-        self.m_client.get_filtered.assert_called_once_with(
+        self.m_client.get_all.assert_called_once_with(
             **expected_kwargs)
 
     def test_config_list_for_node(self):

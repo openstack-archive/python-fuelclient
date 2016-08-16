@@ -13,6 +13,7 @@
 #    under the License.
 
 import abc
+import operator
 import os
 
 from cliff import command
@@ -106,15 +107,41 @@ class BaseListCommand(lister.Lister, BaseCommand):
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.get_all()
+        data = self.get_sorted_data(parsed_args.sort_columns)
+
+        return self.columns, data
+
+    def get_sorted_data(self, sort_columns, **filters):
+        """Get filtered data from client and sort them by given columns.
+
+        :param sort_columns: Sorting columns
+        :type sort_columns: list
+        :param filters: Filter fields
+        :type filters: dict
+        :return: Sorted data
+        :rtype: list
+        """
+        data = self.client.get_all(**filters)
+
+        return self.sort_data_by_columns(sort_columns, data)
+
+    def sort_data_by_columns(self, sort_columns, data):
+        """Sort data by given columns.
+
+        :param sort_columns: Sorting columns
+        :type sort_columns: list
+        :param data: List of objects representing some external entities
+        :type data: list
+        :return: Sorted data
+        :rtype: list
+        """
         data = data_utils.get_display_data_multi(self.columns, data)
+        sort_ids = [self.columns.index(col)
+                    for col in sort_columns if col in self.columns]
+        if sort_ids:
+            data.sort(key=operator.itemgetter(*sort_ids))
 
-        scolumn_ids = [self.columns.index(col)
-                       for col in parsed_args.sort_columns]
-
-        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
-
-        return (self.columns, data)
+        return data
 
 
 @six.add_metaclass(abc.ABCMeta)

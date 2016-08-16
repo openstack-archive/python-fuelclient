@@ -28,18 +28,19 @@ class NodeClient(base_v1.BaseV1Client):
     _entity_wrapper = objects.Node
     _updatable_attributes = ('hostname', 'labels', 'name')
 
-    def get_all(self, environment_id=None, labels=None):
+    def get_all(self, env_id=None, labels=None):
         """Get nodes by specific environment or labels
 
-        :param environment_id: Id of specific environment(cluster)
-        :type environment_id: int
+        :param env_id: Id of specific environment(cluster)
+        :type env_id: int
         :param labels: List of string labels for filtering nodes
         :type labels: list
-        :returns: list -- filtered list of nodes
+        :returns: Filtered list of nodes
+        :rtype: list
         """
-        if environment_id is not None:
+        if env_id is not None:
             result = self._entity_wrapper.get_by_env_id(
-                cluster_id=environment_id)
+                cluster_id=env_id)
         else:
             result = self._entity_wrapper.get_all_data()
 
@@ -65,7 +66,7 @@ class NodeClient(base_v1.BaseV1Client):
         if node_id is not None:
             nodes.append(self._entity_wrapper(obj_id=node_id).data)
         elif env_id is not None:
-            nodes.extend(self.get_all(environment_id=env_id))
+            nodes.extend(self.get_all(env_id=env_id))
             if not nodes:
                 raise error.ActionException(
                     "Cluster with id {0} does not exist or "
@@ -113,7 +114,8 @@ class NodeClient(base_v1.BaseV1Client):
 
         :param node_ids: List of node ids for filtering labels
         :type node_ids: list
-        :returns: list -- filtered list of labels
+        :returns: Filtered list of labels
+        :rtype: list
         """
         labels = []
 
