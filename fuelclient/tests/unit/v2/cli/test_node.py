@@ -14,12 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import io
 import json
 
 import mock
 import six
 import yaml
+
+from six import StringIO
 
 from fuelclient.commands import node as cmd_node
 from fuelclient import main as main_mod
@@ -120,7 +121,7 @@ node-4 ansible_host=10.20.0.5
 '''
 
         args = 'node ansible-inventory --env 1'
-        with mock.patch('sys.stdout', new=io.StringIO()) as mstdout:
+        with mock.patch('sys.stdout', new=StringIO()) as mstdout:
             rv = self.exec_command(args)
             actual_output = mstdout.getvalue()
 
