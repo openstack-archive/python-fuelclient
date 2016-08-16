@@ -152,12 +152,12 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             matcher_execute.last_request.json()
         )
 
-    def test_graphs_list(self):
+    def test_graphs_get_all(self):
         matcher_get = self.m_request.get(
             '/api/v1/clusters/1/deployment_graphs/',
             json=[]
         )
-        self.client.list(1)
+        self.client.get_all(1)
         self.assertTrue(matcher_get.called)
 
     def test_graphs_download_all(self):
