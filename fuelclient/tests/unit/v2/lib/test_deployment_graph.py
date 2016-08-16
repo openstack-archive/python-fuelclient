@@ -292,6 +292,35 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             self.client.list(filters=['cluster', 'release'])
         )
 
+    def test_graphs_get_all(self):
+        release_id = 101
+        env_id = 11
+        fake_env = utils.get_fake_env(release_id=release_id, env_id=env_id)
+        self.m_request.get(
+            '/api/v1/clusters/{}/'.format(env_id),
+            json=fake_env
+        )
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/{}/deployment_graphs/'.format(env_id),
+            json=[]
+        )
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/{}/deployment_graphs/?fetch_related=0'.format(
+                env_id),
+            json=[]
+        )
+        matcher_get = self.m_request.get(
+            '/api/v1/releases/{}/deployment_graphs/?fetch_related=0'.format(
+                release_id),
+            json=[]
+        )
+        matcher_get = self.m_request.get(
+            '/api/v1/clusters/{}/attributes'.format(env_id),
+            json={'editable': {}}
+        )
+        self.client.get_all(env_id)
+        self.assertTrue(matcher_get.called)
+
     def test_graphs_download_all(self):
         matcher_get = self.m_request.get(
             '/api/v1/clusters/1/deployment_tasks/?graph_type=custom_graph',

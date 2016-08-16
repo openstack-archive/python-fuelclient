@@ -16,7 +16,6 @@ import os
 
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
-from fuelclient.common import data_utils
 
 
 class TaskMixIn(object):
@@ -206,9 +205,15 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
     columns = ()
 
     def get_parser(self, prog_name):
+        self.columns = tuple(set(self.client.tasks_records_keys) |
+                             set(self.client.history_records_keys))
+
         parser = super(TaskHistoryShow, self).get_parser(prog_name)
 
-        parser.add_argument('id', type=int, help='Id of the Task')
+        parser.add_argument(
+            'id',
+            type=int,
+            help='Id of the Task')
 
         parser.add_argument(
             '-n',
@@ -246,24 +251,24 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
         return parser
 
     def take_action(self, parsed_args):
-        # print parser
         show_parameters = parsed_args.show_parameters
-        include_summary = parsed_args.include_summary
-        data = self.client.get_all(
-            transaction_id=parsed_args.id,
-            nodes=parsed_args.nodes,
-            statuses=parsed_args.statuses,
-            tasks_names=parsed_args.tasks_names,
-            include_summary=include_summary,
-            show_parameters=show_parameters
-        )
         if show_parameters:
             self.columns = self.client.tasks_records_keys
         else:
             self.columns = self.client.history_records_keys
+
+        include_summary = parsed_args.include_summary
         if include_summary:
             self.columns += ('summary',)
-        data = data_utils.get_display_data_multi(self.columns, data)
+
+        data = self.get_sorted_data(parsed_args.sort_columns,
+                                    transaction_id=parsed_args.id,
+                                    nodes=parsed_args.nodes,
+                                    statuses=parsed_args.statuses,
+                                    tasks_names=parsed_args.tasks_names,
+                                    include_summary=include_summary,
+                                    show_parameters=show_parameters)
+
         return self.columns, data
 
 

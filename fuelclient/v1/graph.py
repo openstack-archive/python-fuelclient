@@ -266,6 +266,24 @@ class GraphClient(base_v1.BaseV1Client):
 
         return graphs_list
 
+    def get_all(self, env_id, filters=None):
+        data = self.list(env_id=env_id, filters=filters)
+
+        # make table context applying special formatting to data copy
+        display_data = []
+        for d in data:
+            d = d.copy()
+            d.update({
+                'relations': "\n".join(
+                    'as "{type}" to {model}(ID={model_id})'.format(**r)
+                    for r in d['relations']
+                ),
+                'tasks': ', '.join(sorted(t['id'] for t in d['tasks']))
+            })
+            display_data.append(d)
+
+        return display_data
+
 
 def get_client(connection):
     return GraphClient(connection)

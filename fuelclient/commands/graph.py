@@ -19,7 +19,6 @@ import os
 from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
-from fuelclient.common import data_utils
 from fuelclient.utils import iterfiles
 
 
@@ -324,23 +323,8 @@ class GraphList(base.BaseListCommand):
         )
         return parser
 
-    def take_action(self, args):
-        data = self.client.list(env_id=args.env, filters=args.filters)
-
-        # make table context applying special formatting to data copy
-        display_data = []
-        for d in data:
-            d = d.copy()
-            d.update({
-                'relations': "\n".join(
-                    'as "{type}" to {model}(ID={model_id})'.format(**r)
-                    for r in d['relations']
-                ),
-                'tasks': ', '.join(sorted(t['id'] for t in d['tasks']))
-            })
-            display_data.append(d)
-
-        data = data_utils.get_display_data_multi(self.columns, display_data)
-        scolumn_ids = [self.columns.index(col) for col in args.sort_columns]
-        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
+    def take_action(self, parsed_args):
+        data = self.get_sorted_data(parsed_args.sort_columns,
+                                    env_id=parsed_args.env,
+                                    filters=parsed_args.filters)
         return self.columns, data

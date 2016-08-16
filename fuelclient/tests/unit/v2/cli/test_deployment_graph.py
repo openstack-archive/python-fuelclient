@@ -272,11 +272,11 @@ class TestGraphActions(test_engine.BaseCLITest):
             )
         )
 
-    def test_list(self):
+    def test_get_all(self):
         with mock.patch('sys.stdout', new=six.moves.cStringIO()) as m_stdout:
             self.m_get_client.reset_mock()
             self.m_client.get_filtered.reset_mock()
-            self.m_client.list.return_value = [
+            self.m_client.get_all.return_value = [
                 {
                     'name': 'updated-graph-name',
                     'tasks': [{
@@ -296,6 +296,8 @@ class TestGraphActions(test_engine.BaseCLITest):
             self.exec_command(
                 'graph list --env 1 --release --plugins --cluster')
             self.m_get_client.assert_called_once_with('graph', mock.ANY)
+            self.m_client.get_all.assert_called_once_with(
+                env_id=1, filters=['release', 'plugins', 'cluster'])
 
             self.assertIn('1', m_stdout.getvalue())
             self.assertIn('updated-graph-name', m_stdout.getvalue())
@@ -307,7 +309,7 @@ class TestGraphActions(test_engine.BaseCLITest):
             self.exec_command('graph list --cluster')
             self.exec_command('graph list')
 
-            self.m_client.list.assert_has_calls([
+            self.m_client.get_all.assert_has_calls([
                 mock.call(env_id=1, filters=['release', 'plugins', 'cluster']),
                 mock.call(env_id=None, filters=['release']),
                 mock.call(env_id=None, filters=['plugins']),
