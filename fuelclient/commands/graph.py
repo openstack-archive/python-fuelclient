@@ -19,7 +19,6 @@ import os
 from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
-from fuelclient.common import data_utils
 
 
 class FileMethodsMixin(object):
@@ -275,18 +274,7 @@ class GraphList(base.BaseListCommand):
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.list(
-            env_id=parsed_args.env
-        )
-        # format fields
-        for d in data:
-            d['relations'] = "\n".join(
-                'as "{type}" to {model}(ID={model_id})'
-                .format(**r) for r in d['relations']
-            )
-            d['tasks'] = ', '.join(sorted(t['id'] for t in d['tasks']))
-        data = data_utils.get_display_data_multi(self.columns, data)
-        scolumn_ids = [self.columns.index(col)
-                       for col in parsed_args.sort_columns]
-        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
+        data = self.get_sorted_data(parsed_args.sort_columns,
+                                    env_id=parsed_args.env)
+
         return self.columns, data
