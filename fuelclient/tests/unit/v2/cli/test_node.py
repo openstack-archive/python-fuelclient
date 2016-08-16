@@ -119,6 +119,7 @@ node-4 ansible_host=10.20.0.5
 '''
 
         args = 'node ansible-inventory --env 1'
+
         with mock.patch('sys.stdout', new=io.StringIO()) as mstdout:
             rv = self.exec_command(args)
             actual_output = mstdout.getvalue()
