@@ -35,17 +35,20 @@ class TestTaskFacade(test_api.BaseLibTest):
 
     def test_task_list(self):
 
-        matcher = self.m_request.get(self.res_uri, json=self.fake_task)
+        matcher = self.m_request.get(self.res_uri, json=self.fake_tasks)
 
         self.client.get_all()
 
         self.assertTrue(self.res_uri, matcher.called)
 
+    def test_task_list_w_parameters(self):
+        pass
+
     def test_task_show(self):
         task_id = 42
         expected_uri = self.get_object_uri(self.res_uri, task_id)
 
-        matcher = self.m_request.get(expected_uri, json=self.fake_tasks)
+        matcher = self.m_request.get(expected_uri, json=self.fake_task)
 
         self.client.get_by_id(task_id)
 
@@ -54,7 +57,7 @@ class TestTaskFacade(test_api.BaseLibTest):
     def test_task_delete(self):
         task_id = 42
         expected_uri = self.get_object_uri(self.res_uri, task_id)
-        matcher = self.m_request.delete(expected_uri, json=self.fake_tasks)
+        matcher = self.m_request.delete(expected_uri, json=self.fake_task)
 
         self.client.delete_by_id(task_id, force=False)
 
@@ -64,7 +67,7 @@ class TestTaskFacade(test_api.BaseLibTest):
     def test_task_delete_force(self):
         task_id = 42
         expected_uri = self.get_object_uri(self.res_uri, task_id)
-        matcher = self.m_request.delete(expected_uri, json=self.fake_tasks)
+        matcher = self.m_request.delete(expected_uri, json=self.fake_task)
 
         self.client.delete_by_id(task_id, force=True)
 
