@@ -66,3 +66,15 @@ class BaseObject(object):
     @classmethod
     def get_all(cls):
         return map(cls.init_with_data, cls.get_all_data())
+
+    @classmethod
+    def get_filtered_data(cls, **filters):
+        """Get filtered data by specified filters
+
+        :param filters: key-value params passed to GET request, e.g.
+                        {'filter1': 'value1', 'filter2': 'value1,value2'}
+        :type filters: dict
+        :return: Filtered data
+        :rtype: list
+        """
+        return cls.connection.get_request(cls.class_api_path, params=filters)
