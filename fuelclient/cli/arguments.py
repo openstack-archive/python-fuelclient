@@ -611,6 +611,16 @@ def get_plugin_arg(help_msg):
     )
 
 
+def get_extension_arg(help_msg):
+    return get_arg(
+        'extensions',
+        flags=('--extensions',),
+        nargs='+',
+        default=[],
+        help=help_msg
+    )
+
+
 def get_notify_all_messages_arg(help_msg):
     return get_boolean_arg(
         'all',

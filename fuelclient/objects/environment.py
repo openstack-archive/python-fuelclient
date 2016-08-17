@@ -30,6 +30,7 @@ class Environment(BaseObject):
     deployment_tasks_path = 'clusters/{0}/deployment_tasks'
     deployment_tasks_graph_path = 'clusters/{0}/deploy_tasks/graph.gv'
     attributes_path = 'clusters/{0}/attributes'
+    extensions_path = 'clusters/{0}/extensions'
     network_template_path = 'clusters/{0}/network_configuration/template'
 
     @classmethod
@@ -663,3 +664,11 @@ class Environment(BaseObject):
         """
         return self.connection.post_request(self._get_ip_addrs_url(),
                                             vip_kwargs)
+
+    def set_extensions(self, extensions):
+        """Enable extensions through request to the Nailgun API
+
+        :param extensions: list of extenstion to be enabled
+        """
+        url = self.extensions_path.format(self.id)
+        return self.connection.put_request(url, extensions)
