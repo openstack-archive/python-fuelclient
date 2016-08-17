@@ -130,6 +130,40 @@ class TaskList(TaskMixIn, base.BaseListCommand):
                'result',
                'progress')
 
+    def get_parser(self, prog_name):
+        parser = super(TaskList, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-e',
+            '--env',
+            type=int,
+            help='Show list of tasks that belong to specified environment')
+
+        parser.add_argument(
+            '-m',
+            '--statuses',
+            type=str,
+            choices=['pending', 'error', 'ready', 'running'],
+            nargs='+',
+            help='Show list of tasks with specified statuses')
+
+        parser.add_argument(
+            '-t',
+            '--tasks-types',
+            type=str,
+            nargs='+',
+            help='Show list of tasks with specified types')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        data = self.client.get_all(env_id=parsed_args.env,
+                                   statuses=parsed_args.statuses,
+                                   types=parsed_args.tasks_types)
+        data = data_utils.get_display_data_multi(self.columns, data)
+
+        return self.columns, data
+
 
 class TaskShow(TaskMixIn, base.BaseShowCommand):
     """Show info about task with given id."""
