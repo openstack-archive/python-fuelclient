@@ -39,7 +39,14 @@ class BaseV1Client(object):
         )
 
     def get_all(self, **kwargs):
-        result = self._entity_wrapper.get_all_data(**kwargs)
+        filters = {}
+        for k, v in six.iteritems(kwargs):
+            if isinstance(v, list):
+                if v:
+                    filters[k] = ','.join(str(s) for s in v)
+            elif v is not None:
+                filters[k] = str(v)
+        result = self._entity_wrapper.get_all_data(**filters)
 
         return result
 
