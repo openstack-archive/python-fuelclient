@@ -39,7 +39,13 @@ class BaseV1Client(object):
         )
 
     def get_all(self, **kwargs):
-        result = self._entity_wrapper.get_all_data(**kwargs)
+        # remove unused filters or filters with empty list as value
+        filters = {k: v for k, v in six.iteritems(kwargs) if v}
+        # 'filter': ['param1', 'param2'] --> 'filter': 'param1,param2'
+        for k, v in six.iteritems(filters):
+            if isinstance(v, list):
+                filters[k] = ",".join(s for s in v)
+        result = self._entity_wrapper.get_all_data(**filters)
 
         return result
 

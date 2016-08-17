@@ -129,6 +129,35 @@ class TaskList(TaskMixIn, base.BaseListCommand):
                'cluster',
                'result',
                'progress')
+    filters = {'cluster_id': 'env',
+               'statuses': 'statuses',
+               'transaction_types': 'names'}
+
+    def get_parser(self, prog_name):
+        parser = super(TaskList, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-e',
+            '--env',
+            type=int,
+            help='Show list of tasks that belong to specified environment')
+
+        parser.add_argument(
+            '-t',
+            '--statuses',
+            type=str,
+            choices=['pending', 'error', 'ready', 'running'],
+            nargs='+',
+            help='Show list of tasks with specified statuses')
+
+        parser.add_argument(
+            '-n',
+            '--names',
+            type=str,
+            nargs='+',
+            help='Show list of tasks with specified names')
+
+        return parser
 
 
 class TaskShow(TaskMixIn, base.BaseShowCommand):
