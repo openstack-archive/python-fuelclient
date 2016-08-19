@@ -408,16 +408,21 @@ class EnvDeploy(EnvMixIn, base.BaseCommand):
                               'Store cluster settings and serialized ' \
                               'data in the db and ask the task executor ' \
                               'to dump the resulting graph into a dot file'
+        noop_run_help_string = dry_run_help_string.replace('dry-run', 'noop-run')
 
         parser.add_argument(
             '-d', '--dry-run', dest="dry_run",
             action='store_true', help=dry_run_help_string)
+        parser.add_argument(
+            '-d', '--noop', dest="noop_run",
+            action='store_true', help=noop_run_help_string)
 
         return parser
 
     def take_action(self, parsed_args):
         task_id = self.client.deploy_changes(parsed_args.id,
-                                             dry_run=parsed_args.dry_run)
+                                             dry_run=parsed_args.dry_run,
+                                             noop_run=parsed_args.noop_run)
 
         msg = 'Deployment task with id {t} for the environment {e} '\
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
@@ -430,7 +435,8 @@ class EnvRedeploy(EnvDeploy):
 
     def take_action(self, parsed_args):
         task_id = self.client.redeploy_changes(parsed_args.id,
-                                               dry_run=parsed_args.dry_run)
+                                               dry_run=parsed_args.dry_run,
+                                               noop_run=parsed_args.noop_run)
 
         msg = 'Deployment task with id {t} for the environment {e} '\
               'has been started.\n'.format(t=task_id, e=parsed_args.id)
