@@ -198,6 +198,14 @@ class GraphExecute(base.BaseCommand):
                             default=False,
                             help='Force run all deployment tasks without '
                                  'skipping.')
+        parser.add_argument('--noop',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Specifies noop-run deployment configuring '
+                            'tasks executor to run puppet and shell tasks in '
+                            'noop mode and skip all other. Stores noop-run '
+                            'result summary in nailgun database.')
         return parser
 
     def take_action(self, args):
@@ -207,6 +215,7 @@ class GraphExecute(base.BaseCommand):
             nodes=args.nodes,
             task_names=args.task_names,
             dry_run=args.dry_run,
+            noop_run=args.noop,
             force=args.force
         )
         msg = 'Deployment task with id {t} for the environment {e} ' \
