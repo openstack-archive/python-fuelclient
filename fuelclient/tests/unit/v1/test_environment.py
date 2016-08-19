@@ -62,9 +62,10 @@ class TestEnvironment(base.UnitTestCase):
     @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
     def test_deploy_changes(self, task_data):
         dry_run = False
+        noop_run = False
         mdeploy = self.m_request.put('/api/v1/clusters/1/changes'
-                                     '?dry_run={0}'.format(
-                                         int(dry_run)), json={})
+                                     '?dry_run={0}&noop_run={1}'.format(
+                                         int(dry_run), int(noop_run)), json={})
 
         cmd = ['fuel', 'deploy-changes', '--env', '1']
         self.execute(cmd)
@@ -108,9 +109,9 @@ class TestEnvironment(base.UnitTestCase):
         self.execute(cmd)
         self.check_deploy_redeploy_changes(dry_run, mdeploy)
 
-    def check_deploy_redeploy_changes(self, dry_run, mdeploy):
-        self.assertEqual(mdeploy.last_request.qs['dry_run'][0],
-                         str(int(dry_run)))
+    def check_deploy_redeploy_changes(self, res, mdeploy, mode='dry_run'):
+        self.assertEqual(mdeploy.last_request.qs[mode][0],
+                         str(int(res)))
 
 
 class TestEnvironmentOstf(base.UnitTestCase):

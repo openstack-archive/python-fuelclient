@@ -82,10 +82,10 @@ class EnvironmentClient(base_v1.BaseV1Client):
         else:
             env.unassign_all()
 
-    def deploy_changes(self, environment_id, dry_run=False):
+    def deploy_changes(self, environment_id, dry_run=False, noop_run=False):
         env = self._entity_wrapper(obj_id=environment_id)
 
-        deploy_task = env.deploy_changes(dry_run=dry_run)
+        deploy_task = env.deploy_changes(dry_run=dry_run, noop_run=noop_run)
         return deploy_task.id
 
     def provision_nodes(self, environment_id, node_ids):
@@ -104,10 +104,11 @@ class EnvironmentClient(base_v1.BaseV1Client):
                                            nodes=nodes)
         return self.connection.put_request(uri, {})
 
-    def redeploy_changes(self, environment_id, dry_run=False):
+    def redeploy_changes(self, environment_id, dry_run=False, noop_run=False):
         env = self._entity_wrapper(obj_id=environment_id)
 
-        redeploy_task = env.redeploy_changes(dry_run=dry_run)
+        redeploy_task = env.redeploy_changes(dry_run=dry_run,
+                                             noop_run=noop_run)
         return redeploy_task.id
 
     def spawn_vms(self, environment_id):

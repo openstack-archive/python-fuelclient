@@ -253,6 +253,15 @@ def get_dry_run_deployment_arg():
              "to dump the deployment graph to a dot file.")
 
 
+def get_noop_run_deployment_arg():
+    return get_boolean_arg(
+        "noop",
+        dest='noop_run',
+        help="Specifies noop-run deployment configuring tasks executor to run "
+             "puppet and shell tasks in noop mode and skip all other. "
+             "Stores noop-run result summary in nailgun database")
+
+
 def get_file_pattern_arg():
     return get_str_arg(
         "filepattern",
