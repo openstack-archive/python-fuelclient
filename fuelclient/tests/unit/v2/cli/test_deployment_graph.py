@@ -101,6 +101,18 @@ class TestGraphActions(test_engine.BaseCLITest):
             )
         )
 
+    def test_execute_w_noop_run(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --type custom_graph --nodes 1 2 3 --noop',
+            dict(
+                env_id=1,
+                graph_type='custom_graph',
+                nodes=[1, 2, 3],
+                noop_run=True
+            )
+        )
+
     def test_download(self):
         self._test_cmd(
             'download',
