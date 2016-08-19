@@ -133,12 +133,14 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             graph_types=["custom_graph", "another_custom_graph"],
             task_names=["rsync_core_puppet"],
             dry_run=True,
+            noop_run=True,
             force=True
         )
         self.assertEqual(
             {
                 'cluster': 1,
                 'dry_run': True,
+                'noop_run': True,
                 'graphs': [
                     {'nodes': [1, 2, 3], 'type': 'custom_graph',
                      'tasks': ['rsync_core_puppet']},
