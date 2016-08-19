@@ -85,7 +85,8 @@ class TestGraphActions(test_engine.BaseCLITest):
                 env_id=1,
                 graph_type='custom_graph',
                 nodes=[1, 2, 3],
-                dry_run=False
+                dry_run=False,
+                noop_run=False
             )
         )
 
@@ -97,7 +98,21 @@ class TestGraphActions(test_engine.BaseCLITest):
                 env_id=1,
                 graph_type='custom_graph',
                 nodes=[1, 2, 3],
-                dry_run=True
+                dry_run=True,
+                noop_run=False
+            )
+        )
+
+    def test_execute_w_noop_run(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --type custom_graph --nodes 1 2 3 --noop',
+            dict(
+                env_id=1,
+                graph_type='custom_graph',
+                nodes=[1, 2, 3],
+                dry_run=False,
+                noop_run=True
             )
         )
 
