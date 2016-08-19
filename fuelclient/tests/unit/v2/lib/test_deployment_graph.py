@@ -150,6 +150,24 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
             matcher_execute.last_request.json()
         )
 
+    def test_new_graph_noop_run(self):
+        matcher_put = self.m_request.put(
+            '/api/v1/clusters/1/deploy/?nodes=1,2,3&graph_type=custom_graph'
+            '&noop_run=1',
+            json=fake_task.get_fake_task(cluster=370))
+        # this is required to form running task info
+        self.m_request.get(
+            '/api/v1/nodes/?cluster_id=370',
+            json={}
+        )
+        self.client.execute(
+            env_id=1,
+            nodes=[1, 2, 3],
+            graph_type="custom_graph",
+            noop_run=True
+        )
+        self.assertTrue(matcher_put.called)
+
     def test_graphs_list(self):
         matcher_get = self.m_request.get(
             '/api/v1/clusters/1/deployment_graphs/',

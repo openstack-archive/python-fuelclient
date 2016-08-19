@@ -86,7 +86,7 @@ class GraphClient(base_v1.BaseV1Client):
         method(data, related_model, related_id, graph_type)
 
     def execute(self, env_id, nodes=None, graph_types=None, task_names=None,
-                dry_run=False, force=False):
+                dry_run=False, noop_run=False, force=False):
         request_data = {'cluster': env_id}
 
         def map_args_to_graph_types(graph):
@@ -105,6 +105,9 @@ class GraphClient(base_v1.BaseV1Client):
 
         if dry_run:
             request_data['dry_run'] = True
+
+        if noop_run:
+            request_data['noop_run'] = True
 
         if force:
             request_data['force'] = True

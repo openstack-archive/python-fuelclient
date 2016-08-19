@@ -157,6 +157,7 @@ class TestGraphActions(test_engine.BaseCLITest):
                 nodes=[1, 2, 3],
                 task_names=None,
                 dry_run=False,
+                noop_run=False,
                 force=False
             )
         )
@@ -172,6 +173,7 @@ class TestGraphActions(test_engine.BaseCLITest):
                 nodes=[1, 2, 3],
                 task_names=None,
                 dry_run=True,
+                noop_run=False,
                 force=False
             )
         )
@@ -186,6 +188,7 @@ class TestGraphActions(test_engine.BaseCLITest):
                 nodes=None,
                 task_names=None,
                 dry_run=False,
+                noop_run=False,
                 force=True
             )
         )
@@ -200,6 +203,22 @@ class TestGraphActions(test_engine.BaseCLITest):
                 nodes=None,
                 task_names=['task1', 'task2'],
                 dry_run=False,
+                noop_run=False,
+                force=False
+            )
+        )
+
+    def test_execute_w_noop_run(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --type custom_graph --nodes 1 2 3 --noop',
+            dict(
+                env_id=1,
+                graph_types=['custom_graph'],
+                nodes=[1, 2, 3],
+                task_names=None,
+                dry_run=False,
+                noop_run=True,
                 force=False
             )
         )

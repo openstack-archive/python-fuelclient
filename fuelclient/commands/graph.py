@@ -191,6 +191,16 @@ class GraphExecute(base.BaseCommand):
                             help='Specifies to dry-run a deployment by '
                                  'configuring task executor to dump the '
                                  'deployment graph to a dot file.')
+        parser.add_argument('--noop',
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help='Specifies noop-run deployment configuring '
+                            'tasks executor to run puppet and shell tasks in '
+                            'noop mode and skip all other. Stores noop-run '
+                            'result summary in nailgun database.')
+
+
         parser.add_argument('-f',
                             '--force',
                             action="store_true",
@@ -198,6 +208,7 @@ class GraphExecute(base.BaseCommand):
                             default=False,
                             help='Force run all deployment tasks without '
                                  'skipping.')
+
         return parser
 
     def take_action(self, args):
@@ -207,6 +218,7 @@ class GraphExecute(base.BaseCommand):
             nodes=args.nodes,
             task_names=args.task_names,
             dry_run=args.dry_run,
+            noop_run=args.noop,
             force=args.force
         )
         self.app.stdout.write(
