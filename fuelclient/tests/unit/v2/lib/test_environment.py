@@ -124,10 +124,9 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.client.deploy_changes(env_id, dry_run=dry_run)
         self.check_deploy_redeploy_changes(dry_run, matcher)
 
-    def check_deploy_redeploy_changes(self, dry_run, matcher):
+    def check_deploy_redeploy_changes(self, res, matcher, mode='dry_run'):
         self.assertTrue(matcher.called)
-        self.assertEqual(matcher.last_request.qs['dry_run'][0],
-                         str(int(dry_run)))
+        self.assertEqual(matcher.last_request.qs[mode][0], str(int(res)))
 
     @mock.patch.object(task_object.DeployTask, 'init_with_data')
     def test_env_deploy_dry_run(self, m_init):
@@ -139,6 +138,17 @@ class TestEnvFacade(test_api.BaseLibTest):
 
         self.client.deploy_changes(env_id, dry_run=dry_run)
         self.check_deploy_redeploy_changes(dry_run, matcher)
+
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_deploy_noop_run(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id, '/changes')
+        matcher = self.m_request.put(expected_uri, json={})
+
+        noop_run = True
+
+        self.client.deploy_changes(env_id, noop_run=noop_run)
+        self.check_deploy_redeploy_changes(noop_run, matcher, mode='noop_run')
 
     @mock.patch.object(task_object.DeployTask, 'init_with_data')
     def test_env_redeploy(self, m_init):
@@ -162,6 +172,18 @@ class TestEnvFacade(test_api.BaseLibTest):
 
         self.client.redeploy_changes(env_id, dry_run=dry_run)
         self.check_deploy_redeploy_changes(dry_run, matcher)
+
+    @mock.patch.object(task_object.DeployTask, 'init_with_data')
+    def test_env_redeploy_noop_run(self, m_init):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id,
+                                           '/changes/redeploy')
+        matcher = self.m_request.put(expected_uri, json={})
+
+        noop_run = True
+
+        self.client.redeploy_changes(env_id, noop_run=noop_run)
+        self.check_deploy_redeploy_changes(noop_run, matcher, mode='noop_run')
 
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_update(self, m_init):
