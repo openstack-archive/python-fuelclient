@@ -93,17 +93,17 @@ class Environment(BaseObject):
             [{"id": n.id} for n in nodes]
         )
 
-    def deploy_changes(self, dry_run=False):
+    def deploy_changes(self, dry_run=False, noop_run=False):
         deploy_data = self.connection.put_request(
             "clusters/{0}/changes".format(self.id),
-            {}, dry_run=int(dry_run)
+            {}, dry_run=int(dry_run), noop_run=int(noop_run)
         )
         return DeployTask.init_with_data(deploy_data)
 
-    def redeploy_changes(self, dry_run=False):
+    def redeploy_changes(self, dry_run=False, noop_run=False):
         deploy_data = self.connection.put_request(
             "clusters/{0}/changes/redeploy".format(self.id),
-            {}, dry_run=int(dry_run)
+            {}, dry_run=int(dry_run), noop_run=int(noop_run)
         )
         return DeployTask.init_with_data(deploy_data)
 
