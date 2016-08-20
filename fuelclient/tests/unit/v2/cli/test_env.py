@@ -281,6 +281,15 @@ class TestEnvCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.provision_nodes.assert_called_once_with(env_id, node_ids)
 
+    def test_env_stop(self):
+        env_id = 45
+        args = 'env stop-deployment {env_id}'.format(env_id=env_id)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.stop.assert_called_once_with(env_id)
+
     def test_env_network_verify(self):
         env_id = 42
         args = 'env network verify {}'.format(env_id)
