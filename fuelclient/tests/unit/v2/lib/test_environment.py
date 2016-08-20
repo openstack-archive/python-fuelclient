@@ -262,6 +262,17 @@ class TestEnvFacade(test_api.BaseLibTest):
 
         self.assertTrue(matcher.called)
 
+    def test_env_stop(self):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id,
+                                           '/stop_deployment/')
+
+        matcher = self.m_request.put(expected_uri, json=utils.get_fake_task())
+
+        self.client.stop(env_id)
+
+        self.assertTrue(matcher.called)
+
     def test_env_remove_nodes_by_id(self):
         nodes = [25, 26]
         env_id = 42
