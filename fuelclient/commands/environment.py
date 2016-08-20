@@ -313,6 +313,27 @@ class EnvUpdate(EnvMixIn, base.BaseShowCommand):
         return (self.columns, updated_env)
 
 
+class EnvStopDeploy(EnvMixIn, base.BaseCommand):
+    """Stop deployment process for specific environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvStopDeploy, self).get_parser(prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the environment to stop deployment.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        result = self.client.stop(parsed_args.id)
+
+        msg = ('Stop deployment process task with id {t} for the environment '
+               '{e} has been started.\n'.format(t=result.data['id'],
+                                                e=result.data['cluster']))
+        self.app.stdout.write(msg)
+
+
 class EnvAddNodes(EnvMixIn, base.BaseCommand):
     """Adds nodes to an environment with the specified roles."""
 
