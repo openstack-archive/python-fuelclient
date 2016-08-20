@@ -182,6 +182,10 @@ class EnvironmentClient(base_v1.BaseV1Client):
         return self.connection.put_request(
             self._get_fact_url(env_id, fact_type), facts)
 
+    def reset(self, env_id):
+        env = self._entity_wrapper(obj_id=env_id)
+        return env.reset()
+
 
 def get_client(connection):
     return EnvironmentClient(connection)

@@ -185,6 +185,16 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.client.redeploy_changes(env_id, noop_run=noop_run)
         self.check_deploy_redeploy_changes(noop_run, matcher, mode='noop_run')
 
+    def test_env_reset(self):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri, env_id, '/reset/')
+
+        matcher = self.m_request.put(expected_uri, json=utils.get_fake_task())
+
+        self.client.reset(env_id)
+
+        self.assertTrue(matcher.called)
+
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_update(self, m_init):
         env_id = 42
