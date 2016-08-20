@@ -194,6 +194,24 @@ class TestEnvCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_with('environment', mock.ANY)
         self.m_client.assert_has_calls(calls)
 
+    def test_env_reset(self):
+        env_id = 45
+        args = 'env reset {env_id}'.format(env_id=env_id)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.reset.assert_called_once_with(env_id, force=False)
+
+    def test_env_reset_force(self):
+        env_id = 45
+        args = 'env reset {env_id} --force'.format(env_id=env_id)
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.reset.assert_called_once_with(env_id, force=True)
+
     def test_env_add_nodes(self):
         args = 'env add nodes -e 42 -n 24 25 -r compute cinder'
         self.exec_command(args)

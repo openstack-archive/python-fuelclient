@@ -458,10 +458,11 @@ class Environment(BaseObject):
             )
         )
 
-    def reset(self):
+    def reset(self, force=False):
         return Task.init_with_data(
             self.connection.put_request(
-                "clusters/{0}/reset/".format(self.id),
+                "clusters/{0}/reset/?force={force}".format(self.id,
+                                                           force=int(force)),
                 {}
             )
         )
