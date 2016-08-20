@@ -313,6 +313,28 @@ class EnvUpdate(EnvMixIn, base.BaseShowCommand):
         return (self.columns, updated_env)
 
 
+class EnvReset(EnvMixIn, base.BaseCommand):
+    """Reset deployed environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvReset, self).get_parser(prog_name)
+
+        parser.add_argument('id',
+                            type=int,
+                            help='Id of the environment to reset.')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        result = self.client.reset(parsed_args.id)
+
+        msg = ('Reset task with id {t} for the environment {e} '
+               'has been started.\n'.format(t=result.data['id'],
+                                            e=result.data['cluster']))
+
+        self.app.stdout.write(msg)
+
+
 class EnvAddNodes(EnvMixIn, base.BaseCommand):
     """Adds nodes to an environment with the specified roles."""
 
