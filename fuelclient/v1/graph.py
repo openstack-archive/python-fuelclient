@@ -72,8 +72,13 @@ class GraphClient(base_v1.BaseV1Client):
         try:
             self.get_graph_for_model(
                 related_model, related_id, graph_type)
+            # could accept {tasks: [], metadata: {}} or just tasks list
             self.update_graph_for_model(
-                {'tasks': data}, related_model, related_id, graph_type)
+                data if isinstance(data, dict) else {'tasks': data},
+                related_model,
+                related_id,
+                graph_type
+            )
         except error.HTTPError as exc:
             if '404' in exc.message:
                 self.create_graph_for_model(

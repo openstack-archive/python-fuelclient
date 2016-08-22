@@ -20,7 +20,6 @@ import yaml
 
 from fuelclient.tests.unit.v2.cli import test_engine
 
-
 TASKS_YAML = '''- id: custom-task-1
   type: puppet
   parameters:
@@ -31,9 +30,21 @@ TASKS_YAML = '''- id: custom-task-1
     param: value
 '''
 
+GRAPH_YAML = '''tasks:
+  - id: custom-task-1
+    type: puppet
+    parameters:
+      param: value
+  - id: custom-task-2
+    type: puppet
+    parameters:
+      param: value
+metadata:
+  key: value
+'''
+
 
 class TestGraphActions(test_engine.BaseCLITest):
-
     @mock.patch('fuelclient.commands.graph.os')
     def _test_cmd(self, method, cmd_line, expected_kwargs, os_m):
         os_m.exists.return_value = True
@@ -48,19 +59,19 @@ class TestGraphActions(test_engine.BaseCLITest):
                 **expected_kwargs)
 
     def test_upload(self):
-        self._test_cmd('upload', '--env 1 --file new_graph.yaml', dict(
+        self._test_cmd('upload', '--env 1 --file new_tasks.yaml', dict(
             data=yaml.load(TASKS_YAML),
             related_model='clusters',
             related_id=1,
             graph_type=None
         ))
-        self._test_cmd('upload', '--release 1 --file new_graph.yaml', dict(
+        self._test_cmd('upload', '--release 1 --file new_tasks.yaml', dict(
             data=yaml.load(TASKS_YAML),
             related_model='releases',
             related_id=1,
             graph_type=None
         ))
-        self._test_cmd('upload', '--plugin 1 --file new_graph.yaml', dict(
+        self._test_cmd('upload', '--plugin 1 --file new_tasks.yaml', dict(
             data=yaml.load(TASKS_YAML),
             related_model='plugins',
             related_id=1,
@@ -68,7 +79,7 @@ class TestGraphActions(test_engine.BaseCLITest):
         ))
         self._test_cmd(
             'upload',
-            '--plugin 1 --file new_graph.yaml --type custom_type',
+            '--plugin 1 --file tasks.yaml --type custom_type',
             dict(
                 data=yaml.load(TASKS_YAML),
                 related_model='plugins',
@@ -76,6 +87,23 @@ class TestGraphActions(test_engine.BaseCLITest):
                 graph_type='custom_type'
             )
         )
+
+    @mock.patch('fuelclient.commands.graph.os')
+    def test_graph_upload(self, os_m):
+        os_m.exists.return_value = True
+        self.m_get_client.reset_mock()
+        self.m_client.get_filtered.reset_mock()
+        m_open = mock.mock_open(read_data=GRAPH_YAML)
+        with mock.patch(
+                'fuelclient.cli.serializers.open', m_open, create=True):
+            self.exec_command('graph upload --env 1 --file new_graph.yaml')
+            self.m_get_client.assert_called_once_with('graph', mock.ANY)
+            self.m_client.upload.assert_called_once_with(
+                data=yaml.load(GRAPH_YAML),
+                related_model='clusters',
+                related_id=1,
+                graph_type=None
+            )
 
     @mock.patch('sys.stderr')
     def test_upload_fail(self, mocked_stderr):
