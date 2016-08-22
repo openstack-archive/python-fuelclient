@@ -225,7 +225,12 @@ class APIClient(object):
         resp = self.post_request_raw(api, data, ostf=ostf)
         self._raise_for_status_with_info(resp)
 
-        return resp.json()
+        try:
+            return resp.json()
+        except Exception as e:
+            raise ValueError(
+                "Failed to decode '{0}': {1}.".format(resp.content, e)
+            )
 
     def get_fuel_version(self):
         return self.get_request("version")
