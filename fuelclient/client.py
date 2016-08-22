@@ -168,10 +168,7 @@ class Client(object):
         resp = self.session.delete(url)
         self._raise_for_status_with_info(resp)
 
-        if resp.status_code == 204:
-            return {}
-
-        return resp.json()
+        return self._decode_content(resp)
 
     def put_request(self, api, data, **params):
         """Make PUT request to specific API with some data.
@@ -186,8 +183,7 @@ class Client(object):
 
         self.print_debug('PUT {0} data={1}'.format(resp.url, data_json))
         self._raise_for_status_with_info(resp)
-
-        return resp.json()
+        return self._decode_content(resp)
 
     def get_request_raw(self, api, ostf=False, params=None):
         """Make a GET request to specific API and return raw response
@@ -232,8 +228,7 @@ class Client(object):
         """
         resp = self.post_request_raw(api, data, ostf=ostf)
         self._raise_for_status_with_info(resp)
-
-        return resp.json()
+        return self._decode_content(resp)
 
     def get_fuel_version(self):
         return self.get_request("version")
@@ -243,6 +238,14 @@ class Client(object):
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
             raise error.HTTPError(error.get_full_error_message(e))
+
+    def _decode_content(self, response):
+        if response.status_code == 204:
+            return {}
+
+        self.print_debug(response.text)
+        return response.json()
+
 
 # This line is single point of instantiation for 'Client' class,
 # which intended to implement Singleton design pattern.
