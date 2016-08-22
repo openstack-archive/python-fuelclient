@@ -69,15 +69,20 @@ class GraphClient(base_v1.BaseV1Client):
 
     def upload(self, data, related_model, related_id, graph_type):
         # create or update
+        if not isinstance(data, dict):
+            data = {'tasks': data}
+
+        method = self.update_graph_for_model
+        # FIXME(bgaifullin) need to remove loading whole graph only
+        # for detecting that it does not exist
         try:
-            self.get_graph_for_model(
-                related_model, related_id, graph_type)
-            self.update_graph_for_model(
-                {'tasks': data}, related_model, related_id, graph_type)
+            self.get_graph_for_model(related_model, related_id, graph_type)
         except error.HTTPError as exc:
             if '404' in exc.message:
-                self.create_graph_for_model(
-                    {'tasks': data}, related_model, related_id, graph_type)
+                method = self.create_graph_for_model
+
+        # could accept {tasks: [], metadata: {}} or just tasks list
+        method(data, related_model, related_id, graph_type)
 
     def execute(self, env_id, nodes, graph_type=None, dry_run=False):
         put_args = []
