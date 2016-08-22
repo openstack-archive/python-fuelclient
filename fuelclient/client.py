@@ -225,7 +225,8 @@ class APIClient(object):
         resp = self.post_request_raw(api, data, ostf=ostf)
         self._raise_for_status_with_info(resp)
 
-        return resp.json()
+        if resp.content:
+            return resp.json()
 
     def get_fuel_version(self):
         return self.get_request("version")
