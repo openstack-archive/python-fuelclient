@@ -25,6 +25,7 @@ from six import StringIO
 from fuelclient import main as main_mod
 from fuelclient.tests.unit.v2.cli import test_engine
 from fuelclient.tests.utils import fake_node
+
 from fuelclient.v1 import node
 
 

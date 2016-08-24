@@ -243,6 +243,7 @@ class Client(object):
         if response.status_code == 204:
             return {}
 
+        logger.debug('decoding content: %s', response.content)
         self.print_debug(response.text)
         return response.json()
 
