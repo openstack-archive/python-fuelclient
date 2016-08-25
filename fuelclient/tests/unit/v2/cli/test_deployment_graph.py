@@ -20,7 +20,6 @@ import yaml
 
 from fuelclient.tests.unit.v2.cli import test_engine
 
-
 TASKS_YAML = '''- id: custom-task-1
   type: puppet
   parameters:
@@ -31,9 +30,27 @@ TASKS_YAML = '''- id: custom-task-1
     param: value
 '''
 
+GRAPH_YAML = '''tasks:
+  - id: custom-task-1
+    type: puppet
+    parameters:
+      param: value
+  - id: custom-task-2
+    type: puppet
+    parameters:
+      param: value
+node_filter: $.pending_deletion
+'''
+
+GRAPH_METADATA_YAML = '''
+node_filter: $.pending_addition
+on_success:
+  node_attributes:
+     status: provisioned
+'''
+
 
 class TestGraphActions(test_engine.BaseCLITest):
-
     @mock.patch('fuelclient.commands.graph.os')
     def _test_cmd(self, method, cmd_line, expected_kwargs, os_m):
         os_m.exists.return_value = True
@@ -48,19 +65,19 @@ class TestGraphActions(test_engine.BaseCLITest):
                 **expected_kwargs)
 
     def test_upload(self):
-        self._test_cmd('upload', '--env 1 --file new_graph.yaml', dict(
+        self._test_cmd('upload', '--env 1 --file new_tasks.yaml', dict(
             data=yaml.load(TASKS_YAML),
             related_model='clusters',
             related_id=1,
             graph_type=None
         ))
-        self._test_cmd('upload', '--release 1 --file new_graph.yaml', dict(
+        self._test_cmd('upload', '--release 1 --file new_tasks.yaml', dict(
             data=yaml.load(TASKS_YAML),
             related_model='releases',
             related_id=1,
             graph_type=None
         ))
-        self._test_cmd('upload', '--plugin 1 --file new_graph.yaml', dict(
+        self._test_cmd('upload', '--plugin 1 --file new_tasks.yaml', dict(
             data=yaml.load(TASKS_YAML),
             related_model='plugins',
             related_id=1,
@@ -68,7 +85,7 @@ class TestGraphActions(test_engine.BaseCLITest):
         ))
         self._test_cmd(
             'upload',
-            '--plugin 1 --file new_graph.yaml --type custom_type',
+            '--plugin 1 --file tasks.yaml --type custom_type',
             dict(
                 data=yaml.load(TASKS_YAML),
                 related_model='plugins',
@@ -76,6 +93,50 @@ class TestGraphActions(test_engine.BaseCLITest):
                 graph_type='custom_type'
             )
         )
+
+    @mock.patch('fuelclient.commands.graph.os')
+    def test_graph_upload_from_file(self, os_m):
+        os_m.path.exists.return_value = True
+        self.m_get_client.reset_mock()
+        self.m_client.get_filtered.reset_mock()
+        m_open = mock.mock_open(read_data=GRAPH_YAML)
+        with mock.patch(
+                'fuelclient.cli.serializers.open', m_open, create=True):
+            self.exec_command('graph upload --env 1 --file new_graph.yaml')
+            self.m_get_client.assert_called_once_with('graph', mock.ANY)
+            self.m_client.upload.assert_called_once_with(
+                data=yaml.load(GRAPH_YAML),
+                related_model='clusters',
+                related_id=1,
+                graph_type=None
+            )
+
+    @mock.patch('fuelclient.commands.graph.os')
+    @mock.patch('fuelclient.commands.graph.iterfiles')
+    @mock.patch('fuelclient.commands.graph.Serializer')
+    def test_graph_upload_from_dir(self, serializers_m, iterfiles_m, os_m):
+        tasks = yaml.load(TASKS_YAML)
+        graph_data = yaml.load(GRAPH_METADATA_YAML)
+        os_m.path.exists.return_value = True
+        os_m.path.isdir.return_value = True
+        serializers_m().read_from_full_path.side_effect = [graph_data, tasks]
+        iterfiles_m.return_value = ['tasks.yaml']
+
+        self.m_get_client.reset_mock()
+        self.m_client.get_filtered.reset_mock()
+        m_open = mock.mock_open(read_data=GRAPH_YAML)
+        with mock.patch(
+                'fuelclient.cli.serializers.open', m_open, create=True):
+            self.exec_command(
+                'graph upload --release 1 --dir /graph/provision -t provision'
+            )
+            self.m_get_client.assert_called_once_with('graph', mock.ANY)
+            self.m_client.upload.assert_called_once_with(
+                data=dict(graph_data, tasks=tasks),
+                related_model='releases',
+                related_id=1,
+                graph_type='provision'
+            )
 
     @mock.patch('sys.stderr')
     def test_upload_fail(self, mocked_stderr):
