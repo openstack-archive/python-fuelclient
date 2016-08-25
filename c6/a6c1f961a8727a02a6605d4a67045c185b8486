@@ -1,0 +1,9 @@
+Code-Review+2: Vladimir Kuklin <vkuklin@mirantis.com>
+Code-Review+2: Bulat Gaifullin <bgaifullin@mirantis.com>
+Workflow+1: Bulat Gaifullin <bgaifullin@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 25 Aug 2016 05:19:19 +0000
+Reviewed-on: https://review.openstack.org/358768
+Project: openstack/python-fuelclient
+Branch: refs/heads/stable/mitaka
