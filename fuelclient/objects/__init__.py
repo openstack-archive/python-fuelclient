@@ -22,6 +22,7 @@ from fuelclient.objects.node import Node
 from fuelclient.objects.node import NodeCollection
 from fuelclient.objects.openstack_config import OpenstackConfig
 from fuelclient.objects.release import Release
+from fuelclient.objects.role import Role
 from fuelclient.objects.task import DeployTask
 from fuelclient.objects.task import SnapshotTask
 from fuelclient.objects.task import Task
