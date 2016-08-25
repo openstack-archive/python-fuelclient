@@ -20,6 +20,7 @@ from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient.utils import iterfiles
 
 
 class FileMethodsMixin(object):
@@ -44,8 +45,8 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
     entity_name = 'graph'
 
     @classmethod
-    def read_tasks_data_from_file(cls, file_path=None, serializer=None):
-        """Read Tasks data from given path.
+    def read_data_from_file(cls, file_path=None, serializer=None):
+        """Read graph data from given path.
 
         :param file_path: path
         :type file_path: str
@@ -57,9 +58,37 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
         cls.check_file_path(file_path)
         return (serializer or Serializer()).read_from_full_path(file_path)
 
+    @classmethod
+    def read_data_from_dir(cls, dir_path=None, serializer=None):
+        """Read graph data from directory.
+
+        :param dir_path: path
+        :type dir_path: str
+        :param serializer: serializer object
+        :type serializer: object
+        :return: data
+        :rtype: list|object
+        """
+        cls.check_dir(dir_path)
+        serializer = serializer or Serializer()
+
+        metadata_filepath = os.path.join(dir_path, 'metadata.yaml')
+        if os.path.exists(metadata_filepath):
+            data = serializer.read_from_full_path(metadata_filepath)
+        else:
+            data = {}
+
+        tasks = []
+        for file_name in iterfiles(dir_path, 'task.yaml'):
+            tasks.extend(serializer.read_from_full_path(file_name))
+
+        if tasks:
+            data['tasks'] = tasks
+        return data
+
     def get_parser(self, prog_name):
         parser = super(GraphUpload, self).get_parser(prog_name)
-        graph_class = parser.add_mutually_exclusive_group()
+        graph_class = parser.add_mutually_exclusive_group(required=True)
 
         graph_class.add_argument('-e',
                                  '--env',
@@ -83,13 +112,19 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
                             default=None,
                             required=False,
                             help='Type of the deployment graph')
-        parser.add_argument('-f',
-                            '--file',
-                            type=str,
-                            required=True,
-                            default=None,
-                            help='YAML file that contains '
-                                 'deployment graph data.')
+        graph_source = parser.add_mutually_exclusive_group(required=True)
+        graph_source.add_argument(
+            '-f',
+            '--file',
+            default=None,
+            help='YAML file that contains deployment graph data.'
+        )
+        graph_source.add_argument(
+            '-d',
+            '--dir',
+            default=None,
+            help='The directory that includes tasks.yaml and metadata.yaml.'
+        )
         return parser
 
     def take_action(self, args):
@@ -99,20 +134,23 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
             ('plugin', 'plugins'),
         )
 
+        if args.file:
+            data = self.read_data_from_file(args.file)
+        else:
+            data = self.read_data_from_dir(args.dir)
+
         for parameter, graph_class in parameters_to_graph_class:
             model_id = getattr(args, parameter)
             if model_id:
                 self.client.upload(
-                    data=self.read_tasks_data_from_file(args.file),
+                    data=data,
                     related_model=graph_class,
                     related_id=model_id,
                     graph_type=args.type
                 )
                 break
 
-        self.app.stdout.write(
-            "Deployment graph was uploaded from {0}\n".format(args.file)
-        )
+        self.app.stdout.write("Deployment graph was successfully uploaded.\n")
 
 
 class GraphExecute(base.BaseCommand):
