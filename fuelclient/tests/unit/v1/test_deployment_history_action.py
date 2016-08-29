@@ -44,6 +44,28 @@ class TestDeploymentTasksAction(base.UnitTestCase):
                 acceptable_keys=DeploymentHistoryClient.history_records_keys))
 
     @patch.object(Serializer, 'print_to_output')
+    def test_show_full_history_include_summary(self, print_mock):
+        self.m_history_api = self.m_request.get(
+            '/api/v1/transactions/1/deployment_history/?'
+            'nodes=&'
+            'statuses=&'
+            'include_summary=1&'
+            'tasks_names=',
+            json=utils.get_fake_deployment_history(include_summary=True))
+
+        self.execute(
+            ['fuel', 'deployment-tasks', '--tid', '1', '--include-summary']
+        )
+        print_mock.assert_called_once_with(
+            utils.get_fake_deployment_history(convert_legacy_fields=True,
+                                              include_summary=True),
+            format_table(
+                utils.get_fake_deployment_history(convert_legacy_fields=True,
+                                                  include_summary=True),
+                acceptable_keys=(DeploymentHistoryClient.history_records_keys +
+                                 ('summary',))))
+
+    @patch.object(Serializer, 'print_to_output')
     def test_show_tasks_history_with_parameters(self, print_mock):
         tasks_after_facade = [
             {

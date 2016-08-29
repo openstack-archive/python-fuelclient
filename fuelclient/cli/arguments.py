@@ -780,3 +780,11 @@ def get_show_parameters_arg(help_msg):
         "help": help_msg
     }
     return get_boolean_arg("show-parameters", **default_kwargs)
+
+
+def get_include_summary_arg(help_msg):
+    default_kwargs = {
+        "flags": ("--include-summary",),
+        "help": help_msg
+    }
+    return get_boolean_arg("include-summary", **default_kwargs)
