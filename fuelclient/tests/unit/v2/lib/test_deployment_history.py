@@ -73,6 +73,32 @@ class TestDeploymentHistoryFacade(test_api.BaseLibTest):
             utils.get_fake_deployment_history(convert_legacy_fields=True),
             tasks_after_facade)
 
+    def test_deployment_history_include_summary(self):
+        fake_history = utils.get_fake_deployment_history(include_summary=True)
+        matcher = self.m_request.get(
+            self.get_url(
+                nodes='1,2',
+                statuses='ready,error,pending',
+                tasks_names='controller-remaining-tasks,'
+                            'ironic-compute,pending-task'
+            ) + '&include_summary=1', json=fake_history)
+
+        tasks_after_facade = self.client.get_all(
+            transaction_id=self.transaction_id,
+            nodes=['1', '2'],
+            statuses=['ready', 'error', 'pending'],
+            tasks_names=['controller-remaining-tasks',
+                         'ironic-compute', 'pending-task'],
+            include_summary=True,
+            show_parameters=False
+        )
+
+        self.assertTrue(matcher.called)
+        self.assertItemsEqual(
+            utils.get_fake_deployment_history(convert_legacy_fields=True,
+                                              include_summary=True),
+            tasks_after_facade)
+
     def test_deployment_history_parameters(self):
 
         matcher = self.m_request.get(

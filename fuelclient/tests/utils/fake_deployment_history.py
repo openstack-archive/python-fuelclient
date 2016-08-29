@@ -17,7 +17,8 @@ import itertools
 
 
 def get_fake_deployment_history(
-        add_task_data=False, convert_legacy_fields=False):
+        add_task_data=False, convert_legacy_fields=False,
+        include_summary=False):
     """Create a fake deployment history.
 
     Returns the serialized and parametrized representation of a dumped Fuel
@@ -33,7 +34,7 @@ def get_fake_deployment_history(
     :rtype: list[dict]
     """
     if add_task_data:
-        return list(itertools.chain(*[[
+        result = list(itertools.chain(*[[
             {
                 'status': 'ready',
                 'time_start': '2016-03-25T17:22:10.687135',
@@ -48,7 +49,7 @@ def get_fake_deployment_history(
                                        '/modular/globals/globals.pp',
                     'puppet_modules': '/etc/puppet/modules',
                     'timeout': 3600
-                }
+                },
             },
             {
                 'status': 'skipped',
@@ -89,7 +90,7 @@ def get_fake_deployment_history(
                 'time_start': '2016-03-25T17:22:10.687135',
                 'time_end': '2016-03-25T17:22:30.830701',
                 'node_id': node_id,
-                'deployment_graph_task_name': 'controller-remaining-tasks'
+                'deployment_graph_task_name': 'controller-remaining-tasks',
             },
             {
                 'status': 'skipped',
@@ -110,7 +111,10 @@ def get_fake_deployment_history(
             for record in result:
                 record['task_name'] = record['deployment_graph_task_name']
                 record.pop('deployment_graph_task_name', None)
-        return result
+    if include_summary:
+        for record in result:
+            record['summary'] = '{}'
+    return result
 
 
 def get_fake_deployment_history_w_params():

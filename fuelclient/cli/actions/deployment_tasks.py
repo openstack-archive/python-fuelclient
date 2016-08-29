@@ -44,7 +44,10 @@ class DeploymentTasksAction(Action):
             ),
             Args.get_show_parameters_arg(
                 "Show deployment tasks parameters"
-            )
+            ),
+            Args.get_include_summary_arg(
+                "Show deployment tasks summary"
+            ),
         ]
         self.flag_func_map = (
             (None, self.list),
@@ -79,19 +82,23 @@ class DeploymentTasksAction(Action):
         statuses = params.status.split(',') if params.status else []
         nodes = params.node.split(',') if params.node else []
         tasks_names = tasks_names.split(',') if tasks_names else []
+        include_summary = getattr(params, 'include-summary')
 
         data = client.get_all(
             transaction_id=params.task,
             nodes=nodes,
             statuses=statuses,
             tasks_names=tasks_names,
-            show_parameters=show_parameters
+            show_parameters=show_parameters,
+            include_summary=include_summary
         )
 
         if show_parameters:
             table_keys = client.tasks_records_keys
         else:
             table_keys = client.history_records_keys
+        if include_summary:
+            table_keys += ('summary',)
         self.serializer.print_to_output(
             data,
             format_table(
