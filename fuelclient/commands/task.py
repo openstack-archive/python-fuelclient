@@ -205,16 +205,23 @@ class TaskHistoryShow(TaskMixIn, base.BaseListCommand):
             action='store_true',
             default=False,
             help='Show deployment tasks parameters')
+        parser.add_argument(
+            '--include-summary',
+            action='store_true',
+            default=False,
+            help='Show deployment tasks summary')
         return parser
 
     def take_action(self, parsed_args):
         # print parser
         show_parameters = parsed_args.show_parameters
+        include_summary = parsed_args.include_summary
         data = self.client.get_all(
             transaction_id=parsed_args.id,
             nodes=parsed_args.nodes,
             statuses=parsed_args.statuses,
             tasks_names=parsed_args.tasks_names,
+            include_summary=include_summary,
             show_parameters=show_parameters
         )
         if show_parameters:

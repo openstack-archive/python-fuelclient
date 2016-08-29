@@ -25,16 +25,18 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
 
     class_api_path = "transactions/{transaction_id}/deployment_history/" \
                      "?nodes={nodes}&statuses={statuses}" \
-                     "&tasks_names={tasks_names}"
+                     "&tasks_names={tasks_names}" \
+                     "&include_summary={include_summary}"
 
     history_records_keys = ("task_name", "node_id", "status",
-                            "time_start", "time_end")
+                            "summary", "time_start", "time_end")
     tasks_records_keys = ("task_name", "task_parameters", "status_by_node")
 
     _entity_wrapper = objects.Environment
 
     def get_all(self, transaction_id, nodes=None, statuses=None,
-                tasks_names=None, show_parameters=False):
+                tasks_names=None, show_parameters=False,
+                include_summary=False):
         parameters = {
             'statuses': statuses,
             'nodes': nodes,
@@ -47,6 +49,7 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
         history_with_tasks = APIClient.get_request(
             self.class_api_path.format(
                 transaction_id=transaction_id,
+                include_summary=int(include_summary),
                 **parameters
             )
         )
