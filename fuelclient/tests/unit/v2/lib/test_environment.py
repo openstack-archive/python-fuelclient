@@ -140,17 +140,6 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.check_deploy_redeploy_changes(dry_run, matcher)
 
     @mock.patch.object(task_object.DeployTask, 'init_with_data')
-    def test_env_deploy_noop_run(self, m_init):
-        env_id = 42
-        expected_uri = self.get_object_uri(self.res_uri, env_id, '/changes')
-        matcher = self.m_request.put(expected_uri, json={})
-
-        noop_run = True
-
-        self.client.deploy_changes(env_id, noop_run=noop_run)
-        self.check_deploy_redeploy_changes(noop_run, matcher, mode='noop_run')
-
-    @mock.patch.object(task_object.DeployTask, 'init_with_data')
     def test_env_redeploy(self, m_init):
         env_id = 42
         expected_uri = self.get_object_uri(self.res_uri, env_id,
@@ -172,18 +161,6 @@ class TestEnvFacade(test_api.BaseLibTest):
 
         self.client.redeploy_changes(env_id, dry_run=dry_run)
         self.check_deploy_redeploy_changes(dry_run, matcher)
-
-    @mock.patch.object(task_object.DeployTask, 'init_with_data')
-    def test_env_redeploy_noop_run(self, m_init):
-        env_id = 42
-        expected_uri = self.get_object_uri(self.res_uri, env_id,
-                                           '/changes/redeploy')
-        matcher = self.m_request.put(expected_uri, json={})
-
-        noop_run = True
-
-        self.client.redeploy_changes(env_id, noop_run=noop_run)
-        self.check_deploy_redeploy_changes(noop_run, matcher, mode='noop_run')
 
     @mock.patch.object(base_object.BaseObject, 'init_with_data')
     def test_env_update(self, m_init):
@@ -294,6 +271,20 @@ class TestEnvFacade(test_api.BaseLibTest):
         matcher = self.m_request.put(expected_url, json=utils.get_fake_task())
 
         self.client.deploy_nodes(env_id, node_ids)
+
+        self.assertTrue(matcher.called)
+        self.assertEqual([','.join(str(i) for i in node_ids)],
+                         matcher.last_request.qs['nodes'])
+
+    def test_env_deploy_nodes_noop_run(self):
+        env_id = 42
+        node_ids = [43, 44]
+
+        expected_url = self.get_object_uri(self.res_uri, env_id, '/deploy/')
+        matcher = self.m_request.put(expected_url, json=utils.get_fake_task())
+
+        noop_run = True
+        self.client.deploy_nodes(env_id, node_ids, noop_run=noop_run)
 
         self.assertTrue(matcher.called)
         self.assertEqual([','.join(str(i) for i in node_ids)],
