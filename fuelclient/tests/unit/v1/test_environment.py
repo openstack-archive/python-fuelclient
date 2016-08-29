@@ -62,10 +62,9 @@ class TestEnvironment(base.UnitTestCase):
     @mock.patch('fuelclient.objects.task.DeployTask.init_with_data')
     def test_deploy_changes(self, task_data):
         dry_run = False
-        noop_run = False
         mdeploy = self.m_request.put('/api/v1/clusters/1/changes'
-                                     '?dry_run={0}&noop_run={1}'.format(
-                                         int(dry_run), int(noop_run)), json={})
+                                     '?dry_run={0}'.format(int(dry_run)),
+                                     json={})
 
         cmd = ['fuel', 'deploy-changes', '--env', '1']
         self.execute(cmd)
