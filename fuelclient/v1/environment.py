@@ -96,12 +96,14 @@ class EnvironmentClient(base_v1.BaseV1Client):
                                               nodes=nodes)
         return self.connection.put_request(uri, {})
 
-    def deploy_nodes(self, environment_id, node_ids):
+    def deploy_nodes(self, environment_id, node_ids, force=False):
         """Deploy specified nodes for the specified environment."""
 
         nodes = ','.join(str(i) for i in node_ids)
         uri = self.deploy_nodes_url.format(env_id=environment_id,
                                            nodes=nodes)
+        if force:
+            uri += '&force=1'
         return self.connection.put_request(uri, {})
 
     def redeploy_changes(self, environment_id, dry_run=False, noop_run=False):
