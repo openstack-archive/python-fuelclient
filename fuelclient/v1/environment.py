@@ -23,7 +23,8 @@ class EnvironmentClient(base_v1.BaseV1Client):
     _updatable_attributes = ('name',)
 
     provision_nodes_url = 'clusters/{env_id}/provision/?nodes={nodes}'
-    deploy_nodes_url = 'clusters/{env_id}/deploy/?nodes={nodes}'
+    deploy_nodes_url = ('clusters/{env_id}/deploy/?'
+                        'nodes={nodes}&noop_run={noop_run}')
 
     def create(self, name, release_id, net_segment_type):
 
@@ -96,12 +97,12 @@ class EnvironmentClient(base_v1.BaseV1Client):
                                               nodes=nodes)
         return self.connection.put_request(uri, {})
 
-    def deploy_nodes(self, environment_id, node_ids):
+    def deploy_nodes(self, environment_id, node_ids, noop_run=False):
         """Deploy specified nodes for the specified environment."""
 
         nodes = ','.join(str(i) for i in node_ids)
         uri = self.deploy_nodes_url.format(env_id=environment_id,
-                                           nodes=nodes)
+                                           nodes=nodes, noop_run=int(noop_run))
         return self.connection.put_request(uri, {})
 
     def redeploy_changes(self, environment_id, dry_run=False, noop_run=False):
