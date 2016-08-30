@@ -79,7 +79,7 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
             data = {}
 
         tasks = []
-        for file_name in iterfiles(dir_path, 'task.yaml'):
+        for file_name in iterfiles(dir_path, 'tasks.yaml'):
             tasks.extend(serializer.read_from_full_path(file_name))
 
         if tasks:
@@ -108,10 +108,9 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
 
         parser.add_argument('-t',
                             '--type',
-                            type=str,
-                            default=None,
-                            required=False,
+                            required=True,
                             help='Type of the deployment graph')
+
         graph_source = parser.add_mutually_exclusive_group(required=True)
         graph_source.add_argument(
             '-f',
