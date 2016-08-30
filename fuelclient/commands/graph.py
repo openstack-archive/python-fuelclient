@@ -79,7 +79,7 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
             data = {}
 
         tasks = []
-        for file_name in iterfiles(dir_path, 'task.yaml'):
+        for file_name in iterfiles(dir_path, 'tasks.yaml'):
             tasks.extend(serializer.read_from_full_path(file_name))
 
         if tasks:
@@ -108,10 +108,9 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
 
         parser.add_argument('-t',
                             '--type',
-                            type=str,
-                            default=None,
-                            required=False,
+                            required=True,
                             help='Type of the deployment graph')
+
         graph_source = parser.add_mutually_exclusive_group(required=True)
         graph_source.add_argument(
             '-f',
@@ -209,7 +208,7 @@ class GraphExecute(base.BaseCommand):
         return parser
 
     def take_action(self, args):
-        self.client.execute(
+        result = self.client.execute(
             env_id=args.env,
             graph_types=args.types,
             nodes=args.nodes,
@@ -218,9 +217,10 @@ class GraphExecute(base.BaseCommand):
             noop_run=args.noop,
             force=args.force
         )
-        self.app.stdout.write(
-            "Deployment was executed\n"
-        )
+        msg = 'Deployment task with id {t} for the environment {e} ' \
+              'has been started.\n'.format(t=result.data['id'],
+                                           e=result.data['cluster'])
+        self.app.stdout.write(msg)
 
 
 class GraphDownload(base.BaseCommand):
@@ -320,7 +320,7 @@ class GraphDownload(base.BaseCommand):
 
 
 class GraphList(base.BaseListCommand):
-    """Upload deployment graph configuration."""
+    """List deployment graphs."""
     entity_name = 'graph'
     columns = ("id",
                "name",
