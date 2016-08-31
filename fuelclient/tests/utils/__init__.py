@@ -32,6 +32,9 @@ from fuelclient.tests.utils.fake_net_conf import get_fake_network_config
 from fuelclient.tests.utils.fake_network_group import get_fake_network_group
 from fuelclient.tests.utils.fake_node import get_fake_node
 from fuelclient.tests.utils.fake_env import get_fake_env
+from fuelclient.tests.utils.fake_extension import get_fake_env_extensions
+from fuelclient.tests.utils.fake_extension import get_fake_extension
+from fuelclient.tests.utils.fake_extension import get_fake_extensions
 from fuelclient.tests.utils.fake_fuel_version import get_fake_fuel_version
 from fuelclient.tests.utils.fake_task import get_fake_task
 from fuelclient.tests.utils.fake_node_group import get_fake_node_group
