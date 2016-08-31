@@ -64,6 +64,7 @@ def get_client(resource, version='v1', connection=None):
             'deployment_history': v1.deployment_history,
             'deployment-info': v1.deployment_info,
             'environment': v1.environment,
+            'extension': v1.extension,
             'fuel-version': v1.fuelversion,
             'graph': v1.graph,
             'network-configuration': v1.network_configuration,
