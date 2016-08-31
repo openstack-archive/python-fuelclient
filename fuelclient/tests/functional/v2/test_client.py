@@ -49,3 +49,34 @@ class TestDeployChanges(base.CLIv2TestCase):
 
         self.check_for_stdout_by_regexp(self.cmd_redeploy_changes,
                                         self.pattern_success)
+
+
+class TestExtensionManagement(base.CLIv2TestCase):
+
+    cmd_create_env = "env create -r {0} cluster-test-extensions-mgmt"
+    cmd_disable_exts = "env extension disable -e 1 --extensions volume_manager"
+    cmd_enable_exts = "env extension enable -e 1 --extensions volume_manager"
+
+    pattern_enable_success = (r"^The following extensions: volume_manager "
+                               r"have been enabled for the environment with "
+                               r"id 1.\n$")
+    pattern_disable_success = (r"^The following extensions: volume_manager "
+                               r"have been disabled for the environment with "
+                               r"id 1.\n$")
+
+    def setUp(self):
+        super(TestExtensionManagement, self).setUp()
+        self.load_data_to_nailgun_server()
+        release_id = self.get_first_deployable_release_id()
+        self.cmd_create_env = self.cmd_create_env.format(release_id)
+        self.run_cli_commands((
+            self.cmd_create_env,
+        ))
+
+    def test_disable_extensions(self):
+        self.check_for_stdout_by_regexp(self.cmd_disable_exts,
+                                        self.pattern_disable_success)
+
+    def test_enable_extensions(self):
+        self.check_for_stdout_by_regexp(self.cmd_enable_exts,
+                                        self.pattern_enable_success)
