@@ -78,6 +78,10 @@ class BaseListCommand(lister.Lister, BaseCommand):
 
     filters = {}
 
+    @property
+    def default_sorting_by(self):
+        return 'id'
+
     @abc.abstractproperty
     def columns(self):
         """Names of columns in the resulting table."""
@@ -100,10 +104,10 @@ class BaseListCommand(lister.Lister, BaseCommand):
                            nargs='+',
                            choices=self.columns,
                            metavar='SORT_COLUMN',
-                           default=['id'],
+                           default=[self.default_sorting_by],
                            help='Space separated list of keys for sorting '
-                                'the data. Defaults to id. Wrong values '
-                                'are ignored.')
+                                'the data. Defaults to {}. Wrong values '
+                                'are ignored.'.format(self.default_sorting_by))
 
         return parser
 
