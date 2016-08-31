@@ -16,6 +16,7 @@ from fuelclient.v1 import cluster_settings
 from fuelclient.v1 import deployment_history
 from fuelclient.v1 import deployment_info
 from fuelclient.v1 import environment
+from fuelclient.v1 import extension
 from fuelclient.v1 import fuelversion
 from fuelclient.v1 import graph
 from fuelclient.v1 import network_configuration
@@ -34,6 +35,7 @@ __all__ = ('cluster_settings',
            'deployment_history',
            'deployment_info',
            'environment',
+           'extension',
            'fuelversion',
            'graph',
            'network_configuration',
