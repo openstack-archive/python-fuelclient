@@ -204,6 +204,89 @@ class EnvShow(EnvMixIn, base.BaseShowCommand):
                "changes")
 
 
+class EnvExtensionList(EnvList):
+    """Show list of enabled extensions for enviroment with given id."""
+    columns = ("extensions",
+               )
+
+    def take_action(self.parsed_args):
+        data = self.client.get_extensions(parsed_args.id)
+
+        return (self.columns, data)
+
+
+class EnvExtensionMixIn(EnvMixIn, base.BaseCommand):
+
+    def get_parser(self, prog_name):
+        parser = super(EnvExtensionEnable, self).get_parser(prog_name)
+
+        parser.add_argument('-e',
+                            '--env',
+                            required=True,
+                            type=int,
+                            help='Id of the environment.')
+
+        return parser
+
+
+class EnvExtensionEnable(EnvExtensionMixIn):
+    """Enable specified extensions for a specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvExtensionEnable, self).get_parser(prog_name)
+
+        parser.add_argument('-E',
+                            '--extensions',
+                            required=True,
+                            type=int,
+                            nargs='+',
+                            help='Names of extensions to enable.')
+
+        return parser
+
+
+    def take_action(self, parsed_args):
+        exts = self.client.get_extensions(parsed_args.env)
+        enabled_exts = set(exts + [parsed_args.extensions])
+        data = self.client.set_extensions(parsed_args.id, enabled_exts)
+
+        msg = ('Fhe following extensions {e} have been enabled for '
+               'the environment with id {id}.\n').format(
+                    e=', '.join(enabled_exts),
+                    id=parsed_args.id)
+
+        self.app.stdout.write(msg)
+
+
+class EnvExtensionDisable(EnvExtensionMixIn):
+    """Disable specified extensions for a specified environment."""
+
+    def get_parser(self, prog_name):
+        parser = super(EnvExtensionDisable, self).get_parser(prog_name)
+
+        parser.add_argument('-E',
+                            '--extensions',
+                            required=True,
+                            type=int,
+                            nargs='+',
+                            help='Names of extensions to disable.')
+
+        return parser
+
+
+    def take_action(self, parsed_args):
+        exts = self.client.get_extensions(parsed_args.env)
+        enabled_exts = set(exts) - set(parsed_args.extensions)
+        data = self.client.set_extensions(parsed_args.id, enabled_exts)
+
+        msg = ('Fhe following extensions {e} have been enabled for '
+               'the environment with id {id}.\n').format(
+                    e=', '.join(enabled_exts),
+                    id=parsed_args.id)
+
+        self.app.stdout.write(msg)
+
+
 class EnvCreate(EnvMixIn, base.BaseShowCommand):
     """Creates environment with given attributes."""
 
