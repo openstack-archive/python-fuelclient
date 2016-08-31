@@ -78,6 +78,10 @@ class BaseListCommand(lister.Lister, BaseCommand):
 
     filters = {}
 
+    @property
+    def default_sorting_by(self):
+        return 'id'
+
     @abc.abstractproperty
     def columns(self):
         """Names of columns in the resulting table."""
@@ -100,10 +104,10 @@ class BaseListCommand(lister.Lister, BaseCommand):
                            nargs='+',
                            choices=self.columns,
                            metavar='SORT_COLUMN',
-                           default=['id'],
+                           default=[self.default_sorting_by],
                            help='Space separated list of keys for sorting '
-                                'the data. Defaults to id. Wrong values '
-                                'are ignored.')
+                                'the data. Defaults to {}. Wrong values '
+                                'are ignored.'.format(self.default_sorting_by))
 
         return parser
 
@@ -129,6 +133,10 @@ class BaseListCommand(lister.Lister, BaseCommand):
 class BaseShowCommand(show.ShowOne, BaseCommand):
     """Shows detailed information about the entity."""
 
+    @property
+    def help_entity_name(self):
+        return self.entity_name
+
     @abc.abstractproperty
     def columns(self):
         """Names of columns in the resulting table."""
@@ -138,7 +146,8 @@ class BaseShowCommand(show.ShowOne, BaseCommand):
         parser = super(BaseShowCommand, self).get_parser(prog_name)
 
         parser.add_argument('id', type=int,
-                            help='Id of the {0}.'.format(self.entity_name))
+                            help='Id of the {0}.'.format(
+                                self.help_entity_name))
 
         return parser
 
