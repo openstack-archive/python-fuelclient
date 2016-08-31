@@ -151,13 +151,14 @@ class APIClient(object):
         if self.debug:
             print(message)
 
-    def delete_request(self, api):
+    def delete_request(self, api, data=None):
         """Make DELETE request to specific API with some data."""
 
         url = self.api_root + api
-        self.print_debug('DELETE {0}'.format(url))
+        data_json = json.dumps(data)
+        self.print_debug('DELETE {0} data={1}'.format(url, data_json))
 
-        resp = self.session.delete(url)
+        resp = self.session.delete(url, data=data_json)
         self._raise_for_status_with_info(resp)
 
         return self._decode_content(resp)

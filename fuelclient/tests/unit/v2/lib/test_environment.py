@@ -492,7 +492,7 @@ class TestEnvFacade(test_api.BaseLibTest):
         matcher = self.m_request.delete(expected_uri, json={})
         self.client.delete_facts(env_id, fact_type)
         self.assertTrue(matcher.called)
-        self.assertIsNone(matcher.last_request.body)
+        self.assertEqual('null', matcher.last_request.body)
 
     def test_download_facts(self):
         env_id = 42
