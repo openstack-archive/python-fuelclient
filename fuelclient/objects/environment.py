@@ -215,6 +215,10 @@ class Environment(BaseObject):
     def status(self):
         return self.get_fresh_data()['status']
 
+	@property
+	def extensions_url(self):
+		return 'clusters/{0}/extensions'.format(self.id)
+
     @property
     def settings_url(self):
         return self.attributes_path.format(self.id)
@@ -664,3 +668,13 @@ class Environment(BaseObject):
         """
         return self.connection.post_request(self._get_ip_addrs_url(),
                                             vip_kwargs)
+
+    def get_extensions(self):
+        return self.connection.get_request(self.extensions_url)
+
+    def set_extensions(self, extensions):
+        """Enable extensions through request to the Nailgun API
+
+        :param extensions: list of extenstion to be enabled
+        """
+        return self.connection.put_request(self.extensions_url, extensions)
