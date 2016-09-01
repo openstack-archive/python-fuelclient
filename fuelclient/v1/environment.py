@@ -186,6 +186,10 @@ class EnvironmentClient(base_v1.BaseV1Client):
         env = self._entity_wrapper(obj_id=env_id)
         return env.reset(force)
 
+    def stop(self, env_id):
+        env = self._entity_wrapper(obj_id=env_id)
+        return env.stop()
+
 
 def get_client(connection):
     return EnvironmentClient(connection)
