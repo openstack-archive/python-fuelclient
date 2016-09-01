@@ -544,11 +544,16 @@ class EnvDeployNodes(EnvMixIn, base.BaseCommand):
                             type=int,
                             nargs='+',
                             help='Ids of nodes to deploy.')
+        parser.add_argument('-f',
+                            '--force',
+                            action='store_true',
+                            help='Force deploy nodes.')
         return parser
 
     def take_action(self, parsed_args):
         node_ids = parsed_args.nodes
-        task = self.client.deploy_nodes(parsed_args.env, node_ids)
+        task = self.client.deploy_nodes(parsed_args.env, node_ids,
+                                        force=parsed_args.force)
 
         msg = ('Deployment task with id {t} for the nodes {n} within '
                'the environment {e} has been '

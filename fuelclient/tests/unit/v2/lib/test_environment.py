@@ -334,6 +334,21 @@ class TestEnvFacade(test_api.BaseLibTest):
         self.assertEqual([','.join(str(i) for i in node_ids)],
                          matcher.last_request.qs['nodes'])
 
+    def test_env_deploy_nodes_force(self):
+        env_id = 42
+        node_ids = [43, 44]
+        force = True
+
+        expected_url = self.get_object_uri(self.res_uri, env_id, '/deploy/')
+        matcher = self.m_request.put(expected_url, json=utils.get_fake_task())
+
+        self.client.deploy_nodes(env_id, node_ids, force=force)
+
+        self.assertTrue(matcher.called)
+        self.assertEqual([','.join(str(i) for i in node_ids)],
+                         matcher.last_request.qs['nodes'])
+        self.assertEqual(matcher.last_request.qs['force'][0], str(int(force)))
+
     def test_env_provision_nodes(self):
         env_id = 42
         node_ids = [43, 44]
