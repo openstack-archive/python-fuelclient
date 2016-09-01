@@ -143,7 +143,7 @@ class GraphClient(base_v1.BaseV1Client):
             'cluster': lambda: self.get_graph_for_model(
                 related_model='clusters',
                 related_model_id=env_id,
-                graph_type=graph_type).get('tasks', []),
+                graph_type=graph_type)[0].get('tasks', []),
 
             'plugins': lambda: self.get_merged_plugins_tasks(
                 env_id=env_id,
