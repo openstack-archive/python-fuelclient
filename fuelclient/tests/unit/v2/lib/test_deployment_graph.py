@@ -192,7 +192,7 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
     def test_graphs_download_cluster(self):
         matcher_get = self.m_request.get(
             '/api/v1/clusters/1/deployment_graphs/custom_graph',
-            json={'tasks': []}
+            json=[{'tasks': []}]
         )
         self.client.download(env_id=1, level='cluster',
                              graph_type='custom_graph')
