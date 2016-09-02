@@ -248,7 +248,20 @@ class TestEnvCommand(test_engine.BaseCLITest):
         self.exec_command(args)
 
         self.m_client.deploy_nodes.return_value = fake_task.get_fake_task()
-        self.m_client.deploy_nodes.assert_called_once_with(env_id, node_ids)
+        self.m_client.deploy_nodes.assert_called_once_with(env_id, node_ids,
+                                                           force=False)
+
+    def test_env_nodes_deploy_force(self):
+        env_id = 42
+        node_ids = [43, 44]
+        args = ('env nodes deploy --force '
+                '--nodes {n[0]} {n[1]} --env {e}').format(e=env_id, n=node_ids)
+
+        self.exec_command(args)
+
+        self.m_client.deploy_nodes.return_value = fake_task.get_fake_task()
+        self.m_client.deploy_nodes.assert_called_once_with(env_id, node_ids,
+                                                           force=True)
 
     def test_env_nodes_provision(self):
         env_id = 42
