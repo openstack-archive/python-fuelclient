@@ -65,11 +65,11 @@ class BaseCommand(command.Command):
 
     @property
     def supported_file_formats(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @property
     def allowed_attr_types(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 @six.add_metaclass(abc.ABCMeta)
