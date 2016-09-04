@@ -18,6 +18,7 @@ import mock
 import six
 import yaml
 
+from fuelclient.cli import error
 from fuelclient.tests.unit.v2.cli import test_engine
 
 TASKS_YAML = '''- id: custom-task-1
@@ -145,6 +146,16 @@ class TestGraphActions(test_engine.BaseCLITest):
                 related_id=1,
                 graph_type='provision'
             )
+
+    @mock.patch('fuelclient.commands.graph.os')
+    @mock.patch('fuelclient.commands.graph.iterfiles')
+    def test_graph_upload_from_dir_fail(self, iterfiles_m, os_m):
+        os_m.path.isdir.return_value = True
+        os_m.path.exists.side_effect = [True, False]
+        iterfiles_m.return_value = []
+        args = 'graph upload --release 1 --dir /graph/provision -t provision'
+
+        self.assertRaises(error.ActionException, self.exec_command, args)
 
     @mock.patch('sys.stderr')
     def test_upload_fail(self, mocked_stderr):
