@@ -1,0 +1,11 @@
+Code-Review+1: Aleksandr Gordeev <agordeev@mirantis.com>
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Code-Review+2: Vitalii Kulanov <vitaliy@kulanov.org.ua>
+Code-Review+2: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Workflow+1: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 05 Sep 2016 12:38:09 +0000
+Reviewed-on: https://review.openstack.org/364305
+Project: openstack/python-fuelclient
+Branch: refs/heads/stable/mitaka
