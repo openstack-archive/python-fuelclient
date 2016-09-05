@@ -36,6 +36,9 @@ from fuelclient.tests.utils.fake_extension import get_fake_env_extensions
 from fuelclient.tests.utils.fake_extension import get_fake_extension
 from fuelclient.tests.utils.fake_extension import get_fake_extensions
 from fuelclient.tests.utils.fake_fuel_version import get_fake_fuel_version
+from fuelclient.tests.utils.fake_health import get_fake_test_set
+from fuelclient.tests.utils.fake_health import get_fake_test_sets
+from fuelclient.tests.utils.fake_health import get_fake_test_set_item
 from fuelclient.tests.utils.fake_task import get_fake_task
 from fuelclient.tests.utils.fake_node_group import get_fake_node_group
 from fuelclient.tests.utils.fake_node_group import get_fake_node_groups
@@ -59,6 +62,9 @@ __all__ = (get_fake_deployment_history,
            get_fake_yaml_network_conf,
            get_fake_env,
            get_fake_env_network_conf,
+           get_fake_test_set,
+           get_fake_test_sets,
+           get_fake_test_set_item,
            get_fake_release,
            get_fake_releases,
            get_fake_attributes_metadata,
