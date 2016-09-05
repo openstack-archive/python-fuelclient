@@ -401,20 +401,24 @@ class Environment(BaseObject):
             "nodes": node_facts
         }
 
+    # TODO(vkulanov): remove method when deprecate old cli
     def get_testsets(self):
         return self.connection.get_request(
             'testsets/{0}'.format(self.id),
             ostf=True
         )
 
+    # TODO(vkulanov): remove property when deprecate old cli
     @property
     def is_customized(self):
         data = self.get_fresh_data()
         return data["is_customized"]
 
+    # TODO(vkulanov): remove method when deprecate old cli
     def is_in_running_test_sets(self, test_set):
         return test_set["testset"] in self._test_sets_to_run
 
+    # TODO(vkulanov): remove method when deprecate old cli
     def run_test_sets(self, test_sets_to_run, ostf_credentials=None):
         self._test_sets_to_run = test_sets_to_run
 
@@ -443,6 +447,7 @@ class Environment(BaseObject):
         self._testruns_ids = [tr['id'] for tr in testruns]
         return testruns
 
+    # TODO(vkulanov): remove method when deprecate old cli
     def get_state_of_tests(self):
         return [
             self.connection.get_request(
