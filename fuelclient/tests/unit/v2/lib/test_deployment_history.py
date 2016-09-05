@@ -35,9 +35,8 @@ class TestDeploymentHistoryFacade(test_api.BaseLibTest):
         self.client = fuelclient.get_client('deployment_history', self.version)
 
     def get_url(self, nodes='', statuses='', tasks_names=''):
-        return self.res_uri + '?nodes={}&statuses={}&tasks_names={}'.format(
-            nodes, statuses, tasks_names
-        )
+        params = '?nodes={}&statuses={}&tasks_names={}'
+        return self.res_uri + params.format(nodes, statuses, tasks_names)
 
     def test_deployment_history_list(self):
 
