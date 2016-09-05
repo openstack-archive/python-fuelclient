@@ -65,6 +65,7 @@ class NodeAction(Action):
                 "Select directory to which download node attributes"),
             Args.get_node_arg("Node id."),
             Args.get_force_arg("Bypassing parameter validation."),
+            Args.get_noop_run_deployment_arg(),
             Args.get_all_arg("Select all nodes."),
             Args.get_role_arg("Role to assign for node."),
             group(
@@ -268,6 +269,7 @@ class NodeAction(Action):
 
         tasks = params.tasks or None
         force = params.force or None
+        noop_run = params.noop_run or None
 
         if params.skip or params.end or params.start:
             tasks = env.get_tasks(
@@ -281,7 +283,8 @@ class NodeAction(Action):
             return
 
         task = env.execute_tasks(
-            node_collection.collection, tasks=tasks, force=force)
+            node_collection.collection, tasks=tasks, force=force,
+            noop_run=noop_run)
 
         self.serializer.print_to_output(
             task.data,
