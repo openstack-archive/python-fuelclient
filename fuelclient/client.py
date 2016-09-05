@@ -162,17 +162,18 @@ class APIClient(object):
 
         return self._decode_content(resp)
 
-    def put_request(self, api, data, **params):
+    def put_request(self, api, data, ostf=False, **params):
         """Make PUT request to specific API with some data.
 
         :param api: API endpoint (path)
         :param data: Data send in request, will be serialized to JSON
+        :param ostf: is this a call to OSTF API
         :param params: Params of query string
         """
-        url = self.api_root + api
+        url = (self.ostf_root if ostf else self.api_root) + api
         data_json = json.dumps(data)
         resp = self.session.put(url, data=data_json, params=params)
-
+        
         self.print_debug('PUT {0} data={1}'.format(resp.url, data_json))
         self._raise_for_status_with_info(resp)
         return self._decode_content(resp)
