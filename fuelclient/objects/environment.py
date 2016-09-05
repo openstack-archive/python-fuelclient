@@ -467,7 +467,7 @@ class Environment(BaseObject):
             )
         )
 
-    def _get_method_url(self, method_type, nodes, force=False):
+    def _get_method_url(self, method_type, nodes, force=False, noop_run=False):
         endpoint = "clusters/{0}/{1}/?nodes={2}".format(
             self.id,
             method_type,
@@ -475,6 +475,8 @@ class Environment(BaseObject):
 
         if force:
             endpoint += '&force=1'
+        if noop_run:
+            endpoint += '&noop_run=1'
 
         return endpoint
 
@@ -486,10 +488,11 @@ class Environment(BaseObject):
             )
         )
 
-    def execute_tasks(self, nodes, tasks, force):
+    def execute_tasks(self, nodes, tasks, force, noop_run):
         return Task.init_with_data(
             self.connection.put_request(
-                self._get_method_url('deploy_tasks', nodes=nodes, force=force),
+                self._get_method_url('deploy_tasks', nodes=nodes, force=force,
+                                     noop_run=noop_run),
                 tasks
             )
         )

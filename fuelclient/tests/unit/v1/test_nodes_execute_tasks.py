@@ -53,6 +53,17 @@ class TestNodeExecuteTasksAction(base.UnitTestCase):
         )
         self.assertEqual(put.last_request.json(), self.tasks)
 
+    def test_execute_provided_list_of_tasks_noop_run(self):
+        put = self.m_request.put(rm.ANY, json={'id': 43})
+
+        self.execute((['fuel', 'node', '--node', '1,2', '--tasks']
+                      + self.tasks + ['--noop']))
+        self.assertEqual(
+            put.last_request.url,
+            'http://127.0.0.1:8000/api/v1/clusters/1/deploy_tasks/?nodes=1,2'
+            '&noop_run=1')
+        self.assertEqual(put.last_request.json(), self.tasks)
+
     @patch('fuelclient.objects.environment.Environment.get_deployment_tasks')
     def test_skipped_tasks(self, get_tasks):
         get_tasks.return_value = [{'id': t} for t in self.tasks]
