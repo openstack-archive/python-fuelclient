@@ -18,6 +18,7 @@ from fuelclient.v1 import deployment_info
 from fuelclient.v1 import environment
 from fuelclient.v1 import fuelversion
 from fuelclient.v1 import graph
+from fuelclient.v1 import health
 from fuelclient.v1 import network_configuration
 from fuelclient.v1 import network_group
 from fuelclient.v1 import node
@@ -37,6 +38,7 @@ __all__ = ('cluster_settings',
            'environment',
            'fuelversion',
            'graph',
+           'health',
            'network_configuration',
            'network_group',
            'node',

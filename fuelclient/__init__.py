@@ -66,6 +66,7 @@ def get_client(resource, version='v1', connection=None):
             'environment': v1.environment,
             'fuel-version': v1.fuelversion,
             'graph': v1.graph,
+            'health': v1.health,
             'network-configuration': v1.network_configuration,
             'network-group': v1.network_group,
             'node': v1.node,
