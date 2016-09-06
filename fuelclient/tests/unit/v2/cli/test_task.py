@@ -81,6 +81,25 @@ class TestTaskCommand(test_engine.BaseCLITest):
                                                       nodes=None,
                                                       statuses=None,
                                                       tasks_names=None,
+                                                      include_summary=False,
+                                                      show_parameters=False)
+
+    def test_task_history_show_include_summary(self):
+        task_id = 42
+        args = 'task history show {task_id} '.format(task_id=task_id)
+        args += '--include-summary '
+
+        self.m_client.get_all.return_value = \
+            utils.get_fake_deployment_history(include_summary=True)
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('deployment_history',
+                                                  mock.ANY)
+        self.m_client.get_all.assert_called_once_with(transaction_id=task_id,
+                                                      nodes=None,
+                                                      statuses=None,
+                                                      tasks_names=None,
+                                                      include_summary=True,
                                                       show_parameters=False)
 
     def test_task_history_parameters(self):
@@ -99,6 +118,7 @@ class TestTaskCommand(test_engine.BaseCLITest):
         self.m_client.get_all.assert_called_once_with(
             transaction_id=task_id, nodes=['1', '2'],
             statuses=['ready', 'error'], tasks_names=['task1', 'task2'],
+            include_summary=False,
             show_parameters=True)
 
     def _test_cmd(self, cmd, method, cmd_line, client,
@@ -208,6 +228,7 @@ class TestDeploymentTasksAction(test_engine.BaseCLITest):
             statuses=['ready'],
             tasks_names=['taskname1', 'taskname2'],
             transaction_id=1,
+            include_summary=False,
             show_parameters=True)
 
         m_formatter.assert_called_once_with(expected_fields,
