@@ -73,6 +73,7 @@ def get_client(resource, version='v1', connection=None):
             'plugins': v1.plugins,
             'release': v1.release,
             'role': v1.role,
+            'sequence': v1.sequence,
             'snapshot': v1.snapshot,
             'task': v1.task,
             'vip': v1.vip
