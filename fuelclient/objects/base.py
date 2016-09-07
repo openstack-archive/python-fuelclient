@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from six.moves.urllib.parse import urlencode
+
 from fuelclient.cli.serializers import Serializer
 from fuelclient.client import DefaultAPIClient
 
@@ -60,9 +62,12 @@ class BaseObject(object):
             return self._data
 
     @classmethod
-    def get_all_data(cls):
-        return cls.connection.get_request(cls.class_api_path)
+    def get_all_data(cls, **kwargs):
+        url = cls.class_api_path
+        if kwargs:
+            url = '?'.join((url, urlencode(kwargs)))
+        return cls.connection.get_request(url)
 
     @classmethod
-    def get_all(cls):
-        return map(cls.init_with_data, cls.get_all_data())
+    def get_all(cls, **kwargs):
+        return map(cls.init_with_data, cls.get_all_data(**kwargs))
