@@ -25,6 +25,7 @@ from fuelclient.v1 import openstack_config
 from fuelclient.v1 import release
 from fuelclient.v1 import role
 from fuelclient.v1 import plugins
+from fuelclient.v1 import sequence
 from fuelclient.v1 import snapshot
 from fuelclient.v1 import task
 from fuelclient.v1 import vip
@@ -43,6 +44,7 @@ __all__ = ('cluster_settings',
            'plugins',
            'release',
            'role',
+           'sequence',
            'snapshot',
            'task',
            'vip')
