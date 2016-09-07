@@ -76,6 +76,8 @@ class BaseCommand(command.Command):
 class BaseListCommand(lister.Lister, BaseCommand):
     """Lists all entities showing some information."""
 
+    filters = {}
+
     @abc.abstractproperty
     def columns(self):
         """Names of columns in the resulting table."""
@@ -106,7 +108,13 @@ class BaseListCommand(lister.Lister, BaseCommand):
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.get_all()
+        filters = {}
+        for name, prop in self.filters.items():
+            value = getattr(parsed_args, prop, None)
+            if value is not None:
+                filters[name] = value
+
+        data = self.client.get_all(**filters)
         data = data_utils.get_display_data_multi(self.columns, data)
 
         scolumn_ids = [self.columns.index(col)
