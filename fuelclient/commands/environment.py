@@ -464,7 +464,7 @@ class EnvDeploy(EnvMixIn, base.BaseCommand):
             '-d', '--dry-run', dest="dry_run",
             action='store_true', help=dry_run_help_string)
         parser.add_argument(
-            '-n', '--noop', dest="noop_run",
+            '--noop', dest="noop_run",
             action='store_true', help=noop_run_help_string)
 
         return parser
@@ -548,12 +548,21 @@ class EnvDeployNodes(EnvMixIn, base.BaseCommand):
                             '--force',
                             action='store_true',
                             help='Force deploy nodes.')
+
+        noop_run_help_string = 'Specifies noop-run deployment ' \
+                               'configuring tasks executor to run ' \
+                               'puppet and shell tasks in noop mode and ' \
+                               'skip all other. Stores noop-run result ' \
+                               'summary in nailgun database'
+        parser.add_argument('--noop', dest="noop_run", action='store_true',
+                            help=noop_run_help_string)
         return parser
 
     def take_action(self, parsed_args):
         node_ids = parsed_args.nodes
         task = self.client.deploy_nodes(parsed_args.env, node_ids,
-                                        force=parsed_args.force)
+                                        force=parsed_args.force,
+                                        noop_run=parsed_args.noop_run)
 
         msg = ('Deployment task with id {t} for the nodes {n} within '
                'the environment {e} has been '
