@@ -130,7 +130,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
         dry_run = False
         noop_run = True
 
-        args = 'env deploy -n'
+        args = 'env deploy --noop'
         args += ' 42'
 
         self.exec_command(args)
@@ -180,7 +180,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
     def test_env_redeploy_noop_run(self):
         dry_run = False
         noop_run = True
-        args = 'env redeploy -n'
+        args = 'env redeploy --noop'
 
         args += ' 42'
 
@@ -242,6 +242,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
     def test_env_nodes_deploy(self):
         env_id = 42
         node_ids = [43, 44]
+        noop_run = False
         args = ('env nodes deploy '
                 '--nodes {n[0]} {n[1]} --env {e}').format(e=env_id, n=node_ids)
 
@@ -249,11 +250,14 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_client.deploy_nodes.return_value = fake_task.get_fake_task()
         self.m_client.deploy_nodes.assert_called_once_with(env_id, node_ids,
-                                                           force=False)
+                                                           force=False,
+                                                           noop_run=noop_run)
 
     def test_env_nodes_deploy_force(self):
         env_id = 42
         node_ids = [43, 44]
+        force = True
+        noop_run = False
         args = ('env nodes deploy --force '
                 '--nodes {n[0]} {n[1]} --env {e}').format(e=env_id, n=node_ids)
 
@@ -261,7 +265,23 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_client.deploy_nodes.return_value = fake_task.get_fake_task()
         self.m_client.deploy_nodes.assert_called_once_with(env_id, node_ids,
-                                                           force=True)
+                                                           noop_run=noop_run,
+                                                           force=force)
+
+    def test_env_nodes_deploy_noop_run(self):
+        env_id = 42
+        node_ids = [43, 44]
+        force = False
+        noop_run = True
+        args = ('env nodes deploy --noop '
+                '--nodes {n[0]} {n[1]} --env {e}').format(e=env_id, n=node_ids)
+
+        self.exec_command(args)
+
+        self.m_client.deploy_nodes.return_value = fake_task.get_fake_task()
+        self.m_client.deploy_nodes.assert_called_once_with(env_id, node_ids,
+                                                           force=force,
+                                                           noop_run=noop_run)
 
     def test_env_nodes_provision(self):
         env_id = 42
