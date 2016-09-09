@@ -38,8 +38,8 @@ class BaseV1Client(object):
             {'connection': self.connection}
         )
 
-    def get_all(self):
-        result = self._entity_wrapper.get_all_data()
+    def get_all(self, **kwargs):
+        result = self._entity_wrapper.get_all_data(**kwargs)
 
         return result
 
