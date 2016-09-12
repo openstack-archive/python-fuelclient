@@ -203,10 +203,10 @@ class TestUtils(base.UnitTestCase):
     def test_get_display_data_bad_key(self):
         test_data = {'a': 1, 'b': 2, 'c': 3}
         fields = ('b', 'bad_key')
-
-        self.assertRaises(error.BadDataException,
-                          data_utils.get_display_data_single,
-                          fields, test_data)
+        self.assertEqual(
+            [2, None],
+            data_utils.get_display_data_single(fields, test_data)
+        )
 
     def test_get_display_data_multi(self):
         test_data = [{'a': 1, 'b': 2, 'c': 3}, {'b': 8, 'c': 9}]
