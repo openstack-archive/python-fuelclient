@@ -16,27 +16,23 @@ import json
 import os
 import yaml
 
-from fuelclient.cli import error
 from fuelclient import utils
 
 
-def get_display_data_single(fields, data):
+def get_display_data_single(fields, data, missing_field_value='-'):
     """Performs slicing of data by set of given fields
 
     :param fields: Iterable containing names of fields to be retrieved
                    from data
     :param data:   Collection of JSON objects representing some
                    external entities
+    :param missing_field_value: the value will be used for all missing fields
 
     :return:       list containing the collection of values of the
                    supplied attributes.
 
     """
-    try:
-        return [data[field] for field in fields]
-    except KeyError as e:
-        raise error.BadDataException('{} is not found in the supplied '
-                                     'data.'.format(e.args[0]))
+    return [data.get(field, missing_field_value) for field in fields]
 
 
 def get_display_data_multi(fields, data):
