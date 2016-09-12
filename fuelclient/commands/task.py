@@ -126,8 +126,10 @@ class TaskList(TaskMixIn, base.BaseListCommand):
     columns = ('id',
                'status',
                'name',
+               'graph_type',
                'cluster',
                'result',
+               'dry_run',
                'progress')
 
 
@@ -137,8 +139,10 @@ class TaskShow(TaskMixIn, base.BaseShowCommand):
                'uuid',
                'status',
                'name',
+               'graph_type',
                'cluster',
                'result',
+               'dry_run',
                'progress',
                'message')
 
