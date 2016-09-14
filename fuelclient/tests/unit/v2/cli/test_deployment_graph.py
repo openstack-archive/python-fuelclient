@@ -251,6 +251,16 @@ class TestGraphActions(test_engine.BaseCLITest):
             )
         )
 
+    def test_execute_with_json_output(self):
+        self.m_client.execute.return_value = mock.MagicMock(
+            data={'id': 1}
+        )
+        with mock.patch('sys.stdout') as stdout_mock:
+            self.exec_command(
+                'graph execute --env 1 --graph-types graph1 --format=json'
+            )
+        stdout_mock.write.assert_called_with('{\n    "id": 1\n}\n')
+
     def test_download(self):
         self._test_cmd(
             'download',
