@@ -197,16 +197,7 @@ class SequenceExecute(SequenceMixIn, base.BaseTasksExecuteCommand):
         )
         return parser
 
-    def take_action(self, args):
-        result = self.client.execute(
-            sequence_id=args.id,
-            env_id=args.env,
-            dry_run=args.dry_run,
-            noop_run=args.noop,
-            force=args.force,
-            debug=args.trace
-        )
-        msg = 'Deployment task with id {t} for the environment {e} ' \
-              'has been started.\n'.format(t=result.data['id'],
-                                           e=result.data['cluster'])
-        self.app.stdout.write(msg)
+    def get_options(self, parsed_args):
+        return {
+            'sequence_id': parsed_args.id,
+        }
