@@ -185,7 +185,7 @@ class SequenceList(SequenceMixIn, base.BaseListCommand):
         return parser
 
 
-class SequenceExecute(SequenceMixIn, base.BaseCommand):
+class SequenceExecute(SequenceMixIn, base.BaseTasksExecuteCommand):
     """Executes sequence on specified environment."""
 
     def get_parser(self, prog_name):
@@ -195,34 +195,6 @@ class SequenceExecute(SequenceMixIn, base.BaseCommand):
             type=int,
             help='Id of the Sequence.'
         )
-        parser.add_argument(
-            '-e', '--env',
-            type=int,
-            required=True,
-            help='Id of the environment'
-        )
-        parser.add_argument(
-            '--dry-run',
-            action="store_true",
-            default=False,
-            help='Specifies to dry-run a deployment by configuring '
-                 'task executor to dump the deployment graph to a dot file.')
-        parser.add_argument(
-            '--force',
-            action="store_true",
-            default=False,
-            help='Force run all deployment tasks '
-                 'without evaluating conditions.'
-        )
-        parser.add_argument(
-            '--noop',
-            action="store_true",
-            default=False,
-            help='Specifies noop-run deployment configuring '
-            'tasks executor to run puppet and shell tasks in '
-            'noop mode and skip all other. Stores noop-run '
-            'result summary in nailgun database.'
-        )
         return parser
 
     def take_action(self, args):
@@ -231,7 +203,8 @@ class SequenceExecute(SequenceMixIn, base.BaseCommand):
             env_id=args.env,
             dry_run=args.dry_run,
             noop_run=args.noop,
-            force=args.force
+            force=args.force,
+            debug=args.trace
         )
         msg = 'Deployment task with id {t} for the environment {e} ' \
               'has been started.\n'.format(t=result.data['id'],

@@ -158,77 +158,96 @@ class TestGraphActions(test_engine.BaseCLITest):
     def test_execute(self):
         self._test_cmd(
             'execute',
-            '--env 1 --type custom_graph another_custom_graph --nodes 1 2 3',
+            '--env 1 --graph-types graph1 graph2 --nodes 1 2 3',
             dict(
                 env_id=1,
-                graph_types=['custom_graph', 'another_custom_graph'],
+                graph_types=['graph1', 'graph2'],
                 nodes=[1, 2, 3],
                 task_names=None,
                 dry_run=False,
                 noop_run=False,
-                force=False
+                force=False,
+                debug=False
             )
         )
 
     def test_execute_w_dry_run(self):
         self._test_cmd(
             'execute',
-            '--env 1 --type custom_graph another_custom_graph '
-            '--nodes 1 2 3 --dry-run',
+            '--env 1 --graph-types graph1 graph2 --nodes 1 2 3 --dry-run',
             dict(
                 env_id=1,
-                graph_types=['custom_graph', 'another_custom_graph'],
+                graph_types=['graph1', 'graph2'],
                 nodes=[1, 2, 3],
                 task_names=None,
                 dry_run=True,
                 noop_run=False,
-                force=False
-            )
-        )
-
-    def test_execute_w_noop_run(self):
-        self._test_cmd(
-            'execute',
-            '--env 1 --type custom_graph another_custom_graph '
-            '--nodes 1 2 3 --noop',
-            dict(
-                env_id=1,
-                graph_types=['custom_graph', 'another_custom_graph'],
-                nodes=[1, 2, 3],
-                task_names=None,
-                dry_run=False,
-                noop_run=True,
-                force=False
+                force=False,
+                debug=False
             )
         )
 
     def test_execute_w_force(self):
         self._test_cmd(
             'execute',
-            '--env 1 --force',
+            '--env 1 --graph-types graph1 --force',
             dict(
                 env_id=1,
-                graph_types=None,
+                graph_types=['graph1'],
                 nodes=None,
                 task_names=None,
                 dry_run=False,
                 noop_run=False,
-                force=True
+                force=True,
+                debug=False
             )
         )
 
     def test_execute_w_task_names(self):
         self._test_cmd(
             'execute',
-            '--env 1 --task-names task1 task2',
+            '--env 1 --graph-types graph1 --task-names task1 task2',
             dict(
                 env_id=1,
-                graph_types=None,
+                graph_types=['graph1'],
                 nodes=None,
                 task_names=['task1', 'task2'],
                 dry_run=False,
                 noop_run=False,
-                force=False
+                force=False,
+                debug=False
+            )
+        )
+
+    def test_execute_w_noop_run(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --graph-types graph1 graph2 --nodes 1 2 3 --noop',
+            dict(
+                env_id=1,
+                graph_types=['graph1', 'graph2'],
+                nodes=[1, 2, 3],
+                task_names=None,
+                dry_run=False,
+                noop_run=True,
+                force=False,
+                debug=False
+            )
+        )
+
+    def test_execute_w_trace(self):
+        self._test_cmd(
+            'execute',
+            '--env 1 --graph-types graph1 --trace',
+            dict(
+                env_id=1,
+                graph_types=['graph1'],
+                nodes=None,
+                task_names=None,
+                dry_run=False,
+                noop_run=False,
+                force=False,
+                debug=True
             )
         )
 
