@@ -29,7 +29,7 @@ class TestTaskCommand(test_engine.BaseCLITest):
         super(TestTaskCommand, self).setUp()
 
         self.m_client.get_all.return_value = [utils.get_fake_task()
-                                              for i in range(10)]
+                                              for _ in range(10)]
         self.m_client.get_by_id.return_value = utils.get_fake_task()
         self.current_path = os.path.join(os.path.abspath(os.curdir))
 
@@ -39,6 +39,30 @@ class TestTaskCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('task', mock.ANY)
         self.m_client.get_all.assert_called_once_with()
+
+    def test_task_list_w_parameters(self):
+        env_id = 45
+        statuses = ['ready', 'error']
+        names = ['provision', 'dump']
+        args = 'task list -e {env_id} -t {statuses} -n {names}'.format(
+            env_id=env_id,
+            statuses=' '.join(statuses),
+            names=' '.join(names))
+
+        self.exec_command(args)
+
+        self.m_get_client.assert_called_once_with('task', mock.ANY)
+        self.m_client.get_all.assert_called_once_with(cluster_id=env_id,
+                                                      statuses=statuses,
+                                                      transaction_types=names)
+
+    @mock.patch('sys.stderr')
+    def test_task_list_w_wrong_parameters(self, mocked_stderr):
+        statuses = ['ready', 'wrong_status']
+        args = 'task list -t {statuses}'.format(statuses=' '.join(statuses))
+        self.assertRaises(SystemExit, self.exec_command, args)
+        self.assertIn('-t/--statuses: invalid choice',
+                      mocked_stderr.write.call_args_list[-1][0][0])
 
     def test_task_show(self):
         task_id = 42
