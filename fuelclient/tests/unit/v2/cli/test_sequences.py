@@ -73,10 +73,20 @@ class TestSequenceActions(test_engine.BaseCLITest):
         self.exec_command('sequence delete 1')
         self.m_client.delete_by_id.assert_called_once_with(1)
 
-    def test_execute(self):
+    def test_execute_with_dry_run_and_force(self):
         self.exec_command(
             'sequence execute 1 -e 2 --dry-run --force'
         )
         self.m_client.execute.assert_called_once_with(
-            sequence_id=1, env_id=2, dry_run=True, noop_run=False, force=True
+            sequence_id=1, env_id=2,
+            dry_run=True, noop_run=False, force=True, debug=False
+        )
+
+    def test_execute_with_noop_and_trace(self):
+        self.exec_command(
+            'sequence execute 1 -e 2 --noop --trace'
+        )
+        self.m_client.execute.assert_called_once_with(
+            sequence_id=1, env_id=2,
+            dry_run=False, noop_run=True, force=False, debug=True
         )

@@ -172,3 +172,47 @@ class BaseDeleteCommand(BaseCommand):
             msg.format(
                 ent=self.entity_name.capitalize(),
                 ent_id=parsed_args.id))
+
+
+
+@six.add_metaclass(abc.ABCMeta)
+class BaseTasksExecuteCommand(BaseCommand):
+    def get_parser(self, prog_name):
+        parser = super(BaseTasksExecuteCommand, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-e', '--env',
+            type=int,
+            required=True,
+            help='Id of the environment'
+        )
+        parser.add_argument(
+            '--force',
+            action="store_true",
+            default=False,
+            help='Force run all deployment tasks without skipping.')
+
+        parser.add_argument(
+            '--trace',
+            action="store_true",
+            default=False,
+            help='Enable debugging mode in tasks executor.'
+        )
+
+        mode_group = parser.add_mutually_exclusive_group()
+        mode_group.add_argument(
+            '--dry-run',
+            action="store_true",
+            default=False,
+            help='Specifies to dry-run a deployment by configuring '
+                 'task executor to dump the deployment graph to a dot file.'
+        )
+        mode_group.add_argument(
+            '--noop',
+            action="store_true",
+            default=False,
+            help='Specifies noop-run deployment configuring tasks executor '
+                 'to run all tasks in noop mode. '
+                 'Execution result summary can be got via history of tasks.')
+
+        return parser

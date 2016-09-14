@@ -152,70 +152,44 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
         self.app.stdout.write("Deployment graph was successfully uploaded.\n")
 
 
-class GraphExecute(base.BaseCommand):
+class GraphExecute(base.BaseTasksExecuteCommand):
     """Start deployment with given graph type."""
     entity_name = 'graph'
 
     def get_parser(self, prog_name):
         parser = super(GraphExecute, self).get_parser(prog_name)
-        parser.add_argument('-e',
-                            '--env',
-                            type=int,
-                            required=True,
-                            help='Id of the environment')
-        parser.add_argument('-t',
-                            '--types',
-                            type=str,
-                            nargs='+',
-                            required=False,
-                            help='Types of the deployment graph in order '
-                                 'of execution')
-        parser.add_argument('-n',
-                            '--nodes',
-                            type=int,
-                            nargs='+',
-                            required=False,
-                            help='Ids of the nodes to use for deployment.')
-        parser.add_argument('-T',
-                            '--task-names',
-                            type=str,
-                            nargs='+',
-                            required=False,
-                            help='List of deployment tasks to run.')
-        parser.add_argument('-d',
-                            '--dry-run',
-                            action="store_true",
-                            required=False,
-                            default=False,
-                            help='Specifies to dry-run a deployment by '
-                                 'configuring task executor to dump the '
-                                 'deployment graph to a dot file.')
-        parser.add_argument('-f',
-                            '--force',
-                            action="store_true",
-                            required=False,
-                            default=False,
-                            help='Force run all deployment tasks without '
-                                 'skipping.')
-        parser.add_argument('--noop',
-                            action="store_true",
-                            required=False,
-                            default=False,
-                            help='Specifies noop-run deployment configuring '
-                            'tasks executor to run puppet and shell tasks in '
-                            'noop mode and skip all other. Stores noop-run '
-                            'result summary in nailgun database.')
+        parser.add_argument(
+            '-t',
+            '--graph-types',
+            nargs='+',
+            required=True,
+            help='Types of the deployment graph in order of execution'
+        )
+        parser.add_argument(
+            '-n',
+            '--nodes',
+            type=int,
+            nargs='+',
+            help='Ids of the nodes to use for deployment.'
+        )
+        parser.add_argument(
+            '-T',
+            '--task-names',
+            nargs='+',
+            help='List of deployment tasks to run.'
+        )
         return parser
 
     def take_action(self, args):
         result = self.client.execute(
             env_id=args.env,
-            graph_types=args.types,
+            graph_types=args.graph_types,
             nodes=args.nodes,
             task_names=args.task_names,
             dry_run=args.dry_run,
             noop_run=args.noop,
-            force=args.force
+            force=args.force,
+            debug=args.trace
         )
         msg = 'Deployment task with id {t} for the environment {e} ' \
               'has been started.\n'.format(t=result.data['id'],
