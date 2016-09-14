@@ -21,8 +21,8 @@ from cliff import show
 import six
 
 import fuelclient
+from fuelclient.cli.serializers import Serializer
 from fuelclient.common import data_utils
-
 
 VERSION = 'v1'
 
@@ -176,6 +176,7 @@ class BaseDeleteCommand(BaseCommand):
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseTasksExecuteCommand(BaseCommand):
+
     def get_parser(self, prog_name):
         parser = super(BaseTasksExecuteCommand, self).get_parser(prog_name)
 
@@ -197,6 +198,11 @@ class BaseTasksExecuteCommand(BaseCommand):
             default=False,
             help='Enable debugging mode in tasks executor.'
         )
+        parser.add_argument(
+            '--format',
+            choices=['json', 'yaml'],
+            help='Select output format, by default text message will produce.'
+        )
 
         mode_group = parser.add_mutually_exclusive_group()
         mode_group.add_argument(
@@ -215,3 +221,26 @@ class BaseTasksExecuteCommand(BaseCommand):
                  'Execution result summary can be got via history of tasks.')
 
         return parser
+
+    def take_action(self, parsed_args):
+        task = self.client.execute(
+            env_id=parsed_args.env,
+            dry_run=parsed_args.dry_run,
+            noop_run=parsed_args.noop,
+            force=parsed_args.force,
+            debug=parsed_args.trace,
+            **self.get_options(parsed_args)
+        )
+        if parsed_args.format:
+            msg = Serializer(parsed_args.format).serialize(task.data) + '\n'
+        else:
+            msg = (
+                'Deployment task with id {0} for the environment {1} '
+                'has been started.\n'
+                .format(task.data['id'], task.data['cluster'])
+            )
+        self.app.stdout.write(msg)
+
+    def get_options(self, parsed_args):
+        """Produce additional options from cmdline arguments."""
+        raise NotImplementedError

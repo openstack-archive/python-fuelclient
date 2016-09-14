@@ -90,3 +90,11 @@ class TestSequenceActions(test_engine.BaseCLITest):
             sequence_id=1, env_id=2,
             dry_run=False, noop_run=True, force=False, debug=True
         )
+
+    def test_execute_with_json_output(self):
+        self.m_client.execute.return_value = mock.MagicMock(
+            data={'id': 1}
+        )
+        with mock.patch('sys.stdout') as stdout_mock:
+            self.exec_command('sequence execute 1 -e 2 --format=json')
+        stdout_mock.write.assert_called_with('{\n    "id": 1\n}\n')
