@@ -194,7 +194,8 @@ node-4 ansible_host=10.20.0.5
             node.NodeClient._updatable_attributes
         node_id = 42
         hostname = 'test-name'
-        expected_field_data = cmd_node.NodeShow.columns
+
+        expected_field_data = cmd_node.NodeShow.columns()
 
         self.m_client.update.return_value = \
             fake_node.get_fake_node(node_id=node_id,
@@ -218,7 +219,7 @@ node-4 ansible_host=10.20.0.5
         self.m_client._updatable_attributes = \
             node.NodeClient._updatable_attributes
         node_id = 37
-        expected_field_data = cmd_node.NodeShow.columns
+        expected_field_data = cmd_node.NodeShow.columns()
 
         test_cases = ('new-name', 'New Name', 'śćż∑ Pó', '你一定是无聊')
         for name in test_cases:

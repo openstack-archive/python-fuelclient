@@ -9,6 +9,8 @@ OS_PASSWORD:
 OS_TENANT_NAME: "admin"
 HTTP_PROXY: null
 HTTP_TIMEOUT: 10
+# mode for roles rendering
+MODE: 'roles'
 
 # Performance tests settings
 PERFORMANCE_PROFILING_TESTS: 0
