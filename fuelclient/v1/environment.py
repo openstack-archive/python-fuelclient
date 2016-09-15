@@ -163,27 +163,17 @@ class EnvironmentClient(base_v1.BaseV1Client):
         env = self._entity_wrapper(environment_id)
         env.set_settings_data(new_configuration, force=force)
 
-    @staticmethod
-    def _get_fact_url(env_id, fact_type, nodes=None, default=False):
-        return "clusters/{id}/orchestrator/{fact_type}{default}{nodes}".format(
-            id=env_id,
-            fact_type=fact_type,
-            default="/defaults" if default else '',
-            nodes="/?nodes={}".format(
-                ",".join(map(str, nodes))) if nodes else ''
-        )
-
     def delete_facts(self, env_id, fact_type):
-        return self.connection.delete_request(
-            self._get_fact_url(env_id, fact_type))
+        env = self._entity_wrapper(env_id)
+        return env.delete_facts(fact_type)
 
-    def download_facts(self, env_id, fact_type, nodes=None, default=False):
-        return self.connection.get_request(self._get_fact_url(
-            env_id, fact_type, nodes=nodes, default=default))
+    def download_facts(self, env_id, fact_type, default=False, **kwargs):
+        env = self._entity_wrapper(env_id)
+        return env.get_facts(fact_type, default=default, **kwargs)
 
     def upload_facts(self, env_id, fact_type, facts):
-        return self.connection.put_request(
-            self._get_fact_url(env_id, fact_type), facts)
+        env = self._entity_wrapper(env_id)
+        return env.upload_facts(fact_type, facts)
 
 
 def get_client(connection):

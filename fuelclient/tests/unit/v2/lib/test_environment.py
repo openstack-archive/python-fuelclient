@@ -452,7 +452,7 @@ class TestEnvFacade(test_api.BaseLibTest):
         expected_uri = self.get_object_uri(
             self.res_uri,
             env_id,
-            '/orchestrator/{fact_type}'.format(fact_type=fact_type))
+            '/orchestrator/{fact_type}/'.format(fact_type=fact_type))
 
         matcher = self.m_request.delete(expected_uri, json={})
         self.client.delete_facts(env_id, fact_type)
@@ -484,7 +484,7 @@ class TestEnvFacade(test_api.BaseLibTest):
         expected_uri = self.get_object_uri(
             self.res_uri,
             env_id,
-            "/orchestrator/{fact_type}".format(fact_type=fact_type))
+            "/orchestrator/{fact_type}/".format(fact_type=fact_type))
 
         matcher = self.m_request.put(expected_uri, json={})
         self.client.upload_facts(env_id, fact_type, facts)
