@@ -720,13 +720,9 @@ class FactsMixIn(object):
                 _fact)
 
     def download(self, env_id, fact_type, destination_dir, file_format,
-                 nodes=None, default=False):
+                 nodes=None, default=False, split=None):
         facts = self.client.download_facts(
-            env_id, fact_type, nodes=nodes, default=default)
-        if not facts:
-            raise error.ServerDataException(
-                "There are no {} facts for this environment!".format(
-                    fact_type))
+            env_id, fact_type, nodes=nodes, default=default, split=split)
 
         facts_dir = self._get_fact_dir(env_id, fact_type, destination_dir)
         if os.path.exists(facts_dir):
@@ -824,6 +820,14 @@ class BaseEnvFactsDownload(FactsMixIn, EnvMixIn, base.BaseCommand):
             required=True,
             help='Format of serialized {} facts'.format(self.fact_type))
 
+        parser.add_argument(
+            '--no-split',
+            action='store_false',
+            dest='split',
+            default=True,
+            help='Do not split deployment info for node and cluster parts.'
+        )
+
         return parser
 
     def take_action(self, parsed_args):
@@ -833,7 +837,8 @@ class BaseEnvFactsDownload(FactsMixIn, EnvMixIn, base.BaseCommand):
             parsed_args.directory,
             parsed_args.format,
             nodes=parsed_args.nodes,
-            default=self.fact_default
+            default=self.fact_default,
+            split=parsed_args.split
         )
         self.app.stdout.write(
             "{0} {1} facts for the environment {2} "
