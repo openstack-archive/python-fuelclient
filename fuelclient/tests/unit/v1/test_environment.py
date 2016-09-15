@@ -170,3 +170,25 @@ class TestEnvironmentOstf(base.UnitTestCase):
         self.env.get_deployment_tasks(end=end)
 
         self.assertEqual(get.last_request.qs, {'end': ['task1']})
+
+    def test_get_default_facts(self):
+        legacy_format_facts = [
+            {"uid": "1", "a": 1}, {"uid": "2", "a": 1}
+        ]
+        new_format_facts = [
+            {"uid": "common", "a": 1}, {"uid": "1"}, {"uid": "2"}
+        ]
+        self.m_request.get(
+            '/api/v1/clusters/{0}/orchestrator/deployment/defaults/?split=0'
+            .format(self.env.id),
+            json=legacy_format_facts
+        )
+        self.m_request.get(
+            '/api/v1/clusters/{0}/orchestrator/deployment/defaults/?split=1'
+            .format(self.env.id),
+            json=new_format_facts
+        )
+        facts = self.env.get_default_facts("deployment", split=False)
+        self.assertItemsEqual(legacy_format_facts, facts)
+        facts = self.env.get_default_facts("deployment", split=True)
+        self.assertItemsEqual(new_format_facts, facts)
