@@ -788,3 +788,13 @@ def get_include_summary_arg(help_msg):
         "help": help_msg
     }
     return get_boolean_arg("include-summary", **default_kwargs)
+
+
+def get_not_split_facts_args():
+    kwargs = {
+        "action": "store_false",
+        "default": True,
+        "dest": "split",
+        "help": "Do not split deployment info for node and cluster parts."
+    }
+    return get_arg('no-split', **kwargs)

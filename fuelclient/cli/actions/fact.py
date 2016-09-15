@@ -47,6 +47,7 @@ class FactAction(Action):
             Args.get_node_arg(
                 "Node ids."
             ),
+            Args.get_not_split_facts_args(),
         ]
         self.flag_func_map = (
             ("default", self.default),
@@ -66,7 +67,9 @@ class FactAction(Action):
         env = Environment(params.env)
         dir_name = env.write_facts_to_dir(
             self.action_name,
-            env.get_default_facts(self.action_name, nodes=params.node),
+            env.get_default_facts(
+                self.action_name, nodes=params.node, split=params.split
+            ),
             directory=params.dir,
             serializer=self.serializer
         )
@@ -107,7 +110,9 @@ class FactAction(Action):
         env = Environment(params.env)
         dir_name = env.write_facts_to_dir(
             self.action_name,
-            env.get_facts(self.action_name, nodes=params.node),
+            env.get_facts(
+                self.action_name, nodes=params.node, split=params.split
+            ),
             directory=params.dir,
             serializer=self.serializer
         )

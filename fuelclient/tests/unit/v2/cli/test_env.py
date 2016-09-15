@@ -476,8 +476,11 @@ class TestEnvCommand(test_engine.BaseCLITest):
     @mock.patch('json.dump')
     def _deployment_facts_download_json(self, m_dump, default=False):
         command = 'get-default' if default else 'download'
-        args = "env deployment-facts {}" \
-               " --env 42 --dir /tmp --nodes 2 --format json".format(command)
+        args = (
+            "env deployment-facts {}"
+            " --env 42 --dir /tmp --nodes 2 --format json --no-split"
+            .format(command)
+        )
         data = [{'uid': 2, 'name': 'node'}]
         expected_path = '/tmp/deployment_42/2.json'
 
@@ -490,7 +493,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.download_facts.assert_called_once_with(
-            42, 'deployment', nodes=[2], default=default)
+            42, 'deployment', nodes=[2], default=default, split=False)
         m_open.assert_called_once_with(expected_path, 'w')
         m_dump.assert_called_once_with(data[0], mock.ANY, indent=4)
 
@@ -503,8 +506,11 @@ class TestEnvCommand(test_engine.BaseCLITest):
     @mock.patch('yaml.safe_dump')
     def _deployment_facts_download_yaml(self, m_safe_dump, default=False):
         command = 'get-default' if default else 'download'
-        args = "env deployment-facts {}" \
-               " --env 42 --dir /tmp --nodes 2 --format yaml".format(command)
+        args = (
+            "env deployment-facts {}"
+            " --env 42 --dir /tmp --nodes 2 --format yaml"
+            .format(command)
+        )
         data = [{'uid': 2, 'name': 'node'}]
         expected_path = '/tmp/deployment_42/2.yaml'
 
@@ -517,7 +523,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.download_facts.assert_called_once_with(
-            42, 'deployment', nodes=[2], default=default)
+            42, 'deployment', nodes=[2], default=default, split=True)
         m_open.assert_called_once_with(expected_path, 'w')
         m_safe_dump.assert_called_once_with(data[0], mock.ANY,
                                             default_flow_style=False)
@@ -581,7 +587,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.download_facts.assert_called_once_with(
-            42, 'provisioning', nodes=[2], default=default)
+            42, 'provisioning', nodes=[2], default=default, split=True)
         m_open.assert_any_call(expected_path_engine, 'w')
         m_dump.assert_any_call(data['engine'], mock.ANY, indent=4)
         m_open.assert_any_call(expected_path_node, 'w')
@@ -614,7 +620,7 @@ class TestEnvCommand(test_engine.BaseCLITest):
 
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.download_facts.assert_called_once_with(
-            42, 'provisioning', nodes=[2], default=default)
+            42, 'provisioning', nodes=[2], default=default, split=True)
         m_open.assert_any_call(expected_path_engine, 'w')
         m_dump.assert_any_call(data['engine'], mock.ANY,
                                default_flow_style=False)
