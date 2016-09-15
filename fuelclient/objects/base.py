@@ -28,10 +28,11 @@ class BaseObject(object):
     instance_api_path = None
     connection = DefaultAPIClient
 
-    def __init__(self, obj_id, **kwargs):
+    def __init__(self, obj_id=None, **kwargs):
         self.connection = DefaultAPIClient
         self.serializer = Serializer.from_params(kwargs.get('params'))
-        self.id = obj_id
+        if obj_id is not None:
+            self.id = obj_id
         self._data = None
 
     @classmethod
