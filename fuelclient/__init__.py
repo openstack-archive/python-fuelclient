@@ -77,6 +77,7 @@ def get_client(resource, version='v1', connection=None):
             'sequence': v1.sequence,
             'snapshot': v1.snapshot,
             'task': v1.task,
+            'tag': v1.tag,
             'vip': v1.vip
         }
     }
