@@ -24,11 +24,15 @@ import six
 from fuelclient.cli import error
 from fuelclient.commands import base
 from fuelclient.common import data_utils
+from fuelclient.consts import CLIENT_MODES
+from fuelclient import fuelclient_settings
 from fuelclient import utils
 
 
 class NodeMixIn(object):
     entity_name = 'node'
+
+    CONF_MODE = fuelclient_settings.get_settings().config.get('MODE', CLIENT_MODES.normal)
 
     numa_fields = (
         'numa_nodes',
@@ -168,16 +172,16 @@ class BaseDownloadCommand(NodeMixIn, base.BaseCommand):
 class NodeList(NodeMixIn, base.BaseListCommand):
     """Show list of all available nodes."""
 
-    columns = ('id',
-               'name',
-               'status',
-               'os_platform',
-               'roles',
-               'ip',
-               'mac',
-               'cluster',
-               'platform_name',
-               'online')
+    columns = (
+        'id',
+        'name',
+        'status',
+        'os_platform',
+        'ip',
+        'mac',
+        'cluster',
+        'platform_name',
+        'online')
 
     def get_parser(self, prog_name):
         parser = super(NodeList, self).get_parser(prog_name)
@@ -187,6 +191,13 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             '--env',
             type=int,
             help='Show only nodes that are in the specified environment')
+
+        parser.add_argument(
+            '-m',
+            '--mode',
+            type=utils.str_to_unicode,
+            choices=['roles', 'tags'],
+            help='Chose mode for rendering')
 
         parser.add_argument(
             '-l',
@@ -200,50 +211,82 @@ class NodeList(NodeMixIn, base.BaseListCommand):
     def take_action(self, parsed_args):
         data = self.client.get_all(
             environment_id=parsed_args.env, labels=parsed_args.labels)
-        data = data_utils.get_display_data_multi(self.columns, data)
+        columns = self.columns + self._get_roles_columns(self.CONF_MODE, parsed_args.mode)
+        data = data_utils.get_display_data_multi(columns, data)
 
-        return (self.columns, data)
+        return columns, data
 
+    @staticmethod
+    def _get_roles_columns(conf_mode, cli_mode):
+        if cli_mode is not None:
+            return cli_mode,
+        if conf_mode == CLIENT_MODES.advanced:
+            return 'tags',
+        return 'roles',
 
 class NodeShow(NodeMixIn, base.BaseShowCommand):
     """Show info about node with given id."""
 
-    columns = ('id',
-               'name',
-               'status',
-               'os_platform',
-               'roles',
-               'kernel_params',
-               'pending_roles',
-               'ip',
-               'mac',
-               'error_type',
-               'pending_addition',
-               'hostname',
-               'fqdn',
-               'platform_name',
-               'cluster',
-               'online',
-               'progress',
-               'pending_deletion',
-               'group_id',
-               # TODO(romcheg): network_data mostly never fits the screen
-               # 'network_data',
-               'manufacturer')
+    columns = (
+        'id',
+        'name',
+        'status',
+        'os_platform',
+        'kernel_params',
+        'ip',
+        'mac',
+        'error_type',
+        'pending_addition',
+        'hostname',
+        'fqdn',
+        'platform_name',
+        'cluster',
+        'online',
+        'progress',
+        'pending_deletion',
+        'group_id',
+        # TODO(romcheg): network_data mostly never fits the screen
+        # 'network_data',
+        'manufacturer')
+
     columns += NodeMixIn.numa_fields
+
+    def get_parser(self, prog_name):
+        parser = super(NodeShow, self).get_parser(prog_name)
+
+        parser.add_argument(
+            '-m',
+            '--mode',
+            type=utils.str_to_unicode,
+            choices=['roles', 'tags'],
+            help='Chose mode for rendering')
+
+        return parser
 
     def take_action(self, parsed_args):
         data = self.client.get_by_id(parsed_args.id)
         numa_topology = self.get_numa_topology_info(data)
         data.update(numa_topology)
-        data = data_utils.get_display_data_single(self.columns, data)
-        return self.columns, data
+        columns = self.columns + self._get_roles_columns(self.CONF_MODE,
+                                                         parsed_args.mode)
+
+        data = data_utils.get_display_data_single(columns, data)
+        return columns, data
+
+    @staticmethod
+    def _get_roles_columns(conf_mode, cli_mode):
+        if cli_mode is not None:
+            if cli_mode == 'tags':
+                return 'tags'
+            return 'pending_roles', 'roles'
+        if conf_mode == CLIENT_MODES.advanced:
+            return 'tags'
+        return 'pending_roles', 'roles'
 
 
-class NodeUpdate(NodeMixIn, base.BaseShowCommand):
+
+class NodeUpdate(NodeShow):
     """Change given attributes for a node."""
-
-    columns = NodeShow.columns
 
     def get_parser(self, prog_name):
         parser = super(NodeUpdate, self).get_parser(prog_name)
@@ -273,10 +316,12 @@ class NodeUpdate(NodeMixIn, base.BaseShowCommand):
             parsed_args.id, **updates)
         numa_topology = self.get_numa_topology_info(updated_node)
         updated_node.update(numa_topology)
+        columns = self.columns + self._get_roles_columns(self.CONF_MODE,
+                                                         parsed_args.mode)
         updated_node = data_utils.get_display_data_single(
-            self.columns, updated_node)
+            columns, updated_node)
 
-        return self.columns, updated_node
+        return columns, updated_node
 
 
 class NodeVmsList(NodeMixIn, base.BaseShowCommand):
