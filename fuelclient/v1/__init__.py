@@ -28,6 +28,7 @@ from fuelclient.v1 import plugins
 from fuelclient.v1 import sequence
 from fuelclient.v1 import snapshot
 from fuelclient.v1 import task
+from fuelclient.v1 import tag
 from fuelclient.v1 import vip
 
 # Please keeps the list in alphabetical order
@@ -47,4 +48,5 @@ __all__ = ('cluster_settings',
            'sequence',
            'snapshot',
            'task',
+           'tag',
            'vip')
