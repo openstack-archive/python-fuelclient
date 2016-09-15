@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 import json
 import os
 import yaml
@@ -79,3 +80,28 @@ def write_to_file(file_path, data):
     data_format = os.path.splitext(file_path)[1].lstrip('.')
     with open(file_path, 'w') as stream:
         safe_dump(data_format, stream, data)
+
+
+def dict_patch(a, b):
+    """recursively apply patch to dict."""
+
+    for k, v in b.items():
+        if isinstance(v, dict) and k in a and isinstance(a[k], dict):
+            dict_patch(a[k], v)
+        else:
+            a[k] = copy.deepcopy(v)
+
+
+def dict_merge(a, b):
+    """recursively merges dict's.
+
+    not just simple a['key'] = b['key'], if
+    both a and bhave a key who's value is a dict then dict_merge is called
+    on both values and the result stored in the returned dictionary.
+    """
+    if not isinstance(b, dict):
+        return copy.deepcopy(b)
+
+    result = copy.deepcopy(a)
+    dict_patch(result, b)
+    return result
