@@ -296,37 +296,32 @@ class Environment(BaseObject):
             os.path.abspath(directory),
             "{0}_{1}".format(fact_type, self.id))
 
-    def _get_fact_default_url(self, fact_type, nodes=None):
-        default_url = "clusters/{0}/orchestrator/{1}/defaults".format(
-            self.id,
-            fact_type
+    def _get_fact_url(self, fact_type, default=False):
+        fact_url = "clusters/{0}/orchestrator/{1}/{2}".format(
+            self.id, fact_type, 'defaults/' if default else ''
         )
-        if nodes is not None:
-            default_url += "/?nodes=" + ",".join(map(str, nodes))
-        return default_url
-
-    def _get_fact_url(self, fact_type, nodes=None):
-        fact_url = "clusters/{0}/orchestrator/{1}/".format(
-            self.id,
-            fact_type
-        )
-        if nodes is not None:
-            fact_url += "/?nodes=" + ",".join(map(str, nodes))
         return fact_url
 
-    def get_default_facts(self, fact_type, nodes=None):
-        facts = self.connection.get_request(
-            self._get_fact_default_url(fact_type, nodes=nodes))
-        if not facts:
-            raise error.ServerDataException(
-                "There is no {0} info for this "
-                "environment!".format(fact_type)
-            )
-        return facts
+    def get_default_facts(self, fact_type, nodes=None, split=None):
+        """Gets facts for cluster.
+        :param fact_type: the type of facts (deployment, provision)
+        :param nodes: if specified, get facts only for selected nodes
+        :param split: If True - facts will be split to common and node part
+        """
+        return self.get_facts(
+            fact_type, default=True, nodes=nodes, split=split
+        )
 
-    def get_facts(self, fact_type, nodes=None):
+    def get_facts(self, fact_type, default=False, nodes=None, split=None):
+        params = {}
+        if nodes is not None:
+            params['nodes'] = ','.join(str(x) for x in nodes)
+        if split is not None:
+            params['split'] = str(int(split))
+
         facts = self.connection.get_request(
-            self._get_fact_url(fact_type, nodes=nodes))
+            self._get_fact_url(fact_type, default=default), params=params
+        )
         if not facts:
             raise error.ServerDataException(
                 "There is no {0} info for this "
