@@ -66,7 +66,9 @@ class FactAction(Action):
         env = Environment(params.env)
         dir_name = env.write_facts_to_dir(
             self.action_name,
-            env.get_default_facts(self.action_name, nodes=params.node),
+            env.get_default_facts(
+                self.action_name, nodes=params.node, merge=False
+            ),
             directory=params.dir,
             serializer=self.serializer
         )
@@ -107,7 +109,7 @@ class FactAction(Action):
         env = Environment(params.env)
         dir_name = env.write_facts_to_dir(
             self.action_name,
-            env.get_facts(self.action_name, nodes=params.node),
+            env.get_facts(self.action_name, nodes=params.node, merge=False),
             directory=params.dir,
             serializer=self.serializer
         )
