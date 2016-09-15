@@ -18,6 +18,7 @@ import shutil
 
 from fuelclient.cli import error
 from fuelclient.cli.serializers import listdir_without_extensions
+from fuelclient.common.data_utils import dict_merge
 from fuelclient.objects.base import BaseObject
 from fuelclient.objects.task import DeployTask
 from fuelclient.objects.task import Task
@@ -314,7 +315,26 @@ class Environment(BaseObject):
             fact_url += "/?nodes=" + ",".join(map(str, nodes))
         return fact_url
 
-    def get_default_facts(self, fact_type, nodes=None):
+    def _merge_facts(self, facts):
+        if facts and isinstance(facts, list):
+            # TODO(bgaifullin) complete merge on server side
+            # on nailgun side facts will be splited on common part
+            # and node part, so there is some clients which was
+            # relayed that facts for node contains both parts
+            # this function add common part to each node
+            facts.sort(key=lambda x: x.get('uid') == 'common')
+            if facts[-1].get('uid') == 'common':
+                common = facts.pop(-1)
+                for i, fact in enumerate(facts):
+                    facts[i] = dict_merge(common, fact)
+        return facts
+
+    def get_default_facts(self, fact_type, nodes=None, merge=True):
+        """Gets facts for cluster.
+        :param fact_type: the type of facts (deployment, provision)
+        :param nodes: if specified, get facts only for selected nodes
+        :param merge: If True - merge common part to each node part
+        """
         facts = self.connection.get_request(
             self._get_fact_default_url(fact_type, nodes=nodes))
         if not facts:
@@ -322,9 +342,11 @@ class Environment(BaseObject):
                 "There is no {0} info for this "
                 "environment!".format(fact_type)
             )
+        if merge:
+            return self._merge_facts(facts)
         return facts
 
-    def get_facts(self, fact_type, nodes=None):
+    def get_facts(self, fact_type, nodes=None, merge=True):
         facts = self.connection.get_request(
             self._get_fact_url(fact_type, nodes=nodes))
         if not facts:
@@ -332,6 +354,8 @@ class Environment(BaseObject):
                 "There is no {0} info for this "
                 "environment!".format(fact_type)
             )
+        if merge:
+            return self._merge_facts(facts)
         return facts
 
     def upload_facts(self, fact_type, facts):
