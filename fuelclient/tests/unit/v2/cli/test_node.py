@@ -202,7 +202,7 @@ node-4 ansible_host=10.20.0.5
 
         self.exec_command(args)
 
-        self.m_get_client.assert_called_once_with('node', mock.ANY)
+        self.m_get_client.assert_called_with('node', mock.ANY)
         self.m_client.update.assert_called_once_with(
             node_id, hostname=hostname)
 
@@ -225,7 +225,6 @@ node-4 ansible_host=10.20.0.5
             if six.PY2:
                 name = name.decode('utf-8')
 
-            self.m_get_client.assert_called_once_with('node', mock.ANY)
             self.m_client.update.assert_called_once_with(
                 node_id, name=name)
             self.m_get_client.reset_mock()

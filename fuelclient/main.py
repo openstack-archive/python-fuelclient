@@ -19,6 +19,8 @@ from cliff import app
 from cliff.commandmanager import CommandManager
 
 from fuelclient.actions import fuel_version
+from fuelclient.cli import error
+from fuelclient import consts
 from fuelclient import fuelclient_settings
 from fuelclient import utils
 
@@ -33,6 +35,19 @@ class FuelClient(app.App):
     configuration of basic engines.
 
     """
+    _is_advanced_mode = None
+
+    @property
+    def is_advanced_mode(self):
+        if self._is_advanced_mode is None:
+            self._is_advanced_mode = False
+            settings = fuelclient_settings.get_settings()
+            try:
+                if settings.MODE == consts.CLIENT_MODES.advanced:
+                    self._is_advanced_mode = True
+            except error.SettingsException:
+                pass
+        return self._is_advanced_mode
 
     def build_option_parser(self, description, version, argparse_kwargs=None):
         """Overrides default options for backwards compatibility."""
