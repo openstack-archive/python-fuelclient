@@ -664,3 +664,17 @@ class Environment(BaseObject):
         """
         return self.connection.post_request(self._get_ip_addrs_url(),
                                             vip_kwargs)
+
+    def get_enabled_plugins(self):
+        """Get list of enabled plugins ids.
+
+        :returns: plugins ids list
+        :rtype: list[int]
+        """
+        attrs = self.get_attributes()['editable']
+        enabled_plugins_ids = []
+        for attr_name in attrs:
+            metadata = attrs[attr_name].get('metadata', {})
+            if metadata.get('class') == 'plugin' and metadata.get('enabled'):
+                enabled_plugins_ids.append(metadata['chosen_id'])
+        return enabled_plugins_ids
