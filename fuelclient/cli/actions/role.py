@@ -58,7 +58,7 @@ class RoleAction(Action):
 
                 fuel role --rel 1
         """
-        roles = Role.get_all(params.release)
+        roles = Role(obj_id=params.release).data
 
         acceptable_keys = ("name", )
 
@@ -75,7 +75,7 @@ class RoleAction(Action):
         """Save full role description to file
             fuel role --rel 1 --role controller --file some.yaml
         """
-        role = Role.get_one(params.release, params.role)
+        role = Role(obj_id=params.release).get_role(params.role)
         self.file_serializer.write_to_file(params.file, role)
         self.file_serializer.print_to_output(
             role,
@@ -87,7 +87,7 @@ class RoleAction(Action):
             fuel role --rel 1 --create --file some.yaml
         """
         role = self.file_serializer.read_from_file(params.file)
-        role = Role.create(params.release, role)
+        role = Role(obj_id=params.release).create_role(role)
         self.file_serializer.print_to_output(
             role,
             "Role {0} successfully created from {1}.".format(
@@ -99,7 +99,7 @@ class RoleAction(Action):
             fuel role --rel 1 --update --file some.yaml
         """
         role = self.file_serializer.read_from_file(params.file)
-        role = Role.update(params.release, role['name'], role)
+        role = Role(obj_id=params.release).update_role(role['name'], role)
         self.file_serializer.print_to_output(
             role,
             "Role successfully updated from {0}.".format(params.file))
@@ -109,7 +109,7 @@ class RoleAction(Action):
         """Delete role from fuel
             fuel role --delete --role controller --rel 1
         """
-        Role.delete(params.release, params.role)
+        Role(obj_id=params.release).delete_role(params.role)
         self.file_serializer.print_to_output(
             {},
             "Role with id {0} successfully deleted.".format(params.role))

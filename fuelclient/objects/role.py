@@ -18,33 +18,21 @@ from fuelclient.objects.base import BaseObject
 
 class Role(BaseObject):
 
-    class_api_path = "releases/{release_id}/roles/"
-    instance_api_path = "releases/{release_id}/roles/{role_name}/"
+    instance_api_path = "releases/{0}/roles/"
+    role_api_path = "releases/{0}/roles/{1}/"
 
-    @classmethod
-    def get_all(cls, release_id):
-        return cls.connection.get_request(
-            cls.class_api_path.format(release_id=release_id))
+    def get_role(self, role_name):
+        return self.connection.get_request(
+            self.role_api_path.format(self.id, role_name))
 
-    @classmethod
-    def get_one(cls, release_id, role_name):
-        return cls.connection.get_request(
-            cls.instance_api_path.format(
-                release_id=release_id, role_name=role_name))
+    def update_role(self, role_name, data):
+        return self.connection.put_request(
+            self.role_api_path.format(self.id, role_name), data)
 
-    @classmethod
-    def update(cls, release_id, role_name, data):
-        return cls.connection.put_request(
-            cls.instance_api_path.format(
-                release_id=release_id, role_name=role_name), data)
+    def create_role(self, data):
+        return self.connection.post_request(
+            self.instance_api_path.format(self.id), data)
 
-    @classmethod
-    def create(cls, release_id, data):
-        return cls.connection.post_request(
-            cls.class_api_path.format(release_id=release_id), data)
-
-    @classmethod
-    def delete(cls, release_id, role_name):
-        return cls.connection.delete_request(
-            cls.instance_api_path.format(
-                release_id=release_id, role_name=role_name))
+    def delete_role(self, role_name):
+        return self.connection.delete_request(
+            self.role_api_path.format(self.id, role_name))
