@@ -31,7 +31,7 @@ class RoleClient(base_v1.BaseV1Client):
         :return: roles data as a list of dict
         :rtype: list
         """
-        data = self._entity_wrapper.get_all(release_id=release_id)
+        data = self._entity_wrapper(obj_id=release_id).data
         # Retrieve nested data from 'meta' and add it as a new key-value pair
         for role in data:
             role_meta = role.pop('meta')
@@ -42,18 +42,20 @@ class RoleClient(base_v1.BaseV1Client):
         return data
 
     def get_one(self, release_id, role_name):
-        return self._entity_wrapper.get_one(release_id, role_name)
+        role = self._entity_wrapper(obj_id=release_id)
+        return role.get_role(role_name)
 
     def update(self, data, **kwargs):
-        return self._entity_wrapper.update(kwargs['release_id'],
-                                           kwargs['role_name'],
-                                           data)
+        role = self._entity_wrapper(obj_id=kwargs['release_id'])
+        return role.update_role(kwargs['role_name'], data)
 
     def create(self, data, **kwargs):
-        return self._entity_wrapper.create(kwargs['release_id'], data)
+        role = self._entity_wrapper(obj_id=kwargs['release_id'])
+        return role.create_role(data)
 
     def delete(self, release_id, role_name):
-        return self._entity_wrapper.delete(release_id, role_name)
+        role = self._entity_wrapper(obj_id=release_id)
+        return role.delete_role(role_name)
 
 
 def get_client(connection):
