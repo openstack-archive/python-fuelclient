@@ -266,6 +266,12 @@ class GraphClient(base_v1.BaseV1Client):
 
         return graphs_list
 
+    def delete(self, related_model, related_id, graph_type):
+        return self.connection.delete_request(
+            self.related_graph_api_path.format(related_model=related_model,
+                                               related_model_id=related_id,
+                                               graph_type=graph_type))
+
 
 def get_client(connection):
     return GraphClient(connection)
