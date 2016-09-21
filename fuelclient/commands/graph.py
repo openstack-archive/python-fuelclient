@@ -352,3 +352,51 @@ class GraphList(base.BaseListCommand):
         scolumn_ids = [self.columns.index(col) for col in args.sort_columns]
         data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
         return self.columns, data
+
+
+class GraphDelete(base.BaseCommand):
+    """Delete deployment graph."""
+    entity_name = 'graph'
+
+    def get_parser(self, prog_name):
+        parser = super(GraphDelete, self).get_parser(prog_name)
+        graph_class = parser.add_mutually_exclusive_group(required=True)
+        graph_class.add_argument('-e',
+                                 '--env',
+                                 type=int,
+                                 help='Id of the environment')
+        graph_class.add_argument('-r',
+                                 '--release',
+                                 type=int,
+                                 help='Id of the release')
+        graph_class.add_argument('-p',
+                                 '--plugin',
+                                 type=int,
+                                 help='Id of the plugin')
+        parser.add_argument('-t',
+                            '--graph-type',
+                            required=True,
+                            help='Type of the deployment graph')
+        return parser
+
+    def take_action(self, parsed_args):
+        parameters_to_graph_class = (
+            ('env', 'clusters'),
+            ('release', 'releases'),
+            ('plugin', 'plugins'),
+        )
+
+        for parameter, graph_class in parameters_to_graph_class:
+            model_id = getattr(parsed_args, parameter)
+            if model_id:
+                self.client.delete(
+                    related_model=graph_class,
+                    related_id=model_id,
+                    graph_type=parsed_args.graph_type
+                )
+                break
+
+        msg = ("Deployment graph '{0}' for '{1}' was "
+               "deleted.\n".format(parsed_args.graph_type, graph_class))
+
+        self.app.stdout.write(msg)

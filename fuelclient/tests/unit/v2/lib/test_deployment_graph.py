@@ -330,3 +330,13 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
         self.client.download(env_id=1, level='cluster',
                              graph_type='custom_graph')
         self.assertTrue(matcher_get.called)
+
+    def test_graph_delete(self):
+        matcher_delete = self.m_request.delete(
+            '/api/v1/clusters/1/deployment_graphs/custom_graph',
+            json={}
+        )
+        self.client.delete(graph_type='custom_graph',
+                           related_id=1,
+                           related_model='clusters')
+        self.assertTrue(matcher_delete.called)
