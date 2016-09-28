@@ -116,6 +116,7 @@ def quote_and_join(words):
         return '"{0}"'.format(words[0])
 
 
+# TODO(vkulanov): remove when deprecate old cli
 def print_health_check(env):
     tests_states = [{"status": "not finished"}]
     finished_tests = set()
