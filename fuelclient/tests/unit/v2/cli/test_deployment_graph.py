@@ -94,7 +94,7 @@ class TestGraphActions(test_engine.BaseCLITest):
         )
         self._test_cmd(
             'upload',
-            '--plugin 1 --file new_graph.yaml --type custom_type',
+            '--plugin 1 --file tasks.yaml --graph-type custom_type',
             dict(
                 data=yaml.load(TASKS_YAML),
                 related_model='plugins',
@@ -279,7 +279,7 @@ class TestGraphActions(test_engine.BaseCLITest):
 
         self._test_cmd(
             'download',
-            '--env 1 --all --file existing_graph.yaml --type custom_graph',
+            '--env 1 --all --file existing_graph.yaml -t custom_graph',
             dict(
                 env_id=1,
                 level='all',
