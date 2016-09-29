@@ -115,7 +115,7 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
                                  help='Id of the plugin')
 
         parser.add_argument('-t',
-                            '--type',
+                            '--graph-type',
                             required=True,
                             help='Type of the deployment graph')
 
@@ -153,7 +153,7 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
                     data=data,
                     related_model=graph_class,
                     related_id=model_id,
-                    graph_type=args.type
+                    graph_type=args.graph_type
                 )
                 break
 
@@ -245,7 +245,7 @@ class GraphDownload(base.BaseCommand):
                                  help='Download release-specific tasks')
 
         parser.add_argument('-t',
-                            '--type',
+                            '--graph-type',
                             type=str,
                             default=None,
                             required=False,
@@ -286,7 +286,7 @@ class GraphDownload(base.BaseCommand):
                 tasks_data = self.client.download(
                     env_id=args.env,
                     level=tasks_level_name,
-                    graph_type=args.type
+                    graph_type=args.graph_type
                 )
                 break
 
