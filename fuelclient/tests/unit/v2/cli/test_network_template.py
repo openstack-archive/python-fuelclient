@@ -20,13 +20,12 @@ from fuelclient.tests.unit.v2.cli import test_engine
 
 class TestNetworkTemplateCommand(test_engine.BaseCLITest):
 
-    def test_network_template_upload(self):
+    @mock.patch('sys.stderr')
+    def test_network_template_upload_fail(self, mocked_stderr):
         args = 'network-template upload 1'
-        self.exec_command(args)
-
-        self.m_get_client.assert_called_once_with('environment', mock.ANY)
-        self.m_client.upload_network_template.assert_called_once_with(
-            1, None)
+        self.assertRaises(SystemExit, self.exec_command, args)
+        self.assertIn('--file',
+                      mocked_stderr.write.call_args_list[-1][0][0])
 
     def test_network_template_upload_w_file(self):
         args = 'network-template upload --file /tmp/test-file 1'
