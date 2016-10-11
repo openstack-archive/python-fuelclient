@@ -39,6 +39,7 @@ class NetworkTemplateMixin(object):
     def add_file_argument(parser):
         parser.add_argument(
             '-f', '--file',
+            required=True,
             type=str,
             help='Yaml file containing the network template'
         )

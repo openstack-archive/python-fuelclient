@@ -125,7 +125,6 @@ class EnvironmentClient(base_v1.BaseV1Client):
             file_path=file_path)
         env.set_network_template_data(network_template_data)
 
-        file_path = env.serializer.prepare_path(file_path)
         return file_path
 
     def download_network_template(self, environment_id, directory=None):
