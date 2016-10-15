@@ -1,0 +1,10 @@
+Code-Review+2: Bulat Gaifullin <gaifullinbf@gmail.com>
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Code-Review+2: Igor Kalnitsky <ikalnitsky@mirantis.com>
+Workflow+1: Bulat Gaifullin <gaifullinbf@gmail.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Sat, 15 Oct 2016 20:30:08 +0000
+Reviewed-on: https://review.openstack.org/372642
+Project: openstack/python-fuelclient
+Branch: refs/heads/master
