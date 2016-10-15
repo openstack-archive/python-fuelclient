@@ -306,3 +306,14 @@ class TestGraphActions(test_engine.BaseCLITest):
                 mock.call(env_id=None, filters=['cluster']),
                 mock.call(env_id=None, filters=None)
             ])
+
+    def test_delete(self):
+        self._test_cmd(
+            'delete',
+            '--env 1 --graph-type custom_graph',
+            dict(
+                graph_type='custom_graph',
+                related_id=1,
+                related_model='clusters'
+            )
+        )
