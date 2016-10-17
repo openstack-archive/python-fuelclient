@@ -30,7 +30,7 @@ class ReleaseList(ReleaseMixIn, base.BaseListCommand):
                "name",
                "state",
                "operating_system",
-               "version")
+               "openstack_version")
 
 
 class ReleaseReposList(ReleaseMixIn, base.BaseListCommand):
