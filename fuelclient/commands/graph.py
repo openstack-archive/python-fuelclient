@@ -80,10 +80,18 @@ class GraphUpload(base.BaseCommand, FileMethodsMixin):
 
         tasks = []
         for file_name in iterfiles(dir_path, 'tasks.yaml'):
-            tasks.extend(serializer.read_from_full_path(file_name))
+            task_data = serializer.read_from_full_path(file_name)
+            if task_data:
+                tasks.extend(task_data)
 
         if tasks:
             data['tasks'] = tasks
+
+        if not data:
+            msg = ("Nothing to upload. Check if at least one 'tasks.yaml' "
+                   "file is not empty and exists in '{path}' directory "
+                   "path".format(path=dir_path))
+            raise error.ActionException(msg)
         return data
 
     def get_parser(self, prog_name):
