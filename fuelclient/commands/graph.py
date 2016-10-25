@@ -211,7 +211,7 @@ class GraphDownload(base.BaseCommand):
 
     def get_parser(self, prog_name):
         parser = super(GraphDownload, self).get_parser(prog_name)
-        tasks_level = parser.add_mutually_exclusive_group()
+        tasks_level = parser.add_mutually_exclusive_group(required=True)
         parser.add_argument('-e',
                             '--env',
                             type=int,
