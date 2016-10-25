@@ -287,6 +287,13 @@ class TestGraphActions(test_engine.BaseCLITest):
             )
         )
 
+    @mock.patch('sys.stderr')
+    def test_download_fail(self, mocked_stderr):
+        cmd = 'graph download --env 1'
+        self.assertRaises(SystemExit, self.exec_command, cmd)
+        self.assertIn('-a/--all -c/--cluster -p/--plugins -r/--release',
+                      mocked_stderr.write.call_args_list[-1][0][0])
+
     def test_list(self):
         with mock.patch('sys.stdout', new=six.moves.cStringIO()) as m_stdout:
             self.m_get_client.reset_mock()
