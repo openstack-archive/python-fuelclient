@@ -100,12 +100,9 @@ class TestTagFacade(test_api.BaseLibTest):
     def test_tag_unassign(self):
         node_id = 1
         tag_ids = [self.fake_tag['id']]
-        expected_uri = '{0}?tags={1}'.format(
-            self.res_uri + 'nodes/{}/tags/'.format(node_id),
-            ','.join(map(str, tag_ids))
-        )
-
-        delete_matcher = self.m_request.delete(expected_uri, json={})
+        expected_uri = (self.res_uri +
+                        'nodes/{}/tags/'.format(node_id))
+        delete_matcher = self.m_request.delete(expected_uri, json=tag_ids)
         self.client.unassign(tag_ids, node_id)
 
         self.assertTrue(delete_matcher.called)

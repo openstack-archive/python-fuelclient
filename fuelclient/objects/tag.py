@@ -52,8 +52,5 @@ class Tag(BaseObject):
 
     @classmethod
     def unassign_tags(cls, tag_ids, node_id):
-        url = '{0}?tags={1}'.format(
-            cls.assign_api_path.format(node_id),
-            ','.join(map(str, tag_ids))
-        )
-        return cls.connection.delete_request(url)
+        return cls.connection.delete_request(
+            cls.assign_api_path.format(node_id), tag_ids)
