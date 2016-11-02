@@ -285,6 +285,25 @@ class TestGraphActions(test_engine.BaseCLITest):
             )
         )
 
+    @mock.patch('json.dumps')
+    def test_download_json(self, m_dumps):
+        env_id = 1
+        graph_data = [{'id': 1}]
+        args = 'graph download --env {0} --all --format json'.format(env_id)
+        expected_path = '/tmp/all_graph_{0}.json'.format(env_id)
+
+        self.m_client.download.return_value = graph_data
+
+        m_open = mock.mock_open()
+        with mock.patch('os.path.abspath', return_value='/tmp'):
+            with mock.patch(
+                    'fuelclient.cli.serializers.open', m_open, create=True):
+                self.exec_command(args)
+
+        m_open.assert_called_once_with(expected_path, 'w')
+        m_dumps.assert_called_once_with(graph_data, indent=4)
+        self.m_get_client.assert_called_once_with('graph', mock.ANY)
+
     @mock.patch('sys.stderr')
     def test_download_fail(self, mocked_stderr):
         cmd = 'graph download --env 1'
