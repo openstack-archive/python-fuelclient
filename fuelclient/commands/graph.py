@@ -209,6 +209,7 @@ class GraphExecute(base.BaseTasksExecuteCommand):
 class GraphDownload(base.BaseCommand):
     """Download deployment graph configuration."""
     entity_name = 'graph'
+    supported_file_formats = ('json', 'yaml')
 
     def get_parser(self, prog_name):
         parser = super(GraphDownload, self).get_parser(prog_name)
@@ -256,32 +257,30 @@ class GraphDownload(base.BaseCommand):
                             type=str,
                             required=False,
                             default=None,
-                            help='YAML file that contains tasks data.')
+                            help='File in {} format that contains tasks '
+                                 'data.'.format(self.supported_file_formats))
+        parser.add_argument('--format',
+                            required=False,
+                            choices=self.supported_file_formats,
+                            default='yaml',
+                            help='Format of serialized tasks data. '
+                                 'Defaults to YAML.')
         return parser
 
     @classmethod
-    def get_default_tasks_data_path(cls):
+    def get_default_tasks_data_path(cls, env_id, task_level_name, file_format):
         return os.path.join(
             os.path.abspath(os.curdir),
-            "cluster_graph"
+            '{}_graph_{}.{}'.format(task_level_name, env_id, file_format)
         )
 
     @classmethod
-    def write_tasks_to_file(cls, tasks_data, serializer=None, file_path=None):
-        serializer = serializer or Serializer()
-        if file_path:
-            return serializer.write_to_full_path(
-                file_path,
-                tasks_data
-            )
-        else:
-            return serializer.write_to_path(
-                cls.get_default_tasks_data_path(),
-                tasks_data
-            )
+    def write_tasks_to_file(cls, tasks_data, serializer, file_path):
+        return serializer.write_to_full_path(file_path, tasks_data)
 
     def take_action(self, args):
         tasks_data = []
+        tasks_level_name = ''
         for tasks_level_name in ('all', 'cluster', 'release', 'plugins'):
             if getattr(args, tasks_level_name):
                 tasks_data = self.client.download(
@@ -292,10 +291,12 @@ class GraphDownload(base.BaseCommand):
                 break
 
         # write to file
+        file_path = args.file or self.get_default_tasks_data_path(
+            args.env, tasks_level_name, args.format)
         graph_data_file_path = self.write_tasks_to_file(
             tasks_data=tasks_data,
-            serializer=Serializer(),
-            file_path=args.file)
+            serializer=Serializer(format=args.format),
+            file_path=file_path)
 
         self.app.stdout.write(
             "Tasks were downloaded to {0}\n".format(graph_data_file_path)
