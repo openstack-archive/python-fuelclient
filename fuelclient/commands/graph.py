@@ -320,7 +320,7 @@ class GraphList(base.BaseListCommand):
             '--plugins',
             dest='filters',
             action='append_const',
-            const='plugins',
+            const='plugin',
             help='Include plugins-specific graphs'
         )
         parser.add_argument(
