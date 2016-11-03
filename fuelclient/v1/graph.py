@@ -245,7 +245,7 @@ class GraphClient(base_v1.BaseV1Client):
         # we cannot use dict here, because order is important
         handlers = (
             ('release', self.get_env_release_graphs_list),
-            ('plugins', self.get_env_plugins_graphs_list),
+            ('plugin', self.get_env_plugins_graphs_list),
             ('cluster', self.get_env_cluster_graphs_list)
         )
 
