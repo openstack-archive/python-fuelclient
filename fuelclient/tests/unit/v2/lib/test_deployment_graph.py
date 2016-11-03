@@ -274,7 +274,7 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
 
         self.assertItemsEqual(
             enabled_plugin_graphs,
-            self.client.list(env_id, filters=['plugins'])
+            self.client.list(env_id, filters=['plugin'])
         )
 
         self.assertItemsEqual(
