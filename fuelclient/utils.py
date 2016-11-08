@@ -27,7 +27,6 @@ from distutils.version import StrictVersion
 from fnmatch import fnmatch
 
 from fuelclient.cli import error
-from fuelclient import consts
 
 
 def _wait_and_check_exit_code(cmd, child):
@@ -213,8 +212,3 @@ def add_os_cli_parameters(parser):
     parser.add_argument(
         '--os-password', metavar='<auth-password>',
         help='Authentication password, defaults to env[OS_PASSWORD].')
-
-    parser.add_argument(
-        '--mode',
-        choices=list(consts.CLIENT_MODES),
-        help="Application mode, defaults to 'simple'.")

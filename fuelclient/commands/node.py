@@ -168,22 +168,16 @@ class BaseDownloadCommand(NodeMixIn, base.BaseCommand):
 class NodeList(NodeMixIn, base.BaseListCommand):
     """Show list of all available nodes."""
 
-    _columns = (
-        'id',
-        'name',
-        'status',
-        'os_platform',
-        'ip',
-        'mac',
-        'cluster',
-        'platform_name',
-        'online')
-
-    @property
-    def columns(self):
-        if self.app.is_advanced_mode:
-            return self._columns + ('tags',)
-        return self._columns + ('pending_roles', 'roles')
+    columns = ('id',
+               'name',
+               'status',
+               'os_platform',
+               'roles',
+               'ip',
+               'mac',
+               'cluster',
+               'platform_name',
+               'online')
 
     def get_parser(self, prog_name):
         parser = super(NodeList, self).get_parser(prog_name)
@@ -193,6 +187,7 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             '--env',
             type=int,
             help='Show only nodes that are in the specified environment')
+
         parser.add_argument(
             '-l',
             '--labels',
@@ -207,40 +202,35 @@ class NodeList(NodeMixIn, base.BaseListCommand):
             environment_id=parsed_args.env, labels=parsed_args.labels)
         data = data_utils.get_display_data_multi(self.columns, data)
 
-        return self.columns, data
+        return (self.columns, data)
 
 
 class NodeShow(NodeMixIn, base.BaseShowCommand):
     """Show info about node with given id."""
 
-    _columns = (
-        'id',
-        'name',
-        'status',
-        'os_platform',
-        'kernel_params',
-        'ip',
-        'mac',
-        'error_type',
-        'pending_addition',
-        'hostname',
-        'fqdn',
-        'platform_name',
-        'cluster',
-        'online',
-        'progress',
-        'pending_deletion',
-        'group_id',
-        # TODO(romcheg): network_data mostly never fits the screen
-        # 'network_data',
-        'manufacturer')
-    _columns += NodeMixIn.numa_fields
-
-    @property
-    def columns(self):
-        if self.app.is_advanced_mode:
-            return self._columns + ('tags',)
-        return self._columns + ('pending_roles', 'roles')
+    columns = ('id',
+               'name',
+               'status',
+               'os_platform',
+               'roles',
+               'kernel_params',
+               'pending_roles',
+               'ip',
+               'mac',
+               'error_type',
+               'pending_addition',
+               'hostname',
+               'fqdn',
+               'platform_name',
+               'cluster',
+               'online',
+               'progress',
+               'pending_deletion',
+               'group_id',
+               # TODO(romcheg): network_data mostly never fits the screen
+               # 'network_data',
+               'manufacturer')
+    columns += NodeMixIn.numa_fields
 
     def take_action(self, parsed_args):
         data = self.client.get_by_id(parsed_args.id)
@@ -250,8 +240,9 @@ class NodeShow(NodeMixIn, base.BaseShowCommand):
         return self.columns, data
 
 
-class NodeUpdate(NodeShow):
+class NodeUpdate(NodeMixIn, base.BaseShowCommand):
     """Change given attributes for a node."""
+
     columns = NodeShow.columns
 
     def get_parser(self, prog_name):
