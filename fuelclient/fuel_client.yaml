@@ -9,9 +9,6 @@ OS_PASSWORD:
 OS_TENANT_NAME: "admin"
 HTTP_PROXY: null
 HTTP_TIMEOUT: 10
-# application mode
-# possible options: 'advanced', 'simple'
-MODE: 'simple'
 
 # Performance tests settings
 PERFORMANCE_PROFILING_TESTS: 0

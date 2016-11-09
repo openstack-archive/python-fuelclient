@@ -32,8 +32,3 @@ TASK_STATUSES = Enum(
     'ready',
     'running'
 )
-
-CLIENT_MODES = Enum(
-    'advanced',
-    'simple'
-)
