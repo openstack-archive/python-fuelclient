@@ -15,6 +15,7 @@
 
 from fuelclient.cli.actions.base import Action
 from fuelclient.cli.actions.base import check_all
+from fuelclient.cli.actions.base import check_any
 import fuelclient.cli.arguments as Args
 from fuelclient.cli.arguments import group
 from fuelclient.cli.formatting import format_table
@@ -23,9 +24,14 @@ from fuelclient.objects.role import Role
 
 
 class RoleAction(Action):
-    """List all roles for specific release
+    """List all roles for specific release or cluster
     """
     action_name = "role"
+
+    fields_mapper = (
+        ('env', 'clusters'),
+        ('release', 'releases')
+    )
 
     def __init__(self):
         # NOTE(dshulyak) this serializers are really messed up
@@ -33,8 +39,11 @@ class RoleAction(Action):
         self.file_serializer = FileFormatBasedSerializer()
         self.args = [
             Args.get_list_arg("List all roles"),
-
-            Args.get_release_arg("Release id"),
+            group(
+                Args.get_env_arg(),
+                Args.get_release_arg("Release id"),
+                required=True
+            ),
             Args.get_str_arg("role", help="Name of the role"),
             Args.get_file_arg("File with role description"),
 
@@ -52,13 +61,21 @@ class RoleAction(Action):
             (None, self.list),
         )
 
-    @check_all('release')
+    def parse_model(self, args):
+        for param, role_class in self.fields_mapper:
+            model_id = getattr(args, param)
+            if model_id:
+                return role_class, model_id
+
+    @check_any('release', 'env')
     def list(self, params):
-        """Print all available roles
+        """Print all available roles for release or cluster
 
                 fuel role --rel 1
+                fuel role --env 1
         """
-        roles = Role(obj_id=params.release).data
+        model, model_id = self.parse_model(params)
+        roles = Role(owner_type=model, owner_id=model_id).data
 
         acceptable_keys = ("name", )
 
@@ -70,46 +87,69 @@ class RoleAction(Action):
             )
         )
 
-    @check_all('role', 'release', 'file')
+    @check_all('role', 'file')
+    @check_any('release', 'env')
     def item(self, params):
         """Save full role description to file
             fuel role --rel 1 --role controller --file some.yaml
+            fuel role --env 1 --role controller --file some.yaml
         """
-        role = Role(obj_id=params.release).get_role(params.role)
+        model, model_id = self.parse_model(params)
+        role = Role(owner_type=model, owner_id=model_id).get_role(params.role)
         self.file_serializer.write_to_file(params.file, role)
         self.file_serializer.print_to_output(
             role,
-            "Role successfully saved to {0}.".format(params.file))
+            "Role {0} for {1} successfully saved to {2}.".format(
+                params.role,
+                model,
+                params.file))
 
-    @check_all('file', 'release')
+    @check_all('file')
+    @check_any('release', 'env')
     def create(self, params):
         """Create a role from file description
             fuel role --rel 1 --create --file some.yaml
+            fuel role --env 1 --create --file some.yaml
         """
+        model, model_id = self.parse_model(params)
         role = self.file_serializer.read_from_file(params.file)
-        role = Role(obj_id=params.release).create_role(role)
+        role = Role(owner_type=model, owner_id=model_id).create_role(role)
         self.file_serializer.print_to_output(
             role,
-            "Role {0} successfully created from {1}.".format(
-                role['name'], params.file))
+            "Role {0} for {1} successfully created from {2}.".format(
+                role['name'], model, params.file))
 
-    @check_all('file', 'release')
+    @check_all('file')
+    @check_any('release', 'env')
     def update(self, params):
         """Update a role from file description
-            fuel role --rel 1 --update --file some.yaml
+            fuel role --rel 1 --create --file some.yaml
+            fuel role --env 1 --create --file some.yaml
         """
+        model, model_id = self.parse_model(params)
         role = self.file_serializer.read_from_file(params.file)
-        role = Role(obj_id=params.release).update_role(role['name'], role)
+        role = Role(owner_type=model, owner_id=model_id).update_role(
+            role['name'],
+            role)
         self.file_serializer.print_to_output(
             role,
-            "Role successfully updated from {0}.".format(params.file))
+            "Role {0} for {1} successfully updated from {2}.".format(
+                params.role,
+                model,
+                params.file))
 
-    @check_all('role', 'release')
+    @check_all('role')
+    @check_any('release', 'env')
     def delete(self, params):
         """Delete role from fuel
             fuel role --delete --role controller --rel 1
+            fuel role --delete --role controller --env 1
         """
-        Role(obj_id=params.release).delete_role(params.role)
+        model, model_id = self.parse_model(params)
+        Role(owner_type=model, owner_id=model_id).delete_role(params.role)
         self.file_serializer.print_to_output(
             {},
-            "Role with id {0} successfully deleted.".format(params.role))
+            "Role {0} for {1} with id {2} successfully deleted.".format(
+                params.role,
+                model,
+                model_id))
