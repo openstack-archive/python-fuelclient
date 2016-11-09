@@ -26,14 +26,24 @@ from fuelclient.common import data_utils
 
 
 class RoleMixIn(object):
-
     entity_name = 'role'
     supported_file_formats = ('json', 'yaml')
+    fields_mapper = (
+        ('env', 'clusters'),
+        ('release', 'releases')
+    )
+
+    def parse_model(self, args):
+        for param, role_class in self.fields_mapper:
+            model_id = getattr(args, param)
+            if model_id:
+                return role_class, model_id
 
     @staticmethod
-    def get_file_path(directory, release_id, role_name, file_format):
+    def get_file_path(directory, owner_type, owner_id, role_name, file_format):
         return os.path.join(os.path.abspath(directory),
-                            'release_{id}'.format(id=release_id),
+                            '{owner}_{id}'.format(owner=owner_type,
+                                                  id=owner_id),
                             '{}.{}'.format(role_name, file_format))
 
 
@@ -53,11 +63,16 @@ class BaseUploadCommand(RoleMixIn, base.BaseCommand):
 
     def get_parser(self, prog_name):
         parser = super(BaseUploadCommand, self).get_parser(prog_name)
-        parser.add_argument('-r',
-                            '--release',
-                            type=int,
-                            required=True,
-                            help='Id of the release')
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('-r',
+                           '--release',
+                           type=int,
+                           help='Id of the release')
+        group.add_argument('-e',
+                           '--env',
+                           type=int,
+                           help='Id of the environment'
+                           )
         parser.add_argument('-n',
                             '--name',
                             required=True,
@@ -76,11 +91,14 @@ class BaseUploadCommand(RoleMixIn, base.BaseCommand):
         return parser
 
     def take_action(self, parsed_args):
-        params = {"release_id": parsed_args.release,
+        model, model_id = self.parse_model(parsed_args)
+        params = {"owner_type": model,
+                  "owner_id": model_id,
                   "role_name": parsed_args.name}
 
         file_path = self.get_file_path(parsed_args.directory,
-                                       parsed_args.release,
+                                       model,
+                                       model_id,
                                        parsed_args.name,
                                        parsed_args.format)
 
@@ -93,9 +111,10 @@ class BaseUploadCommand(RoleMixIn, base.BaseCommand):
                 parsed_args.name, file_path)
             raise error.InvalidFileException(msg)
 
-        msg = ("Description of role '{role}' for release with id {id} was "
+        msg = ("Description of role '{role}' for {owner_t} with id {id} was "
                "{action}d from {file_path}\n".format(role=parsed_args.name,
-                                                     id=parsed_args.release,
+                                                     owner_t=model,
+                                                     id=model_id,
                                                      action=self.action,
                                                      file_path=file_path))
         self.app.stdout.write(msg)
@@ -111,15 +130,21 @@ class RoleList(RoleMixIn, base.BaseListCommand):
 
     def get_parser(self, prog_name):
         parser = super(RoleList, self).get_parser(prog_name)
-        parser.add_argument('-r',
-                            '--release',
-                            type=int,
-                            required=True,
-                            help='Id of the release')
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('-r',
+                           '--release',
+                           type=int,
+                           help='Id of the release')
+        group.add_argument('-e',
+                           '--env',
+                           type=int,
+                           help='Id of the environment'
+                           )
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.get_all(parsed_args.release)
+        model, model_id = self.parse_model(parsed_args)
+        data = self.client.get_all(model, model_id)
 
         data = data_utils.get_display_data_multi(self.columns, data)
         return self.columns, data
@@ -130,11 +155,16 @@ class RoleDownload(RoleMixIn, base.BaseCommand):
 
     def get_parser(self, prog_name):
         parser = super(RoleDownload, self).get_parser(prog_name)
-        parser.add_argument('-r',
-                            '--release',
-                            type=int,
-                            required=True,
-                            help='Id of the release')
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('-r',
+                           '--release',
+                           type=int,
+                           help='Id of the release')
+        group.add_argument('-e',
+                           '--env',
+                           type=int,
+                           help='Id of the environment'
+                           )
         parser.add_argument('-n',
                             '--name',
                             required=True,
@@ -153,11 +183,15 @@ class RoleDownload(RoleMixIn, base.BaseCommand):
         return parser
 
     def take_action(self, parsed_args):
+        model, model_id = self.parse_model(parsed_args)
         file_path = self.get_file_path(parsed_args.directory,
-                                       parsed_args.release,
+                                       model,
+                                       model_id,
                                        parsed_args.name,
                                        parsed_args.format)
-        data = self.client.get_one(parsed_args.release, parsed_args.name)
+        data = self.client.get_one(model,
+                                   model_id,
+                                   parsed_args.name)
 
         try:
             fileutils.ensure_tree(os.path.dirname(file_path))
@@ -170,9 +204,10 @@ class RoleDownload(RoleMixIn, base.BaseCommand):
                    "for role {} at {}".format(parsed_args.name, file_path))
             raise error.InvalidFileException(msg)
 
-        msg = ("Description data of role '{}' within release id {} "
+        msg = ("Description data of role '{}' within {} id {} "
                "was stored in {}\n".format(parsed_args.name,
-                                           parsed_args.release,
+                                           model,
+                                           model_id,
                                            file_path))
         self.app.stdout.write(msg)
 
@@ -202,11 +237,16 @@ class RoleDelete(RoleMixIn, base.BaseCommand):
 
     def get_parser(self, prog_name):
         parser = super(RoleDelete, self).get_parser(prog_name)
-        parser.add_argument('-r',
-                            '--release',
-                            type=int,
-                            required=True,
-                            help='Id of the release')
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('-r',
+                           '--release',
+                           type=int,
+                           help='Id of the release')
+        group.add_argument('-e',
+                           '--env',
+                           type=int,
+                           help='Id of the environment'
+                           )
         parser.add_argument('-n',
                             '--name',
                             required=True,
@@ -214,8 +254,11 @@ class RoleDelete(RoleMixIn, base.BaseCommand):
         return parser
 
     def take_action(self, parsed_args):
-        self.client.delete(parsed_args.release, parsed_args.name)
+        model, model_id = self.parse_model(parsed_args)
+        self.client.delete(model,
+                           model_id,
+                           parsed_args.name)
 
-        msg = "Role '{}' was deleted from release with id {}\n".format(
-            parsed_args.name, parsed_args.release)
+        msg = "Role '{}' was deleted from {} with id {}\n".format(
+            parsed_args.name, model, model_id)
         self.app.stdout.write(msg)

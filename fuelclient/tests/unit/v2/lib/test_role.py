@@ -25,7 +25,7 @@ class TestRoleFacade(test_api.BaseLibTest):
         super(TestRoleFacade, self).setUp()
 
         self.version = 'v1'
-        self.res_uri = '/api/{version}/releases/'.format(
+        self.res_uri = '/api/{version}/'.format(
             version=self.version)
         self.role_name = 'fake_role'
         self.fake_role = utils.get_fake_role(self.role_name)
@@ -33,30 +33,56 @@ class TestRoleFacade(test_api.BaseLibTest):
 
         self.client = fuelclient.get_client('role', self.version)
 
-    def test_role_list(self):
+    def test_release_role_list(self):
         release_id = 42
-        expected_uri = self.get_object_uri(self.res_uri, release_id, '/roles/')
+        expected_uri = self.get_object_uri(self.res_uri + "releases/",
+                                           release_id,
+                                           '/roles/')
         matcher = self.m_request.get(expected_uri, json=self.fake_roles)
-        self.client.get_all(release_id)
+        self.client.get_all('releases', release_id)
 
         self.assertTrue(matcher.called)
 
-    def test_role_download(self):
+    def test_cluster_role_list(self):
+        env_id = 42
+        expected_uri = self.get_object_uri(self.res_uri + "clusters/",
+                                           env_id,
+                                           '/roles/')
+        matcher = self.m_request.get(expected_uri, json=self.fake_roles)
+        self.client.get_all('clusters', env_id)
+
+        self.assertTrue(matcher.called)
+
+    def test_release_role_download(self):
         release_id = 45
-        expected_uri = self.get_object_uri(self.res_uri,
+        expected_uri = self.get_object_uri(self.res_uri + "releases/",
                                            release_id,
                                            '/roles/{}/'.format(self.role_name))
         role_matcher = self.m_request.get(expected_uri, json=self.fake_role)
 
-        role = self.client.get_one(release_id, self.role_name)
+        role = self.client.get_one("releases", release_id, self.role_name)
 
         self.assertTrue(expected_uri, role_matcher.called)
         self.assertEqual(role, self.fake_role)
 
-    def test_role_update(self):
+    def test_cluster_role_download(self):
+        env_id = 45
+        expected_uri = self.get_object_uri(self.res_uri + "clusters/",
+                                           env_id,
+                                           '/roles/{}/'.format(self.role_name))
+        role_matcher = self.m_request.get(expected_uri, json=self.fake_role)
+
+        role = self.client.get_one("clusters", env_id, self.role_name)
+
+        self.assertTrue(expected_uri, role_matcher.called)
+        self.assertEqual(role, self.fake_role)
+
+    def test_release_role_update(self):
         release_id = 45
-        params = {"release_id": release_id, "role_name": self.role_name}
-        expected_uri = self.get_object_uri(self.res_uri,
+        params = {"owner_type": "releases",
+                  "owner_id": release_id,
+                  "role_name": self.role_name}
+        expected_uri = self.get_object_uri(self.res_uri + "releases/",
                                            release_id,
                                            '/roles/{}/'.format(self.role_name))
         upd_matcher = self.m_request.put(expected_uri, json=self.fake_role)
@@ -66,10 +92,26 @@ class TestRoleFacade(test_api.BaseLibTest):
         self.assertTrue(upd_matcher.called)
         self.assertEqual(self.fake_role, upd_matcher.last_request.json())
 
-    def test_role_create(self):
+    def test_cluster_role_update(self):
+        env_id = 45
+        params = {"owner_type": "clusters",
+                  "owner_id": env_id,
+                  "role_name": self.role_name}
+        expected_uri = self.get_object_uri(self.res_uri + "clusters/",
+                                           env_id,
+                                           '/roles/{}/'.format(self.role_name))
+        upd_matcher = self.m_request.put(expected_uri, json=self.fake_role)
+
+        self.client.update(self.fake_role, **params)
+
+        self.assertTrue(upd_matcher.called)
+        self.assertEqual(self.fake_role, upd_matcher.last_request.json())
+
+    def test_release_role_create(self):
         release_id = 45
-        params = {"release_id": release_id}
-        expected_uri = self.get_object_uri(self.res_uri,
+        params = {"owner_type": "releases",
+                  "owner_id": release_id}
+        expected_uri = self.get_object_uri(self.res_uri + "releases/",
                                            release_id,
                                            '/roles/'.format(self.role_name))
         post_matcher = self.m_request.post(expected_uri, json=self.fake_role)
@@ -79,13 +121,38 @@ class TestRoleFacade(test_api.BaseLibTest):
         self.assertTrue(post_matcher.called)
         self.assertEqual(self.fake_role, post_matcher.last_request.json())
 
-    def test_role_delete(self):
+    def test_cluster_role_create(self):
+        env_id = 45
+        params = {"owner_type": "clusters",
+                  "owner_id": env_id}
+        expected_uri = self.get_object_uri(self.res_uri + "clusters/",
+                                           env_id,
+                                           '/roles/'.format(self.role_name))
+        post_matcher = self.m_request.post(expected_uri, json=self.fake_role)
+
+        self.client.create(self.fake_role, **params)
+
+        self.assertTrue(post_matcher.called)
+        self.assertEqual(self.fake_role, post_matcher.last_request.json())
+
+    def test_release_role_delete(self):
         release_id = 45
-        expected_uri = self.get_object_uri(self.res_uri,
+        expected_uri = self.get_object_uri(self.res_uri + "releases/",
                                            release_id,
                                            '/roles/{}/'.format(self.role_name))
         delete_matcher = self.m_request.delete(expected_uri, json={})
 
-        self.client.delete(release_id, self.role_name)
+        self.client.delete('releases', release_id, self.role_name)
+
+        self.assertTrue(delete_matcher.called)
+
+    def test_cluster_role_delete(self):
+        env_id = 45
+        expected_uri = self.get_object_uri(self.res_uri + "clusters/",
+                                           env_id,
+                                           '/roles/{}/'.format(self.role_name))
+        delete_matcher = self.m_request.delete(expected_uri, json={})
+
+        self.client.delete('clusters', env_id, self.role_name)
 
         self.assertTrue(delete_matcher.called)

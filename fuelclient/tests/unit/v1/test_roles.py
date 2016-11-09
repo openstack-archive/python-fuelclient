@@ -26,11 +26,21 @@ API_OUT = yaml.load(API_IN)
 
 class TestRoleActions(base.UnitTestCase):
 
-    release_id = 2
+    owner_id = 2
 
-    def test_list_roles(self):
-        url = '/api/v1/releases/{0}/roles/'.format(self.release_id)
-        cmd = 'fuel role --rel {0}'.format(self.release_id)
+    def test_list_release_roles(self):
+        url = '/api/v1/releases/{0}/roles/'.format(self.owner_id)
+        cmd = 'fuel role --rel {0}'.format(self.owner_id)
+        get_request = self.m_request.get(url, json=[API_OUT])
+
+        self.execute(cmd.split())
+
+        self.assertTrue(get_request.called)
+        self.assertIn(url, get_request.last_request.url)
+
+    def test_list_cluster_roles(self):
+        url = '/api/v1/clusters/{0}/roles/'.format(self.owner_id)
+        cmd = 'fuel role --env {0}'.format(self.owner_id)
         get_request = self.m_request.get(url, json=[API_OUT])
 
         self.execute(cmd.split())
@@ -39,10 +49,10 @@ class TestRoleActions(base.UnitTestCase):
         self.assertIn(url, get_request.last_request.url)
 
     @patch('fuelclient.cli.serializers.open', create=True)
-    def test_get_role(self, mopen):
-        url = '/api/v1/releases/{0}/roles/my_role/'.format(self.release_id)
+    def test_get_release_role(self, mopen):
+        url = '/api/v1/releases/{0}/roles/my_role/'.format(self.owner_id)
         cmd = 'fuel role --role my_role --file myfile.yaml --rel {0}'.format(
-            self.release_id)
+            self.owner_id)
         get_request = self.m_request.get(url, json=API_OUT)
 
         self.execute(cmd.split())
@@ -52,10 +62,23 @@ class TestRoleActions(base.UnitTestCase):
         self.assertIn(url, get_request.last_request.url)
 
     @patch('fuelclient.cli.serializers.open', create=True)
-    def test_create_role(self, mopen):
-        url = '/api/v1/releases/{0}/roles/'.format(self.release_id)
+    def test_get_cluster_role(self, mopen):
+        url = '/api/v1/clusters/{0}/roles/my_role/'.format(self.owner_id)
+        cmd = 'fuel role --role my_role --file myfile.yaml --env {0}'.format(
+            self.owner_id)
+        get_request = self.m_request.get(url, json=API_OUT)
+
+        self.execute(cmd.split())
+
+        mopen().__enter__().write.assert_called_once_with(API_IN)
+        self.assertTrue(get_request.called)
+        self.assertIn(url, get_request.last_request.url)
+
+    @patch('fuelclient.cli.serializers.open', create=True)
+    def test_create_release_role(self, mopen):
+        url = '/api/v1/releases/{0}/roles/'.format(self.owner_id)
         cmd = 'fuel role --create --file myfile.yaml --rel {0}'.format(
-            self.release_id)
+            self.owner_id)
         mopen().__enter__().read.return_value = API_IN
         post_request = self.m_request.post(url, json=API_OUT)
 
@@ -67,10 +90,25 @@ class TestRoleActions(base.UnitTestCase):
             API_OUT, post_request.last_request.json())
 
     @patch('fuelclient.cli.serializers.open', create=True)
-    def test_update_role(self, mopen):
-        url = '/api/v1/releases/{0}/roles/my_role/'.format(self.release_id)
+    def test_create_cluster_role(self, mopen):
+        url = '/api/v1/clusters/{0}/roles/'.format(self.owner_id)
+        cmd = 'fuel role --create --file myfile.yaml --env {0}'.format(
+            self.owner_id)
+        mopen().__enter__().read.return_value = API_IN
+        post_request = self.m_request.post(url, json=API_OUT)
+
+        self.execute(cmd.split())
+
+        self.assertTrue(post_request.called)
+        self.assertIn(url, post_request.last_request.url)
+        self.assertEqual(
+            API_OUT, post_request.last_request.json())
+
+    @patch('fuelclient.cli.serializers.open', create=True)
+    def test_update_release_role(self, mopen):
+        url = '/api/v1/releases/{0}/roles/my_role/'.format(self.owner_id)
         cmd = 'fuel role --update --file myfile.yaml --rel {0}'.format(
-            self.release_id)
+            self.owner_id)
         mopen().__enter__().read.return_value = API_IN
         put_request = self.m_request.put(url, json=API_OUT)
 
@@ -81,10 +119,36 @@ class TestRoleActions(base.UnitTestCase):
         self.assertEqual(
             API_OUT, put_request.last_request.json())
 
-    def test_delete_role(self):
-        url = '/api/v1/releases/{0}/roles/my_role/'.format(self.release_id)
+    @patch('fuelclient.cli.serializers.open', create=True)
+    def test_update_cluster_role(self, mopen):
+        url = '/api/v1/clusters/{0}/roles/my_role/'.format(self.owner_id)
+        cmd = 'fuel role --update --file myfile.yaml --env {0}'.format(
+            self.owner_id)
+        mopen().__enter__().read.return_value = API_IN
+        put_request = self.m_request.put(url, json=API_OUT)
+
+        self.execute(cmd.split())
+
+        self.assertTrue(put_request.called)
+        self.assertIn(url, put_request.last_request.url)
+        self.assertEqual(
+            API_OUT, put_request.last_request.json())
+
+    def test_delete_release_role(self):
+        url = '/api/v1/releases/{0}/roles/my_role/'.format(self.owner_id)
         cmd = 'fuel role --delete --role my_role --rel {0}'.format(
-            self.release_id)
+            self.owner_id)
+        delete_request = self.m_request.delete(url, json=API_OUT)
+
+        self.execute(cmd.split())
+
+        self.assertTrue(delete_request.called)
+        self.assertIn(url, delete_request.last_request.url)
+
+    def test_delete_cluster_role(self):
+        url = '/api/v1/clusters/{0}/roles/my_role/'.format(self.owner_id)
+        cmd = 'fuel role --delete --role my_role --env {0}'.format(
+            self.owner_id)
         delete_request = self.m_request.delete(url, json=API_OUT)
 
         self.execute(cmd.split())
@@ -93,8 +157,8 @@ class TestRoleActions(base.UnitTestCase):
         self.assertIn(url, delete_request.last_request.url)
 
     def test_formatting_for_list_roles(self):
-        url = '/api/v1/releases/{0}/roles/'.format(self.release_id)
-        cmd = 'fuel role --rel {0}'.format(self.release_id)
+        url = '/api/v1/releases/{0}/roles/'.format(self.owner_id)
+        cmd = 'fuel role --rel {0}'.format(self.owner_id)
         get_request = self.m_request.get(url, json=[API_OUT])
 
         with patch.object(Serializer, 'print_to_output') as mock_print:

@@ -18,21 +18,41 @@ from fuelclient.objects.base import BaseObject
 
 class Role(BaseObject):
 
-    instance_api_path = "releases/{0}/roles/"
-    role_api_path = "releases/{0}/roles/{1}/"
+    def __init__(self, owner_type, owner_id, **kwargs):
+        super(Role, self).__init__(owner_id, **kwargs)
+        self.owner_type = owner_type
+
+    instance_api_path = "{owner_type}/{owner_id}/roles/"
+    role_api_path = "{owner_type}/{owner_id}/roles/{role_name}/"
 
     def get_role(self, role_name):
         return self.connection.get_request(
-            self.role_api_path.format(self.id, role_name))
+            self.role_api_path.format(
+                owner_type=self.owner_type,
+                owner_id=self.id,
+                role_name=role_name))
 
     def update_role(self, role_name, data):
         return self.connection.put_request(
-            self.role_api_path.format(self.id, role_name), data)
+            self.role_api_path.format(
+                owner_type=self.owner_type,
+                owner_id=self.id,
+                role_name=role_name),
+            data)
 
     def create_role(self, data):
         return self.connection.post_request(
-            self.instance_api_path.format(self.id), data)
+            self.instance_api_path.format(
+                owner_type=self.owner_type, owner_id=self.id), data)
 
     def delete_role(self, role_name):
         return self.connection.delete_request(
-            self.role_api_path.format(self.id, role_name))
+            self.role_api_path.format(
+                owner_type=self.owner_type,
+                owner_id=self.id,
+                role_name=role_name))
+
+    def update(self):
+        self._data = self.connection.get_request(
+            self.instance_api_path.format(owner_type=self.owner_type,
+                                          owner_id=self.id))
