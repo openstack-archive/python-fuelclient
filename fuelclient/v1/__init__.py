@@ -24,6 +24,7 @@ from fuelclient.v1 import network_group
 from fuelclient.v1 import node
 from fuelclient.v1 import openstack_config
 from fuelclient.v1 import release
+from fuelclient.v1 import role
 from fuelclient.v1 import plugins
 from fuelclient.v1 import sequence
 from fuelclient.v1 import task
@@ -43,6 +44,7 @@ __all__ = ('cluster_settings',
            'openstack_config',
            'plugins',
            'release',
+           'role',
            'sequence',
            'task',
            'vip')

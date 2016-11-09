@@ -73,6 +73,7 @@ def get_client(resource, version='v1', connection=None):
             'openstack-config': v1.openstack_config,
             'plugins': v1.plugins,
             'release': v1.release,
+            'role': v1.role,
             'sequence': v1.sequence,
             'task': v1.task,
             'vip': v1.vip
