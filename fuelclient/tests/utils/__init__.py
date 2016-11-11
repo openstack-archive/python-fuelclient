@@ -48,6 +48,10 @@ from fuelclient.tests.utils.fake_release import get_fake_releases
 from fuelclient.tests.utils.fake_release import get_fake_attributes_metadata
 from fuelclient.tests.utils.fake_release import get_fake_release_component
 from fuelclient.tests.utils.fake_release import get_fake_release_components
+from fuelclient.tests.utils.fake_role import get_fake_role
+from fuelclient.tests.utils.fake_role import get_fake_roles
+from fuelclient.tests.utils.fake_tag import get_fake_tag
+from fuelclient.tests.utils.fake_tag import get_fake_tags
 
 
 __all__ = (get_fake_deployment_history,
@@ -73,4 +77,6 @@ __all__ = (get_fake_deployment_history,
            get_fake_node_groups,
            get_fake_openstack_config,
            get_fake_plugin,
-           get_fake_plugins)
+           get_fake_plugins,
+           get_fake_tag,
+           get_fake_tags)
