@@ -15,10 +15,10 @@
 #    under the License.
 
 import os
-import pkg_resources
 import shutil
 import sys
 
+import pkg_resources
 import six
 import yaml
 

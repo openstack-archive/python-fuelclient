@@ -16,12 +16,12 @@
 
 import json
 import os
-import six
 import subprocess
-import yaml
 
 import mock
 import requests
+import six
+import yaml
 
 from fuelclient.cli import error
 from fuelclient import client

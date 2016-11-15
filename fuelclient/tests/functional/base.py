@@ -22,10 +22,11 @@ import sys
 import tempfile
 import time
 
+from oslotest import base as oslo_base
+
 from fuelclient import consts
 from fuelclient.objects import Release
 
-from oslotest import base as oslo_base
 
 logging.basicConfig(stream=sys.stderr)
 log = logging.getLogger("CliTest.ExecutionLog")
