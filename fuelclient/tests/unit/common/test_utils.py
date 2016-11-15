@@ -16,18 +16,18 @@
 
 import json
 import os
-import six
 import subprocess
-import yaml
 
 import mock
 import requests
+import six
+import yaml
 
-from fuelclient.cli import error
 from fuelclient import client
+from fuelclient import utils
+from fuelclient.cli import error
 from fuelclient.common import data_utils
 from fuelclient.tests.unit.v1 import base
-from fuelclient import utils
 
 
 class TestUtils(base.UnitTestCase):
