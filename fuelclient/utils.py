@@ -14,17 +14,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from distutils.version import StrictVersion
+from fnmatch import fnmatch
 import functools
 import glob
 import io
 import os
-import six
 import subprocess
 import sys
-import yaml
 
-from distutils.version import StrictVersion
-from fnmatch import fnmatch
+import six
+import yaml
 
 from fuelclient.cli import error
 

@@ -14,11 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 import os
 
-from fuelclient import objects
+import mock
 
+from fuelclient import objects
 from fuelclient.tests.unit.v1 import base
 
 
