@@ -347,9 +347,9 @@ class TestGraphActions(test_engine.BaseCLITest):
             self.exec_command('graph list')
 
             self.m_client.list.assert_has_calls([
-                mock.call(env_id=1, filters=['release', 'plugins', 'cluster']),
+                mock.call(env_id=1, filters=['release', 'plugin', 'cluster']),
                 mock.call(env_id=None, filters=['release']),
-                mock.call(env_id=None, filters=['plugins']),
+                mock.call(env_id=None, filters=['plugin']),
                 mock.call(env_id=None, filters=['cluster']),
                 mock.call(env_id=None, filters=None)
             ])
