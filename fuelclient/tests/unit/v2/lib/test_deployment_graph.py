@@ -289,8 +289,43 @@ class TestDeploymentGraphFacade(test_api.BaseLibTest):
 
         self.assertItemsEqual(
             cluster_graphs + not_this_env_cluster_graphs + release_graphs,
-            self.client.list(filters=['cluster', 'release'])
+            self.client.list(filters=['cluster', 'release']))
+
+    def test_new_graph_dry_run_subgraph(self):
+        matcher_post = self.m_request.post(
+            '/api/v1/graphs/execute/',
+            json=utils.get_fake_task(cluster=370))
+        # this is required to form running task info
+        self.m_request.get(
+            '/api/v1/nodes/?cluster_id=370',
+            json={}
         )
+        self.client.execute(
+            env_id=1,
+            nodes=[1, 2, 3],
+            graph_types=["custom_graph"],
+            dry_run=True,
+            subgraphs=['primary-database/1,3:keystone-db/1-2,5',
+                       'openstack-controller']
+        )
+        self.assertTrue(matcher_post.called)
+        expected_body = {'cluster': 1,
+                         'dry_run': True,
+                         'graphs':
+                             [{
+                              'nodes': [1, 2, 3], 'type': 'custom_graph',
+                              'tasks': ['rsync_core_puppet']},
+                              {
+                              'nodes': [1, 2, 3],
+                              'type': 'another_custom_graph',
+                              'tasks': ['rsync_core_puppet']}],
+                         'subgraphs': [
+                             {'start': ['primary-database/1,3'],
+                              'end': ['keystone-db/1-2,5']},
+                             {'start': ['openstack-controller'],
+                              'end': [None]}]
+                         }
+        self.assertItemsEqual(matcher_post.last_request.json(), expected_body)
 
     def test_graphs_download_all(self):
         matcher_get = self.m_request.get(
