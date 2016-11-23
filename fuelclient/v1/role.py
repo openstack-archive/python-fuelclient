@@ -23,15 +23,17 @@ class RoleClient(base_v1.BaseV1Client):
 
     _entity_wrapper = objects.Role
 
-    def get_all(self, release_id):
-        """Get all available roles for specific release.
+    def get_all(self, owner_type, owner_id):
+        """Get all available roles for specific release or cluster.
 
-        :param release_id: Id of release
-        :type release_id: int
+        :param owner_type: release or cluster
+        :type owner_id: int
         :return: roles data as a list of dict
         :rtype: list
         """
-        data = self._entity_wrapper(obj_id=release_id).data
+
+        data = self._entity_wrapper(owner_type, owner_id).get_all()
+
         # Retrieve nested data from 'meta' and add it as a new key-value pair
         for role in data:
             role_meta = role.pop('meta')
@@ -41,20 +43,23 @@ class RoleClient(base_v1.BaseV1Client):
 
         return data
 
-    def get_one(self, release_id, role_name):
-        role = self._entity_wrapper(obj_id=release_id)
+    def get_one(self, owner_type, owner_id, role_name):
+        role = self._entity_wrapper(owner_type, owner_id)
         return role.get_role(role_name)
 
     def update(self, data, **kwargs):
-        role = self._entity_wrapper(obj_id=kwargs['release_id'])
+        role = self._entity_wrapper(owner_type=kwargs['owner_type'],
+                                    owner_id=kwargs['owner_id'])
         return role.update_role(kwargs['role_name'], data)
 
     def create(self, data, **kwargs):
-        role = self._entity_wrapper(obj_id=kwargs['release_id'])
+        role = self._entity_wrapper(owner_type=kwargs['owner_type'],
+                                    owner_id=kwargs['owner_id'])
         return role.create_role(data)
 
-    def delete(self, release_id, role_name):
-        role = self._entity_wrapper(obj_id=release_id)
+    def delete(self, owner_type, owner_id, role_name):
+        role = self._entity_wrapper(owner_type=owner_type,
+                                    owner_id=owner_id)
         return role.delete_role(role_name)
 
 
