@@ -54,6 +54,13 @@ class TestOpenstackConfig(test_engine.BaseCLITest):
                              'node_role': None, 'is_active': True}
         )
 
+    def test_config_list_sorted(self):
+        self._test_config_list(
+            cmd_line='--env {0} -s node_id'.format(self.CLUSTER_ID),
+            expected_kwargs={'cluster_id': self.CLUSTER_ID, 'node_ids': None,
+                             'node_role': None, 'is_active': True}
+        )
+
     @mock.patch('sys.stderr')
     def test_config_list_for_cluster_fail(self, mocked_stderr):
         self.assertRaises(SystemExit,
