@@ -59,6 +59,23 @@ class TestRoleCommand(test_engine.BaseCLITest):
         self.m_client.get_all.assert_called_once_with('clusters', env_id)
         self.m_get_client.assert_called_once_with('role', mock.ANY)
 
+    def test_role_list_sorted(self):
+        self.m_client.get_all.return_value = [
+            {"name": "fake_role_2",
+             "group": "fake_group_1",
+             "conflicts": ["fake_role_1", "fake_role_3"],
+             "description": "some fake description"},
+            {"name": "fake_role_1",
+             "group": "fake_group_2",
+             "conflicts": ["fake_role_2", "fake_role_3"],
+             "description": "some fake description"},
+        ]
+        env_id = 45
+        args = 'role list -e {id} -s group'.format(id=env_id)
+        self.exec_command(args)
+        self.m_client.get_all.assert_called_once_with('clusters', env_id)
+        self.m_get_client.assert_called_once_with('role', mock.ANY)
+
     @mock.patch('sys.stderr')
     def test_role_list_fail(self, mocked_stderr):
         args = 'role list'
