@@ -46,6 +46,12 @@ class TestEnvCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('environment', mock.ANY)
         self.m_client.get_all.assert_called_once_with()
 
+    def test_env_list_sorted(self):
+        args = 'env list -s name'
+        self.exec_command(args)
+        self.m_get_client.assert_called_once_with('environment', mock.ANY)
+        self.m_client.get_all.assert_called_once_with()
+
     def test_env_show(self):
         args = 'env show 42'
         self.exec_command(args)
