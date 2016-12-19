@@ -90,6 +90,7 @@ class OpenstackConfigList(OpenstackConfigMixin, base.BaseListCommand):
             cluster_id=args.env, node_ids=args.node,
             node_role=args.role, is_active=(not args.deleted))
         data = data_utils.get_display_data_multi(self.columns, data)
+        data = self._sort_data(args, data)
 
         return self.columns, data
 
