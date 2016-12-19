@@ -112,6 +112,12 @@ class BaseListCommand(lister.Lister, BaseCommand):
 
         return parser
 
+    def _sort_data(self, parsed_args, data):
+        scolumn_ids = [self.columns.index(col)
+                       for col in parsed_args.sort_columns]
+        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
+        return data
+
     def take_action(self, parsed_args):
         filters = {}
         for name, prop in self.filters.items():
@@ -121,13 +127,9 @@ class BaseListCommand(lister.Lister, BaseCommand):
 
         data = self.client.get_all(**filters)
         data = data_utils.get_display_data_multi(self.columns, data)
+        data = self._sort_data(parsed_args, data)
 
-        scolumn_ids = [self.columns.index(col)
-                       for col in parsed_args.sort_columns]
-
-        data.sort(key=lambda x: [x[scolumn_id] for scolumn_id in scolumn_ids])
-
-        return (self.columns, data)
+        return self.columns, data
 
 
 @six.add_metaclass(abc.ABCMeta)
