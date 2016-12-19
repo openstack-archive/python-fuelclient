@@ -127,6 +127,10 @@ class TagList(TagMixIn, base.BaseListCommand):
                "conflicts",
                "description")
 
+    @property
+    def default_sorting_by(self):
+        return ['name']
+
     def get_parser(self, prog_name):
         parser = super(TagList, self).get_parser(prog_name)
         group = parser.add_mutually_exclusive_group(required=True)
@@ -145,6 +149,7 @@ class TagList(TagMixIn, base.BaseListCommand):
         data = self.client.get_all(model, model_id)
 
         data = data_utils.get_display_data_multi(self.columns, data)
+        data = self._sort_data(parsed_args, data)
         return self.columns, data
 
 

@@ -37,6 +37,12 @@ class TestPluginsCommand(test_engine.BaseCLITest):
         self.m_get_client.assert_called_once_with('plugins', mock.ANY)
         self.m_client.get_all.assert_called_once_with()
 
+    def test_plugin_list_sorted(self):
+        args = 'plugins list -s name'
+        self.exec_command(args)
+        self.m_get_client.assert_called_once_with('plugins', mock.ANY)
+        self.m_client.get_all.assert_called_once_with()
+
     def test_plugins_sync_all(self):
         args = 'plugins sync'
         self.exec_command(args)

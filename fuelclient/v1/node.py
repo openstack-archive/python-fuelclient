@@ -133,8 +133,6 @@ class NodeClient(base_v1.BaseV1Client):
                     'label_value': value
                 })
 
-        labels = sorted(labels, key=lambda label: label.get('node_id'))
-
         return labels
 
     def set_labels_for_nodes(self, labels=None, node_ids=None):

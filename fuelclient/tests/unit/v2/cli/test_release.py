@@ -43,6 +43,12 @@ class TestReleaseCommand(test_engine.BaseCLITest):
         self.m_client.get_attributes_metadata_by_id.assert_called_once_with(1)
         self.m_get_client.assert_called_once_with('release', mock.ANY)
 
+    def test_release_repos_list_sorted(self):
+        args = 'release repos list 1 -s name'
+        self.exec_command(args)
+        self.m_client.get_attributes_metadata_by_id.assert_called_once_with(1)
+        self.m_get_client.assert_called_once_with('release', mock.ANY)
+
     @mock.patch('fuelclient.commands.release.utils.parse_yaml_file')
     def test_release_repos_update(self, mock_parse_yaml):
         args = 'release repos update 1 -f repos.yaml'
@@ -69,6 +75,13 @@ class TestReleaseCommand(test_engine.BaseCLITest):
     def test_release_component_list(self):
         release_id = 42
         args = 'release component list {0}'.format(release_id)
+        self.exec_command(args)
+        self.m_client.get_components_by_id.assert_called_once_with(release_id)
+        self.m_get_client.assert_called_once_with('release', mock.ANY)
+
+    def test_release_component_list_sorted(self):
+        release_id = 42
+        args = 'release component list {0} -s default'.format(release_id)
         self.exec_command(args)
         self.m_client.get_components_by_id.assert_called_once_with(release_id)
         self.m_get_client.assert_called_once_with('release', mock.ANY)
