@@ -198,11 +198,11 @@ class NodeList(NodeMixIn, base.BaseListCommand):
         return parser
 
     def take_action(self, parsed_args):
-        data = self.client.get_all(
-            environment_id=parsed_args.env, labels=parsed_args.labels)
-        data = data_utils.get_display_data_multi(self.columns, data)
-
-        return (self.columns, data)
+        self.filters = {
+            'environment_id': 'env',
+            'labels': 'labels'
+        }
+        return super(NodeList, self).take_action(parsed_args)
 
 
 class NodeShow(NodeMixIn, base.BaseShowCommand):
@@ -328,6 +328,10 @@ class NodeLabelList(NodeMixIn, base.BaseListCommand):
         'label_name',
         'label_value')
 
+    @property
+    def default_sorting_by(self):
+        return ['node_id']
+
     def get_parser(self, prog_name):
         parser = super(NodeLabelList, self).get_parser(prog_name)
 
@@ -343,8 +347,9 @@ class NodeLabelList(NodeMixIn, base.BaseListCommand):
         data = self.client.get_all_labels_for_nodes(
             node_ids=parsed_args.nodes)
         data = data_utils.get_display_data_multi(self.columns, data)
+        data = self._sort_data(parsed_args, data)
 
-        return (self.columns, data)
+        return self.columns, data
 
 
 class NodeLabelSet(NodeMixIn, base.BaseCommand):

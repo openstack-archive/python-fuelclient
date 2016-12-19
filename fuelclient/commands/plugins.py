@@ -29,12 +29,6 @@ class PluginsList(PluginsMixIn, base.BaseListCommand):
                'package_version',
                'releases')
 
-    def take_action(self, parsed_args):
-        data = self.client.get_all()
-        data = data_utils.get_display_data_multi(self.columns, data)
-
-        return self.columns, data
-
 
 class PluginsSync(PluginsMixIn, base.BaseCommand):
     """Synchronise plugins on file system with plugins in API service."""
