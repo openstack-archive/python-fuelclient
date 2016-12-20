@@ -40,7 +40,7 @@ class SequenceCreate(SequenceMixIn, base.show.ShowOne, base.BaseCommand):
         parser.add_argument(
             '-n', '--name',
             required=True,
-            help='The unique name for sequence'
+            help='The unique name for sequence.'
         )
         parser.add_argument(
             '-t', '--graph-type',
@@ -48,7 +48,7 @@ class SequenceCreate(SequenceMixIn, base.show.ShowOne, base.BaseCommand):
             nargs='+',
             required=True,
             help='Graph types, which will be included to sequence.\n'
-                 'Note: Order is important'
+                 'Note: Order is important.'
         )
         return parser
 
@@ -121,7 +121,7 @@ class SequenceDownload(SequenceMixIn, base.BaseCommand):
 
 
 class SequenceUpdate(SequenceMixIn, base.BaseShowCommand):
-    """Update existing sequence"""
+    """Update existing sequence."""
 
     columns = ("id", "name")
 
@@ -130,7 +130,7 @@ class SequenceUpdate(SequenceMixIn, base.BaseShowCommand):
         parser.add_argument(
             '-n', '--name',
             required=False,
-            help='The unique name for sequence'
+            help='The unique name for sequence.'
         )
         parser.add_argument(
             '-t', '--graph-type',
@@ -138,7 +138,7 @@ class SequenceUpdate(SequenceMixIn, base.BaseShowCommand):
             nargs='+',
             required=False,
             help='Graph types, which will be included to sequence.\n'
-                 'Note: Order is important'
+                 'Note: Order is important.'
         )
         return parser
 
@@ -156,7 +156,7 @@ class SequenceUpdate(SequenceMixIn, base.BaseShowCommand):
 
 
 class SequenceDelete(SequenceMixIn, base.BaseDeleteCommand):
-    """Delete existing sequence"""
+    """Delete existing sequence."""
 
 
 class SequenceShow(SequenceMixIn, base.BaseShowCommand):
@@ -165,7 +165,7 @@ class SequenceShow(SequenceMixIn, base.BaseShowCommand):
 
 
 class SequenceList(SequenceMixIn, base.BaseListCommand):
-    """Delete existing sequence"""
+    """Show list of all existing sequences."""
     columns = ("id", "release_id", "name")
     filters = {'release': 'release', 'cluster': 'env'}
 
@@ -175,7 +175,7 @@ class SequenceList(SequenceMixIn, base.BaseListCommand):
         group.add_argument(
             '-r', '--release',
             type=int,
-            help='The Release object ID'
+            help='The Release object ID.'
         )
         group.add_argument(
             '-e', '--env',
