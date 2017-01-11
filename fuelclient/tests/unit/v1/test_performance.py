@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #    Copyright 2014 Mirantis, Inc.
 #
@@ -143,7 +142,7 @@ class ClientPerfTest(base.UnitTestCase):
 
         node_ids = ','.join([str(n['id']) for n in self.nodes])
 
-        m_open.return_value = mock.MagicMock(spec=file)
+        m_open.return_value = mock.MagicMock(spec=open)
         m_file = m_open.return_value.__enter__.return_value
         m_file.read.side_effect = node_configs
 
