@@ -63,6 +63,27 @@ class TestTagCommand(test_engine.BaseCLITest):
         self.m_client.get_all.assert_called_once_with('clusters', env_id)
         self.m_get_client.assert_called_once_with('tag', mock.ANY)
 
+    def test_tag_list_sorted(self):
+        self.m_client.get_all.return_value = [
+            {"tag": "fake_tag_2",
+             "group": "group_1",
+             "has_primary": True,
+             "owner_id": 1,
+             "owner_type": 'release',
+             },
+            {"tag": "fake_tag_1",
+             "group": "group_2",
+             "has_primary": True,
+             "owner_id": 1,
+             "owner_type": 'release',
+             }
+        ]
+        env_id = 45
+        args = 'tag list -e {id} -s group'.format(id=env_id)
+        self.exec_command(args)
+        self.m_client.get_all.assert_called_once_with('clusters', env_id)
+        self.m_get_client.assert_called_once_with('tag', mock.ANY)
+
     @mock.patch('sys.stderr')
     def test_tag_list_fail(self, mocked_stderr):
         args = 'tag list'
