@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #    Copyright 2014 Mirantis, Inc.
 #
@@ -69,7 +68,7 @@ class Profiler(object):
         callgraph_file = pref_filename + 'dot'
 
         # write pstats
-        with file(stats_file, 'w') as file_o:
+        with open(stats_file, 'w') as file_o:
             stats = Stats(self.profiler, stream=file_o)
             stats.sort_stats('time', 'cumulative').print_stats()
 
@@ -95,5 +94,5 @@ class Profiler(object):
 
         # write calltree
         call_tree = pyprof2calltree.CalltreeConverter(stats)
-        with file(tree_file, 'wb') as file_o:
+        with open(tree_file, 'wb') as file_o:
             call_tree.output(file_o)
