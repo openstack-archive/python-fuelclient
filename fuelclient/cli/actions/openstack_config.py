@@ -92,8 +92,7 @@ class OpenstackConfigAction(Action):
         config_id = getattr(params, 'config-id')
         config = OpenstackConfig(config_id)
         data = config.data
-        OpenstackConfig.write_file(params.file, {
-            'configuration': data['configuration']})
+        OpenstackConfig.write_file(params.file, data['configuration'])
 
     @check_all('env', 'file')
     def upload(self, params):
@@ -110,7 +109,7 @@ class OpenstackConfigAction(Action):
 
         configs = OpenstackConfig.create(
             cluster_id=params.env,
-            configuration=data['configuration'],
+            configuration=data,
             node_ids=node_ids, node_role=node_role)
         configs = [c.data for c in configs]
         self.serializer.print_to_output(
