@@ -13,7 +13,6 @@
 #    under the License.
 
 import collections
-import six
 
 from fuelclient import objects
 from fuelclient.v1 import base_v1
@@ -41,7 +40,7 @@ class PluginsClient(base_v1.BaseV1Client):
             for key in plugin['releases']:
                 releases[key['os']].append(key['version'])
             plugin['releases'] = ', '.join('{} ({})'.format(k, ', '.join(v))
-                                           for k, v in six.iteritems(releases))
+                                           for k, v in releases.items())
         return plugins
 
     def sync(self, ids):

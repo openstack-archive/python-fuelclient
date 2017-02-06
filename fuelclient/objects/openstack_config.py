@@ -14,8 +14,6 @@
 
 import os
 
-import six
-
 from fuelclient.cli import error
 from fuelclient.cli.serializers import Serializer
 from fuelclient.objects.base import BaseObject
@@ -29,7 +27,7 @@ class OpenstackConfig(BaseObject):
 
     @classmethod
     def _prepare_params(cls, filters):
-        return dict((k, v) for k, v in six.iteritems(filters) if v is not None)
+        return dict((k, v) for k, v in filters.items() if v is not None)
 
     @classmethod
     def create(cls, **kwargs):

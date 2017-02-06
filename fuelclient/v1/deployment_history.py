@@ -13,7 +13,6 @@
 #    under the License.
 from collections import defaultdict
 
-import six
 import yaml
 
 from fuelclient import objects
@@ -40,7 +39,7 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
             'include_summary': (str(int(include_summary)),),
         }
         # remove unused parameters or parameters with empty list as value
-        parameters = {k: v for k, v in six.iteritems(parameters)
+        parameters = {k: v for k, v in parameters.items()
                       if v is not None and v}
         # 'parameters': ['param1', 'param2'] --> 'parameters': 'param1,param2'
         for k in parameters:
@@ -83,7 +82,7 @@ class DeploymentHistoryClient(base_v1.BaseV1Client):
 
         if show_parameters:
             result = []
-            for task_name, value in sorted(six.iteritems(tasks_parameters)):
+            for task_name, value in sorted(tasks_parameters.items()):
                 statuses_by_node = []
                 for record in history_records_by_task[task_name]:
                     time_start = record.get('time_start')

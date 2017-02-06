@@ -40,7 +40,7 @@ class BaseV1Client(object):
 
     def get_all(self, **kwargs):
         filters = {}
-        for k, v in six.iteritems(kwargs):
+        for k, v in kwargs.items():
             if isinstance(v, list):
                 if v:
                     filters[k] = ','.join(str(s) for s in v)

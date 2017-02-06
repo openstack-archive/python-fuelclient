@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 from six import moves as six_moves
 
 
@@ -37,7 +36,7 @@ def get_fake_plugin(**kwargs):
                            {'os': 'ubuntu',
                             'version': 'mitaka-9.0'}],
               'is_hotpluggable': True}
-    for k, v in six.iteritems(kwargs):
+    for k, v in kwargs.items():
         if k in plugin:
             plugin[k] = v
     return plugin

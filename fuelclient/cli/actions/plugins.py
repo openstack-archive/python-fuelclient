@@ -13,7 +13,6 @@
 #    under the License.
 
 import collections
-import six
 
 import fuelclient.cli.arguments as Args
 
@@ -85,7 +84,7 @@ class PluginAction(Action):
             for key in plugin['releases']:
                 releases[key['os']].append(key['version'])
             plugin['releases'] = ', '.join('{} ({})'.format(k, ', '.join(v))
-                                           for k, v in six.iteritems(releases))
+                                           for k, v in releases.items())
         self.serializer.print_to_output(
             plugins,
             format_table(plugins, acceptable_keys=self.acceptable_keys))
