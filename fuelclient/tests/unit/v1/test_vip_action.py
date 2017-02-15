@@ -39,8 +39,7 @@ ENV_OUTPUT = {
     "components": [],
     "changes": [
         {"node_id": None, "name": "attributes"},
-        {"node_id": None, "name": "networks"},
-        {"node_id": None, "name": "vmware_attributes"}],
+        {"node_id": None, "name": "networks"}],
     "id": 6, "name": "test_not_deployed"}
 
 

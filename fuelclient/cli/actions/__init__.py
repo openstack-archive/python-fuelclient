@@ -38,7 +38,6 @@ from fuelclient.cli.actions.openstack_config import OpenstackConfigAction
 from fuelclient.cli.actions.release import ReleaseAction
 from fuelclient.cli.actions.role import RoleAction
 from fuelclient.cli.actions.settings import SettingsAction
-from fuelclient.cli.actions.settings import VmwareSettingsAction
 from fuelclient.cli.actions.snapshot import SnapshotAction
 from fuelclient.cli.actions.user import UserAction
 from fuelclient.cli.actions.plugins import PluginAction
@@ -73,7 +72,6 @@ actions_tuple = (
     TokenAction,
     UserAction,
     VIPAction,
-    VmwareSettingsAction,
 )
 
 actions = dict(
