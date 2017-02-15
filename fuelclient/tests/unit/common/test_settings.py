@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 #
 #    Copyright 2015 Mirantis, Inc.
 #
@@ -95,24 +95,3 @@ class TestSettings(BaseSettings):
             test_command=[
                 'fuel', 'settings', '--env', '1', '--download'],
             test_url='/api/v1/clusters/1/attributes')
-
-
-class TestVmwareSettings(BaseSettings):
-
-    def test_upload_action(self):
-        self.check_upload_action(
-            test_command=[
-                'fuel', 'vmware-settings', '--env', '1', '--upload'],
-            test_url='/api/v1/clusters/1/vmware_attributes')
-
-    def test_default_action(self):
-        self.check_default_action(
-            test_command=[
-                'fuel', 'vmware-settings', '--env', '1', '--default'],
-            test_url='/api/v1/clusters/1/vmware_attributes/defaults')
-
-    def test_download_action(self):
-        self.check_download_action(
-            test_command=[
-                'fuel', 'vmware-settings', '--env', '1', '--download'],
-            test_url='/api/v1/clusters/1/vmware_attributes')
