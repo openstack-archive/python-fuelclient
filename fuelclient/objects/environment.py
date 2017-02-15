@@ -119,12 +119,6 @@ class Environment(BaseObject):
             "settings_{0}".format(self.id)
         )
 
-    def get_vmware_settings_data_path(self, directory=os.curdir):
-        return os.path.join(
-            os.path.abspath(directory),
-            "vmware_settings_{0}".format(self.id)
-        )
-
     def get_network_template_data_path(self, directory=None):
         directory = directory or os.curdir
         return os.path.join(
@@ -145,15 +139,6 @@ class Environment(BaseObject):
         self._check_dir(directory)
         return (serializer or self.serializer).write_to_path(
             self.get_settings_data_path(directory),
-            settings_data
-        )
-
-    def write_vmware_settings_data(self, settings_data, directory=None,
-                                   serializer=None):
-        directory = directory or os.curdir
-        self._check_dir(directory)
-        return (serializer or self.serializer).write_to_path(
-            self.get_vmware_settings_data_path(directory),
             settings_data
         )
 
@@ -191,11 +176,6 @@ class Environment(BaseObject):
             raise error.InvalidDirectoryException(
                 "Error: '{0}' is not a directory.".format(directory))
 
-    def read_vmware_settings_data(self, directory=os.curdir, serializer=None):
-        self._check_dir(directory)
-        return (serializer or self.serializer).read_from_file(
-            self.get_vmware_settings_data_path(directory))
-
     def read_network_template_data(self, directory=os.curdir,
                                    serializer=None):
         """Used by 'fuel' command line utility."""
@@ -224,14 +204,6 @@ class Environment(BaseObject):
         return self.settings_url + "/defaults"
 
     @property
-    def vmware_settings_url(self):
-        return "clusters/{0}/vmware_attributes".format(self.id)
-
-    @property
-    def default_vmware_settings_url(self):
-        return self.vmware_settings_url + "/defaults"
-
-    @property
     def network_url(self):
         return "clusters/{id}/network_configuration/neutron".format(
             **self.data
@@ -254,12 +226,6 @@ class Environment(BaseObject):
     def get_default_settings_data(self):
         return self.connection.get_request(self.default_settings_url)
 
-    def get_vmware_settings_data(self):
-        return self.connection.get_request(self.vmware_settings_url)
-
-    def get_default_vmware_settings_data(self):
-        return self.connection.get_request(self.default_vmware_settings_url)
-
     def get_network_template_data(self):
         return self.connection.get_request(self.network_template_url)
 
@@ -275,10 +241,6 @@ class Environment(BaseObject):
             result = self.connection.put_request(
                 self.settings_url, data)
         return result
-
-    def set_vmware_settings_data(self, data):
-        return self.connection.put_request(
-            self.vmware_settings_url, data)
 
     def verify_network(self):
         return self.connection.put_request(
