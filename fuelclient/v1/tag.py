@@ -27,6 +27,8 @@ class TagClient(base_v1.BaseV1Client):
         """Get all available tags for specific release or cluster.
 
         :param owner_type: release or cluster
+        :type owner_type: str
+        :param owner_id: id of release or cluster
         :type owner_id: int
         :return: tags data as a list of dict
         :rtype: list
