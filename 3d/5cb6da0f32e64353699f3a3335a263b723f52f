@@ -1,0 +1,12 @@
+Verified+1: Fuel CI <fuel-ci-bot@mirantis.com>
+Code-Review+2: Aleksey Kasatkin <akasatkin@mirantis.com>
+Code-Review+2: Ihor Kalnytskyi <ikalnitsky@mirantis.com>
+Code-Review+1: lixinhu <lixinhu@inspur.com>
+Code-Review+1: Vitalii Kulanov <vitaliy@kulanov.org.ua>
+Workflow+1: Aleksey Kasatkin <akasatkin@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 27 Feb 2017 11:26:09 +0000
+Reviewed-on: https://review.openstack.org/437413
+Project: openstack/python-fuelclient
+Branch: refs/heads/stable/newton
