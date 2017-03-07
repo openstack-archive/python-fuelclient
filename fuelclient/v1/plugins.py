@@ -53,6 +53,22 @@ class PluginsClient(base_v1.BaseV1Client):
 
         self._entity_wrapper.sync(plugin_ids=ids)
 
+    def install(self, plugin_path):
+        """Install plugin archive and register in API service
+
+        :param plugin_path: Name of plugin file
+        :type plugin_path: str
+        """
+        return self._entity_wrapper.install(plugin_path)
+
+    def remove(self, plugin_name, plugin_version):
+        """Removes the plugin package, and updates data in API service
+
+        :param str plugin_name: Name of plugin to remove
+        :param str plugin_version: Version of plugin to remove
+        """
+        return self._entity_wrapper.remove(plugin_name, plugin_version)
+
 
 def get_client(connection):
     return PluginsClient(connection)
