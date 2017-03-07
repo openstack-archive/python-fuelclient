@@ -13,6 +13,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import json
+
+from mock import mock
 
 import fuelclient
 from fuelclient.tests.unit.v2.lib import test_api
@@ -63,3 +66,80 @@ class TestPluginsFacade(test_api.BaseLibTest):
         self.client.sync(ids=ids)
         self.assertTrue(matcher.called)
         self.assertEqual(ids, matcher.last_request.json()['ids'])
+
+
+class TestPluginInstallFacade(TestPluginsFacade):
+
+    def setUp(self):
+        super(TestPluginInstallFacade, self).setUp()
+
+        self.m_exec_result = None
+        self.m_exec = mock.patch.object(fuelclient.utils, 'exec_cmd',
+                                        return_value=self.m_exec_result)
+        self.m_is_master = mock.patch.object(fuelclient.objects.plugins,
+                                             'raise_error_if_not_master')
+        self.m_meta = mock.patch.object(fuelclient.utils,
+                                        'glob_and_parse_yaml',
+                                        return_value=self.fake_plugins)
+
+    def exec_install(self, force=False):
+        path = '/path/to/plugin.rpm'
+
+        post_matcher = self.m_request.post(self.res_uri, json={})
+        get_matcher = self.m_request.get(self.res_uri, json={})
+        put_matcher = None
+
+        fake_plugin = self.fake_plugins[0]
+        if force:
+            put_uri = '/api/{version}/plugins/{id}'.format(
+                version=self.version,
+                id=fake_plugin['id'])
+            put_matcher = self.m_request.get(put_uri, json={})
+            post_matcher = self.m_request.post(self.res_uri, json={},
+                                               status_code=409)
+        m_name = mock.patch.object(fuelclient.objects.plugins.PluginV2,
+                                   'name_from_file',
+                                   return_value=fake_plugin['name'])
+        m_version = mock.patch.object(fuelclient.objects.plugins.PluginV2,
+                                      'version_from_file',
+                                      return_value=fake_plugin['version'])
+
+        with m_name, m_version, self.m_is_master, self.m_meta, self.m_exec:
+            self.client.install(path, force)
+
+        self.assertTrue(get_matcher.called)
+        self.assertTrue(post_matcher.called)
+        self.assertEqual(fake_plugin,
+                         json.loads(post_matcher.last_request.body))
+        if force:
+            self.assertTrue(put_matcher.called)
+            self.assertEqual(fake_plugin,
+                             json.loads(put_matcher.last_request.body))
+
+
+class TestPluginRemoveFacade(TestPluginsFacade):
+
+    def setUp(self):
+        super(TestPluginRemoveFacade, self).setUp()
+
+        self.m_exec_result = None
+        self.m_exec = mock.patch.object(fuelclient.utils, 'exec_cmd',
+                                        return_value=self.m_exec_result)
+        self.m_is_master = mock.patch.object(fuelclient.objects.plugins,
+                                             'raise_error_if_not_master')
+
+    def test_remove_plugin(self):
+
+        fake_plugin = self.fake_plugins[0]
+        expected_uri = '/api/{version}/plugins/{id}'.format(
+            version=self.version, id=fake_plugin['id'])
+
+        del_matcher = self.m_request.delete(expected_uri, json={})
+        get_matcher = self.m_request.get(self.res_uri, json=self.fake_plugins)
+
+        with self.m_is_master, self.m_exec:
+            self.client.remove(fake_plugin['name'], fake_plugin['version'])
+
+        self.assertTrue(get_matcher.called)
+        self.assertTrue(del_matcher.called)
+        self.assertIsNone(del_matcher.last_request.body)
