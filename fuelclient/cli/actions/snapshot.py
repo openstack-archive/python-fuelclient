@@ -49,7 +49,7 @@ class SnapshotAction(Action):
         if sys.stdin.isatty():
             conf = {}
         else:
-            conf = yaml.load(sys.stdin.read())
+            conf = yaml.safe_load(sys.stdin.read())
 
         snapshot_task = SnapshotTask.start_snapshot_task(conf)
         self.serializer.print_to_output(

@@ -98,7 +98,7 @@ class FuelClientSettings(object):
     def _update_from_file(self, path):
         with open(path, 'r') as custom_config:
             self.config.update(
-                yaml.load(custom_config.read())
+                yaml.safe_load(custom_config.read())
             )
 
     def _update_from_env(self):

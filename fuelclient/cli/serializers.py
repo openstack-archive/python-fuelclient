@@ -35,7 +35,7 @@ class Serializer(object):
         },
         "yaml": {
             "w": lambda d: yaml.safe_dump(d, default_flow_style=False),
-            "r": utils.safe_deserialize(yaml.load)
+            "r": utils.safe_deserialize(yaml.safe_load)
         }
     }
 

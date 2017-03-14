@@ -187,7 +187,7 @@ class PluginV1(BasePlugin):
         try:
             for member_name in plugin_tar.getnames():
                 if cls.metadata_config in member_name:
-                    return yaml.load(
+                    return yaml.safe_load(
                         plugin_tar.extractfile(member_name).read())
         finally:
             plugin_tar.close()
