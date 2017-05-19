@@ -190,7 +190,7 @@ class TestPluginsActions(base.UnitTestCase):
 
     def test_parse_name_version_raises_error(self):
         plugin = PluginAction()
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             error.ArgumentException,
             'Syntax: fuel plugins <action> fuel_plugin==1.0.0',
             plugin.parse_name_version, 'some_string')
@@ -203,7 +203,7 @@ class TestPluginsActions(base.UnitTestCase):
     @patch('fuelclient.utils.file_exists', return_value=False)
     def test_check_file_raises_error(self, _):
         plugin = PluginAction()
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             error.ArgumentException,
             'File "/tmp/path/plugin.fp" does not exists',
             plugin.check_file, self.file_name)

@@ -42,10 +42,10 @@ class TestReleaseComponent(base.UnitTestCase):
             }
         }
 
-        self.assertRaisesRegexp(ValueError,
-                                "Predicates not found.",
-                                ReleaseComponentList.retrieve_predicates,
-                                test_data)
+        self.assertRaisesRegex(ValueError,
+                               "Predicates not found.",
+                               ReleaseComponentList.retrieve_predicates,
+                               test_data)
 
     def test_retrieve_data(self):
         test_data = "fake:component:1"

@@ -93,10 +93,10 @@ class TestHealthFacade(test_api.BaseLibTest):
         matcher = self.m_request.get(expected_uri, json={})
 
         msg = "Test sets with id {id} does not exist".format(id=testrun_id)
-        self.assertRaisesRegexp(error.ActionException,
-                                msg,
-                                self.client.get_status_single,
-                                testrun_id)
+        self.assertRaisesRegex(error.ActionException,
+                               msg,
+                               self.client.get_status_single,
+                               testrun_id)
         self.assertTrue(matcher.called)
 
     @mock.patch('fuelclient.objects.Environment')
@@ -135,13 +135,13 @@ class TestHealthFacade(test_api.BaseLibTest):
 
         msg = ("Environment is not ready to run health check "
                "because it is in '{0}' state.".format(cluster_state))
-        self.assertRaisesRegexp(error.EnvironmentException,
-                                msg,
-                                self.client.start,
-                                cluster_id,
-                                ostf_credentials={},
-                                test_sets=test_sets,
-                                force=False)
+        self.assertRaisesRegex(error.EnvironmentException,
+                               msg,
+                               self.client.start,
+                               cluster_id,
+                               ostf_credentials={},
+                               test_sets=test_sets,
+                               force=False)
 
     @mock.patch('fuelclient.objects.Environment')
     def test_health_start_not_allowed_env_status_w_force(self, m_env_obj):
@@ -181,13 +181,13 @@ class TestHealthFacade(test_api.BaseLibTest):
             return_value=is_customized)
         msg = ("Environment deployment facts were updated. "
                "Health check is likely to fail because of that.")
-        self.assertRaisesRegexp(error.EnvironmentException,
-                                msg,
-                                self.client.start,
-                                cluster_id,
-                                ostf_credentials={},
-                                test_sets=test_sets,
-                                force=False)
+        self.assertRaisesRegex(error.EnvironmentException,
+                               msg,
+                               self.client.start,
+                               cluster_id,
+                               ostf_credentials={},
+                               test_sets=test_sets,
+                               force=False)
 
     @mock.patch('fuelclient.objects.Environment')
     def test_health_start_customized_env_w_force(self, m_env_obj):

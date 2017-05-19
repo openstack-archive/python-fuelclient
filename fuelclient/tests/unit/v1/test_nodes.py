@@ -43,10 +43,10 @@ class TestNodeSetAction(base.UnitTestCase):
         self.params.node = [1, 2]
 
         error_msg = r"You should select only one node to change\."
-        with self.assertRaisesRegexp(error.ArgumentException, error_msg):
+        with self.assertRaisesRegex(error.ArgumentException, error_msg):
             self.node_action.set_hostname(self.params)
 
-        with self.assertRaisesRegexp(error.ArgumentException, error_msg):
+        with self.assertRaisesRegex(error.ArgumentException, error_msg):
             self.node_action.set_name(self.params)
 
         self.assertFalse(mput.called)

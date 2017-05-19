@@ -155,9 +155,9 @@ class TestGraphActions(test_engine.BaseCLITest):
         iterfiles_m.return_value = []
         args = 'graph upload --release 1 --dir /graph/provision -t provision'
 
-        self.assertRaisesRegexp(error.ActionException,
-                                "Nothing to upload",
-                                self.exec_command, args)
+        self.assertRaisesRegex(error.ActionException,
+                               "Nothing to upload",
+                               self.exec_command, args)
 
     @mock.patch('sys.stderr')
     def test_upload_fail(self, mocked_stderr):

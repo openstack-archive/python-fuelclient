@@ -31,7 +31,7 @@ class TestFuelVersion(base.UnitTestCase):
         args, _ = mstdout.write.call_args_list[0]
         regex = ('No JSON object could be decoded'
                  '|Expecting value: line 1 column 1')
-        with self.assertRaisesRegexp(ValueError, regex):
+        with self.assertRaisesRegex(ValueError, regex):
             json.loads(args[0])
         self.assertEqual(
             fake_fuel_version.get_fake_fuel_version(),

@@ -76,7 +76,7 @@ class TestUtils(base.UnitTestCase):
 
         with mock.patch.object(
                 subprocess, 'Popen', return_value=process_mock) as popen_mock:
-            self.assertRaisesRegexp(
+            self.assertRaisesRegex(
                 error.ExecutedErrorNonZeroExitCode,
                 'Shell command executed with "{0}" '
                 'exit code: {1} '.format(return_code, cmd),
@@ -110,7 +110,7 @@ class TestUtils(base.UnitTestCase):
 
         process_mock = self.make_process_mock(return_code=return_code)
         with mock.patch.object(subprocess, 'Popen', return_value=process_mock):
-            with self.assertRaisesRegexp(
+            with self.assertRaisesRegex(
                     error.ExecutedErrorNonZeroExitCode,
                     'Shell command executed with "{0}" '
                     'exit code: {1} '.format(return_code, cmd)):
@@ -240,8 +240,8 @@ class TestUtils(base.UnitTestCase):
                             json={'message': text},
                             status_code=403)
 
-        with self.assertRaisesRegexp(error.HTTPError,
-                                     '403.*{}'.format(text)):
+        with self.assertRaisesRegex(error.HTTPError,
+                                    '403.*{}'.format(text)):
             client.DefaultAPIClient.post_request('address')
 
     def test_parse_to_list_of_dicts(self):
@@ -258,7 +258,7 @@ class TestUtils(base.UnitTestCase):
             [[{"id": 5}, {"id": 6}], {"id": 7}])
         self.assertEqual(items, [{"id": 5}, {"id": 6}, {"id": 7}])
 
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             TypeError, 'A dict or list instance expected',
             utils.parse_to_list_of_dicts, [42])
 

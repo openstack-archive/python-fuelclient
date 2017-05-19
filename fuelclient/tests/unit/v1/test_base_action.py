@@ -55,7 +55,7 @@ class TestBaseAction(base_tests.UnitTestCase):
         m_os.path.exists.return_value = False
         m_os.mkdir.side_effect = OSError(exc_msg)
 
-        with self.assertRaisesRegexp(error.ActionException, exc_msg):
+        with self.assertRaisesRegex(error.ActionException, exc_msg):
             self.action.full_path_directory('/base/path', 'subdir')
 
     @mock.patch('fuelclient.cli.actions.base.os')

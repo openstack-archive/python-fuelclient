@@ -172,7 +172,7 @@ class TestNodeFacade(test_api.BaseLibTest):
 
         msg = 'Wrong label "{0}" was provided. Label key couldn\'t ' \
               'be an empty string.'.format(labels[1])
-        with self.assertRaisesRegexp(error.LabelEmptyKeyError, msg):
+        with self.assertRaisesRegex(error.LabelEmptyKeyError, msg):
             self.client.set_labels_for_nodes(labels=labels, node_ids=node_ids)
 
     def test_delete_specific_labels_for_all_nodes(self):

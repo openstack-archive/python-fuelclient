@@ -63,7 +63,7 @@ class TestPluginV1(base.UnitTestCase):
             '/var/www/nailgun/plugins/plugin_name-version')
 
     def test_update(self, _):
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             error.BadDataException,
             'Update action is not supported for old plugins with '
             'package version "1.0.0", you can install your plugin '
@@ -71,7 +71,7 @@ class TestPluginV1(base.UnitTestCase):
             self.plugin.update, 'some_string')
 
     def test_downgrade(self, _):
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             error.BadDataException,
             'Downgrade action is not supported for old plugins with '
             'package version "1.0.0", you can install your plugin '
@@ -205,7 +205,7 @@ class TestPluginsObject(base.UnitTestCase):
 
     @patch('fuelclient.utils.glob_and_parse_yaml', return_value=[])
     def test_register_raises_error(self, glob_parse_mock):
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             error.BadDataException,
             'Plugin name3 with version version3 does '
             'not exist, install it and try again',
@@ -309,7 +309,7 @@ class TestPluginsObject(base.UnitTestCase):
     def test_make_obj_by_name_v2_raises_error(self, get_mock):
         get_mock.return_value = {'package_version': '0.0.1'}
 
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             error.BadDataException,
             'Plugin plugin_name==version has '
             'unsupported package version 0.0.1',
@@ -326,7 +326,7 @@ class TestPluginsObject(base.UnitTestCase):
             PluginV2)
 
     def test_make_obj_by_file_raises_error(self):
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             error.BadDataException,
             'Plugin file-name.ext has unsupported format .ext',
             self.plugin.make_obj_by_file, 'file-name.ext')

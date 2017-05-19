@@ -37,7 +37,7 @@ class TestChangePassword(base.UnitTestCase):
                 side_effect=['pwd', 'otherpwd'])
     def test_get_password_from_prompt_different_passwords(self, mgetpass):
         user_action = UserAction()
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
                 ArgumentException, 'Passwords are not the same'):
             user_action._get_password_from_prompt()
 
