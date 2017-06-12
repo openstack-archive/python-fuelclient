@@ -2,8 +2,8 @@
 Team and repository tags
 ========================
 
-.. image:: http://governance.openstack.org/badges/python-fuelclient.svg
-    :target: http://governance.openstack.org/reference/tags/index.html
+.. image:: https://governance.openstack.org/badges/python-fuelclient.svg
+    :target: https://governance.openstack.org/reference/tags/index.html
 
 .. Change things from this point on
 
@@ -34,5 +34,5 @@ Anyone wishing to contribute to python-fuelclient should follow the general
 OpenStack process. A good reference for it can be found here:
   https://wiki.openstack.org/wiki/How_To_Contribute
 
-  http://docs.openstack.org/infra/manual/developers.html
+  https://docs.openstack.org/infra/manual/developers.html
 
