@@ -27,7 +27,7 @@ class TestParser(base.UnitTestCase):
                               self.execute,
                               ['fuel', '--json', '--yaml'])
         args, _ = mstderr.write.call_args
-        self.assertRegexpMatches(
+        self.assertRegex(
             args[0],
             r"argument (--json|--yaml): not allowed with"
             r" argument (--yaml|--json)")
