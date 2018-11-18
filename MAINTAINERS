@@ -19,7 +19,7 @@ description:
 
   [1] http://specs.openstack.org/openstack/fuel-specs/policy/team-structure.html
   [2] https://review.openstack.org/#/admin/groups/551,members
-  [3] http://lists.openstack.org/pipermail/openstack-dev/2015-August/072406.html
+  [3] http://lists.openstack.org/pipermail/openstack-discuss/2015-August/072406.html
 
   Please keep this file in YAML format in order to allow helper scripts
   to read this as a configuration data.
