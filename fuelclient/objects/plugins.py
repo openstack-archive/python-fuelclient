@@ -13,7 +13,6 @@
 #    under the License.
 
 import abc
-import json
 import os
 import shutil
 import subprocess
@@ -21,6 +20,7 @@ import sys
 import tarfile
 
 from distutils.version import StrictVersion
+from oslo_serialization import jsonutils as json
 
 import six
 import yaml

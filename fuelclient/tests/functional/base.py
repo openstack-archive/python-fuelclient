@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import logging
 import os
 import re
@@ -26,6 +25,7 @@ from fuelclient import consts
 from fuelclient.objects import Release
 
 from oslotest import base as oslo_base
+from oslo_serialization import jsonutils as json
 
 logging.basicConfig(stream=sys.stderr)
 log = logging.getLogger("CliTest.ExecutionLog")

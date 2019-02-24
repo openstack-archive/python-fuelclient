@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import mock
 import yaml
+
+from oslo_serialization import jsonutils as json
 
 from fuelclient.tests.unit.v1 import base
 from fuelclient.tests.utils import fake_fuel_version

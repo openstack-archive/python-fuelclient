@@ -14,13 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
 import mock
 import six
 import yaml
 
 from six import StringIO
+
+from oslo_serialization import jsonutils as json
 
 from fuelclient.commands import node as cmd_node
 from fuelclient import main as main_mod

@@ -12,11 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import requests
 
 from keystoneclient.v2_0 import client as auth_client
 from six.moves.urllib import parse as urlparse
+
+from oslo_serialization import jsonutils as json
 
 from fuelclient.cli import error
 from fuelclient import fuelclient_settings

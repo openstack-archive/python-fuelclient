@@ -14,10 +14,10 @@
 
 import abc
 import collections
-import json
 import operator
 import os
 
+from oslo_serialization import jsonutils as json
 from oslo_utils import fileutils
 import six
 

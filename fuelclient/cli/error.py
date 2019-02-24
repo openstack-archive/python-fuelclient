@@ -13,9 +13,10 @@
 #    under the License.
 
 from functools import wraps
-import json
 import os
 import sys
+
+from oslo_serialization import jsonutils as json
 
 from keystoneclient.exceptions import Unauthorized
 import requests
