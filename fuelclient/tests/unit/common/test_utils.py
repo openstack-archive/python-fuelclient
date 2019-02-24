@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import os
 import six
 import subprocess
@@ -22,6 +21,8 @@ import yaml
 
 import mock
 import requests
+
+from oslo_serialization import jsonutils as json
 
 from fuelclient.cli import error
 from fuelclient import client

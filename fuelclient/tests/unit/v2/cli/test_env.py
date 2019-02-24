@@ -15,9 +15,10 @@
 #    under the License.
 
 
-import json
 import mock
 import yaml
+
+from oslo_serialization import jsonutils as json
 
 from six import moves
 

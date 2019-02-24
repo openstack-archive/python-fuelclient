@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import os
 import shutil
 import tarfile
@@ -24,6 +23,8 @@ import mock
 import requests_mock as rm
 from six import moves as six_moves
 import testtools
+
+from oslo_serialization import jsonutils as json
 
 from fuelclient import client
 from fuelclient import fuelclient_settings

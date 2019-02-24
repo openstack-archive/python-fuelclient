@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import os
 import yaml
+
+from oslo_serialization import jsonutils as json
 
 from fuelclient import utils
 
