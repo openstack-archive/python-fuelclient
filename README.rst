@@ -1,38 +1,10 @@
-========================
-Team and repository tags
-========================
+This project is no longer maintained.
 
-.. image:: http://governance.openstack.org/badges/python-fuelclient.svg
-    :target: http://governance.openstack.org/reference/tags/index.html
+The contents of this repository are still available in the Git
+source code management system.  To see the contents of this
+repository before it reached its end of life, please check out the
+previous commit with "git checkout HEAD^1".
 
-.. Change things from this point on
-
-python-fuelclient
-=================
-
-python-fuelclient provides a CLI tool and a Python API wrapper for interacting
-with `Fuel <https://github.com/stackforge/fuel-web>`_.
-
-
------------------
-Project resources
------------------
-
-Project status, bugs, and blueprints are tracked on Launchpad:
-  https://launchpad.net/fuel
-
-Development documentation is hosted here:
-  https://docs.fuel-infra.org/fuel-dev
-
-User guide can be found here:
-  http://docs.mirantis.com
-
-Any additional information can be found on the Fuel's project wiki
-  https://wiki.openstack.org/wiki/Fuel
-
-Anyone wishing to contribute to python-fuelclient should follow the general
-OpenStack process. A good reference for it can be found here:
-  https://wiki.openstack.org/wiki/How_To_Contribute
-
-  http://docs.openstack.org/infra/manual/developers.html
-
+For any further questions, please email
+openstack-discuss@lists.openstack.org or join #openstack-dev on
+Freenode.
